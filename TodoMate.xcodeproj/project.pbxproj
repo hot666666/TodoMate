@@ -11,6 +11,10 @@
 		45E10B952C69B77300FC31CD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10B942C69B77300FC31CD /* ContentView.swift */; };
 		45E10B972C69B77400FC31CD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45E10B962C69B77400FC31CD /* Assets.xcassets */; };
 		45E10B9A2C69B77400FC31CD /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45E10B992C69B77400FC31CD /* Preview Assets.xcassets */; };
+		45E10BA32C69FA2F00FC31CD /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10BA22C69FA2B00FC31CD /* TodoItem.swift */; };
+		45E10BA62C6A097100FC31CD /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10BA52C6A097100FC31CD /* View+Extension.swift */; };
+		45E10BAD2C6A103900FC31CD /* TodoListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10BAC2C6A103400FC31CD /* TodoListView.swift */; };
+		45ED09012C6A1307005A8096 /* StatusPopoverButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ED09002C6A1300005A8096 /* StatusPopoverButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +24,10 @@
 		45E10B962C69B77400FC31CD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		45E10B992C69B77400FC31CD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TodoMate.entitlements; sourceTree = "<group>"; };
+		45E10BA22C69FA2B00FC31CD /* TodoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItem.swift; sourceTree = "<group>"; };
+		45E10BA52C6A097100FC31CD /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
+		45E10BAC2C6A103400FC31CD /* TodoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListView.swift; sourceTree = "<group>"; };
+		45ED09002C6A1300005A8096 /* StatusPopoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusPopoverButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,21 +60,49 @@
 		45E10B912C69B77300FC31CD /* TodoMate */ = {
 			isa = PBXGroup;
 			children = (
-				45E10B922C69B77300FC31CD /* TodoMateApp.swift */,
-				45E10B942C69B77300FC31CD /* ContentView.swift */,
-				45E10B962C69B77400FC31CD /* Assets.xcassets */,
 				45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */,
-				45E10B982C69B77400FC31CD /* Preview Content */,
+				45E10B922C69B77300FC31CD /* TodoMateApp.swift */,
+				45E10BAB2C6A102400FC31CD /* View */,
+				45E10BA42C6A095B00FC31CD /* Extension */,
+				45E10BA12C69FA0E00FC31CD /* Model */,
+				45E10BAE2C6A10A300FC31CD /* Resource */,
 			);
 			path = TodoMate;
 			sourceTree = "<group>";
 		};
-		45E10B982C69B77400FC31CD /* Preview Content */ = {
+		45E10BA12C69FA0E00FC31CD /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				45E10BA22C69FA2B00FC31CD /* TodoItem.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		45E10BA42C6A095B00FC31CD /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				45E10BA52C6A097100FC31CD /* View+Extension.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		45E10BAB2C6A102400FC31CD /* View */ = {
+			isa = PBXGroup;
+			children = (
+				45E10B942C69B77300FC31CD /* ContentView.swift */,
+				45ED09002C6A1300005A8096 /* StatusPopoverButton.swift */,
+				45E10BAC2C6A103400FC31CD /* TodoListView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		45E10BAE2C6A10A300FC31CD /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				45E10B962C69B77400FC31CD /* Assets.xcassets */,
 				45E10B992C69B77400FC31CD /* Preview Assets.xcassets */,
 			);
-			path = "Preview Content";
+			path = Resource;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,6 +176,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				45E10B952C69B77300FC31CD /* ContentView.swift in Sources */,
+				45E10BA32C69FA2F00FC31CD /* TodoItem.swift in Sources */,
+				45E10BAD2C6A103900FC31CD /* TodoListView.swift in Sources */,
+				45ED09012C6A1307005A8096 /* StatusPopoverButton.swift in Sources */,
+				45E10BA62C6A097100FC31CD /* View+Extension.swift in Sources */,
 				45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -274,7 +314,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TodoMate/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"TodoMate/Resource\"";
 				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -301,7 +341,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TodoMate/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"TodoMate/Resource\"";
 				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
