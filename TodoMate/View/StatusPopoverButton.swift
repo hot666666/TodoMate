@@ -10,6 +10,7 @@ import SwiftUI
 struct StatusPopoverButton: View {
     @State private var isPresentedPopover = false
     @State var todo: TodoItem
+    var updateStatus: (TodoItem) -> Void = { _ in }
     
     var body: some View {
         StatusButtonView(status: todo.status) {
@@ -17,9 +18,10 @@ struct StatusPopoverButton: View {
         }
         .popover(isPresented: $isPresentedPopover) {
             VStack {
-                ForEach(TodoItem.Status.allCases, id: \.self) { newStatus in
+                ForEach(TodoItemStatus.allCases, id: \.self) { newStatus in
                     StatusButtonView(status: newStatus) {
                         todo.status = newStatus
+                        updateStatus(todo)
                         isPresentedPopover = false
                     }
                 }
@@ -30,10 +32,10 @@ struct StatusPopoverButton: View {
 }
 
 fileprivate struct StatusButtonView: View {
-    var status: TodoItem.Status
+    var status: TodoItemStatus
     var action: () -> Void
     
-    init(status: TodoItem.Status, action: @escaping () -> Void) {
+    init(status: TodoItemStatus, action: @escaping () -> Void) {
         self.status = status
         self.action = action
     }
