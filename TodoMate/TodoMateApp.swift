@@ -12,6 +12,8 @@ struct TodoMateApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(for: TodoItemEntity.self)
         }
     }
 }
+
