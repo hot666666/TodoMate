@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// TODO: - [Bug] content를 둘러싼 padding 부분에는 Color.balck.opacity(0.3)이 적용안됨
 struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier {
     @Binding var selectedItem: Item?
     let sheetContent: (Item) -> SheetContent

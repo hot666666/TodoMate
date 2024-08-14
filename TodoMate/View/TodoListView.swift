@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 // MARK: - TodoListView
 struct TodoListView: View {
-    @State var todoItems: [TodoItem] = TodoItem.stub
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    @Environment(AppState.self) private var appState: AppState
+    @Environment(TodoItemManager.self) private var todoItemManager: TodoItemManager
     @State private var hoveringId: String? = nil
-    @State private var selectedTodoItem: TodoItem? = nil
     
     var body: some View {
         GroupBox {
@@ -19,42 +21,46 @@ struct TodoListView: View {
                 header
                 
                 List {
-                    ForEach(todoItems) { todo in
-                        TodoItemView(todo: todo)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets())
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(hoveringId == todo.id ? Color.secondary.opacity(0.2) : Color.clear)
-                            )
-                            .onHover { hovering in
-                                if selectedTodoItem == nil && hovering {
-                                    hoveringId = todo.id
-                                } else {
-                                    hoveringId = nil
+                    ForEach(todoItemManager.todoItems) { todo in
+                        HStack(spacing: 0){
+                            Image(systemName: "arrow.up.arrow.down")
+                                .opacity(hoveringId == todo.id ? 0.8 : 0)
+                            TodoItemView(todo: todo)
+                                .background(
+                                    /// hover 효과
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.secondary)
+                                        .opacity(hoveringId == todo.id ? 0.2 : 0)
+                                )
+                                .onTapGesture {
+                                    appState.selectedTodoItem = todo
                                 }
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                        .onHover { hovering in
+                            // TODO: - onMove 이후 hovering false 문제
+                            if appState.selectedTodoItem == nil && hovering {
+                                hoveringId = todo.id
+                            } else {
+                                hoveringId = nil
                             }
-                            .onTapGesture {
-                                selectedTodoItem = todo
+                        }
+                        .contextMenu {
+                            Button(action: {
+                                todoItemManager.remove(modelContext: modelContext, todo)
+                                remove(todo)
+                            }) {
+                                Image(systemName: "trash")
+                                Text("삭제")
                             }
-                            .contextMenu {
-                                Button(action: {
-                                    remove(todo)
-                                }) {
-                                    Image(systemName: "trash")
-                                    Text("삭제")
-                                }
-                            }
+                        }
                     }
-                    .onMove(perform: move)  // TODO: - onMove in List, 좌측에 조그마한 영역을 터치해야 움직임
+                    .onMove(perform: move)
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
             }
-        }
-        /// MacOS 앱은 기본적으로 .sheet를 이용할 때, 외부 뷰 터치 시 dismiss가 수행을 안해서 따로 만든 커스텀 수정자
-        .customSheet(selectedItem: $selectedTodoItem) { todo in
-            TodoListSheetView(todo: todo)
         }
     }
     
@@ -66,7 +72,7 @@ struct TodoListView: View {
             Spacer()
             
             Button(action: {
-                todoItems.append(.init())
+                todoItemManager.create(modelContext: modelContext)
             }, label: {
                 HStack(spacing: 3) {
                     Image(systemName: "plus")
@@ -81,25 +87,30 @@ struct TodoListView: View {
         Divider()
     }
 }
+
 extension TodoListView {
-    private func move(from source: IndexSet, to destination: Int) {
-        todoItems.move(fromOffsets: source, toOffset: destination)
+    func move(from source: IndexSet, to destination: Int) {
+        todoItemManager.todoItems.move(fromOffsets: source, toOffset: destination)
     }
     
-    private func remove(_ todo: TodoItem) {
-        if let index = todoItems.firstIndex(where: { $0.id == todo.id }) {
-            todoItems.remove(at: index)
+    func remove(_ todo: TodoItem){
+        if let index = todoItemManager.todoItems.firstIndex(where: { $0.id == todo.id }) {
+            todoItemManager.todoItems.remove(at: index)
         }
     }
 }
 
 // MARK: - TodoItemView
 fileprivate struct TodoItemView: View {
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    @Environment(TodoItemManager.self) private var todoItemManager: TodoItemManager
     var todo: TodoItem
     
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
-            StatusPopoverButton(todo: todo)
+            StatusPopoverButton(todo: todo) { updateTodoItem in
+                todoItemManager.update(modelContext: modelContext, updateTodoItem)
+            }
             
             Text(todo.content)
                 .font(.title3)
@@ -116,40 +127,8 @@ fileprivate struct TodoItemView: View {
     }
 }
 
-#Preview {
+#Preview(traits: .sampleData) {
     TodoListView()
-}
-
-// MARK: - TodoListSheetView
-fileprivate struct TodoListSheetView: View {
-    var todo: TodoItem
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            TextField("", text: Bindable(todo).content)
-                .textFieldStyle(.plain)
-                .font(.largeTitle)
-                .bold()
-            HStack {
-                Text("Date")
-                DatePicker("", selection: Bindable(todo).date)
-                    .datePickerStyle(.stepperField)
-            }
-            HStack {
-                Text("Status")
-                StatusPopoverButton(todo: todo)
-            }
-            HStack(alignment: .top) {
-                Text("Detail")
-                TextEditor(text: Bindable(todo).detail)
-                    .frame(maxHeight: .infinity)
-            }
-            Spacer()
-        }
-        .padding(90)  // TODO: - adaptive window size
-    }
-}
-
-#Preview("SheetView") {
-    TodoListSheetView(todo: .stub[0])
+        .environment(AppState())
+        .environment(TodoItemManager(todoItemRepository: .init()))
 }
