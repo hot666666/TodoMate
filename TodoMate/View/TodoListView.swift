@@ -119,7 +119,7 @@ fileprivate struct TodoItemView: View {
                 todoItemManager.update(modelContext: modelContext, updateTodoItem)
             }
             
-            Text(todo.content)
+            Text(todo.content.isEmpty ? "이름없음" : todo.content)
                 .font(.title3)
             
             Spacer()

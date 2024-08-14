@@ -25,7 +25,7 @@ class TodoItemEntity {
     
     init() {
         self.date = .now
-        self.content = "이름없음"
+        self.content = ""
         self.statusRawValue = TodoItemStatus.todo.rawValue
         self.detail = ""
     }
@@ -50,9 +50,9 @@ extension TodoItemEntity {
         let context = container.mainContext
 
         let sampleItems = [
-            TodoItemEntity(content: "이름없음1"),
-            TodoItemEntity(content: "이름없음2"),
-            TodoItemEntity(content: "이름없음3"),
+            TodoItemEntity(content: ""),
+            TodoItemEntity(content: ""),
+            TodoItemEntity(content: ""),
         ]
 
         for item in sampleItems {

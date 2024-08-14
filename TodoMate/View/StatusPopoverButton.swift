@@ -17,7 +17,7 @@ struct StatusPopoverButton: View {
             isPresentedPopover = true
         }
         .popover(isPresented: $isPresentedPopover) {
-            VStack {
+            VStack(spacing: 0) {
                 ForEach(TodoItemStatus.allCases, id: \.self) { newStatus in
                     StatusButtonView(status: newStatus) {
                         todo.status = newStatus
@@ -34,6 +34,7 @@ struct StatusPopoverButton: View {
 fileprivate struct StatusButtonView: View {
     var status: TodoItemStatus
     var action: () -> Void
+    @State private var isHovered = false
     
     init(status: TodoItemStatus, action: @escaping () -> Void) {
         self.status = status
@@ -42,11 +43,23 @@ fileprivate struct StatusButtonView: View {
     
     var body: some View {
         Button(action: action) {
-            Text(status.rawValue)
-                .padding(.horizontal, 5)
+            HStack {
+                Spacer()
+                Text(status.rawValue)
+                    .foregroundColor(.primary)
+                Spacer()
+            }
+            .padding(.horizontal, 5)
         }
+        .frame(width: 80)
         .background(status.color)
         .clipShape(.capsule)
+        .padding(5)
+        .background(isHovered ? Color.secondary.opacity(0.2) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 5))
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
 }
 
