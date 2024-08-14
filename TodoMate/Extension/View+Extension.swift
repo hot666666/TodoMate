@@ -27,7 +27,7 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
                     sheetContent(item)
                         .frame(width: geometry.size.width * 0.6,
                                height: geometry.size.height * 0.7)
-                        .background(.ultraThinMaterial)
+                        .background(.regularMaterial)
                         .cornerRadius(10)
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 }
