@@ -11,6 +11,7 @@ import SwiftUI
 struct TodoListSheetView: View {
     @State private var showOverlay = false
     @State private var buttonFrame: CGRect = .zero
+    @FocusState private var focused: Bool
     
     var todo: TodoItem
     var onDismiss: (TodoItem) -> Void
@@ -25,6 +26,7 @@ struct TodoListSheetView: View {
         ZStack {
             VStack(alignment: .leading, spacing: 15) {
                 todoItemContent
+                    .focused($focused)
                 
                 /// toggle showOverlay
                 todoItemDate
@@ -35,7 +37,6 @@ struct TodoListSheetView: View {
                 
                 Spacer()
             }
-            .font(.title3)
             .padding(60)
             .onDisappear {
                 onDismiss(todo)
@@ -56,6 +57,11 @@ struct TodoListSheetView: View {
             }
         }
         .zIndex(1)
+        .onAppear {
+            if todo.content.isEmpty {
+                focused = true
+            }
+        }
     }
 }
 
@@ -91,7 +97,6 @@ extension TodoListSheetView {
         HStack(spacing: 15) {
             Text(Image(systemName: "circle.dotted")).bold() + Text(" 상태")
             StatusPopoverButton(todo: todo)
-                .padding(.leading, 5)
         }
     }
     
