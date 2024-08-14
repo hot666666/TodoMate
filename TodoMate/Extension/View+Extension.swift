@@ -19,6 +19,7 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()
                     .onTapGesture {
+                        // TODO: - TodoListSheetView onDismiss 처리
                         selectedItem = nil
                     }
                 
@@ -26,7 +27,7 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
                     sheetContent(item)
                         .frame(width: geometry.size.width * 0.6,
                                height: geometry.size.height * 0.7)
-                        .background(Color(NSColor.windowBackgroundColor))
+                        .background(.ultraThinMaterial)
                         .cornerRadius(10)
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 }

@@ -22,12 +22,7 @@ struct ContentView: View {
                 .onAppear {
                     todoItemManager.fetch(modelContext: modelContext)
                 }
-            
-//            RoundedRectangle(cornerRadius: 10)
-//                .padding()
-//                .overlay {
-//                    Text("달력")
-//                }
+ 
             
         }
         /// MacOS 앱은 기본적으로 .sheet를 이용할 때, 외부 뷰 터치 시 dismiss가 수행을 안해서 따로 만든 커스텀 수정자
