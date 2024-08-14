@@ -40,7 +40,7 @@ class TodoItemEntity {
 
 extension TodoItemEntity {
     func toModel() -> TodoItem {
-        TodoItem(date: self.date, content: self.content, status: self.status, pid: self.persistentModelID)
+        TodoItem(date: self.date, content: self.content, detail: self.detail, status: self.status, pid: self.persistentModelID)
     }
 }
 
