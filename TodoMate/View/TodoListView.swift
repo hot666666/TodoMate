@@ -60,6 +60,14 @@ struct TodoListView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
+                .contextMenu {
+                    Button(action: {
+                        todoItemManager.create(modelContext: modelContext)
+                    }) {
+                        Image(systemName: "plus")
+                        Text("Todo 추가")
+                    }
+                }
             }
         }
     }
@@ -76,10 +84,9 @@ struct TodoListView: View {
             }, label: {
                 HStack(spacing: 3) {
                     Image(systemName: "plus")
-                    Text("New")
                 }
             })
-            .opacity(0.5)
+            .hoverButtonStyle()
         }
         .bold()
         .padding([.top, .horizontal], 5)
@@ -89,11 +96,11 @@ struct TodoListView: View {
 }
 
 extension TodoListView {
-    func move(from source: IndexSet, to destination: Int) {
+    private func move(from source: IndexSet, to destination: Int) {
         todoItemManager.todoItems.move(fromOffsets: source, toOffset: destination)
     }
     
-    func remove(_ todo: TodoItem){
+    private func remove(_ todo: TodoItem){
         if let index = todoItemManager.todoItems.firstIndex(where: { $0.id == todo.id }) {
             todoItemManager.todoItems.remove(at: index)
         }
@@ -128,7 +135,13 @@ fileprivate struct TodoItemView: View {
 }
 
 #Preview(traits: .sampleData) {
+    @Previewable @State var todoItemManager: TodoItemManager = .init(todoItemRepository: .init())
+    @Previewable @Environment(\.modelContext) var modelContext: ModelContext
+    
     TodoListView()
         .environment(AppState())
-        .environment(TodoItemManager(todoItemRepository: .init()))
+        .environment(todoItemManager)
+        .onAppear {
+            todoItemManager.fetch(modelContext: modelContext)
+        }
 }
