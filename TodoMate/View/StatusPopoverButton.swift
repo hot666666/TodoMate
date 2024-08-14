@@ -49,9 +49,8 @@ fileprivate struct StatusButtonView: View {
                     .foregroundColor(.primary)
                 Spacer()
             }
-            .padding(.horizontal, 5)
         }
-        .frame(width: 80)
+        .frame(width: 70)
         .background(status.color)
         .clipShape(.capsule)
         .padding(5)
@@ -68,5 +67,5 @@ fileprivate struct StatusButtonView: View {
     let todo: TodoItem = .init()
     
     StatusPopoverButton(todo: todo)
-        .frame(minWidth: 100, minHeight: 100)
+        .frame(minWidth: 200, minHeight: 200)
 }

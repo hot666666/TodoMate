@@ -16,7 +16,6 @@ struct TodoListSheetView: View {
     var todo: TodoItem
     var onDismiss: (TodoItem) -> Void
     
-    
     init(todo: TodoItem, onDismiss: @escaping (TodoItem) -> Void) {
         self.todo = todo
         self.onDismiss = onDismiss
