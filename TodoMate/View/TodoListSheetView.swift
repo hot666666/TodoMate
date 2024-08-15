@@ -7,15 +7,17 @@
 
 import SwiftUI
 
-// TODO: - CustomSheetModifier에서 또 sheet 처리해야 안잘림, 해당 뷰 외부 터치 시 DateSettingView만 꺼지도록 설정해야함
 struct TodoListSheetView: View {
-    @State private var showOverlay = false
-    @State private var buttonFrame: CGRect = .zero
-    @FocusState private var focused: Bool
+    @Environment(AppState.self) private var appState: AppState
+    @FocusState private var focusedField: Field?
+    
+    private enum Field: Hashable {
+        case content
+        case detail
+    }
     
     var todo: TodoItem
     var onDismiss: (TodoItem) -> Void
-    
     
     init(todo: TodoItem, onDismiss: @escaping (TodoItem) -> Void) {
         self.todo = todo
@@ -24,43 +26,34 @@ struct TodoListSheetView: View {
     
     var body: some View {
         ZStack {
-            VStack(alignment: .leading, spacing: 15) {
+            Color.clear
+                .contentShape(.rect)
+                .onTapGesture {
+                    focusedField = nil
+                }
+            
+            VStack(alignment: .leading, spacing: 20) {
                 todoItemContent
-                    .focused($focused)
+                    .focused($focusedField, equals: .content)
                 
-                /// toggle showOverlay
                 todoItemDate
                 
                 todoItemStatus
                 
                 todoItemDetail
+                    .focused($focusedField, equals: .detail)
                 
                 Spacer()
             }
             .padding(60)
-            .onDisappear {
-                onDismiss(todo)
-            }
-            
-            // Overlay View
-            if showOverlay {
-                Color.black.opacity(0.01)
-                    .onTapGesture {
-                        showOverlay = false
-                    }
-                GeometryReader { geometry in
-                    DateSettingView(todo: todo)
-                    /// CustomSheetModifier - Width: geometry.size.width * 0.6, Height: geometry.size.height * 0.7
-                        .position(x: buttonFrame.minX + Const.DateSettingViewFrame.WIDTH/2 - geometry.size.width * 0.333,
-                                  y: buttonFrame.minY + Const.DateSettingViewFrame.HEIGHT/2 - geometry.size.height * 0.214)
-                }
-            }
         }
-        .zIndex(1)
         .onAppear {
             if todo.content.isEmpty {
-                focused = true
+                focusedField = .content
             }
+        }
+        .onDisappear {
+            onDismiss(todo)
         }
     }
 }
@@ -74,53 +67,57 @@ extension TodoListSheetView {
     }
     
     private var todoItemDate: some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 20) {
             Text(Image(systemName: "calendar")) + Text(" 날짜")
             
-            Button(action: {
-                self.showOverlay.toggle()
-            }) {
-                Text(todo.date.toYYYYMMDDString())
-            }
-            /// Button 위치를 얻기위한 과정
-            .background(GeometryReader { geometry in
-                Color.clear
-                    .preference(key: ButtonFramePreferenceKey.self, value: geometry.frame(in: .global))
-            })
-            .onPreferenceChange(ButtonFramePreferenceKey.self) { value in
-                self.buttonFrame = value
-            }
+            Text(todo.date.toYYYYMMDDString())
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .background(Color.black.opacity(0.25))
+                .cornerRadius(5)
+                .overlay(
+                    GeometryReader { buttonGeometry in
+                        Color.clear
+                            .contentShape(.rect)
+                            .onTapGesture {
+                                appState.popover = true
+                                appState.updatePopoverPosition(buttonGeometry)
+                        }
+                    }
+                )
         }
     }
     
     private var todoItemStatus: some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 20) {
             Text(Image(systemName: "circle.dotted")).bold() + Text(" 상태")
             StatusPopoverButton(todo: todo)
         }
     }
     
     private var todoItemDetail: some View {
-        HStack(alignment: .top, spacing: 15) {
+        HStack(alignment: .top, spacing: 20) {
             Text(Image(systemName: "note.text")).bold() + Text(" 메모")
             TextEditor(text: Bindable(todo).detail)
+                .padding(.top, 5)
+                .scrollContentBackground(.hidden)
+                .background(.ultraThinMaterial)
+                .foregroundColor(.secondary)
+                .cornerRadius(3)
                 .frame(maxHeight: .infinity)
+                .shadow(radius: focusedField == .detail ? 10 : 0.5)
+                .focused($focusedField, equals: .detail)
+
         }
     }
 }
 
 #Preview("SheetView") {
+    @Previewable @State var appState: AppState = .init()
+    
     TodoListSheetView(todo: .stub) { _ in
         
     }
     .frame(width: 500, height: 700)
-}
-
-// TODO: - 공부
-struct ButtonFramePreferenceKey: PreferenceKey {
-    static var defaultValue: CGRect = .zero
-    
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
-    }
+    .environment(appState)
 }

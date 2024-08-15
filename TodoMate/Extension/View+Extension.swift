@@ -7,22 +7,23 @@
 
 import SwiftUI
 
+// CustomSheetModifier 정의
 struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier {
-    @Binding var selectedItem: Item?
+    @Environment(AppState.self) private var appState: AppState
     let sheetContent: (Item) -> SheetContent
     
     func body(content: Content) -> some View {
         ZStack {
             content
             
-            if let item = selectedItem {
+            if let item = appState.selectedTodoItem as? Item {
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        // TODO: - TodoListSheetView onDismiss 처리
-                        selectedItem = nil
+                        appState.selectedTodoItem = nil
                     }
                 
+                /// 지정된 크기로 sheetContent 표시
                 GeometryReader { geometry in
                     sheetContent(item)
                         .frame(width: geometry.size.width * 0.6,
@@ -38,9 +39,44 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
 
 extension View {
     func customSheet<Item: Identifiable, SheetContent: View>(
-        selectedItem: Binding<Item?>,
+        selectedItem: Item?,
         @ViewBuilder content: @escaping (Item) -> SheetContent
     ) -> some View {
-        self.modifier(CustomSheetModifier(selectedItem: selectedItem, sheetContent: content))
+        self.modifier(CustomSheetModifier(sheetContent: content))
+    }
+}
+
+
+// CustomOverlayModifier 정의
+struct CustomOverlayModifier<OverlayContent: View>: ViewModifier {
+    @Environment(AppState.self) private var appState: AppState
+    let overlayContent: () -> OverlayContent
+    
+    func body(content: Content) -> some View {
+        ZStack {
+            content
+            
+            if appState.popover  {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        appState.popover = false
+                    }
+                
+                /// 지정된 위치에 overlayContent 표시
+                overlayContent()
+                    .position(appState.popoverPosition)
+            }
+        }
+    }
+}
+
+extension View {
+    func customOverlayView<OverlayContent: View>(
+        isPresented: Bool,
+        overlayPosition: CGPoint,
+        @ViewBuilder overlayContent: @escaping () -> OverlayContent
+    ) -> some View {
+        self.modifier(CustomOverlayModifier(overlayContent: overlayContent))
     }
 }
