@@ -11,15 +11,10 @@ struct TodoListSheetView: View {
     @Environment(AppState.self) private var appState: AppState
     @FocusState private var focusedField: Field?
     
-    private enum Field: Hashable {
-        case content
-        case detail
-    }
+    var todo: Todo
+    var onDismiss: (Todo) -> Void
     
-    var todo: TodoItem
-    var onDismiss: (TodoItem) -> Void
-    
-    init(todo: TodoItem, onDismiss: @escaping (TodoItem) -> Void) {
+    init(todo: Todo, onDismiss: @escaping (Todo) -> Void) {
         self.todo = todo
         self.onDismiss = onDismiss
     }
@@ -59,6 +54,11 @@ struct TodoListSheetView: View {
 }
 
 extension TodoListSheetView {
+    private enum Field: Hashable {
+        case content
+        case detail
+    }
+    
     private var todoItemContent: some View {
         TextField("이름없음", text: Bindable(todo).content)
             .textFieldStyle(.plain)
@@ -106,7 +106,6 @@ extension TodoListSheetView {
                 .cornerRadius(3)
                 .frame(maxHeight: .infinity)
                 .shadow(radius: focusedField == .detail ? 10 : 0.5)
-                .focused($focusedField, equals: .detail)
 
         }
     }
