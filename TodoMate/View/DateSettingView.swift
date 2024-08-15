@@ -9,11 +9,15 @@
 import SwiftUI
 
 struct DateSettingView: View {
-    var todo: TodoItem
+    @Environment(AppState.self) private var appState: AppState
     
     var body: some View {
         VStack {
-            CalendarView(todoDate: Bindable(todo).date)
+            if let todo = appState.selectedTodoItem {
+                CalendarView(todoDate: Bindable(todo).date)
+            } else {
+                EmptyView()
+            }
         }
         .padding()
         .frame(width: Const.DateSettingViewFrame.WIDTH, height: Const.DateSettingViewFrame.HEIGHT)
@@ -23,5 +27,8 @@ struct DateSettingView: View {
 }
 
 #Preview {
-    DateSettingView(todo: .stub)
+    @Previewable @State var appState: AppState = .init()
+    
+    DateSettingView()
+        .environment(appState)
 }

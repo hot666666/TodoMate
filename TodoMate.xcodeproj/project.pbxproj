@@ -137,11 +137,11 @@
 		45E10BAB2C6A102400FC31CD /* View */ = {
 			isa = PBXGroup;
 			children = (
+				45E10B942C69B77300FC31CD /* ContentView.swift */,
 				45ACB00F2C6B93DF005F4B17 /* Common */,
 				455430992C6C43B30003E41C /* CalendarView.swift */,
 				45ACB0092C6B6214005F4B17 /* DateSettingView.swift */,
 				45ACB0042C6B0A89005F4B17 /* TodoListSheetView.swift */,
-				45E10B942C69B77300FC31CD /* ContentView.swift */,
 				45ED09002C6A1300005A8096 /* StatusPopoverButton.swift */,
 				45E10BAC2C6A103400FC31CD /* TodoListView.swift */,
 			);
