@@ -26,9 +26,9 @@ struct DateSettingView: View {
     }
 }
 
-#Preview {
-    @Previewable @State var appState: AppState = .init()
-    
-    DateSettingView()
-        .environment(appState)
-}
+//#Preview {
+//    @Previewable @State var appState: AppState = .init()
+//    
+//    DateSettingView()
+//        .environment(appState)
+//}

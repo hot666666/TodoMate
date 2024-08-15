@@ -35,10 +35,10 @@ struct ContentView: View {
     }
 }
 
-#Preview(traits: .sampleData) {
-    @Previewable @State var appState: AppState = .init()
-    
-    ContentView()
-        .frame(minWidth: 300, minHeight: 500)
-        .environment(appState)
-}
+//#Preview(traits: .sampleData) {
+//    @Previewable @State var appState: AppState = .init()
+//    
+//    ContentView()
+//        .frame(minWidth: 300, minHeight: 500)
+//        .environment(appState)
+//}

@@ -134,14 +134,14 @@ fileprivate struct TodoItemView: View {
     }
 }
 
-#Preview(traits: .sampleData) {
-    @Previewable @State var todoItemManager: TodoItemManager = .init(todoItemRepository: .init())
-    @Previewable @Environment(\.modelContext) var modelContext: ModelContext
-    
-    TodoListView()
-        .environment(AppState())
-        .environment(todoItemManager)
-        .onAppear {
-            todoItemManager.fetch(modelContext: modelContext)
-        }
-}
+//#Preview(traits: .sampleData) {
+//    @Previewable @State var todoItemManager: TodoItemManager = .init(todoItemRepository: .init())
+//    @Previewable @Environment(\.modelContext) var modelContext: ModelContext
+//    
+//    TodoListView()
+//        .environment(AppState())
+//        .environment(todoItemManager)
+//        .onAppear {
+//            todoItemManager.fetch(modelContext: modelContext)
+//        }
+//}

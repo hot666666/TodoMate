@@ -26,6 +26,6 @@ struct SampleData: PreviewModifier {
 }
 
 /// #Preview에서 traits 인자로 사용하기 위해 확장
-extension PreviewTrait where T == Preview.ViewTraits {
-    @MainActor static var sampleData: Self = .modifier(SampleData())
-}
+//extension PreviewTrait where T == Preview.ViewTraits {
+//    @MainActor static var sampleData: Self = .modifier(SampleData())
+//}
