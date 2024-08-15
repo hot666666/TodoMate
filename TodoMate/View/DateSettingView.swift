@@ -13,7 +13,7 @@ struct DateSettingView: View {
     
     var body: some View {
         VStack {
-            if let todo = appState.selectedTodoItem {
+            if let todo = appState.selectedTodo {
                 CalendarView(todoDate: Bindable(todo).date)
             } else {
                 EmptyView()
