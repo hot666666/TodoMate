@@ -16,10 +16,10 @@ enum TodoItemStatus: String, Codable, CaseIterable {
     
     var color: Color {
         switch self {
-        case .todo: return .gray
-        case .inProgress: return .blue
-        case .complete: return .green
-        case .inComplete: return .red
+        case .todo: return .customGray
+        case .inProgress: return .customBlue
+        case .complete: return .customGreen
+        case .inComplete: return .customRed
         }
     }
 }
