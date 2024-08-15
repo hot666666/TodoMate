@@ -6,17 +6,20 @@
 //
 
 import SwiftUI
+import FirebaseCore
 
 @main
 struct TodoMateApp: App {
     @State private var appState: AppState = .init()
     
+    init() {
+        FirebaseApp.configure()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: TodoItemEntity.self)
                 .environment(appState)
         }
     }
 }
-
