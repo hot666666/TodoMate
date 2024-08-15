@@ -21,3 +21,13 @@ extension Const {
         static let WEEKDAYS: [String] = ["일", "월", "화", "수", "목", "금", "토"]
     }
 }
+
+extension Const {
+    enum FireStore {
+        static let USER = "todomates"
+        static let TODO = "todos"
+    }
+}
+
+typealias FireStore = Const.FireStore
+
