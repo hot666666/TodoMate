@@ -24,12 +24,12 @@ extension TodoItemManager {
         fetch(modelContext: modelContext)
     }
     
-    func fetch(modelContext: ModelContext) {
-        todoItems = todoItemRepository.fetchAllTodoItems(modelContext: modelContext)
+    func fetch(modelContext: ModelContext, _ date: Date = .now) {
+        todoItems = todoItemRepository.fetchTodoItem(modelContext: modelContext, date)
     }
     
-    func update(modelContext: ModelContext, _ item: TodoItem) {
-        todoItemRepository.updateTodoItem(modelContext: modelContext, item)
+    func update(modelContext: ModelContext, _ todo: TodoItem) {
+        todoItemRepository.updateTodoItem(modelContext: modelContext, todo)
     }
     
     func remove(modelContext: ModelContext, _ todo: TodoItem) {

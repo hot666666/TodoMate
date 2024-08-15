@@ -27,17 +27,24 @@ class TodoItemRepository {
         }
     }
     
-    // Read - id
-    func fetchTodoItem(modelContext: ModelContext, byID id: PersistentIdentifier) -> TodoItem? {
-        let fetchDescriptor = FetchDescriptor<TodoItemEntity>(predicate: #Predicate { $0.persistentModelID == id })
+    // Read - today
+    func fetchTodoItem(modelContext: ModelContext, _ date: Date = .now) -> [TodoItem] {
+        let calendar = Calendar.current
+        
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        let fetchDescriptor = FetchDescriptor<TodoItemEntity>(predicate: #Predicate {
+            $0.date >= startOfDay && $0.date < endOfDay
+        })
+        
         do {
-            if let entity = try modelContext.fetch(fetchDescriptor).first {
-                return entity.toModel()
-            }
+            let entities = try modelContext.fetch(fetchDescriptor)
+            return entities.map { $0.toModel() }
         } catch {
-            print("Failed to fetch todo item by ID: \(error)")
+            print("Failed to fetch todo items: \(error)")
+            return []
         }
-        return nil
     }
     
     // Update

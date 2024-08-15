@@ -21,8 +21,6 @@ struct ContentView: View {
                 .onAppear {
                     todoItemManager.fetch(modelContext: modelContext)
                 }
- 
-            
         }
         /// MacOS 앱은 기본적으로 .sheet를 이용할 때, 외부 뷰 터치 시 dismiss가 수행을 안해서 따로 만든 커스텀 수정자
         .customSheet(selectedItem: appState.selectedTodoItem) { todo in
