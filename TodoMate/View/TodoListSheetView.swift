@@ -102,6 +102,7 @@ extension TodoListSheetView {
                 .padding(.top, 5)
                 .scrollContentBackground(.hidden)
                 .background(.ultraThinMaterial)
+                .foregroundColor(.secondary)
                 .cornerRadius(3)
                 .frame(maxHeight: .infinity)
                 .shadow(radius: focusedField == .detail ? 10 : 0.5)
