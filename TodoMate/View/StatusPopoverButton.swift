@@ -9,8 +9,8 @@ import SwiftUI
 
 struct StatusPopoverButton: View {
     @State private var isPresentedPopover = false
-    @State var todo: TodoItem
-    var updateStatus: (TodoItem) -> Void = { _ in }
+    @State var todo: Todo
+    var updateStatus: (Todo) -> Void = { _ in }
     
     var body: some View {
         StatusButtonView(status: todo.status) {
@@ -64,7 +64,7 @@ fileprivate struct StatusButtonView: View {
 
 
 #Preview {
-    let todo: TodoItem = .init()
+    let todo: Todo = .init()
     
     StatusPopoverButton(todo: todo)
         .frame(minWidth: 200, minHeight: 200)

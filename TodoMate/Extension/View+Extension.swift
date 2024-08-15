@@ -8,24 +8,26 @@
 import SwiftUI
 
 // CustomSheetModifier 정의
-struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier {
+struct CustomSheetModifier<Item: Identifiable, SheetContent: View, OnDismiss>: ViewModifier {  // TODO: - Generic 공부
     @Environment(AppState.self) private var appState: AppState
-    let sheetContent: (Item) -> SheetContent
+    let sheetContent: (Item, OnDismiss) -> SheetContent
     
     func body(content: Content) -> some View {
         ZStack {
             content
             
-            if let item = appState.selectedTodoItem as? Item {
+            if let item = appState.selectedTodo as? Item,
+               let onDismiss = appState.selectedTodoUpdate as? OnDismiss {
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        appState.selectedTodoItem = nil
+                        appState.selectedTodo = nil
+                        appState.selectedTodoUpdate = nil
                     }
                 
                 /// 지정된 크기로 sheetContent 표시
                 GeometryReader { geometry in
-                    sheetContent(item)
+                    sheetContent(item, onDismiss)
                         .frame(width: geometry.size.width * 0.6,
                                height: geometry.size.height * 0.7)
                         .background(.regularMaterial)
@@ -38,9 +40,9 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
 }
 
 extension View {
-    func customSheet<Item: Identifiable, SheetContent: View>(
+    func customSheet<Item: Identifiable, SheetContent: View, OnDismiss>(
         selectedItem: Item?,
-        @ViewBuilder content: @escaping (Item) -> SheetContent
+        @ViewBuilder content: @escaping (Item, OnDismiss) -> SheetContent
     ) -> some View {
         self.modifier(CustomSheetModifier(sheetContent: content))
     }

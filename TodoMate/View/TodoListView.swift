@@ -6,14 +6,12 @@
 //
 
 import SwiftUI
-import SwiftData
 
 // MARK: - TodoListView
 struct TodoListView: View {
-    @Environment(\.modelContext) private var modelContext: ModelContext
     @Environment(AppState.self) private var appState: AppState
-    @Environment(TodoItemManager.self) private var todoItemManager: TodoItemManager
     @State private var hoveringId: String? = nil
+    @State var todoManager: TodoManager
     
     var body: some View {
         GroupBox {
@@ -21,11 +19,13 @@ struct TodoListView: View {
                 header
                 
                 List {
-                    ForEach(todoItemManager.todoItems) { todo in
+                    ForEach(todoManager.todos) { todo in
                         HStack(spacing: 0){
                             Image(systemName: "arrow.up.arrow.down")
                                 .opacity(hoveringId == todo.id ? 0.8 : 0)
-                            TodoItemView(todo: todo)
+                            TodoItemView(todo: todo){ updateTodo in
+                                todoManager.update(updateTodo)
+                            }
                                 .background(
                                     /// hover 효과
                                     RoundedRectangle(cornerRadius: 8)
@@ -33,14 +33,17 @@ struct TodoListView: View {
                                         .opacity(hoveringId == todo.id ? 0.2 : 0)
                                 )
                                 .onTapGesture {
-                                    appState.selectedTodoItem = todo
+                                    appState.selectedTodo = todo
+                                    appState.selectedTodoUpdate = { updateTodo in
+                                        todoManager.update(updateTodo)
+                                    }
                                 }
                         }
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
                         .onHover { hovering in
                             // TODO: - onMove 이후 hovering false 문제
-                            if appState.selectedTodoItem == nil && hovering {
+                            if appState.selectedTodo == nil && hovering {
                                 hoveringId = todo.id
                             } else {
                                 hoveringId = nil
@@ -48,7 +51,7 @@ struct TodoListView: View {
                         }
                         .contextMenu {
                             Button(action: {
-                                todoItemManager.remove(modelContext: modelContext, todo)
+                                todoManager.remove(todo)
                                 remove(todo)
                             }) {
                                 Image(systemName: "trash")
@@ -62,13 +65,19 @@ struct TodoListView: View {
                 .scrollContentBackground(.hidden)
                 .contextMenu {
                     Button(action: {
-                        todoItemManager.create(modelContext: modelContext)
+                        let todo = create()
+                        Task {
+                            await todoManager.create(todo)
+                        }
                     }) {
                         Image(systemName: "plus")
                         Text("Todo 추가")
                     }
                 }
             }
+        }
+        .task {
+            await todoManager.fetch()
         }
     }
     
@@ -80,7 +89,10 @@ struct TodoListView: View {
             Spacer()
             
             Button(action: {
-                todoItemManager.create(modelContext: modelContext)
+                let todo = create()
+                Task {
+                    await todoManager.create(todo)
+                }
             }, label: {
                 HStack(spacing: 3) {
                     Image(systemName: "plus")
@@ -96,28 +108,35 @@ struct TodoListView: View {
 }
 
 extension TodoListView {
-    private func move(from source: IndexSet, to destination: Int) {
-        todoItemManager.todoItems.move(fromOffsets: source, toOffset: destination)
+    private func create(_ todo: Todo = .init()) -> Todo {
+        todoManager.todos.append(todo)
+        return todo
     }
     
-    private func remove(_ todo: TodoItem){
-        if let index = todoItemManager.todoItems.firstIndex(where: { $0.id == todo.id }) {
-            todoItemManager.todoItems.remove(at: index)
+    private func move(from source: IndexSet, to destination: Int) {
+        todoManager.todos.move(fromOffsets: source, toOffset: destination)
+    }
+    
+    private func remove(_ todo: Todo){
+        if let index = todoManager.todos.firstIndex(where: { $0.id == todo.id }) {
+            todoManager.todos.remove(at: index)
         }
     }
 }
 
 // MARK: - TodoItemView
 fileprivate struct TodoItemView: View {
-    @Environment(\.modelContext) private var modelContext: ModelContext
-    @Environment(TodoItemManager.self) private var todoItemManager: TodoItemManager
-    var todo: TodoItem
+    var todo: Todo
+    var action: (Todo) -> Void
+    
+    init(todo: Todo, action: @escaping (Todo) -> Void) {
+        self.todo = todo
+        self.action = action
+    }
     
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
-            StatusPopoverButton(todo: todo) { updateTodoItem in
-                todoItemManager.update(modelContext: modelContext, updateTodoItem)
-            }
+            StatusPopoverButton(todo: todo, updateStatus: action)
             
             Text(todo.content.isEmpty ? "이름없음" : todo.content)
                 .font(.title3)
@@ -134,14 +153,12 @@ fileprivate struct TodoItemView: View {
     }
 }
 
-#Preview(traits: .sampleData) {
-    @Previewable @State var todoItemManager: TodoItemManager = .init(todoItemRepository: .init())
-    @Previewable @Environment(\.modelContext) var modelContext: ModelContext
+#Preview {
+    @Previewable @State var todoManager: TodoManager = .init(userId: "")
     
-    TodoListView()
+    TodoListView(todoManager: todoManager)
         .environment(AppState())
-        .environment(todoItemManager)
-        .onAppear {
-            todoItemManager.fetch(modelContext: modelContext)
+        .task {
+            await todoManager.fetch()
         }
 }
