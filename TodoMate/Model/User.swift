@@ -24,3 +24,9 @@ extension User {
         UserDTO(id: self.fid, name: self.name)
     }
 }
+
+extension User {
+    static var stub: [User] {
+        [.init(name: "유저1", fid: UUID().uuidString), .init(name: "유저2", fid: UUID().uuidString)]
+    }
+}
