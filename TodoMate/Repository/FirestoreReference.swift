@@ -17,7 +17,7 @@ class FirestoreReference {
         return db.collection(FireStore.USER)
     }
     
-    func todoCollection(userId: String) -> CollectionReference {
-        return userCollection().document(userId).collection(FireStore.TODO)
+    func todoCollection() -> CollectionReference {
+        return db.collection(FireStore.TODO)
     }
 }
