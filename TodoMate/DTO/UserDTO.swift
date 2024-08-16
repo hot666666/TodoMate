@@ -14,10 +14,11 @@ struct TodoDTO: Codable {
     var status: String
     var detail: String
     var date: Date
+    var uid: String
 }
 
 extension TodoDTO {
     func toModel() -> Todo {
-        Todo(date: self.date, content: self.content, detail: self.detail, status: .init(rawValue: self.status) ?? .todo, fid: self.id)
+        Todo(date: self.date, content: self.content, detail: self.detail, status: .init(rawValue: self.status) ?? .todo, uid: self.uid, fid: self.id)
     }
 }

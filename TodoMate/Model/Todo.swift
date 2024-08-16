@@ -30,29 +30,34 @@ class Todo: Identifiable {
     var content: String
     var status: TodoItemStatus
     var detail: String
+    var uid: String
     var fid: String?
     
     init(date: Date = .now,
          content: String = "",
          detail: String = "",
          status: TodoItemStatus = .todo,
+         uid: String = "",
          fid: String? = nil) {
         self.date = date
         self.content = content
         self.detail = detail
         self.status = status
+        self.uid = uid
         self.fid = fid
     }
 }
 
 extension Todo {
     func toDTO() -> TodoDTO {
-        TodoDTO(id: fid, content: self.content, status: self.status.rawValue,  detail: self.detail, date: self.date)
+        TodoDTO(id: self.fid, content: self.content, status: self.status.rawValue,  detail: self.detail, date: self.date, uid: self.uid)
     }
 }
 
 extension Todo {
-    static var stub: Todo {
-        .init()
+    static var stub: [Todo] {
+        [.init(date: .now, content: "할일1", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
+         .init(date: .now, content: "할일2", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
+         .init(date: .now, content: "할일3", detail: "할일입니다", status: .todo, fid: UUID().uuidString)]
     }
 }
