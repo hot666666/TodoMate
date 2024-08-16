@@ -9,15 +9,10 @@ import SwiftUI
 
 struct TodoListSheetView: View {
     @Environment(AppState.self) private var appState: AppState
+    @Environment(TodoManager.self) private var todoManager: TodoManager
     @FocusState private var focusedField: Field?
     
     var todo: Todo
-    var onDismiss: (Todo) -> Void
-    
-    init(todo: Todo, onDismiss: @escaping (Todo) -> Void) {
-        self.todo = todo
-        self.onDismiss = onDismiss
-    }
     
     var body: some View {
         ZStack {
@@ -48,7 +43,7 @@ struct TodoListSheetView: View {
             }
         }
         .onDisappear {
-            onDismiss(todo)
+            todoManager.update(todo)
         }
     }
 }
@@ -111,12 +106,8 @@ extension TodoListSheetView {
     }
 }
 
-#Preview("SheetView") {
-    @Previewable @State var appState: AppState = .init()
-    
-    TodoListSheetView(todo: .stub) { _ in
-        
-    }
+#Preview {
+    TodoListSheetView(todo: .stub[0])
     .frame(width: 500, height: 700)
-    .environment(appState)
+    .environment(AppState())
 }

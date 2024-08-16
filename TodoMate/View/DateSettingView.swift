@@ -27,8 +27,6 @@ struct DateSettingView: View {
 }
 
 #Preview {
-    @Previewable @State var appState: AppState = .init()
-    
     DateSettingView()
-        .environment(appState)
+        .environment(AppState())
 }

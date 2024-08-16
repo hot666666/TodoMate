@@ -10,8 +10,13 @@ import SwiftUI
 // MARK: - TodoListView
 struct TodoListView: View {
     @Environment(AppState.self) private var appState: AppState
+    @Environment(TodoManager.self) private var todoManager: TodoManager
     @State private var hoveringId: String? = nil
-    @State var todoManager: TodoManager
+    
+    private let userId: String
+    init(userId: String) {
+        self.userId = userId
+    }
     
     var body: some View {
         GroupBox {
@@ -19,7 +24,7 @@ struct TodoListView: View {
                 header
                 
                 List {
-                    ForEach(todoManager.todos) { todo in
+                    ForEach(todoManager.todos.filter { $0.uid == userId } ) { todo in
                         HStack(spacing: 0){
                             Image(systemName: "arrow.up.arrow.down")
                                 .opacity(hoveringId == todo.id ? 0.8 : 0)
@@ -34,9 +39,6 @@ struct TodoListView: View {
                                 )
                                 .onTapGesture {
                                     appState.selectedTodo = todo
-                                    appState.selectedTodoUpdate = { updateTodo in
-                                        todoManager.update(updateTodo)
-                                    }
                                 }
                         }
                         .listRowSeparator(.hidden)
@@ -109,6 +111,7 @@ struct TodoListView: View {
 
 extension TodoListView {
     private func create(_ todo: Todo = .init()) -> Todo {
+        todo.uid = userId
         todoManager.todos.append(todo)
         return todo
     }
@@ -153,12 +156,3 @@ fileprivate struct TodoItemView: View {
     }
 }
 
-#Preview {
-    @Previewable @State var todoManager: TodoManager = .init(userId: "")
-    
-    TodoListView(todoManager: todoManager)
-        .environment(AppState())
-        .task {
-            await todoManager.fetch()
-        }
-}

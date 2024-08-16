@@ -64,8 +64,6 @@ fileprivate struct StatusButtonView: View {
 
 
 #Preview {
-    let todo: Todo = .init()
-    
-    StatusPopoverButton(todo: todo)
+    StatusPopoverButton(todo: .stub[0])
         .frame(minWidth: 200, minHeight: 200)
 }
