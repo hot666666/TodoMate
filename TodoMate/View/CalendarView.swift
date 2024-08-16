@@ -170,7 +170,7 @@ fileprivate struct CalendarDayView: View {
 
 
 #Preview {
-    let todo: Todo = .stub
+    let todo: Todo = .stub[0]
     CalendarView(todoDate: Bindable(todo).date)
 }
 

@@ -17,6 +17,7 @@
 		457B43C62C6DFFD00049334A /* FirestoreReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43C52C6DFFCA0049334A /* FirestoreReference.swift */; };
 		457B43C92C6E0D140049334A /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43C82C6E0D120049334A /* User.swift */; };
 		457B43CB2C6E18FB0049334A /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CA2C6E18F60049334A /* UserManager.swift */; };
+		457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		45ACB0032C6B0A42005F4B17 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ACB0022C6B0A40005F4B17 /* AppState.swift */; };
 		45ACB0052C6B0A8D005F4B17 /* TodoListSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ACB0042C6B0A89005F4B17 /* TodoListSheetView.swift */; };
 		45ACB00A2C6B6217005F4B17 /* DateSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ACB0092C6B6214005F4B17 /* DateSettingView.swift */; };
@@ -45,6 +46,7 @@
 		457B43C52C6DFFCA0049334A /* FirestoreReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreReference.swift; sourceTree = "<group>"; };
 		457B43C82C6E0D120049334A /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		457B43CA2C6E18F60049334A /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
+		457B43CC2C6F3D9C0049334A /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		45ACB0022C6B0A40005F4B17 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		45ACB0042C6B0A89005F4B17 /* TodoListSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListSheetView.swift; sourceTree = "<group>"; };
 		45ACB0082C6B3FED005F4B17 /* TodoMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,6 +146,7 @@
 		45E10BA42C6A095B00FC31CD /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				457B43CC2C6F3D9C0049334A /* Color+Extension.swift */,
 				45ED09072C6AEC0B005A8096 /* Date+Extension.swift */,
 				45E10BA52C6A097100FC31CD /* View+Extension.swift */,
 			);
@@ -281,6 +284,7 @@
 				457B43C92C6E0D140049334A /* User.swift in Sources */,
 				45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */,
 				45ACB00C2C6B65E1005F4B17 /* Const.swift in Sources */,
+				457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -414,16 +418,19 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TodoMate/Resource\"";
+				DEVELOPMENT_ASSET_PATHS = "TodoMate/Resource TodoMate/Resource/Assets.xcassets";
 				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -441,16 +448,19 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"TodoMate/Resource\"";
+				DEVELOPMENT_ASSET_PATHS = "TodoMate/Resource TodoMate/Resource/Assets.xcassets";
 				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
