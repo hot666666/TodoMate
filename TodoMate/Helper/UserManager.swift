@@ -8,10 +8,12 @@
 import SwiftUI
 
 protocol UserManagerProtocol {
-//    func create(_ user: Todo) async
+    var users: [User] { get }
     func fetch() async
-//    func remove(_ todo: Todo)
     func update(_ user: User)
+    // TODO: - 추가기능
+    ///    func create(_ user: Todo) async
+    ///    func remove(_ todo: Todo)
 }
 
 @Observable
@@ -46,13 +48,17 @@ extension UserManager {
     }
 }
 
-extension UserManager {
-    func createUser(user: User) async throws {
-        let createdId = try await userRepository.createUser(user: user.toDTO())
-        // TODO: - user.id = createdId
+class StubUserManager: UserManagerProtocol {
+    var users: [User] = []
+    
+    @MainActor
+    func fetch() async {
+        users = User.stub
     }
     
-    func deleteUser(id: String) async throws {
-        try await userRepository.deleteUser(id: id)
+    func update(_ user: User) {
+        if let updatedUser = users.first(where: { $0.fid == user.fid }) {
+            updatedUser.name = user.name
+        }
     }
 }
