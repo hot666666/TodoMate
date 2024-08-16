@@ -10,7 +10,6 @@ import SwiftUI
 @Observable
 class AppState {
     var selectedTodo: Todo? = nil
-    var selectedTodoUpdate: ((Todo) -> Void)? = nil
     
     var popover: Bool = false
     var popoverPosition: CGPoint = .zero
