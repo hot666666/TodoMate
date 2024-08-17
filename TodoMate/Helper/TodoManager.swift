@@ -10,8 +10,8 @@ import FirebaseFirestore
 
 protocol TodoManagerProtocol {
     var todos: [Todo] { get set }
-    func create(_ todo: Todo) async
-    func fetch() async
+    func create(uid: String)
+    func fetch() async -> [Todo]
     func update(_ todo: Todo)
     func remove(_ todo: Todo)
 }
@@ -31,7 +31,6 @@ class TodoManager: TodoManagerProtocol {
     deinit {
         task?.cancel()
     }
-
 }
 
 extension TodoManager {
@@ -44,31 +43,40 @@ extension TodoManager {
         }
     }
     
+    // TODO: - O(n)...
     @MainActor
     private func handleDatabaseChange(_ change: DatabaseChange<TodoDTO>) {
         switch change {
         case .added(let todoDTO):
-            let todo = todoDTO.toModel()
-            if !todos.contains(where: { $0.fid == todo.fid }) {
-                todos.append(todo)
+            if !todos.contains(where: { $0.fid == todoDTO.id }) {
+                todos.append(todoDTO.toModel())
             }
         case .modified(let todoDTO):
             if let index = todos.firstIndex(where: { $0.fid == todoDTO.id }) {
                 todos[index] = todoDTO.toModel()
             }
         case .removed(let id):
-            todos.removeAll { $0.fid == id }
+            if let index = todos.firstIndex(where: { $0.fid == id }) {
+                todos.remove(at: index)
+            }
         }
     }
 }
 
 extension TodoManager {
-    @MainActor
-    func fetch() async {
+    /// local
+    func move(from source: IndexSet, to destination: Int) {
+        todos.move(fromOffsets: source, toOffset: destination)
+    }
+}
+
+extension TodoManager {
+    func fetch() async -> [Todo] {
         do {
-            todos = try await todoRepository.fetchTodos().map { $0.toModel() }
+            return try await todoRepository.fetchTodos().map { $0.toModel() }
         } catch {
             print("Error fetching todos: \(error)")
+            return []
         }
     }
     
@@ -93,13 +101,15 @@ extension TodoManager {
         }
     }
     
-    @MainActor
-    func create(_ todo: Todo) async {
-        do {
-            let id = try await todoRepository.createTodo(todo: todo.toDTO())
-            todo.fid = id
-        } catch {
-            print("Error creating todo: \(error)")
+    func create(uid: String) {
+        Task {
+            do {
+                let todo: Todo = .init(uid: uid)
+                try await todoRepository.createTodo(todo: todo.toDTO())
+            } catch {
+                print("Error creating todo: \(error)")
+            }
+            
         }
     }
 }
@@ -111,9 +121,8 @@ class StubTodoManager: TodoManagerProtocol {
     init(todos: [Todo] = []) {
         self.todos = todos
     }
-    
-    func fetch() async {
-        todos = Todo.stub
+    func fetch() async -> [Todo] {
+        return Todo.stub
     }
     
     func remove(_ todo: Todo) {
@@ -126,9 +135,8 @@ class StubTodoManager: TodoManagerProtocol {
         }
     }
     
-    @MainActor
-    func create(_ todo: Todo) async {
-        todo.fid = UUID().uuidString /// Firebase에 업데이트되면 얻는 고유 ID 과정
-        todos.append(todo)
+    func create(uid: String) {
+        /// Firebase에 업데이트되면 얻는 고유 ID를 설정
+        todos.append(.init(uid: uid, fid: UUID().uuidString))
     }
 }

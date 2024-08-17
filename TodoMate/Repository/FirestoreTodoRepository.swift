@@ -15,7 +15,7 @@ enum DatabaseChange<T> {
 
 protocol TodoRepository {
     func fetchTodos() async throws -> [TodoDTO]
-    func createTodo(todo: TodoDTO) async throws -> String
+    func createTodo(todo: TodoDTO) async throws
     func updateTodo(todo: TodoDTO) async throws
     func deleteTodo(todoId: String) async throws
     func observeTodoChanges() -> AsyncStream<DatabaseChange<TodoDTO>>
@@ -74,14 +74,13 @@ extension FirestoreTodoRepository {
         }
     }
     
-    func createTodo(todo: TodoDTO) async throws -> String {
+    func createTodo(todo: TodoDTO) async throws {
         let todoDocRef = reference.todoCollection().document()
         var newTodo = todo
         newTodo.id = todoDocRef.documentID
         try todoDocRef.setData(from: newTodo)
-        return todoDocRef.documentID
     }
-    
+
     func updateTodo(todo: TodoDTO) async throws {
         guard let todoId = todo.id else { return }
         let todoDocRef = reference.todoCollection().document(todoId)
