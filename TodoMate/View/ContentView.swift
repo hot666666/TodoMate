@@ -16,11 +16,17 @@ struct ContentView: View {
         GeometryReader { geometry in
             ScrollView {
                 ForEach(userManager.users) { user in
-                    TodoListView(userId: user.fid)
-                        .padding()
-                        .frame(height: geometry.size.height / 2 - 10)
+                    ExpandableView(title: user.name) {
+                        TodoListView(userId: user.fid)
+                            .padding()
+                            .frame(height: geometry.size.height / 2 - 50)
+                    }
                 }
+                
+                // TODO: - chat
             }
+            .padding(5)
+            .padding(.top, 5)
         }
         .task {
             await userManager.fetch()

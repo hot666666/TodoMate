@@ -29,6 +29,7 @@
 		45CE6C962C704E900053835E /* TodoListHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6C952C704E8B0053835E /* TodoListHeader.swift */; };
 		45CE6C9A2C7080530053835E /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6C992C70804F0053835E /* CalendarManager.swift */; };
 		45CE6C9C2C7081250053835E /* EnvironmentValues+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6C9B2C70811D0053835E /* EnvironmentValues+Extension.swift */; };
+		45CE6C9E2C70BE410053835E /* ExpandableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6C9D2C70BE3C0053835E /* ExpandableView.swift */; };
 		45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10B922C69B77300FC31CD /* TodoMateApp.swift */; };
 		45E10B952C69B77300FC31CD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10B942C69B77300FC31CD /* ContentView.swift */; };
 		45E10B972C69B77400FC31CD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45E10B962C69B77400FC31CD /* Assets.xcassets */; };
@@ -64,6 +65,7 @@
 		45CE6C952C704E8B0053835E /* TodoListHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListHeader.swift; sourceTree = "<group>"; };
 		45CE6C992C70804F0053835E /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
 		45CE6C9B2C70811D0053835E /* EnvironmentValues+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+Extension.swift"; sourceTree = "<group>"; };
+		45CE6C9D2C70BE3C0053835E /* ExpandableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandableView.swift; sourceTree = "<group>"; };
 		45E10B922C69B77300FC31CD /* TodoMateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoMateApp.swift; sourceTree = "<group>"; };
 		45E10B942C69B77300FC31CD /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		45E10B962C69B77400FC31CD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -113,8 +115,8 @@
 		45CE6C922C704D5B0053835E /* TodoListView */ = {
 			isa = PBXGroup;
 			children = (
-				45CE6C952C704E8B0053835E /* TodoListHeader.swift */,
 				45E10BAC2C6A103400FC31CD /* TodoListView.swift */,
+				45CE6C952C704E8B0053835E /* TodoListHeader.swift */,
 				45CE6C932C704D8E0053835E /* TodoListContent.swift */,
 			);
 			path = TodoListView;
@@ -190,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				45E10B942C69B77300FC31CD /* ContentView.swift */,
+				45CE6C9D2C70BE3C0053835E /* ExpandableView.swift */,
 				45CE6C922C704D5B0053835E /* TodoListView */,
 				45CE6C982C7052C90053835E /* TodoListSheetView */,
 				45CE6C972C7052C20053835E /* DateSettingView */,
@@ -310,6 +313,7 @@
 				45ED09082C6AEC0B005A8096 /* Date+Extension.swift in Sources */,
 				45ED09012C6A1307005A8096 /* StatusPopoverButton.swift in Sources */,
 				457B43C22C6DFA600049334A /* TodoManager.swift in Sources */,
+				45CE6C9E2C70BE410053835E /* ExpandableView.swift in Sources */,
 				45E10BA62C6A097100FC31CD /* View+Extension.swift in Sources */,
 				45ED09042C6ADDA7005A8096 /* UserDTO.swift in Sources */,
 				45CE6C942C704D930053835E /* TodoListContent.swift in Sources */,
