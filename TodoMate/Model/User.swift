@@ -11,9 +11,9 @@ import SwiftUI
 class User: Identifiable {
     let id: String = UUID().uuidString
     var name: String
-    var fid: String?
+    var fid: String
     
-    init(name: String = "", fid: String? = nil) {
+    init(name: String = "", fid: String = UUID().uuidString) {
         self.name = name
         self.fid = fid
     }
@@ -27,6 +27,6 @@ extension User {
 
 extension User {
     static var stub: [User] {
-        [.init(name: "유저1", fid: UUID().uuidString), .init(name: "유저2", fid: UUID().uuidString)]
+        [.init(name: "유저1"), .init(name: "유저2")]
     }
 }

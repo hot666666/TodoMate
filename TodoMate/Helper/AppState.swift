@@ -17,6 +17,14 @@ class AppState {
 
 
 extension AppState {
+    var isSelectedTodo: Bool {
+        selectedTodo != nil
+    }
+    
+    func updateSelectTodo(_ todo: Todo) {
+        selectedTodo = todo
+    }
+    
     func updatePopoverPosition(_ proxy: GeometryProxy) {
         popoverPosition = CGPoint(
             x: proxy.frame(in: .global).midX + (Const.DateSettingViewFrame.WIDTH - proxy.size.width) / 2 ,
