@@ -15,6 +15,6 @@ struct UserDTO: Codable {
 
 extension UserDTO {
     func toModel() -> User {
-        User(name: self.name, fid: self.id)
+        User(name: self.name, fid: self.id!)
     }
 }
