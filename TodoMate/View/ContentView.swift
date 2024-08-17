@@ -9,18 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(AppState.self) private var appState: AppState
-    @State var userManager: UserManager = UserManager()
-    @State var todoManager: TodoManager = TodoManager()
+    @State var userManager: UserManager = .init()
+    @State var todoManager: TodoManager = .init()
     
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
                 ForEach(userManager.users) { user in
-                    if let userId = user.fid {
-                        TodoListView(userId: userId)
-                            .padding()
-                            .frame(height: geometry.size.height / 2 - 10)
-                    }
+                    TodoListView(userId: user.fid)
+                        .padding()
+                        .frame(height: geometry.size.height / 2 - 10)
                 }
             }
         }
