@@ -9,8 +9,9 @@ import SwiftUI
 
 // MARK: - CalendarView
 struct CalendarView: View {
-    @Binding var todoDate: Date
+    @Environment(\.calendarManager) var calendarManager
     
+    @Binding var todoDate: Date
     @State private var calendarDays: [CalendarDay] = []
     @State private var currentDate: Date = .now
     @State private var selectedIndex: Int?
@@ -24,7 +25,9 @@ struct CalendarView: View {
                 calendarDaysGrid
             }
         }
-        .onAppear(perform: updateCalendarDays)
+        .onAppear {
+            updateCalendarDays(todoDate: todoDate)
+        }
     }
     
     private var header: some View {
@@ -50,37 +53,39 @@ struct CalendarView: View {
     }
     
     private var weekdayHeaders: some View {
-        ForEach(Const.CalendarView.WEEKDAYS, id: \.self) { day in
-            Text(day)
-                .foregroundColor(.secondary)
-        }
-    }
-    
-    private var calendarDaysGrid: some View {
-        ForEach(Array(calendarDays.enumerated()), id: \.element.id) { index, calendarDay in
-            CalendarDayView(calendarDay: calendarDay)
-                .aspectRatio(1, contentMode: .fit)
-                .onTapGesture {
-                    handleCalendarDayTap(at: index)
-                }
-        }
-    }
-}
+         ForEach(Const.CalendarView.WEEKDAYS, id: \.self) { day in
+             Text(day)
+                 .foregroundColor(.secondary)
+         }
+     }
+     
+     private var calendarDaysGrid: some View {
+         ForEach(Array(calendarDays.enumerated()), id: \.element.id) { index, calendarDay in
+             CalendarDayView(calendarDay: calendarDay)
+                 .aspectRatio(1, contentMode: .fit)
+                 .onTapGesture {
+                     handleCalendarDayTap(at: index)
+                 }
+         }
+     }
+ }
 
 extension CalendarView {
     private func handleCalendarDayTap(at index: Int) {
         updateSelection(at: index)
-        todoDate = calendarDays[index].date     /// todoDate 업데이트 수행
         updateMonthIfNeeded(for: calendarDays[index])
     }
     
     private func updateSelection(at index: Int) {
-        /// 이전 선택을 원래대로 돌려주고, 현재 선택 업데이트
+        /// 이전 선택 날짜가 오늘이라면, dateType을 .today로 설정
         if let previousIndex = selectedIndex {
-            calendarDays[previousIndex].dateType = calendar.isDateInToday(calendarDays[previousIndex].date) ? .today : .default
+            calendarDays[previousIndex].dateType = calendarManager.isDateInToday(calendarDays[previousIndex].date) ? .today : .default
         }
         calendarDays[index].dateType = .selected
         selectedIndex = index
+        
+        /// Binding 값 업데이트
+        todoDate = calendarDays[index].date
     }
     
     private func updateMonthIfNeeded(for calendarDay: CalendarDay) {
@@ -96,29 +101,25 @@ extension CalendarView {
 }
 
 extension CalendarView {
-    private var calendar: Calendar {
-         Calendar.current
-     }
-    
     private func updateMonth(by value: Int) {
-        if let newDate = calendar.date(byAdding: .month, value: value, to: currentDate) {
+        if let newDate = calendarManager.addMonths(value, to: currentDate) {
             currentDate = newDate
-            updateCalendarDays()
+            updateCalendarDays(todoDate: todoDate)
         }
     }
     
-    // currentDate가 현재 월인 42일을 calendarDays: [CalendarDay]로 업데이트한다
-    private func updateCalendarDays() {
-        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: currentDate))!
-        let startDayInPreviousMonth = calendar.date(byAdding: .day, value: -calendar.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)!
+    // currentDate가 포함된 42일을 calendarDays: [CalendarDay]로 업데이트한다
+    private func updateCalendarDays(todoDate: Date) {
+        let startOfMonth = calendarManager.startOfMonth(for: currentDate)
+        let startDayInPreviousMonth = calendarManager.addDays(-calendarManager.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
         
         var days: [CalendarDay] = []
         
         for dayOffset in 0..<42 {
-            let date = calendar.date(byAdding: .day, value: dayOffset, to: startDayInPreviousMonth)!
+            let date = calendarManager.addDays(dayOffset, to: startDayInPreviousMonth)
             
             let monthType: CalendarMonthType
-            if calendar.isDate(date, equalTo: currentDate, toGranularity: .month) {
+            if calendarManager.isDate(date, equalTo: currentDate, toGranularity: .month) {
                 monthType = .curr
             } else if date < startOfMonth {
                 monthType = .prev
@@ -127,11 +128,10 @@ extension CalendarView {
             }
             
             let dateType: CalendarDateType
-            if calendar.isDate(todoDate, inSameDayAs: date) {  /// todoDate 날짜를 이용
+            if calendarManager.isDate(todoDate, inSameDayAs: date) {
                 dateType = .selected
-                /// todoDate가 오늘이라면 덮어쓰기
                 selectedIndex = dayOffset
-            } else if calendar.isDateInToday(date) {
+            } else if calendarManager.isDateInToday(date) {
                 dateType = .today
             } else {
                 dateType = .default
@@ -143,6 +143,8 @@ extension CalendarView {
         calendarDays = days
     }
 }
+
+
 
 // MARK: - CalendarDayView
 fileprivate struct CalendarDayView: View {
@@ -166,11 +168,5 @@ fileprivate struct CalendarDayView: View {
         }
         .contentShape(.rect)
     }
-}
-
-
-#Preview {
-    let todo: Todo = .stub[0]
-    CalendarView(todoDate: Bindable(todo).date)
 }
 
