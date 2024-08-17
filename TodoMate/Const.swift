@@ -12,7 +12,7 @@ enum Const { }
 extension Const {
     enum DateSettingViewFrame {
         static let WIDTH: CGFloat = 250
-        static let HEIGHT: CGFloat = 500
+        static let HEIGHT: CGFloat = 350
     }
 }
 
