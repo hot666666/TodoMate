@@ -83,3 +83,25 @@ extension View {
         self.modifier(CustomOverlayModifier(overlayContent: overlayContent))
     }
 }
+
+
+// MARK: - TextEditorStyle
+/// TextEditor for ChatView
+struct TextEditorStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.vertical, 5)
+            .scrollContentBackground(.hidden)
+            .scrollIndicators(.never)
+            .cornerRadius(5)
+            .frame(minHeight: 30)
+            .fixedSize(horizontal: false, vertical: true)
+            .background(.ultraThinMaterial)
+    }
+}
+
+extension View {
+    func textEditorStyle() -> some View {
+        self.modifier(TextEditorStyle())
+    }
+}
