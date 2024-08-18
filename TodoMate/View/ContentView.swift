@@ -18,7 +18,7 @@ struct ContentView: View {
         GeometryReader { geometry in
             ScrollView {
                 // TODO: - 최하단 채팅으로 스크롤 이동
-                ExpandableView(title: "채팅\(chatManager.formatCount)") {
+                ExpandableView(title: "채팅\(chatManager.formatCount)", isExpanded: false) {
                     ChatListView()
                         .padding(.horizontal, 5)
                         .environment(chatManager)
