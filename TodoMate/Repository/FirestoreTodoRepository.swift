@@ -5,7 +5,7 @@
 //  Created by hs on 8/15/24.
 //
 
-import FirebaseFirestore
+import Foundation
 
 enum DatabaseChange<T> {
     case added(T)
