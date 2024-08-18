@@ -93,15 +93,22 @@ extension TodoListSheetView {
     private var todoItemDetail: some View {
         HStack(alignment: .top, spacing: 20) {
             Text(Image(systemName: "note.text")).bold() + Text(" 메모")
+            
             TextEditor(text: Bindable(todo).detail)
                 .padding(.top, 5)
                 .scrollContentBackground(.hidden)
+                .scrollIndicators(.never)
                 .background(.ultraThinMaterial)
                 .foregroundColor(.secondary)
                 .cornerRadius(3)
-                .frame(maxHeight: .infinity)
+                .frame(minHeight: 23)
+                .fixedSize(horizontal: false, vertical: true)
                 .shadow(radius: focusedField == .detail ? 10 : 0.5)
 
+    
+            
+            
+            
         }
     }
 }

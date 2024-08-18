@@ -8,9 +8,16 @@
 import SwiftUI
 
 struct ExpandableView<Content: View>: View {
-    @State private var isExpanded = true
+    @State private var isExpanded: Bool
     let title: String
     let content: () -> Content
+    
+    init(title: String, isExpanded: Bool = true, @ViewBuilder content: @escaping () -> Content) {
+        self._isExpanded = State(initialValue: isExpanded)
+        self.title = title
+        self.content = content
+    }
+    
     
     var body: some View {
         VStack {

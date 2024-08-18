@@ -20,4 +20,8 @@ class FirestoreReference {
     func todoCollection() -> CollectionReference {
         return db.collection(FireStore.TODO)
     }
+    
+    func chatCollection() -> CollectionReference {
+        return db.collection(FireStore.CHAT)
+    }
 }
