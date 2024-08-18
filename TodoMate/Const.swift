@@ -26,8 +26,13 @@ extension Const {
     enum FireStore {
         static let USER = "todomates"
         static let TODO = "todos"
+        static let CHAT = "chats"
     }
 }
 
 typealias FireStore = Const.FireStore
 
+extension Const {
+    /// Chat update variable
+    static let Signature = UUID().uuidString
+}
