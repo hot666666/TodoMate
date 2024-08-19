@@ -8,10 +8,10 @@
 import SwiftUI
 
 enum TodoItemStatus: String, CaseIterable {
+    case inComplete = "미완료"
     case todo = "시작 전"
     case inProgress = "진행 중"
     case complete = "완료"
-    case inComplete = "미완료"
     
     var color: Color {
         switch self {

@@ -9,9 +9,9 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(AppState.self) private var appState: AppState
-    @State var userManager: UserManager = .init()
-    @State var todoManager: TodoManager = .init()
-    @State var chatManager: ChatManager = .init()
+    @State private var userManager: UserManager = .init()
+    @State private var todoManager: TodoManager = .init()
+    @State private var chatManager: ChatManager = .init()
     
     
     var body: some View {
