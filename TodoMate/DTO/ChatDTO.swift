@@ -19,3 +19,9 @@ extension ChatDTO {
         return Chat(content: self.content, sign: self.sign, fid: self.id!)
     }
 }
+
+extension Chat {
+    func toDTO() -> ChatDTO {
+        return ChatDTO(id: self.fid, content: self.content, sign: self.sign)
+    }
+}

@@ -22,7 +22,7 @@ class Chat: Identifiable {
 }
 
 extension Chat {
-    func toDTO() -> ChatDTO {
-        return ChatDTO(id: self.fid, content: self.content, sign: self.sign)
+    static var stub: [Chat] {
+        [.init(content: "챗1"), .init(content: "챗2"), .init(content: "챗3")]
     }
 }

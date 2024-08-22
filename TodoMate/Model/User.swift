@@ -20,12 +20,6 @@ class User: Identifiable {
 }
 
 extension User {
-    func toDTO() -> UserDTO {
-        UserDTO(id: self.fid, name: self.name)
-    }
-}
-
-extension User {
     static var stub: [User] {
         [.init(name: "유저1"), .init(name: "유저2")]
     }
