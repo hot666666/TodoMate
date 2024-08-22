@@ -9,9 +9,10 @@ import SwiftUI
 
 @main
 struct TodoMatePreviewApp: App {
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Text("tmp")
         }
     }
 }

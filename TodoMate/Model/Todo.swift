@@ -8,10 +8,10 @@
 import SwiftUI
 
 enum TodoItemStatus: String, CaseIterable {
+    case inComplete = "미완료"
     case todo = "시작 전"
     case inProgress = "진행 중"
     case complete = "완료"
-    case inComplete = "미완료"
     
     var color: Color {
         switch self {
@@ -49,15 +49,11 @@ class Todo: Identifiable {
 }
 
 extension Todo {
-    func toDTO() -> TodoDTO {
-        TodoDTO(id: self.fid, content: self.content, status: self.status.rawValue,  detail: self.detail, date: self.date, uid: self.uid)
-    }
-}
-
-extension Todo {
     static var stub: [Todo] {
         [.init(date: .now, content: "할일1", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
          .init(date: .now, content: "할일2", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
-         .init(date: .now, content: "할일3", detail: "할일입니다", status: .todo, fid: UUID().uuidString)]
+         .init(date: .now, content: "할일3", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
+         .init(date: .now, content: "할일4", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
+         .init(date: .now, content: "할일5", detail: "할일입니다", status: .todo, fid: UUID().uuidString)]
     }
 }

@@ -1,24 +1,27 @@
 //
-//  TodoItemEntity.swift
+//  UserDTO.swift
 //  TodoMate
 //
-//  Created by hs on 8/13/24.
+//  Created by hs on 8/15/24.
 //
 
 import FirebaseFirestore
 import Foundation
 
-struct TodoDTO: Codable {
+struct UserDTO: Codable {
     @DocumentID var id: String?
-    var content: String
-    var status: String
-    var detail: String
-    var date: Date
-    var uid: String
+    var name: String
 }
 
-extension TodoDTO {
-    func toModel() -> Todo {
-        Todo(date: self.date, content: self.content, detail: self.detail, status: .init(rawValue: self.status) ?? .todo, uid: self.uid, fid: self.id)
+extension UserDTO {
+    func toModel() -> User {
+        User(name: self.name, fid: self.id!)
     }
 }
+
+extension User {
+    func toDTO() -> UserDTO {
+        UserDTO(id: self.fid, name: self.name)
+    }
+}
+

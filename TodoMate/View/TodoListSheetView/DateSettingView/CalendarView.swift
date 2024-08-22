@@ -9,12 +9,11 @@ import SwiftUI
 
 // MARK: - CalendarView
 struct CalendarView: View {
-    @Environment(\.calendarManager) var calendarManager
-    
-    @Binding var todoDate: Date
+    private let calendar: Calendar = .current
     @State private var calendarDays: [CalendarDay] = []
     @State private var currentDate: Date = .now
     @State private var selectedIndex: Int?
+    @Binding var todoDate: Date
     
     var body: some View {
         VStack {
@@ -79,7 +78,7 @@ extension CalendarView {
     private func updateSelection(at index: Int) {
         /// 이전 선택 날짜가 오늘이라면, dateType을 .today로 설정
         if let previousIndex = selectedIndex {
-            calendarDays[previousIndex].dateType = calendarManager.isDateInToday(calendarDays[previousIndex].date) ? .today : .default
+            calendarDays[previousIndex].dateType = calendar.isDateInToday(calendarDays[previousIndex].date) ? .today : .default
         }
         calendarDays[index].dateType = .selected
         selectedIndex = index
@@ -102,7 +101,7 @@ extension CalendarView {
 
 extension CalendarView {
     private func updateMonth(by value: Int) {
-        if let newDate = calendarManager.addMonths(value, to: currentDate) {
+        if let newDate = calendar.addMonths(value, to: currentDate) {
             currentDate = newDate
             updateCalendarDays(todoDate: todoDate)
         }
@@ -110,16 +109,16 @@ extension CalendarView {
     
     // currentDate가 포함된 42일을 calendarDays: [CalendarDay]로 업데이트한다
     private func updateCalendarDays(todoDate: Date) {
-        let startOfMonth = calendarManager.startOfMonth(for: currentDate)
-        let startDayInPreviousMonth = calendarManager.addDays(-calendarManager.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
+        let startOfMonth = calendar.startOfMonth(for: currentDate)
+        let startDayInPreviousMonth = calendar.addDays(-calendar.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
         
         var days: [CalendarDay] = []
         
         for dayOffset in 0..<42 {
-            let date = calendarManager.addDays(dayOffset, to: startDayInPreviousMonth)
+            let date = calendar.addDays(dayOffset, to: startDayInPreviousMonth)
             
             let monthType: CalendarMonthType
-            if calendarManager.isDate(date, equalTo: currentDate, toGranularity: .month) {
+            if calendar.isDate(date, equalTo: currentDate, toGranularity: .month) {
                 monthType = .curr
             } else if date < startOfMonth {
                 monthType = .prev
@@ -128,10 +127,10 @@ extension CalendarView {
             }
             
             let dateType: CalendarDateType
-            if calendarManager.isDate(todoDate, inSameDayAs: date) {
+            if calendar.isDate(todoDate, inSameDayAs: date) {
                 dateType = .selected
                 selectedIndex = dayOffset
-            } else if calendarManager.isDateInToday(date) {
+            } else if calendar.isDateInToday(date) {
                 dateType = .today
             } else {
                 dateType = .default

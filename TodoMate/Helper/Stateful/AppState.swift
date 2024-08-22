@@ -15,7 +15,6 @@ class AppState {
     var popoverPosition: CGPoint = .zero
 }
 
-
 extension AppState {
     var isSelectedTodo: Bool {
         selectedTodo != nil

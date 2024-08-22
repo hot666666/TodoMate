@@ -10,18 +10,21 @@ import FirebaseCore
 
 @main
 struct TodoMateApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var appState: AppState = .init()
+    @State private var appState: AppState
+    @State private var container: DIContainer
     
     init() {
         FirebaseApp.configure()
+        
+        _appState = State(initialValue: AppState())
+        _container = State(initialValue: DIContainer())
     }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(appState)
-                .environment(\.calendarManager, CalendarManager.shared)
+                .environment(container)
         }
     }
 }

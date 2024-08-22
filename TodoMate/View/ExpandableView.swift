@@ -12,7 +12,7 @@ struct ExpandableView<Content: View>: View {
     let title: String
     let content: () -> Content
     
-    init(title: String, isExpanded: Bool = true, @ViewBuilder content: @escaping () -> Content) {
+    init(title: String, isExpanded: Bool = false, @ViewBuilder content: @escaping () -> Content) {
         self._isExpanded = State(initialValue: isExpanded)
         self.title = title
         self.content = content

@@ -7,27 +7,23 @@
 
 import Foundation
 
-enum DatabaseChange<T> {
-    case added(T)
-    case modified(T)
-    case removed(String)
-}
-
-protocol TodoRepository {
-    func fetchTodos() async throws -> [TodoDTO]
+protocol TodoRepositoryType {
     func createTodo(todo: TodoDTO) async throws
+    func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO]
     func updateTodo(todo: TodoDTO) async throws
     func deleteTodo(todoId: String) async throws
     func observeTodoChanges() -> AsyncStream<DatabaseChange<TodoDTO>>
 }
 
-class FirestoreTodoRepository: TodoRepository {
+class FirestoreTodoRepository: TodoRepositoryType {
     private let reference: FirestoreReference
     
     init(reference: FirestoreReference = .shared) {
         self.reference = reference
     }
-    
+}
+
+extension FirestoreTodoRepository {
     func observeTodoChanges() -> AsyncStream<DatabaseChange<TodoDTO>> {
         AsyncStream { continuation in
             let listener = reference.todoCollection().addSnapshotListener { querySnapshot, error in
@@ -46,7 +42,7 @@ class FirestoreTodoRepository: TodoRepository {
                         case .modified:
                             continuation.yield(.modified(todoDTO))
                         case .removed:
-                            continuation.yield(.removed(diff.document.documentID))
+                            continuation.yield(.removed(todoDTO))
                         @unknown default:
                             break
                         }
@@ -62,8 +58,20 @@ class FirestoreTodoRepository: TodoRepository {
 }
 
 extension FirestoreTodoRepository {
-    func fetchTodos() async throws -> [TodoDTO] {
-        let snapshot = try await reference.todoCollection().getDocuments()
+    func createTodo(todo: TodoDTO) async throws {
+        let todoDocRef = reference.todoCollection().document()
+        var newTodo = todo
+        newTodo.id = todoDocRef.documentID
+        try todoDocRef.setData(from: newTodo)
+    }
+    
+    func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO] {
+        let snapshot = try await reference.todoCollection()
+            .whereField("date", isGreaterThanOrEqualTo: startDate)
+            .whereField("date", isLessThanOrEqualTo: endDate)
+            .whereField("uid", isEqualTo: userId)
+            .getDocuments()
+        
         return snapshot.documents.compactMap { document -> TodoDTO? in
             do {
                 return try document.data(as: TodoDTO.self)
@@ -74,13 +82,6 @@ extension FirestoreTodoRepository {
         }
     }
     
-    func createTodo(todo: TodoDTO) async throws {
-        let todoDocRef = reference.todoCollection().document()
-        var newTodo = todo
-        newTodo.id = todoDocRef.documentID
-        try todoDocRef.setData(from: newTodo)
-    }
-
     func updateTodo(todo: TodoDTO) async throws {
         guard let todoId = todo.id else { return }
         let todoDocRef = reference.todoCollection().document(todoId)

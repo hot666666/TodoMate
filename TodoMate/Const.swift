@@ -33,6 +33,6 @@ extension Const {
 typealias FireStore = Const.FireStore
 
 extension Const {
-    /// Chat update variable
+    /// variable used in updating Chat
     static let Signature = UUID().uuidString
 }

@@ -16,7 +16,6 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
     func body(content: Content) -> some View {
         ZStack {
             content
-                .disabled(appState.isSelectedTodo)
             
             if let item = appState.selectedTodo as? Item {
                 Color.black.opacity(0.3)

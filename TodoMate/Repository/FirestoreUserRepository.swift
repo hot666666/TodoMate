@@ -7,19 +7,29 @@
 
 import Foundation
 
-protocol UserRepository {
+protocol UserRepositoryType {
+    func createUser(user: UserDTO) async throws -> String
     func fetchUser(id: String) async throws -> UserDTO
     func fetchAllUsers() async throws -> [UserDTO]
-    func createUser(user: UserDTO) async throws -> String
     func updateUser(user: UserDTO) async throws
     func deleteUser(id: String) async throws
 }
 
-class FirestoreUserRepository: UserRepository {
+class FirestoreUserRepository: UserRepositoryType {
     private let reference: FirestoreReference
     
     init(reference: FirestoreReference = .shared) {
         self.reference = reference
+    }
+}
+
+extension FirestoreUserRepository {
+    func createUser(user: UserDTO) async throws -> String {
+        let newUserRef = reference.userCollection().document()
+        var newUser = user
+        newUser.id = newUserRef.documentID
+        try newUserRef.setData(from: newUser)
+        return newUserRef.documentID
     }
     
     func fetchUser(id: String) async throws -> UserDTO {
@@ -36,14 +46,6 @@ class FirestoreUserRepository: UserRepository {
     func fetchAllUsers() async throws -> [UserDTO] {
         let snapshot = try await reference.userCollection().getDocuments()
         return snapshot.documents.compactMap { try? $0.data(as: UserDTO.self) }
-    }
-    
-    func createUser(user: UserDTO) async throws -> String {
-        let newUserRef = reference.userCollection().document()
-        var newUser = user
-        newUser.id = newUserRef.documentID
-        try newUserRef.setData(from: newUser)
-        return newUserRef.documentID
     }
     
     func updateUser(user: UserDTO) async throws {

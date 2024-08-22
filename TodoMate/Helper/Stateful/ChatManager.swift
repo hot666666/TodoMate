@@ -8,25 +8,19 @@
 import Foundation
 import FirebaseFirestore
 
-protocol ChatManagerProtocol {
-    var chats: [Chat] { get set }
-    func fetch() async -> [Chat]
-    func remove(_ chat: Chat)
-    func update(_ chat: Chat)
-    func create(_ chat: Chat)
-}
-
 @Observable
-class ChatManager: ChatManagerProtocol {
+class ChatManager: ChatManagerType {
     var chats: [Chat] = []
+    private let signature: String = Const.Signature
     
-    private let chatRepository: ChatRepository
+    private let chatRepository: ChatRepositoryType
     private var task: Task<Void, Never>?
-    private var signature: String
     
-    init(signature: String = Const.Signature, chatRepository: ChatRepository = FirestoreChatRepository(reference: .shared)) {
-        self.signature = signature
+    init(chatRepository: ChatRepositoryType = FirestoreChatRepository(reference: .shared)) {
         self.chatRepository = chatRepository
+    }
+    
+    func onAppear() {
         setupRealtimeUpdates()
     }
     
@@ -39,7 +33,7 @@ extension ChatManager {
     private func setupRealtimeUpdates() {
         task = Task {
             for await change in chatRepository.observeChatChanges() {
-                print("[Observed change in FirebaseFirestore] - ", change)
+                print("[Observed Chat change in FirebaseFirestore] - ", change)
                 await handleDatabaseChange(change)
             }
         }
@@ -53,16 +47,12 @@ extension ChatManager {
                 chats.append(chatDTO.toModel())
             }
         case .modified(let chatDTO):
-            if chatDTO.sign == Const.Signature {
-                print("1 호출")
-                break
-            }
-            print("2 호출")
+            guard (chatDTO.sign != Const.Signature) else { return }
             if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
                 chats[index] = chatDTO.toModel()
             }
-        case .removed(let id):
-            if let index = chats.firstIndex(where: { $0.fid == id }) {
+        case .removed(let chatDTO):
+            if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
                 chats.remove(at: index)
             }
         }
@@ -75,6 +65,7 @@ extension ChatManager {
     }
     
     func fetch() async -> [Chat] {
+        print("[Fetching Chat] -")
         do {
             return try await chatRepository.fetchChats().map { $0.toModel() }
         } catch {
@@ -84,9 +75,10 @@ extension ChatManager {
     }
     
     func remove(_ chat: Chat) {
+        print("[Removing Chat] - \(chat)")
         Task {
             do {
-                try await chatRepository.deleteChat(chatId: chat.id)
+                try await chatRepository.deleteChat(chatId: chat.fid!)
             } catch {
                 print("Error deleting chat: \(error)")
             }
@@ -94,7 +86,7 @@ extension ChatManager {
     }
     
     func update(_ chat: Chat) {
-        print("Chat updated")
+        print("[Updating Chat - \(chat)]")
         Task {
             do {
                 try await chatRepository.updateChat(chat: chat.toDTO())
@@ -105,6 +97,7 @@ extension ChatManager {
     }
     
     func create(_ chat: Chat = .init()) {
+        print("[Creating Chat - \(chat)]")
         Task {
             do {
                 try await chatRepository.createChat(chat: chat.toDTO())

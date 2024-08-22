@@ -9,40 +9,35 @@ import SwiftUI
 
 // MARK: - TodoListView
 struct TodoListView: View {
-    @Environment(AppState.self) private var appState: AppState
-    @Environment(TodoManager.self) private var todoManager: TodoManager
-    
-    private let userId: String
-    init(userId: String) {
-        self.userId = userId
-    }
+    @State var viewModel: TodoListViewModel
     
     var body: some View {
         GroupBox {
             VStack(alignment: .leading) {
                 TodoListHeader(title: "오늘의 투두") {
-                    AddTodoButton(action: createTodo)
+                    AddTodoButton(action: viewModel.create)
                 }
-                TodoListContent(todos: filteredTodos)
+                TodoListContent()
+                    .environment(viewModel)
             }
         }
         .contextMenu {
-            AddTodoButton(isContextMenu: true, action: createTodo)
+            AddTodoButton(isContextMenu: true, action: viewModel.create)
+        }
+        .task {
+            await viewModel.fetch()
+        }
+        .onAppear {
+            viewModel.onAppear()
+        }
+        .onDisappear {
+            viewModel.onDisappear()
         }
     }
-    
-    private func createTodo() {
-        todoManager.create(uid: userId)
-    }
-    
-    private var filteredTodos: [Todo] {
-        todoManager.todos.filter { $0.uid == userId }
-    }
-    
 }
 
 // MARK: - AddTodoButton
-struct AddTodoButton: View {
+fileprivate struct AddTodoButton: View {
     var isContextMenu: Bool = false
     var action: () -> Void
     
