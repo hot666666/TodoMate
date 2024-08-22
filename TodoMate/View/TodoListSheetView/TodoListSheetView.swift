@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TodoListSheetView: View {
     @Environment(AppState.self) private var appState: AppState
-    @Environment(TodoManager.self) private var todoManager: TodoManager
+    @Environment(DIContainer.self) private var container: DIContainer
     @FocusState private var focusedField: Field?
     
     var todo: Todo
@@ -43,7 +43,7 @@ struct TodoListSheetView: View {
             }
         }
         .onDisappear {
-            todoManager.update(todo)
+            container.todoService.update(todo)
         }
     }
 }
@@ -104,11 +104,6 @@ extension TodoListSheetView {
                 .frame(minHeight: 23)
                 .fixedSize(horizontal: false, vertical: true)
                 .shadow(radius: focusedField == .detail ? 10 : 0.5)
-
-    
-            
-            
-            
         }
     }
 }

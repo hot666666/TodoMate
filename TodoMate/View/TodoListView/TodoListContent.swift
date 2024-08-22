@@ -9,14 +9,13 @@ import SwiftUI
 
 // MARK: - TodoListContent
 struct TodoListContent: View {
-    @Environment(TodoManager.self) private var todoManager: TodoManager
-    let todos: [Todo]
+    @Environment(TodoListViewModel.self) private var viewModel: TodoListViewModel
     
     @State private var hoveringId: String? = nil
     
     var body: some View {
         List {
-            ForEach(todos) { todo in
+            ForEach(viewModel.todos) { todo in
                 TodoListItem(
                     todo: todo,
                     isHovering: hoveringId == todo.id,
@@ -27,16 +26,18 @@ struct TodoListContent: View {
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets())
             }
-            .onMove(perform: todoManager.move)
+            .onMove(perform: viewModel.move)
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
     }
 }
 
+
+
 // MARK: - TodoListItem
 fileprivate struct TodoListItem: View {
-    @Environment(TodoManager.self) private var todoManager: TodoManager
+    @Environment(TodoListViewModel.self) private var viewModel: TodoListViewModel
     @Environment(AppState.self) private var appState: AppState
     
     let todo: Todo
@@ -64,9 +65,11 @@ fileprivate struct TodoListItem: View {
                     appState.updateSelectTodo(todo)
                 }
         }
-        .onHover { onHover($0) }
+        .onHover { 
+            onHover($0)
+        }
         .contextMenu {
-            Button(role: .destructive, action: { todoManager.remove(todo) }) {
+            Button(role: .destructive, action: { viewModel.remove(todo) }) {
                 Text(Image(systemName: "trash"))+Text(" 삭제")
             }
         }
@@ -75,13 +78,13 @@ fileprivate struct TodoListItem: View {
 
 // MARK: - TodoListItemContent
 fileprivate struct TodoListItemContent: View {
-    @Environment(TodoManager.self) private var todoManager: TodoManager
+    @Environment(TodoListViewModel.self) private var viewModel: TodoListViewModel
     
     let todo: Todo
     
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
-            StatusPopoverButton(todo: todo, updateStatus: { todoManager.update($0) })
+            StatusPopoverButton(todo: todo, updateStatus: { viewModel.update($0) })
             
             Text(todo.content.isEmpty ? "이름없음" : todo.content)
                 .font(.title3)
