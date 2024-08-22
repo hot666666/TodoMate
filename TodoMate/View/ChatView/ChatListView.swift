@@ -7,30 +7,62 @@
 
 import SwiftUI
 
-import Combine
-
-class Debouncer {
-    private let delay: TimeInterval
-    private var workItem: DispatchWorkItem?
+// MARK: - ChatListView
+struct ChatListView: View {
+    @Environment(ChatManager.self) private var chatManager: ChatManager
+    @FocusState private var focusedId: String?
     
-    init(delay: TimeInterval) {
-        self.delay = delay
+    var body: some View {
+        ZStack {
+            Color.clear
+                .contentShape(.rect)
+                .onTapGesture { clearFocus() }
+            
+                VStack(spacing: 10) {
+                    ForEach(chatManager.chats) { chat in
+                        ChatView(item: chat, focusedId: $focusedId)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    chatManager.remove(chat)
+                                } label: {
+                                    Text(Image(systemName: "trash"))+Text(" 삭제")
+                                }
+                            }
+                    }
+                    
+                    HStack {
+                        addButton
+                            .padding(.bottom)
+                        Spacer()
+                    }
+                }
+                .padding(5)
+                .padding(.horizontal, 5)
+        }
+    }
+}
+ 
+extension ChatListView {
+    private var addButton: some View {
+        Button(action: { chatManager.create() }) {
+            Image(systemName: "plus")
+        }
+        .hoverButtonStyle()
     }
     
-    func debounce(action: @escaping () -> Void) {
-        workItem?.cancel()
-        workItem = DispatchWorkItem(block: action)
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem!)
+    private func clearFocus() {
+        focusedId = nil
     }
 }
 
-struct ChatView: View {
+// MARK: - ChatView
+fileprivate struct ChatView: View {
     @Environment(ChatManager.self) private var chatManager: ChatManager
+    @State private var debouncer = Debouncer(delay: 0.7)
+    
+    @State private var localContent: String  /// 실제 서버에 업데이트되기 전, 로컬의 입력상태
     var item: Chat
     @FocusState.Binding var focusedId: String?
-    
-    @State private var localContent: String
-    @State private var debouncer = Debouncer(delay: 0.7)
     
     init(item: Chat, focusedId: FocusState<String?>.Binding) {
         self.item = item
@@ -46,69 +78,13 @@ struct ChatView: View {
             .shadow(radius: focusedId == item.id ? 5 : 0)
             .onTapGesture { focusedId = item.id }
             .onChange(of: localContent) { _, newValue in
-                print(newValue)
                 debouncer.debounce {
+                    print("[Updating Chat - \(newValue)]")
                     let updatedChat = item
                     updatedChat.content = newValue
-                    updatedChat.sign = Const.Signature
+                    updatedChat.sign = Const.Signature  /// 동일 사용자인지 구분하여, 같다면 focused가 풀리지 않음
                     chatManager.update(updatedChat)
                 }
             }
-    }
-}
-
-struct ChatListView: View {
-    @Environment(ChatManager.self) private var chatManager: ChatManager
-    @FocusState private var focusedId: String?
-    
-    var body: some View {
-        ZStack {
-            Color.clear
-                .contentShape(.rect)
-                .onTapGesture { clearFocus() }
-            
-                VStack(spacing: 10) {
-                    ForEach(chatManager.chats) { chat in
-                        ChatView(item: chat, focusedId: $focusedId)
-                        // TODO: - 삭제
-//                            .contextMenu {
-//                                Button(role: .destructive) {
-//                                    chatManager.remove(chat)
-//                                } label: {
-//                                    Label("Delete", systemImage: "trash")
-//                                }
-//                            }
-                    }
-                    
-                    HStack {
-                        AddItemButton(action: addNewChat)
-                            .padding(.bottom)
-                        Spacer()
-                    }
-                }
-                .padding(5)
-                .padding(.horizontal, 5)
-        }
-    }
-}
- 
-extension ChatListView {
-    private func clearFocus() {
-        focusedId = nil
-    }
-    
-    private func addNewChat() {
-        chatManager.create()
-    }
-}
-
-struct AddItemButton: View {
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "plus")
-        }
-        .hoverButtonStyle()
     }
 }
