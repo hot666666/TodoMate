@@ -11,8 +11,6 @@ extension Date {
     func toYYYYMMDDString() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy/MM/dd"
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         return formatter.string(from: self)
     }
     
@@ -25,6 +23,12 @@ extension Date {
     func toDayString() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "d"
+        return dateFormatter.string(from: self)
+    }
+    
+    func toMonthString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "M"
         return dateFormatter.string(from: self)
     }
 }
