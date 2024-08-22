@@ -19,13 +19,32 @@ enum CalendarDateType {
     case selected
 }
 
-struct CalendarDay: Identifiable {
+struct CalendarDay: Identifiable, Hashable {
     let id: Int
     let date: Date
     var monthType: CalendarMonthType
     var dateType: CalendarDateType
+}
 
+extension CalendarDay {
     var isCurrentMonth: Bool {
         monthType == .curr
     }
+    
+    var isToday: Bool {
+        dateType == .today
+    }
+    
+    var isFirstDay: Bool {
+        dayString == "1"
+    }
+    
+    var dayString: String {
+        date.toDayString()
+    }
+    
+    var monthString: String {
+        date.toMonthString()
+    }
 }
+
