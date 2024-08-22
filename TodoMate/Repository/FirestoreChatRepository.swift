@@ -7,21 +7,23 @@
 
 import Foundation
 
-protocol ChatRepository {
-    func fetchChats() async throws -> [ChatDTO]
+protocol ChatRepositoryType {
     func createChat(chat: ChatDTO) async throws
+    func fetchChats() async throws -> [ChatDTO]
     func updateChat(chat: ChatDTO) async throws
     func deleteChat(chatId: String) async throws
     func observeChatChanges() -> AsyncStream<DatabaseChange<ChatDTO>>
 }
 
-class FirestoreChatRepository: ChatRepository {
+class FirestoreChatRepository: ChatRepositoryType {
     private let reference: FirestoreReference
     
     init(reference: FirestoreReference = .shared) {
         self.reference = reference
     }
-    
+}
+
+extension FirestoreChatRepository {
     func observeChatChanges() -> AsyncStream<DatabaseChange<ChatDTO>> {
         AsyncStream { continuation in
             let listener = reference.chatCollection().addSnapshotListener { querySnapshot, error in
@@ -40,7 +42,7 @@ class FirestoreChatRepository: ChatRepository {
                         case .modified:
                             continuation.yield(.modified(chatDTO))
                         case .removed:
-                            continuation.yield(.removed(diff.document.documentID))
+                            continuation.yield(.removed(chatDTO))
                         @unknown default:
                             break
                         }
@@ -56,6 +58,13 @@ class FirestoreChatRepository: ChatRepository {
 }
 
 extension FirestoreChatRepository {
+    func createChat(chat: ChatDTO) async throws {
+        let chatDocRef = reference.chatCollection().document()
+        var newChat = chat
+        newChat.id = chatDocRef.documentID
+        try chatDocRef.setData(from: newChat)
+    }
+    
     func fetchChats() async throws -> [ChatDTO] {
         let snapshot = try await reference.chatCollection().getDocuments()
         return snapshot.documents.compactMap { document -> ChatDTO? in
@@ -66,13 +75,6 @@ extension FirestoreChatRepository {
                 return nil
             }
         }
-    }
-    
-    func createChat(chat: ChatDTO) async throws {
-        let chatDocRef = reference.chatCollection().document()
-        var newChat = chat
-        newChat.id = chatDocRef.documentID
-        try chatDocRef.setData(from: newChat)
     }
 
     func updateChat(chat: ChatDTO) async throws {
