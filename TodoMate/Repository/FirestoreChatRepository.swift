@@ -66,7 +66,9 @@ extension FirestoreChatRepository {
     }
     
     func fetchChats() async throws -> [ChatDTO] {
-        let snapshot = try await reference.chatCollection().getDocuments()
+        let snapshot = try await reference.chatCollection()
+            .order(by: "date", descending: false)
+            .getDocuments()
         return snapshot.documents.compactMap { document -> ChatDTO? in
             do {
                 return try document.data(as: ChatDTO.self)

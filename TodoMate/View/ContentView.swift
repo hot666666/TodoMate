@@ -22,6 +22,9 @@ struct ContentView: View {
                             .padding(.horizontal, 5)
                             .environment(chatManager)
                     }
+                    .task {
+                        await chatManager.onAppear()
+                    }
                     .padding(.top)
                     
                     ForEach(userManager.users) { user in
