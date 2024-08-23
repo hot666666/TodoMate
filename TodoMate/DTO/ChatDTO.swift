@@ -12,16 +12,17 @@ struct ChatDTO: Codable {
     @DocumentID var id: String?
     var content: String
     var sign: String
+    var date: Date
 }
 
 extension ChatDTO {
     func toModel() -> Chat {
-        return Chat(content: self.content, sign: self.sign, fid: self.id!)
+        return Chat(content: self.content, sign: self.sign, date: self.date, fid: self.id!)
     }
 }
 
 extension Chat {
     func toDTO() -> ChatDTO {
-        return ChatDTO(id: self.fid, content: self.content, sign: self.sign)
+        return ChatDTO(id: self.fid, content: self.content, sign: self.sign, date: self.date)
     }
 }
