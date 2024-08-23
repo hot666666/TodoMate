@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// TODO: (1) hover +, (2) move
+// TODO: (2) move
 struct TodosInMonthView: View {
     @State var viewModel: TodosInMonthViewModel
     
