@@ -17,11 +17,11 @@ class TodoService: TodoServiceType {
 }
 
 extension TodoService {
-    func create(with uid: String) {
+    func create(with uid: String, date: Date = .now) {
         print("[creating Todo - \(uid)")
         Task {
             do {
-                let todo: Todo = .init(uid: uid)
+                let todo: Todo = .init(date: date, uid: uid)
                 try await todoRepository.createTodo(todo: todo.toDTO())
             } catch {
                 print("Error creating todo: \(error)")

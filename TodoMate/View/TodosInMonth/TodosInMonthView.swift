@@ -23,8 +23,15 @@ struct TodosInMonthView: View {
                 calendarDaysGrid
             }
             .border(Color.gray, width: 0.5)
-
         }
+        .environment(viewModel)
+//        .onChange(of: viewModel.todos, { _, newValue in
+//            print()
+//            for (key, _) in newValue {
+//                print(key, newValue[key]?.count ?? -1)
+//            }
+//            print()
+//        })
         .padding()
         .task {
             await viewModel.fetch()
@@ -90,12 +97,23 @@ struct TodosInMonthView: View {
 // MARK: - CalendarDayView
 fileprivate struct CalendarDayView: View {
     @Environment(AppState.self) private var appState: AppState
+    @Environment(TodosInMonthViewModel.self) private var viewModel: TodosInMonthViewModel
     let calendarDay: CalendarDay
     let todos: [Todo]
+    
+    @State private var isHovering: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
+                Button(action: {
+                    viewModel.create(date: calendarDay.date)
+                }, label: {
+                    Text(Image(systemName: "plus"))
+                })
+                .hoverButtonStyle()
+                .opacity(isHovering ? 1 : 0)
+                
                 Spacer()
                 HStack {
                     Text(calendarDay.isFirstDay ? "\(calendarDay.monthString)월 " : "")
@@ -115,12 +133,22 @@ fileprivate struct CalendarDayView: View {
                     .onTapGesture {
                         appState.selectedTodo = todo
                     }
+                    .contextMenu {
+                        Button {
+                            viewModel.remove(todo)
+                        } label: {
+                            Text(Image(systemName: "trash"))+Text(" 삭제")
+                        }
+                    }
                     .padding(.bottom, 1)
             }
             .padding([.horizontal], 5)
             Spacer()
         }
         .contentShape(.rect)
+        .onHover { hovering in
+            isHovering = hovering
+        }
     }
 }
 

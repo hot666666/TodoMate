@@ -33,7 +33,7 @@ class TodoListViewModel {
 
 extension TodoListViewModel {
     func create() {
-        container.todoService.create(with: userId)
+        container.todoService.create(with: userId, date: .now)
     }
     
     @MainActor
@@ -58,19 +58,26 @@ extension TodoListViewModel {
 
 extension TodoListViewModel: TodoObserver {
     func todoAdded(_ todo: Todo) {
-        guard calendar.isDate(todo.date, inSameDayAs: .now) else { return }
+        guard calendar.isDateInToday(todo.date) else { return }
         todos.append(todo)
     }
     
     func todoModified(_ todo: Todo) {
-        guard calendar.isDate(todo.date, inSameDayAs: .now) else { return }
         if let index = todos.firstIndex(where: { $0.fid == todo.fid }) {
-            todos[index] = todo
+            if calendar.isDateInToday(todo.date) {
+                todos[index] = todo
+            } else {
+                todos.remove(at: index)
+            }
+            return
         }
+        
+        guard calendar.isDateInToday(todo.date) else { return }
+            todos.append(todo)
     }
     
     func todoRemoved(_ todo: Todo) {
-        guard calendar.isDate(todo.date, inSameDayAs: .now) else { return }
+        guard calendar.isDateInToday(todo.date) else { return }
         self.todos.removeAll { $0.fid == todo.fid }
     }
 }

@@ -11,7 +11,7 @@ import Foundation
 class StubTodoService: TodoServiceType {
     private let calendar = Calendar.current
     
-    func create(with uid: String) {
+    func create(with uid: String, date: Date) {
         
     }
     
@@ -67,9 +67,8 @@ class StubChatManager: ChatManagerType {
         chats.count > 0 ? "(\(chats.count))" : ""
     }
     
-    func fetch() async -> [Chat] {
+    func fetch() async {
         chats = Chat.stub
-        return chats
     }
     
     func remove(_ chat: Chat) {
