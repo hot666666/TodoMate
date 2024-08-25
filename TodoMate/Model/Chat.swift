@@ -12,11 +12,13 @@ class Chat: Identifiable {
     let id: String = UUID().uuidString
     var content: String
     var sign: String
+    var date: Date
     var fid: String?
     
-    init(content: String = "", sign: String = UUID().uuidString, fid: String? = nil) {
+    init(content: String = "", sign: String = UUID().uuidString, date: Date = .now, fid: String? = nil) {
         self.content = content
         self.sign = sign
+        self.date = date
         self.fid = fid
     }
 }

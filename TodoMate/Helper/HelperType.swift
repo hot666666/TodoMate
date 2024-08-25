@@ -20,7 +20,7 @@ protocol TodoRealtimeServiceType {
 }
 
 protocol TodoServiceType {
-    func create(with uid: String)
+    func create(with uid: String, date: Date)
     func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]]
     func fetchToday(userId: String) async -> [Todo]
     func update(_ todo: Todo)
@@ -40,7 +40,7 @@ protocol UserManagerType {
 protocol ChatManagerType {
     var chats: [Chat] { get set }
     var formatCount: String { get }
-    func fetch() async -> [Chat]
+    func fetch() async
     func remove(_ chat: Chat)
     func update(_ chat: Chat)
     func create(_ chat: Chat)

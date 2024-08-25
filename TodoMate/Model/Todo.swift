@@ -48,6 +48,12 @@ class Todo: Identifiable {
     }
 }
 
+extension Todo: Equatable {
+    static func == (lhs: Todo, rhs: Todo) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
 extension Todo {
     static var stub: [Todo] {
         [.init(date: .now, content: "할일1", detail: "할일입니다", status: .todo, fid: UUID().uuidString),

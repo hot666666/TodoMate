@@ -46,6 +46,14 @@ extension TodosInMonthViewModel {
         }
     }
     
+    func remove(_ todo: Todo) {
+        container.todoService.remove(todo)
+    }
+    
+    func create(date: Date) {
+        container.todoService.create(with: userId, date: date)
+    }
+    
     func moveMonth(by value: Int) {
         if let newDate = calendar.addMonths(value, to: currentDate) {
             currentDate = newDate
@@ -99,34 +107,50 @@ extension TodosInMonthViewModel {
 }
 
 extension TodosInMonthViewModel: TodoObserver {
+    // TODO: - 업데이트가 올바르게 이뤄지지 않은 경우가 발생
     private func checkValidUpdate(for todo: Todo) -> Bool {
         let startOfMonth = calendar.startOfMonth(for: currentDate)
         let startDate = calendar.addDays(-calendar.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
         let endDate = calendar.addDays(41, to: startDate).addingTimeInterval(-1)
         
-        return todo.date >= startDate && todo.date <= endDate
+        return startDate <= todo.date && todo.date <= endDate
     }
     
     func todoAdded(_ todo: Todo) {
         guard checkValidUpdate(for: todo) else { return }
         
-        let key = calendar.startOfDay(for: todo.date)
-        todos[key, default: []].append(todo)
+        let todoDate = calendar.startOfDay(for: todo.date)
+        todos[todoDate, default: []].append(todo)
     }
     
     func todoModified(_ todo: Todo) {
-        guard checkValidUpdate(for: todo) else { return }
-        
-        let key = calendar.startOfDay(for: todo.date)
-        if let index = todos[key, default: []].firstIndex(where: { $0.fid == todo.fid }) {
-            todos[key]![index] = todo
+        for (date, var todoList) in todos {
+            if let index = todoList.firstIndex(where: { $0.fid == todo.fid }) {
+                if calendar.isDate(date, inSameDayAs: todo.date) {
+                    todoList[index] = todo
+                    todos[date] = todoList
+                    return
+                } else {
+                    todoList.remove(at: index)
+                    if todoList.isEmpty {
+                        todos.removeValue(forKey: date)
+                    } else {
+                        todos[date] = todoList
+                    }
+                }
+                break
+            }
         }
+        
+        guard checkValidUpdate(for: todo) else { return }
+        let todoDate = calendar.startOfDay(for: todo.date)
+        todos[todoDate, default: []].append(todo)
     }
     
     func todoRemoved(_ todo: Todo) {
         guard checkValidUpdate(for: todo) else { return }
         
-        let key = calendar.startOfDay(for: todo.date)
-        todos[key, default: []].removeAll(where: { $0.fid == todo.fid })
+        let todoDate = calendar.startOfDay(for: todo.date)
+        todos[todoDate, default: []].removeAll(where: { $0.fid == todo.fid })
     }
 }

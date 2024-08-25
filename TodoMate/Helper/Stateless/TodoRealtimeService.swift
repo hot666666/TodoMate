@@ -11,7 +11,7 @@ import FirebaseFirestore
 class TodoRealtimeService: TodoRealtimeServiceType {
     private let todoRepository: TodoRepositoryType
     private var task: Task<Void, Never>?
-    private var observers: [String: [TodoObserver]] = [:]
+    private var observers: [String: [WeakTodoObserver]] = [:]
     
     init(todoRepository: TodoRepositoryType = FirestoreTodoRepository(reference: .shared)) {
         self.todoRepository = todoRepository
@@ -26,14 +26,14 @@ class TodoRealtimeService: TodoRealtimeServiceType {
 extension TodoRealtimeService {
     func addObserver(_ observer: TodoObserver, for userId: String) {
         print("[Add Observer - \(ObjectIdentifier(observer))]")
-        observers[userId, default: []].append(observer)
+        observers[userId, default: []].append(WeakTodoObserver(observer))
     }
     
     func removeObserver(_ observer: TodoObserver, for userId: String) {
-        if observers[userId, default: []].contains(where: { ObjectIdentifier($0) == ObjectIdentifier(observer) }) {
+        if observers[userId, default: []].contains(where: { $0.value === observer }) {
             print("[Remove Observer - \(ObjectIdentifier(observer))]")
         }
-        observers[userId, default: []].removeAll(where: { ObjectIdentifier($0) == ObjectIdentifier(observer) })
+        observers[userId, default: []].removeAll(where: { $0.value === observer })
     }
 }
 
@@ -59,16 +59,24 @@ extension TodoRealtimeService {
         switch change {
         case .added:
             for observer in observers {
-                observer.todoAdded(todo)
+                observer.value?.todoAdded(todo)
             }
         case .modified:
             for observer in observers {
-                observer.todoModified(todo)
+                observer.value?.todoModified(todo)
             }
         case .removed:
             for observer in observers {
-                observer.todoRemoved(todo)
+                observer.value?.todoRemoved(todo)
             }
         }
+    }
+}
+
+fileprivate class WeakTodoObserver {
+    weak var value: TodoObserver?
+    
+    init(_ observer: TodoObserver) {
+        self.value = observer
     }
 }

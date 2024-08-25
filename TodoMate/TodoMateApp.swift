@@ -8,8 +8,10 @@
 import SwiftUI
 import FirebaseCore
 
+
 @main
 struct TodoMateApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var appState: AppState
     @State private var container: DIContainer
     
@@ -25,6 +27,14 @@ struct TodoMateApp: App {
             ContentView()
                 .environment(appState)
                 .environment(container)
+        }
+        .commands {
+            CommandGroup(after: .appInfo) {
+                Button("업데이트 확인") {
+                    appDelegate.openCheckAppUpdateView()
+                }
+                .keyboardShortcut("U", modifiers: .command)
+            }
         }
     }
 }

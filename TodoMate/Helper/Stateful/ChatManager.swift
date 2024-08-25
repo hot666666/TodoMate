@@ -20,7 +20,8 @@ class ChatManager: ChatManagerType {
         self.chatRepository = chatRepository
     }
     
-    func onAppear() {
+    func onAppear() async {
+        await fetch()
         setupRealtimeUpdates()
     }
     
@@ -64,13 +65,13 @@ extension ChatManager {
         chats.count > 0 ? "(\(chats.count))" : ""
     }
     
-    func fetch() async -> [Chat] {
+    @MainActor
+    func fetch() async {
         print("[Fetching Chat] -")
         do {
-            return try await chatRepository.fetchChats().map { $0.toModel() }
+            chats = try await chatRepository.fetchChats().map { $0.toModel() }
         } catch {
             print("Error fetching chats: \(error)")
-            return []
         }
     }
     
