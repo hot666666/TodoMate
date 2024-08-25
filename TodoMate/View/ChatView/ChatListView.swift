@@ -77,8 +77,12 @@ fileprivate struct ChatView: View {
             .focused($focusedId, equals: item.id)
             .shadow(radius: focusedId == item.id ? 5 : 0)
             .onTapGesture { focusedId = item.id }
-            .onChange(of: localContent) { _, newValue in
+            .onChange(of: localContent) { oldValue, newValue in
                 debouncer.debounce {
+                    if newValue.isEmpty && oldValue.isEmpty {
+                        chatManager.remove(item)
+                        return
+                    }
                     print("[Updating Chat - \(newValue)]")
                     let updatedChat = item
                     updatedChat.content = newValue
