@@ -14,7 +14,6 @@ struct ContentView: View {
     @State private var chatManager: ChatManager = .init()
     
     var body: some View {
-        GeometryReader { geometry in
             ScrollView {
                 VStack {
                     ExpandableView(title: "채팅\(chatManager.formatCount)") {
@@ -32,28 +31,33 @@ struct ContentView: View {
                             ExpandableView(title: "캘린더") {
                                 TodosInMonthView(viewModel: .init(container: container, userId: user.fid))
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 30)
                             
-                            TodoListView(viewModel: .init(container: container, userId: user.fid))
-                                .padding()
-                                .frame(height: max(50, geometry.size.height / 2 - 150))
+                            todoBox(userId: user.fid)
+                                .padding(.horizontal, 30)
                         }
                     }
                     .padding(.top, 5)
                 }
                 .disabled(appState.isSelectedTodo)
-                .padding(.horizontal, max(10, geometry.size.width * 0.1))
+                
+                Spacer()
+                    .frame(height: 50)
             }
-        }
         .task {
             await userManager.fetch()
         }
         .customSheet(selectedItem: appState.selectedTodo) {
-            TodoListSheetView(todo: $0)
+            TodoSheet(todo: $0)
         }
         .customOverlayView(isPresented: appState.popover, overlayPosition: appState.popoverPosition) {
             DateSettingView()
         }
+    }
+    
+    @ViewBuilder
+    private func todoBox(userId: String) -> some View {
+        TodoBox(viewModel: .init(container: container, userId: userId))
     }
 }
 

@@ -8,10 +8,13 @@
 import SwiftUI
 
 @Observable
-class TodoListViewModel {
+class TodoBoxViewModel {
     private let container: DIContainer
     private let userId: String
+    
+    private var hoveringTodoId: String? = nil
     private let calendar: Calendar = .current
+    
     var todos: [Todo] = []
     
     init(
@@ -31,7 +34,7 @@ class TodoListViewModel {
     }
 }
 
-extension TodoListViewModel {
+extension TodoBoxViewModel {
     func create() {
         container.todoService.create(with: userId, date: .now)
     }
@@ -50,13 +53,21 @@ extension TodoListViewModel {
     }
 }
 
-extension TodoListViewModel {
+extension TodoBoxViewModel {
     func move(from source: IndexSet, to destination: Int) {
         todos.move(fromOffsets: source, toOffset: destination)
     }
+    
+    func setHoveringTodo(_ id: String?) {
+        hoveringTodoId = id
+    }
+
+    func isHovering(_ todo: Todo) -> Bool {
+        return hoveringTodoId == todo.id
+    }
 }
 
-extension TodoListViewModel: TodoObserver {
+extension TodoBoxViewModel: TodoObserver {
     func todoAdded(_ todo: Todo) {
         guard calendar.isDateInToday(todo.date) else { return }
         todos.append(todo)
