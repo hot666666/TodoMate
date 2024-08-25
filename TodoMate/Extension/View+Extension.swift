@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - CustomSheetModifier
 /// MacOS 앱은 기본적으로 .sheet를 이용할 때, 외부 뷰 터치 시 dismiss가 수행을 안해서 따로 만든 커스텀 수정자
-struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier {  // TODO: - Generic 공부
+struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier {
     @Environment(AppState.self) private var appState: AppState
     let sheetContent: (Item) -> SheetContent
     
@@ -27,8 +27,8 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
                 /// 지정된 크기로 sheetContent 표시
                 GeometryReader { geometry in
                     sheetContent(item)
-                        .frame(width: geometry.size.width * 0.6,
-                               height: geometry.size.height * 0.7)
+                        .frame(width: max(300, geometry.size.width * 0.6),
+                               height: max(500, geometry.size.height * 0.7))
                         .background(.regularMaterial)
                         .cornerRadius(10)
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
