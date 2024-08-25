@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TodoListSheetView: View {
+struct TodoSheet: View {
     @Environment(AppState.self) private var appState: AppState
     @Environment(DIContainer.self) private var container: DIContainer
     @FocusState private var focusedField: Field?
@@ -48,7 +48,7 @@ struct TodoListSheetView: View {
     }
 }
 
-extension TodoListSheetView {
+extension TodoSheet {
     private enum Field: Hashable {
         case content
         case detail
@@ -86,7 +86,7 @@ extension TodoListSheetView {
     private var todoItemStatus: some View {
         HStack(spacing: 20) {
             Text(Image(systemName: "circle.dotted")).bold() + Text(" 상태")
-            StatusPopoverButton(todo: todo)
+            StatusButton(todo: todo)
         }
     }
     
@@ -109,7 +109,7 @@ extension TodoListSheetView {
 }
 
 #Preview {
-    TodoListSheetView(todo: .stub[0])
+    TodoSheet(todo: .stub[0])
     .frame(width: 500, height: 700)
     .environment(AppState())
 }
