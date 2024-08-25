@@ -12,16 +12,16 @@ class DIContainer {
     var todoService: TodoServiceType
     var todoRealtimeService: TodoRealtimeServiceType
     
-    init(todoService: TodoServiceType = TodoService(),
-         todoRealtimeService: TodoRealtimeServiceType = TodoRealtimeService()) {
+    init(todoService: TodoServiceType,
+         todoRealtimeService: TodoRealtimeServiceType) {
         self.todoService = todoService
         self.todoRealtimeService = todoRealtimeService
     }
 }
 
 
-//extension DIContainer {
-//    static var stub: DIContainer {
-//        .init(services: StubServices())
-//    }
-//}
+extension DIContainer {
+    static var stub: DIContainer {
+        .init(todoService: StubTodoService(), todoRealtimeService: StubTodoRealtimeService())
+    }
+}

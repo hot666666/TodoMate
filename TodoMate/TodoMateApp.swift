@@ -19,7 +19,7 @@ struct TodoMateApp: App {
         FirebaseApp.configure()
         
         _appState = State(initialValue: AppState())
-        _container = State(initialValue: DIContainer())
+        _container = State(initialValue: DIContainer(todoService: TodoService(), todoRealtimeService: TodoRealtimeService()))
     }
     
     var body: some Scene {
