@@ -9,10 +9,19 @@ import SwiftUI
 
 @main
 struct TodoMatePreviewApp: App {
+    @State private var appState: AppState
+    @State private var container: DIContainer
+    
+    init() {
+        _appState = State(initialValue: AppState())
+        _container = State(initialValue: DIContainer.stub)
+    }
 
     var body: some Scene {
         WindowGroup {
-            Text("tmp")
+            ContentView()
+                .environment(appState)
+                .environment(container)
         }
     }
 }
