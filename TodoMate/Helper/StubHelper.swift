@@ -48,9 +48,11 @@ class StubTodoRealtimeService: TodoRealtimeServiceType {
 }
 
 // Statefull
+@Observable
 class StubUserManager: UserManagerType {
     var users: [User] = []
     
+    @MainActor
     func fetch() async {
         users = User.stub
     }
@@ -67,6 +69,7 @@ class StubChatManager: ChatManagerType {
         chats.count > 0 ? "(\(chats.count))" : ""
     }
     
+    @MainActor
     func fetch() async {
         chats = Chat.stub
     }
