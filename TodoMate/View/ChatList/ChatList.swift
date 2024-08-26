@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-// MARK: - ChatListView
-struct ChatListView: View {
+// MARK: - ChatList
+struct ChatList: View {
     @Environment(ChatManager.self) private var chatManager: ChatManager
     @FocusState private var focusedId: String?
     
@@ -20,7 +20,7 @@ struct ChatListView: View {
             
                 VStack(spacing: 10) {
                     ForEach(chatManager.chats) { chat in
-                        ChatView(item: chat, focusedId: $focusedId)
+                        ChatField(item: chat, focusedId: $focusedId)
                             .contextMenu {
                                 Button(role: .destructive) {
                                     chatManager.remove(chat)
@@ -40,23 +40,24 @@ struct ChatListView: View {
                 .padding(.horizontal, 5)
         }
     }
-}
- 
-extension ChatListView {
+    
+    @ViewBuilder
     private var addButton: some View {
-        Button(action: { chatManager.create() }) {
+        Button(action: chatManager.create) {
             Image(systemName: "plus")
         }
         .hoverButtonStyle()
     }
-    
+}
+ 
+extension ChatList {
     private func clearFocus() {
         focusedId = nil
     }
 }
 
 // MARK: - ChatView
-fileprivate struct ChatView: View {
+fileprivate struct ChatField: View {
     @Environment(ChatManager.self) private var chatManager: ChatManager
     @State private var debouncer = Debouncer(delay: 0.7)
     
