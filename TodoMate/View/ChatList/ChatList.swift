@@ -80,7 +80,7 @@ fileprivate struct ChatField: View {
             .onTapGesture { focusedId = item.id }
             .onChange(of: localContent) { oldValue, newValue in
                 debouncer.debounce {
-                    if newValue.isEmpty && oldValue.isEmpty {
+                    if newValue.isEmpty {
                         chatManager.remove(item)
                         return
                     }
