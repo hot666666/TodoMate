@@ -48,6 +48,7 @@ extension ChatManager {
                 chats.append(chatDTO.toModel())
             }
         case .modified(let chatDTO):
+            /// Signature가 같다면, 내가 입력 중이던 요소라 업데이트가 따로 필요 없다
             guard (chatDTO.sign != Const.Signature) else { return }
             if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
                 chats[index] = chatDTO.toModel()
