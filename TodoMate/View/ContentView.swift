@@ -16,7 +16,7 @@ struct ContentView: View {
     var body: some View {
             ScrollView {
                 VStack {
-                    ExpandableView(title: "채팅\(chatManager.formatCount)") {
+                    ExpandableView(title: "채팅\(chatManager.formatCount)", storageKey: "chatlist") {
                         ChatListView()
                             .padding(.horizontal, 5)
                             .environment(chatManager)
@@ -27,8 +27,8 @@ struct ContentView: View {
                     .padding(.top)
                     
                     ForEach(userManager.users) { user in
-                        ExpandableView(title: user.name, isExpanded: true) {
-                            ExpandableView(title: "캘린더") {
+                        ExpandableView(title: user.name, storageKey: "user_\(user.fid)") {
+                            ExpandableView(title: "캘린더", storageKey: "calendar_\(user.fid)") {
                                 TodosInMonthView(viewModel: .init(container: container, userId: user.fid))
                             }
                             .padding(.horizontal, 30)
