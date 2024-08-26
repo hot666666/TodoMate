@@ -54,6 +54,7 @@ extension TodoSheet {
         case detail
     }
     
+    @ViewBuilder
     private var todoItemContent: some View {
         TextField("이름없음", text: Bindable(todo).content)
             .textFieldStyle(.plain)
@@ -61,6 +62,7 @@ extension TodoSheet {
             .bold()
     }
     
+    @ViewBuilder
     private var todoItemDate: some View {
         HStack(spacing: 20) {
             Text(Image(systemName: "calendar")) + Text(" 날짜")
@@ -83,6 +85,7 @@ extension TodoSheet {
         }
     }
     
+    @ViewBuilder
     private var todoItemStatus: some View {
         HStack(spacing: 20) {
             Text(Image(systemName: "circle.dotted")).bold() + Text(" 상태")
@@ -90,6 +93,7 @@ extension TodoSheet {
         }
     }
     
+    @ViewBuilder
     private var todoItemDetail: some View {
         HStack(alignment: .top, spacing: 20) {
             Text(Image(systemName: "note.text")).bold() + Text(" 메모")

@@ -29,6 +29,7 @@ struct CalendarView: View {
         }
     }
     
+    @ViewBuilder
     private var header: some View {
         HStack {
             Text(currentDate.toYearMonthString())
@@ -51,6 +52,7 @@ struct CalendarView: View {
         }
     }
     
+    @ViewBuilder
     private var weekdayHeaders: some View {
          ForEach(Const.CalendarView.WEEKDAYS, id: \.self) { day in
              Text(day)
@@ -58,6 +60,7 @@ struct CalendarView: View {
          }
      }
      
+    @ViewBuilder
      private var calendarDaysGrid: some View {
          ForEach(Array(calendarDays.enumerated()), id: \.element.id) { index, calendarDay in
              CalendarDayView(calendarDay: calendarDay)
