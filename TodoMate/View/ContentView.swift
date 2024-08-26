@@ -14,36 +14,19 @@ struct ContentView: View {
     @State private var chatManager: ChatManager = .init()
     
     var body: some View {
-            ScrollView {
-                VStack {
-                    ExpandableView(title: "채팅\(chatManager.formatCount)", storageKey: "chatlist") {
-                        ChatListView()
-                            .padding(.horizontal, 5)
-                            .environment(chatManager)
-                    }
-                    .task {
-                        await chatManager.onAppear()
-                    }
+        ScrollView {
+            VStack {
+                chatSection
                     .padding(.top)
-                    
-                    ForEach(userManager.users) { user in
-                        ExpandableView(title: user.name, storageKey: "user_\(user.fid)") {
-                            ExpandableView(title: "캘린더", storageKey: "calendar_\(user.fid)") {
-                                TodosInMonthView(viewModel: .init(container: container, userId: user.fid))
-                            }
-                            .padding(.horizontal, 30)
-                            
-                            todoBox(userId: user.fid)
-                                .padding(.horizontal, 30)
-                        }
-                    }
-                    .padding(.top, 5)
-                }
-                .disabled(appState.isSelectedTodo)
                 
-                Spacer()
-                    .frame(height: 50)
+                userSections
+                    .padding(.top, 5)
             }
+            .disabled(appState.isSelectedTodo)
+            
+            Spacer()
+                .frame(height: 50)
+        }
         .task {
             await userManager.fetch()
         }
@@ -56,8 +39,44 @@ struct ContentView: View {
     }
     
     @ViewBuilder
-    private func todoBox(userId: String) -> some View {
-        TodoBox(viewModel: .init(container: container, userId: userId))
+    private var chatSection: some View {
+        ExpandableView(title: "채팅\(chatManager.formatCount)", storageKey: "chatlist") {
+            ChatList()
+                .padding(.horizontal, 5)
+                .environment(chatManager)
+        }
+        .task {
+            await chatManager.onAppear()
+        }
+    }
+    
+    @ViewBuilder
+    private var userSections: some View {
+        ForEach(userManager.users) { user in
+            userSection(for: user)
+        }
+    }
+    
+    private func userSection(for user: User) -> some View {
+        ExpandableView(title: user.name, storageKey: "user_\(user.fid)") {
+            VStack {
+                calendarView(for: user)
+                    .padding(.horizontal, 30)
+                
+                todoBoxView(for: user)
+                    .padding(.horizontal, 30)
+            }
+        }
+    }
+    
+    private func calendarView(for user: User) -> some View {
+        ExpandableView(title: "캘린더", storageKey: "calendar_\(user.fid)") {
+            CalendarWithTodo(viewModel: .init(container: container, userId: user.fid))
+        }
+    }
+    
+    private func todoBoxView(for user: User) -> some View {
+        TodoBox(viewModel: .init(container: container, userId: user.fid))
     }
 }
 
