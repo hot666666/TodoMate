@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum TodoItemStatus: String, CaseIterable {
+enum TodoItemStatus: String, CaseIterable, Codable {
     case inComplete = "미완료"
     case todo = "시작 전"
     case inProgress = "진행 중"
@@ -24,8 +24,8 @@ enum TodoItemStatus: String, CaseIterable {
 }
 
 @Observable
-class Todo: Identifiable {
-    let id: String = UUID().uuidString
+class Todo: Identifiable, Codable {
+    let id: String
     var date: Date
     var content: String
     var status: TodoItemStatus
@@ -33,18 +33,44 @@ class Todo: Identifiable {
     var uid: String
     var fid: String?
     
-    init(date: Date = .now,
+    enum CodingKeys: String, CodingKey {
+         case id, date
+     }
+    
+    init(id: String = UUID().uuidString,
+         date: Date = .now,
          content: String = "",
          detail: String = "",
          status: TodoItemStatus = .todo,
          uid: String = "",
          fid: String? = nil) {
+        self.id = id
         self.date = date
         self.content = content
         self.detail = detail
         self.status = status
         self.uid = uid
         self.fid = fid
+    }
+    
+    /// Decode : T -> Todo
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        date = try container.decode(Date.self, forKey: .date)
+        /// Initialize other properties with default values
+        content = ""
+        status = .todo
+        detail = ""
+        uid = ""
+        fid = nil
+    }
+    
+    /// Encode : Todo -> T
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(date, forKey: .date)
     }
 }
 
@@ -53,6 +79,15 @@ extension Todo: Equatable {
         return lhs.id == rhs.id
     }
 }
+
+extension Todo: Transferable {
+    static var transferRepresentation: some TransferRepresentation {
+        ProxyRepresentation(exporting: { todo in
+            TodoTransferData(id: todo.id, date: todo.date)
+        })
+    }
+}
+
 
 extension Todo {
     static var stub: [Todo] {
