@@ -27,8 +27,8 @@ struct CustomSheetModifier<Item: Identifiable, SheetContent: View>: ViewModifier
                 /// 지정된 크기로 sheetContent 표시
                 GeometryReader { geometry in
                     sheetContent(item)
-                        .frame(width: max(450, geometry.size.width * 0.6),
-                               height: max(450, geometry.size.height * 0.7))
+                        .frame(width: max(450, geometry.size.width * 0.8),
+                               height: max(450, geometry.size.height * 0.8))
                         .background(.regularMaterial)
                         .cornerRadius(10)
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)

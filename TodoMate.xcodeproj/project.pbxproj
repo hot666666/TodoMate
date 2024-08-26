@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		452304202C6DD2DF0026C24B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */; };
+		453D374E2C7C8390003835CE /* UTType+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D374D2C7C838C003835CE /* UTType+Extension.swift */; };
+		453D374F2C7C8390003835CE /* UTType+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D374D2C7C838C003835CE /* UTType+Extension.swift */; };
+		453D37512C7C8451003835CE /* TodoTransferData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D37502C7C8450003835CE /* TodoTransferData.swift */; };
+		453D37522C7C8451003835CE /* TodoTransferData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D37502C7C8450003835CE /* TodoTransferData.swift */; };
 		4554309A2C6C43B70003E41C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455430992C6C43B30003E41C /* CalendarView.swift */; };
 		455C9B962C6F8CBA004A1519 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B952C6F8CB4004A1519 /* AppDelegate.swift */; };
 		455C9B982C6F8DC2004A1519 /* Button+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B972C6F8DBC004A1519 /* Button+Extension.swift */; };
@@ -27,8 +31,8 @@
 		459AA3EA2C743C5B00CA43F2 /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10BA22C69FA2B00FC31CD /* Todo.swift */; };
 		459AA3EB2C743C6A00CA43F2 /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		459AA3EC2C74418D00CA43F2 /* StubHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3E82C743A3600CA43F2 /* StubHelper.swift */; };
-		459AA3EE2C74489700CA43F2 /* TodosInMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3ED2C74489100CA43F2 /* TodosInMonthView.swift */; };
-		459AA3F12C758EE300CA43F2 /* TodosInMonthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F02C758EE100CA43F2 /* TodosInMonthViewModel.swift */; };
+		459AA3EE2C74489700CA43F2 /* CalendarWithTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3ED2C74489100CA43F2 /* CalendarWithTodo.swift */; };
+		459AA3F12C758EE300CA43F2 /* CalendarWithTodoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F02C758EE100CA43F2 /* CalendarWithTodoViewModel.swift */; };
 		459AA3F32C7593EC00CA43F2 /* TodoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F22C7593E800CA43F2 /* TodoService.swift */; };
 		459AA3F52C75BEF800CA43F2 /* TodoBoxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F42C75BEF500CA43F2 /* TodoBoxViewModel.swift */; };
 		459AA3F82C75CA2B00CA43F2 /* DIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F72C75CA2800CA43F2 /* DIContainer.swift */; };
@@ -54,7 +58,7 @@
 		45CE6CAA2C70CF970053835E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45CE6CA92C70CF970053835E /* Assets.xcassets */; };
 		45CE6CAD2C70CF970053835E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 45CE6CAC2C70CF970053835E /* Preview Assets.xcassets */; };
 		45CE6CB52C7178620053835E /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB42C7178600053835E /* Chat.swift */; };
-		45CE6CB82C7179390053835E /* ChatListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB72C7179350053835E /* ChatListView.swift */; };
+		45CE6CB82C7179390053835E /* ChatList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB72C7179350053835E /* ChatList.swift */; };
 		45CE6CBA2C7181DB0053835E /* FirestoreChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB92C7181DB0053835E /* FirestoreChatRepository.swift */; };
 		45CE6CBC2C71825B0053835E /* ChatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBB2C71825B0053835E /* ChatManager.swift */; };
 		45CE6CBE2C7190D40053835E /* ChatDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBD2C7190D20053835E /* ChatDTO.swift */; };
@@ -82,6 +86,8 @@
 
 /* Begin PBXFileReference section */
 		4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		453D374D2C7C838C003835CE /* UTType+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+Extension.swift"; sourceTree = "<group>"; };
+		453D37502C7C8450003835CE /* TodoTransferData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoTransferData.swift; sourceTree = "<group>"; };
 		455430992C6C43B30003E41C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		455C9B952C6F8CB4004A1519 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		455C9B972C6F8DBC004A1519 /* Button+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Button+Extension.swift"; sourceTree = "<group>"; };
@@ -94,8 +100,8 @@
 		457B43CA2C6E18F60049334A /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		457B43CC2C6F3D9C0049334A /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		459AA3E82C743A3600CA43F2 /* StubHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubHelper.swift; sourceTree = "<group>"; };
-		459AA3ED2C74489100CA43F2 /* TodosInMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosInMonthView.swift; sourceTree = "<group>"; };
-		459AA3F02C758EE100CA43F2 /* TodosInMonthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosInMonthViewModel.swift; sourceTree = "<group>"; };
+		459AA3ED2C74489100CA43F2 /* CalendarWithTodo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarWithTodo.swift; sourceTree = "<group>"; };
+		459AA3F02C758EE100CA43F2 /* CalendarWithTodoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarWithTodoViewModel.swift; sourceTree = "<group>"; };
 		459AA3F22C7593E800CA43F2 /* TodoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoService.swift; sourceTree = "<group>"; };
 		459AA3F42C75BEF500CA43F2 /* TodoBoxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoBoxViewModel.swift; sourceTree = "<group>"; };
 		459AA3F72C75CA2800CA43F2 /* DIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DIContainer.swift; sourceTree = "<group>"; };
@@ -119,7 +125,7 @@
 		45CE6CAC2C70CF970053835E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		45CE6CAE2C70CF970053835E /* TodoMatePreview.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TodoMatePreview.entitlements; sourceTree = "<group>"; };
 		45CE6CB42C7178600053835E /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
-		45CE6CB72C7179350053835E /* ChatListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListView.swift; sourceTree = "<group>"; };
+		45CE6CB72C7179350053835E /* ChatList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatList.swift; sourceTree = "<group>"; };
 		45CE6CB92C7181DB0053835E /* FirestoreChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreChatRepository.swift; sourceTree = "<group>"; };
 		45CE6CBB2C71825B0053835E /* ChatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatManager.swift; sourceTree = "<group>"; };
 		45CE6CBD2C7190D20053835E /* ChatDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDTO.swift; sourceTree = "<group>"; };
@@ -159,13 +165,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		459AA3EF2C758ECF00CA43F2 /* TodosInMonth */ = {
+		459AA3EF2C758ECF00CA43F2 /* CalendarWithTodo */ = {
 			isa = PBXGroup;
 			children = (
-				459AA3F02C758EE100CA43F2 /* TodosInMonthViewModel.swift */,
-				459AA3ED2C74489100CA43F2 /* TodosInMonthView.swift */,
+				459AA3F02C758EE100CA43F2 /* CalendarWithTodoViewModel.swift */,
+				459AA3ED2C74489100CA43F2 /* CalendarWithTodo.swift */,
 			);
-			path = TodosInMonth;
+			path = CalendarWithTodo;
 			sourceTree = "<group>";
 		};
 		459AA3F62C75CA2000CA43F2 /* Dependency */ = {
@@ -272,13 +278,13 @@
 			path = TodoMatePreview;
 			sourceTree = "<group>";
 		};
-		45CE6CB62C7179270053835E /* ChatView */ = {
+		45CE6CB62C7179270053835E /* ChatList */ = {
 			isa = PBXGroup;
 			children = (
 				459AA4002C75EE9E00CA43F2 /* Debouncer.swift */,
-				45CE6CB72C7179350053835E /* ChatListView.swift */,
+				45CE6CB72C7179350053835E /* ChatList.swift */,
 			);
-			path = ChatView;
+			path = ChatList;
 			sourceTree = "<group>";
 		};
 		45DF57B12C7AEDDB00940AF7 /* Resource */ = {
@@ -342,6 +348,7 @@
 		45E10BA12C69FA0E00FC31CD /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				453D37502C7C8450003835CE /* TodoTransferData.swift */,
 				45CE6CB42C7178600053835E /* Chat.swift */,
 				457B43C82C6E0D120049334A /* User.swift */,
 				45E10BA22C69FA2B00FC31CD /* Todo.swift */,
@@ -353,6 +360,7 @@
 		45E10BA42C6A095B00FC31CD /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				453D374D2C7C838C003835CE /* UTType+Extension.swift */,
 				459AA4052C76023600CA43F2 /* String+Extension.swift */,
 				459AA3F92C75D7E500CA43F2 /* Calendar+Extension.swift */,
 				455C9B972C6F8DBC004A1519 /* Button+Extension.swift */,
@@ -366,10 +374,10 @@
 		45E10BAB2C6A102400FC31CD /* View */ = {
 			isa = PBXGroup;
 			children = (
-				459AA4372C7969B800CA43F2 /* CheckAppUpdateView */,
 				45E10B942C69B77300FC31CD /* ContentView.swift */,
-				45CE6CB62C7179270053835E /* ChatView */,
-				459AA3EF2C758ECF00CA43F2 /* TodosInMonth */,
+				459AA4372C7969B800CA43F2 /* CheckAppUpdateView */,
+				45CE6CB62C7179270053835E /* ChatList */,
+				459AA3EF2C758ECF00CA43F2 /* CalendarWithTodo */,
 				45CE6C922C704D5B0053835E /* TodoBox */,
 				45CE6C982C7052C90053835E /* TodoListSheetView */,
 				45CE6C9D2C70BE3C0053835E /* ExpandableView.swift */,
@@ -524,8 +532,10 @@
 				45DF57B42C7AEE2400940AF7 /* ContentView.swift in Sources */,
 				45DF57C42C7B13C700940AF7 /* TodoBoxViewModel.swift in Sources */,
 				459AA4072C76023D00CA43F2 /* String+Extension.swift in Sources */,
+				453D374E2C7C8390003835CE /* UTType+Extension.swift in Sources */,
 				45DF57B92C7AF81000940AF7 /* StatusButton.swift in Sources */,
 				45DF57BD2C7B0BB500940AF7 /* DIContainer.swift in Sources */,
+				453D37522C7C8451003835CE /* TodoTransferData.swift in Sources */,
 				459AA3E52C733A7100CA43F2 /* Date+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -543,14 +553,16 @@
 				459AA3F32C7593EC00CA43F2 /* TodoService.swift in Sources */,
 				45E10BA32C69FA2F00FC31CD /* Todo.swift in Sources */,
 				457B43C02C6DF9610049334A /* FirestoreTodoRepository.swift in Sources */,
-				459AA3EE2C74489700CA43F2 /* TodosInMonthView.swift in Sources */,
+				459AA3EE2C74489700CA43F2 /* CalendarWithTodo.swift in Sources */,
 				459AA3FD2C75DFCE00CA43F2 /* Wrapper.swift in Sources */,
 				45ACB00E2C6B92A3005F4B17 /* CalendarDay.swift in Sources */,
+				453D374F2C7C8390003835CE /* UTType+Extension.swift in Sources */,
 				457B43CB2C6E18FB0049334A /* UserManager.swift in Sources */,
 				45DF57C52C7B156800940AF7 /* StatusButton.swift in Sources */,
 				45ACB0052C6B0A8D005F4B17 /* TodoSheet.swift in Sources */,
 				459AA3F82C75CA2B00CA43F2 /* DIContainer.swift in Sources */,
 				457B43C62C6DFFD00049334A /* FirestoreReference.swift in Sources */,
+				453D37512C7C8451003835CE /* TodoTransferData.swift in Sources */,
 				45CE6CBA2C7181DB0053835E /* FirestoreChatRepository.swift in Sources */,
 				45ACB0032C6B0A42005F4B17 /* AppState.swift in Sources */,
 				45CE6CB52C7178620053835E /* Chat.swift in Sources */,
@@ -558,10 +570,10 @@
 				45ED09082C6AEC0B005A8096 /* Date+Extension.swift in Sources */,
 				457B43C22C6DFA600049334A /* TodoRealtimeService.swift in Sources */,
 				45CE6C9E2C70BE410053835E /* ExpandableView.swift in Sources */,
-				459AA3F12C758EE300CA43F2 /* TodosInMonthViewModel.swift in Sources */,
+				459AA3F12C758EE300CA43F2 /* CalendarWithTodoViewModel.swift in Sources */,
 				45E10BA62C6A097100FC31CD /* View+Extension.swift in Sources */,
 				459AA4032C75F2AB00CA43F2 /* HelperType.swift in Sources */,
-				45CE6CB82C7179390053835E /* ChatListView.swift in Sources */,
+				45CE6CB82C7179390053835E /* ChatList.swift in Sources */,
 				45ED09042C6ADDA7005A8096 /* TodoDTO.swift in Sources */,
 				45CE6CBC2C71825B0053835E /* ChatManager.swift in Sources */,
 				459AA3F52C75BEF800CA43F2 /* TodoBoxViewModel.swift in Sources */,
@@ -762,6 +774,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMate.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -793,6 +806,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMate.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;

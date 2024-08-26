@@ -19,9 +19,8 @@ struct CheckAppUpdateView: View {
             Spacer()
             if latestVersion <= currentAppVersion {
                 Text("현재 최신 버전입니다")
-            } else {
-                Text("현재 버전 : \(currentAppVersion)")
             }
+            Text("현재 버전 : \(currentAppVersion)")
             
             if isUpdateAvailable {
                 Button(action: downloadLatestUpdate) {
@@ -55,7 +54,9 @@ struct CheckAppUpdateView: View {
             checkForUpdate()
         }
     }
-    
+}
+
+extension CheckAppUpdateView {
     private var currentAppVersion: String {
         return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     }
