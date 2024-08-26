@@ -36,7 +36,7 @@ class TodoBoxViewModel {
 
 extension TodoBoxViewModel {
     func create() {
-        container.todoService.create(with: userId, date: .now)
+        container.todoService.create(.init(date: .now, uid: userId))
     }
     
     @MainActor

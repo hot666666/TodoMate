@@ -97,7 +97,8 @@ extension ChatManager {
         }
     }
     
-    func create(_ chat: Chat = .init()) {
+    func create() {
+        let chat: Chat = .init()
         print("[Creating Chat - \(chat)]")
         Task {
             do {

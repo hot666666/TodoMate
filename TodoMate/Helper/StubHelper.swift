@@ -11,7 +11,7 @@ import Foundation
 class StubTodoService: TodoServiceType {
     private let calendar = Calendar.current
     
-    func create(with uid: String, date: Date) {
+    func create(_ todo: Todo) {
         
     }
     
@@ -82,7 +82,7 @@ class StubChatManager: ChatManagerType {
 
     }
     
-    func create(_ chat: Chat) {
+    func create() {
 
     }
 }
