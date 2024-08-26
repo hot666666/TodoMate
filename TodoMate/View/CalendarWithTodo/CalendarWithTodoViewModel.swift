@@ -8,11 +8,12 @@
 import SwiftUI
 
 @Observable
-class TodosInMonthViewModel {
+class CalendarWithTodoViewModel {
     private let container: DIContainer
     private let calendar: Calendar = .current
     private let userId: String
     
+    private var isDropTargeted: Bool = false
     var todos: [Date: [Todo]] = [:]
     var currentDate: Date = .now
     var calendarDays: [CalendarDay] = []
@@ -26,21 +27,37 @@ class TodosInMonthViewModel {
     func onAppear() {
         container.todoRealtimeService.addObserver(self, for: userId)
     }
-
     
     func onDissapear() {
         container.todoRealtimeService.removeObserver(self, for: userId)
     }
 }
 
-extension TodosInMonthViewModel {
+extension CalendarWithTodoViewModel {
+    func setDropTarget(status: Bool) {
+        isDropTargeted = status
+    }
+    
+    func onDrop(data: [TodoTransferData], to newDate: Date) -> Bool {
+        guard let data = data.first else { return false }
+        
+        let oldDate = calendar.startOfDay(for: data.date)
+        guard let movedTodo = todos[oldDate]?.first(where: { $0.id == data.id }) else { return false }
+        
+        movedTodo.date = newDate
+        
+        container.todoService.update(movedTodo)
+        return true
+    }
+}
+
+extension CalendarWithTodoViewModel {
     @MainActor
     func fetch() async {
         let startOfMonth = calendar.startOfMonth(for: currentDate)
         let startDate = calendar.addDays(-calendar.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
         let endDate = calendar.addDays(41, to: startDate).addingTimeInterval(-1)
         
-
         Task {
             todos = await container.todoService.fetchMonth(userId: userId, startDate: startDate, endDate: endDate)
         }
@@ -51,29 +68,28 @@ extension TodosInMonthViewModel {
     }
     
     func create(date: Date) {
-        container.todoService.create(with: userId, date: date)
+        container.todoService.create(.init(date: date, uid: userId))
+    }
+    
+    func copy(_ todo: Todo) {
+        container.todoService.create(.init(date: todo.date, content: todo.content, detail: todo.detail, status: .todo, uid: todo.uid, fid: todo.uid))
     }
     
     func moveMonth(by value: Int) {
-        if let newDate = calendar.addMonths(value, to: currentDate) {
-            currentDate = newDate
-            updateCalendarDays()
-            Task {
-                await fetch()
-            }
-        }
+        let updatedDate = calendar.addMonths(value, to: currentDate)!
+        currentDate = updatedDate
+        updateCalendarDays()
+        Task { await fetch() }
     }
     
     func currentMonth() {
         currentDate = .now
         updateCalendarDays()
-        Task {
-            await fetch()
-        }
+        Task { await fetch() }
     }
 }
 
-extension TodosInMonthViewModel {
+extension CalendarWithTodoViewModel {
     private func updateCalendarDays() {
         let startOfMonth = calendar.startOfMonth(for: currentDate)
         let startDayInPreviousMonth = calendar.addDays(-calendar.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
@@ -106,8 +122,7 @@ extension TodosInMonthViewModel {
     }
 }
 
-extension TodosInMonthViewModel: TodoObserver {
-    // TODO: - 업데이트가 올바르게 이뤄지지 않은 경우가 발생
+extension CalendarWithTodoViewModel: TodoObserver {
     private func checkValidUpdate(for todo: Todo) -> Bool {
         let startOfMonth = calendar.startOfMonth(for: currentDate)
         let startDate = calendar.addDays(-calendar.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
