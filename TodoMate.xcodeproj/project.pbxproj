@@ -86,6 +86,7 @@
 
 /* Begin PBXFileReference section */
 		4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		4537EAE42C7DFEA10077A3B3 /* ExportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ExportOptions.plist; sourceTree = "<group>"; };
 		453D374D2C7C838C003835CE /* UTType+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+Extension.swift"; sourceTree = "<group>"; };
 		453D37502C7C8450003835CE /* TodoTransferData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoTransferData.swift; sourceTree = "<group>"; };
 		455430992C6C43B30003E41C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
@@ -316,6 +317,7 @@
 		45E10B862C69B77300FC31CD = {
 			isa = PBXGroup;
 			children = (
+				4537EAE42C7DFEA10077A3B3 /* ExportOptions.plist */,
 				45E10B912C69B77300FC31CD /* TodoMate */,
 				45ACB0082C6B3FED005F4B17 /* TodoMate.app */,
 				45CE6CA32C70CF960053835E /* TodoMatePreview.app */,
@@ -432,6 +434,7 @@
 				45E10B8B2C69B77300FC31CD /* Sources */,
 				45E10B8C2C69B77300FC31CD /* Frameworks */,
 				45E10B8D2C69B77300FC31CD /* Resources */,
+				451531552C7E0F73001D517A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -507,6 +510,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		451531552C7E0F73001D517A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\n# 파일 경로 설정\nPLIST_PATH=\"${PROJECT_DIR}/GoogleService-Info.plist\"\n\n# 파일이 존재하는지 확인\nif [ ! -f \"$PLIST_PATH\" ]; then\n  echo \"Creating GoogleService-Info.plist from environment variable\"\n  echo \"$GOOGLE_SERVICE_INFO\" > \"$PLIST_PATH\"\nelse\n  echo \"GoogleService-Info.plist already exists\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		45CE6C9F2C70CF960053835E /* Sources */ = {
