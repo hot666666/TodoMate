@@ -85,6 +85,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		451531582C7E1660001D517A /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
 		4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4537EAE42C7DFEA10077A3B3 /* ExportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ExportOptions.plist; sourceTree = "<group>"; };
 		453D374D2C7C838C003835CE /* UTType+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+Extension.swift"; sourceTree = "<group>"; };
@@ -166,6 +167,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		451531572C7E1648001D517A /* ci_scripts */ = {
+			isa = PBXGroup;
+			children = (
+				451531582C7E1660001D517A /* ci_pre_xcodebuild.sh */,
+			);
+			path = ci_scripts;
+			sourceTree = "<group>";
+		};
 		459AA3EF2C758ECF00CA43F2 /* CalendarWithTodo */ = {
 			isa = PBXGroup;
 			children = (
@@ -317,6 +326,7 @@
 		45E10B862C69B77300FC31CD = {
 			isa = PBXGroup;
 			children = (
+				451531572C7E1648001D517A /* ci_scripts */,
 				4537EAE42C7DFEA10077A3B3 /* ExportOptions.plist */,
 				45E10B912C69B77300FC31CD /* TodoMate */,
 				45ACB0082C6B3FED005F4B17 /* TodoMate.app */,
@@ -515,7 +525,7 @@
 		451531552C7E0F73001D517A /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			files = (
 			);
 			inputFileListPaths = (
@@ -526,9 +536,10 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\n# 파일 경로 설정\nPLIST_PATH=\"${PROJECT_DIR}/GoogleService-Info.plist\"\n\n# 파일이 존재하는지 확인\nif [ ! -f \"$PLIST_PATH\" ]; then\n  echo \"Creating GoogleService-Info.plist from environment variable\"\n  echo \"$GOOGLE_SERVICE_INFO\" > \"$PLIST_PATH\"\nelse\n  echo \"GoogleService-Info.plist already exists\"\nfi\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
