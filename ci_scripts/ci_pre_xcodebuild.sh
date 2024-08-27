@@ -1,9 +1,4 @@
 #!/bin/sh
-//  ci_pre_xcodebuild.sh
-//  TodoMate
-//
-//  Created by hs on 8/27/24.
-//
 
 # 파일 경로 설정
 PLIST_PATH="${PROJECT_DIR}/GoogleService-Info.plist"
