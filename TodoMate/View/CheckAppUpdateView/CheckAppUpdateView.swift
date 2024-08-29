@@ -26,6 +26,7 @@ struct CheckAppUpdateView: View {
                 Button(action: downloadLatestUpdate) {
                     Text("TodoMate \(latestVersion) 다운로드")
                         .disabled(isDownloading)
+                        .opacity(isDownloading ? 0.3 : 1)
                 }
             } else {
                 Button(action: checkForUpdate) {
