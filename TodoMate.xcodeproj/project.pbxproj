@@ -62,6 +62,7 @@
 		45CE6CBA2C7181DB0053835E /* FirestoreChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB92C7181DB0053835E /* FirestoreChatRepository.swift */; };
 		45CE6CBC2C71825B0053835E /* ChatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBB2C71825B0053835E /* ChatManager.swift */; };
 		45CE6CBE2C7190D40053835E /* ChatDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBD2C7190D20053835E /* ChatDTO.swift */; };
+		45D438F42C8028600012E9CD /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D438F32C80285B0012E9CD /* Util.swift */; };
 		45DF57B42C7AEE2400940AF7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DF57B32C7AEE2100940AF7 /* ContentView.swift */; };
 		45DF57B72C7AEE6900940AF7 /* TodoList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DF57B62C7AEE6400940AF7 /* TodoList.swift */; };
 		45DF57B92C7AF81000940AF7 /* StatusButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45DF57B82C7AF80C00940AF7 /* StatusButton.swift */; };
@@ -87,7 +88,6 @@
 /* Begin PBXFileReference section */
 		451531582C7E1660001D517A /* ci_pre_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_pre_xcodebuild.sh; sourceTree = "<group>"; };
 		4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		4537EAE42C7DFEA10077A3B3 /* ExportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = ExportOptions.plist; sourceTree = "<group>"; };
 		453D374D2C7C838C003835CE /* UTType+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+Extension.swift"; sourceTree = "<group>"; };
 		453D37502C7C8450003835CE /* TodoTransferData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoTransferData.swift; sourceTree = "<group>"; };
 		455430992C6C43B30003E41C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
@@ -131,6 +131,7 @@
 		45CE6CB92C7181DB0053835E /* FirestoreChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreChatRepository.swift; sourceTree = "<group>"; };
 		45CE6CBB2C71825B0053835E /* ChatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatManager.swift; sourceTree = "<group>"; };
 		45CE6CBD2C7190D20053835E /* ChatDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDTO.swift; sourceTree = "<group>"; };
+		45D438F32C80285B0012E9CD /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		45DF57B32C7AEE2100940AF7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		45DF57B62C7AEE6400940AF7 /* TodoList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoList.swift; sourceTree = "<group>"; };
 		45DF57B82C7AF80C00940AF7 /* StatusButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusButton.swift; sourceTree = "<group>"; };
@@ -327,7 +328,6 @@
 			isa = PBXGroup;
 			children = (
 				451531572C7E1648001D517A /* ci_scripts */,
-				4537EAE42C7DFEA10077A3B3 /* ExportOptions.plist */,
 				45E10B912C69B77300FC31CD /* TodoMate */,
 				45ACB0082C6B3FED005F4B17 /* TodoMate.app */,
 				45CE6CA32C70CF960053835E /* TodoMatePreview.app */,
@@ -343,6 +343,7 @@
 				4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */,
 				45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */,
 				45ACB00B2C6B65DE005F4B17 /* Const.swift */,
+				45D438F32C80285B0012E9CD /* Util.swift */,
 				455C9B952C6F8CB4004A1519 /* AppDelegate.swift */,
 				45E10B922C69B77300FC31CD /* TodoMateApp.swift */,
 				459AA3F62C75CA2000CA43F2 /* Dependency */,
@@ -616,6 +617,7 @@
 				459AA4012C75EEA300CA43F2 /* Debouncer.swift in Sources */,
 				459AA3FA2C75D7EA00CA43F2 /* Calendar+Extension.swift in Sources */,
 				457B43C92C6E0D140049334A /* User.swift in Sources */,
+				45D438F42C8028600012E9CD /* Util.swift in Sources */,
 				455C9B982C6F8DC2004A1519 /* Button+Extension.swift in Sources */,
 				45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */,
 				459AA3E92C743A3B00CA43F2 /* StubHelper.swift in Sources */,
