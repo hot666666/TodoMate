@@ -11,6 +11,7 @@ import SwiftUI
 struct ChatList: View {
     @Environment(ChatManager.self) private var chatManager: ChatManager
     @FocusState private var focusedId: String?
+    @State private var isUploadingImage: Bool = false
     
     var body: some View {
         ZStack {
@@ -36,6 +37,11 @@ struct ChatList: View {
                         Spacer()
                     }
                 }
+                .dropDestination(for: Data.self) { items, _ in
+                    guard let item = items.first, let uiImage = NSImage(data: item) else { return false }
+                    // TODO:- uploading image
+                    return true
+                }
                 .padding(5)
                 .padding(.horizontal, 5)
         }
@@ -60,6 +66,7 @@ extension ChatList {
 fileprivate struct ChatField: View {
     @Environment(ChatManager.self) private var chatManager: ChatManager
     @State private var debouncer = Debouncer(delay: 0.7)
+    @State private var showingPopover: Bool = false
     
     @State private var localContent: String  /// 실제 서버에 업데이트되기 전, 로컬의 입력상태
     var item: Chat
@@ -72,6 +79,44 @@ fileprivate struct ChatField: View {
     }
     
     var body: some View {
+        if item.isImage {
+            imageView
+        } else {
+            textView
+        }
+    }
+    
+    @ViewBuilder
+    var imageView: some View {
+        HStack {
+            AsyncImage(url: URL(string: item.content)){ image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .containerRelativeFrame(.horizontal) { size, axis in
+                        size * 0.3
+                    }
+                    .onLongPressGesture {
+                         showingPopover = true
+                     }
+                    // TODO: - CustomSheetModifier
+                    .popover(isPresented: $showingPopover) {
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 600, height: 600)
+                            .padding()
+                    }
+            } placeholder: {
+                ProgressView()
+                    .font(.caption2)
+            }
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    var textView: some View {
         TextEditor(text: $localContent)
             .textEditorStyle()
             .font(.system(size: 15))
