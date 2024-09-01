@@ -14,12 +14,14 @@ class Chat: Identifiable {
     var sign: String
     var date: Date
     var fid: String?
+    var isImage: Bool
     
-    init(content: String = "", sign: String = UUID().uuidString, date: Date = .now, fid: String? = nil) {
+    init(content: String = "", sign: String = UUID().uuidString, date: Date = .now, fid: String? = nil, isImage: Bool = false) {
         self.content = content
         self.sign = sign
         self.date = date
         self.fid = fid
+        self.isImage = isImage
     }
 }
 

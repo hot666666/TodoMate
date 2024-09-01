@@ -13,16 +13,17 @@ struct ChatDTO: Codable {
     var content: String
     var sign: String
     var date: Date
+    var isImage: Bool
 }
 
 extension ChatDTO {
     func toModel() -> Chat {
-        return Chat(content: self.content, sign: self.sign, date: self.date, fid: self.id!)
+        return Chat(content: self.content, sign: self.sign, date: self.date, fid: self.id!, isImage: self.isImage)
     }
 }
 
 extension Chat {
     func toDTO() -> ChatDTO {
-        return ChatDTO(id: self.fid, content: self.content, sign: self.sign, date: self.date)
+        return ChatDTO(id: self.fid, content: self.content, sign: self.sign, date: self.date, isImage: self.isImage)
     }
 }
