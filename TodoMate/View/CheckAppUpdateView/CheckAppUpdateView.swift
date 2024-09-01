@@ -41,14 +41,6 @@ struct CheckAppUpdateView: View {
             }
             
             Spacer()
-            
-            HStack {
-                Spacer()
-                Button(action: openDownloadsFolder) {
-                    Image(systemName: "folder.fill")
-                }
-                .hoverButtonStyle()
-            }
         }
         .frame(width: 300, height: 400)
         .padding()
