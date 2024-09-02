@@ -51,31 +51,15 @@ class StubImageUploadService: ImageUploadServiceType {
     }
 }
 
-// Statefull
-@Observable
-class StubUserManager: UserManagerType {
-    var users: [User] = []
-    
-    @MainActor
-    func fetch() async {
-        users = User.stub
+class StubChatService: ChatServiceType {
+    func fetch() async -> [Chat] {
+        Chat.stub
     }
     
-    func update(_ user: User) {
-        
-    }
-}
-
-class StubChatManager: ChatManagerType {
     var chats: [Chat] = []
     
     var formatCount: String {
         chats.count > 0 ? "(\(chats.count))" : ""
-    }
-    
-    @MainActor
-    func fetch() async {
-        chats = Chat.stub
     }
     
     func remove(_ chat: Chat) {
@@ -88,5 +72,31 @@ class StubChatManager: ChatManagerType {
     
     func create(with url: String?) {
 
+    }
+    
+    func observeChatChanges() -> AsyncStream<DatabaseChange<ChatDTO>> {
+        AsyncStream { continuation in
+            Task {
+                for chat in Chat.stub {
+                    continuation.yield(.added(chat.toDTO()))
+                }
+                continuation.finish()
+            }
+        }
+    }
+}
+
+// Statefull
+@Observable
+class StubUserManager: UserManagerType {
+    var users: [User] = []
+    
+    @MainActor
+    func fetch() async {
+        users = User.stub
+    }
+    
+    func update(_ user: User) {
+        
     }
 }
