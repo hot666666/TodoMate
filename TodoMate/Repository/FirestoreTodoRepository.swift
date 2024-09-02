@@ -43,8 +43,6 @@ extension FirestoreTodoRepository {
                             continuation.yield(.modified(todoDTO))
                         case .removed:
                             continuation.yield(.removed(todoDTO))
-                        @unknown default:
-                            break
                         }
                     }
                 }

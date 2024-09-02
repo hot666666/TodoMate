@@ -11,7 +11,6 @@ struct ContentView: View {
     @Environment(DIContainer.self) private var container: DIContainer
     @Environment(AppState.self) private var appState: AppState
     @State private var userManager: UserManager = .init()
-    @State private var chatManager: ChatManager = .init()
     
     var body: some View {
         ScrollView {
@@ -40,13 +39,9 @@ struct ContentView: View {
     
     @ViewBuilder
     private var chatSection: some View {
-        ExpandableView(title: "채팅\(chatManager.formatCount)", storageKey: "chatlist") {
-            ChatList()
+        ExpandableView(title: "채팅", storageKey: "chatlist") {
+            ChatList(viewModel: .init(container: container))
                 .padding(.horizontal, 5)
-                .environment(chatManager)
-        }
-        .task {
-            await chatManager.onAppear()
         }
     }
     

@@ -43,8 +43,6 @@ extension FirestoreChatRepository {
                             continuation.yield(.modified(chatDTO))
                         case .removed:
                             continuation.yield(.removed(chatDTO))
-                        @unknown default:
-                            break
                         }
                     }
                 }

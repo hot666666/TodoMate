@@ -1,5 +1,5 @@
 //
-//  ChatManager.swift
+//  ChatService.swift
 //  TodoMate
 //
 //  Created by hs on 8/18/24.
@@ -9,8 +9,7 @@ import Foundation
 import FirebaseFirestore
 
 @Observable
-class ChatManager: ChatManagerType {
-    var chats: [Chat] = []
+class ChatService: ChatServiceType {
     private let signature: String = Const.Signature
     
     private let chatRepository: ChatRepositoryType
@@ -19,60 +18,51 @@ class ChatManager: ChatManagerType {
     init(chatRepository: ChatRepositoryType = FirestoreChatRepository(reference: .shared)) {
         self.chatRepository = chatRepository
     }
-    
-    func onAppear() async {
-        await fetch()
-        setupRealtimeUpdates()
+ 
+    deinit {
+        cancelTask()
     }
     
-    deinit {
+    func cancelTask() {
         task?.cancel()
     }
-}
 
-extension ChatManager {
-    private func setupRealtimeUpdates() {
-        task = Task {
-            for await change in chatRepository.observeChatChanges() {
-                print("[Observed Chat change in FirebaseFirestore] - ", change)
-                await handleDatabaseChange(change)
+    func observeChatChanges() -> AsyncStream<DatabaseChange<Chat>> {
+        AsyncStream { continuation in
+            task = Task {
+                for await change in chatRepository.observeChatChanges() {
+                    let mappedChange = self.mapDatabaseChange(change)
+                    continuation.yield(mappedChange)
+                }
+                
+                continuation.onTermination = { @Sendable _ in
+                    self.task?.cancel()
+                }
             }
         }
     }
-    
-    @MainActor
-    private func handleDatabaseChange(_ change: DatabaseChange<ChatDTO>) {
+
+    private func mapDatabaseChange(_ change: DatabaseChange<ChatDTO>) -> DatabaseChange<Chat> {
         switch change {
         case .added(let chatDTO):
-            if !chats.contains(where: { $0.fid == chatDTO.id }) {
-                chats.append(chatDTO.toModel())
-            }
+            return .added(chatDTO.toModel())
         case .modified(let chatDTO):
-            /// Signature가 같다면, 내가 입력 중이던 요소라 업데이트가 따로 필요 없다
-            guard (chatDTO.sign != Const.Signature) else { return }
-            if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
-                chats[index] = chatDTO.toModel()
-            }
+            return .modified(chatDTO.toModel())
         case .removed(let chatDTO):
-            if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
-                chats.remove(at: index)
-            }
+            return .removed(chatDTO.toModel())
         }
     }
 }
 
-extension ChatManager {
-    var formatCount: String {
-        chats.count > 0 ? "(\(chats.count))" : ""
-    }
-    
+extension ChatService {
     @MainActor
-    func fetch() async {
+    func fetch() async -> [Chat] {
         print("[Fetching Chat] -")
         do {
-            chats = try await chatRepository.fetchChats().map { $0.toModel() }
+            return try await chatRepository.fetchChats().map { $0.toModel() }
         } catch {
             print("Error fetching chats: \(error)")
+            return []
         }
     }
     
@@ -98,8 +88,12 @@ extension ChatManager {
         }
     }
     
-    func create() {
+    func create(with url: String? = nil) {
         let chat: Chat = .init()
+        if let url = url {
+            chat.content = url
+            chat.isImage = true
+        }
         print("[Creating Chat - \(chat)]")
         Task {
             do {

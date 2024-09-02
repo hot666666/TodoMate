@@ -43,8 +43,51 @@ class StubTodoRealtimeService: TodoRealtimeServiceType {
     func removeObserver(_ observer: TodoObserver,for userId: String) {
         
     }
+}
+
+class StubImageUploadService: ImageUploadServiceType {
+    func upload(data: Data) async -> String {
+        ""
+    }
+}
+
+class StubChatService: ChatServiceType {
+    func fetch() async -> [Chat] {
+        Chat.stub
+    }
     
+    var chats: [Chat] = []
     
+    var formatCount: String {
+        chats.count > 0 ? "(\(chats.count))" : ""
+    }
+    
+    func remove(_ chat: Chat) {
+
+    }
+    
+    func update(_ chat: Chat) {
+
+    }
+    
+    func create(with url: String?) {
+
+    }
+    
+    func observeChatChanges() -> AsyncStream<DatabaseChange<Chat>> {
+        AsyncStream { continuation in
+            Task {
+                for chat in Chat.stub {
+                    continuation.yield(.added(chat))
+                }
+                continuation.finish()
+            }
+        }
+    }
+    
+    func cancelTask() {
+        
+    }
 }
 
 // Statefull
@@ -59,30 +102,5 @@ class StubUserManager: UserManagerType {
     
     func update(_ user: User) {
         
-    }
-}
-
-class StubChatManager: ChatManagerType {
-    var chats: [Chat] = []
-    
-    var formatCount: String {
-        chats.count > 0 ? "(\(chats.count))" : ""
-    }
-    
-    @MainActor
-    func fetch() async {
-        chats = Chat.stub
-    }
-    
-    func remove(_ chat: Chat) {
-
-    }
-    
-    func update(_ chat: Chat) {
-
-    }
-    
-    func create() {
-
     }
 }
