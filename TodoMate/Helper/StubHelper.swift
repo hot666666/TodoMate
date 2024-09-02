@@ -74,15 +74,19 @@ class StubChatService: ChatServiceType {
 
     }
     
-    func observeChatChanges() -> AsyncStream<DatabaseChange<ChatDTO>> {
+    func observeChatChanges() -> AsyncStream<DatabaseChange<Chat>> {
         AsyncStream { continuation in
             Task {
                 for chat in Chat.stub {
-                    continuation.yield(.added(chat.toDTO()))
+                    continuation.yield(.added(chat))
                 }
                 continuation.finish()
             }
         }
+    }
+    
+    func cancelTask() {
+        
     }
 }
 
