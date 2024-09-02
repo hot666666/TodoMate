@@ -43,8 +43,12 @@ class StubTodoRealtimeService: TodoRealtimeServiceType {
     func removeObserver(_ observer: TodoObserver,for userId: String) {
         
     }
-    
-    
+}
+
+class StubImageUploadService: ImageUploadServiceType {
+    func upload(data: Data) async -> String {
+        ""
+    }
 }
 
 // Statefull
@@ -82,7 +86,7 @@ class StubChatManager: ChatManagerType {
 
     }
     
-    func create() {
+    func create(with url: String?) {
 
     }
 }

@@ -27,6 +27,10 @@ protocol TodoServiceType {
     func remove(_ todo: Todo)
 }
 
+protocol ImageUploadServiceType {
+    func upload(data: Data) async -> String
+}
+
 // Stateful
 protocol UserManagerType {
     var users: [User] { get }
@@ -43,5 +47,5 @@ protocol ChatManagerType {
     func fetch() async
     func remove(_ chat: Chat)
     func update(_ chat: Chat)
-    func create()
+    func create(with url: String?)
 }
