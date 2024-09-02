@@ -28,7 +28,7 @@ protocol TodoServiceType {
 }
 
 protocol ImageUploadServiceType {
-    func upload(data: Data) async -> String
+    func upload(data: Data) async -> String  /// URL
 }
 
 protocol ChatServiceType {
@@ -36,7 +36,8 @@ protocol ChatServiceType {
     func remove(_ chat: Chat)
     func update(_ chat: Chat)
     func create(with url: String?)
-    func observeChatChanges() -> AsyncStream<DatabaseChange<ChatDTO>>
+    func observeChatChanges() -> AsyncStream<DatabaseChange<Chat>>
+    func cancelTask()
 }
 
 // Stateful
