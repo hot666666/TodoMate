@@ -9,14 +9,17 @@ import Foundation
 
 @Observable
 class DIContainer {
+    var chatService: ChatServiceType
     var todoService: TodoServiceType
     var todoRealtimeService: TodoRealtimeServiceType
     var imageUploadService: ImageUploadServiceType
     
-    init(todoService: TodoServiceType,
+    init(chatService: ChatServiceType,
+         todoService: TodoServiceType,
          todoRealtimeService: TodoRealtimeServiceType,
          imageUploadService: ImageUploadServiceType
     ) {
+        self.chatService = chatService
         self.todoService = todoService
         self.todoRealtimeService = todoRealtimeService
         self.imageUploadService = imageUploadService
@@ -26,7 +29,8 @@ class DIContainer {
 
 extension DIContainer {
     static var stub: DIContainer {
-        .init(todoService: StubTodoService(), 
+        .init(chatService: StubChatService(),
+              todoService: StubTodoService(),
               todoRealtimeService: StubTodoRealtimeService(),
               imageUploadService: StubImageUploadService()
         )
