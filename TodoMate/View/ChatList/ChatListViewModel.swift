@@ -1,5 +1,5 @@
 //
-//  ChatServiceViewModel.swift
+//  ChatListViewModel.swift
 //  TodoMate
 //
 //  Created by hs on 9/2/24.
@@ -19,15 +19,15 @@ class ChatListViewModel {
     
     init(container: DIContainer) {
         self.container = container
-    }
-    
-    func onAppear() async {
-        await fetch()
-        setupRealtimeUpdates()
+        Task {
+            await fetch()
+            setupRealtimeUpdates()
+        }
     }
     
     deinit {
         task?.cancel()
+        container.chatService.cancelTask()
     }
     
     private func setupRealtimeUpdates() {
@@ -40,17 +40,17 @@ class ChatListViewModel {
     }
     
     @MainActor
-    private func handleDatabaseChange(_ change: DatabaseChange<ChatDTO>) {
+    private func handleDatabaseChange(_ change: DatabaseChange<Chat>) {
         switch change {
         case .added(let chatDTO):
             if !chats.contains(where: { $0.fid == chatDTO.id }) {
-                chats.append(chatDTO.toModel())
+                chats.append(chatDTO)
             }
         case .modified(let chatDTO):
             /// Signature가 같다면, 내가 입력 중이던 요소라 업데이트가 따로 필요 없다
             guard (chatDTO.sign != Const.Signature) else { return }
             if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
-                chats[index] = chatDTO.toModel()
+                chats[index] = chatDTO
             }
         case .removed(let chatDTO):
             if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
