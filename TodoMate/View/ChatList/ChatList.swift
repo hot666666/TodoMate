@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
+import AppKit
 
-// MARK: - ChatList
 struct ChatList: View {
-    @Environment(ChatManager.self) private var chatManager: ChatManager
+    @State var viewModel: ChatListViewModel
     @FocusState private var focusedId: String?
-    @State private var isUploadingImage: Bool = false
     
     var body: some View {
         ZStack {
@@ -20,11 +19,11 @@ struct ChatList: View {
                 .onTapGesture { clearFocus() }
             
                 VStack(spacing: 10) {
-                    ForEach(chatManager.chats) { chat in
-                        ChatField(item: chat, focusedId: $focusedId)
+                    ForEach(viewModel.chats) { chat in
+                        ChatItem(viewModel: viewModel, item: chat, focusedId: $focusedId)
                             .contextMenu {
                                 Button(role: .destructive) {
-                                    chatManager.remove(chat)
+                                    viewModel.remove(chat)
                                 } label: {
                                     Text(Image(systemName: "trash"))+Text(" 삭제")
                                 }
@@ -37,19 +36,33 @@ struct ChatList: View {
                         Spacer()
                     }
                 }
-                .dropDestination(for: Data.self) { items, _ in
-                    guard let item = items.first, let uiImage = NSImage(data: item) else { return false }
-                    // TODO:- uploading image
-                    return true
-                }
+                .background(viewModel.isTargeted ? Color.blue.opacity(0.3) : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 3)
+                                .stroke(viewModel.isTargeted ? Color.blue : Color.clear, lineWidth: 2)
+                        )
+                .dropDestination(for: Data.self) { droppedItems, _ in
+                    viewModel.uploadImage(data: droppedItems.first)
+                } isTargeted: { viewModel.setIsTargeted($0) }
                 .padding(5)
                 .padding(.horizontal, 5)
+            
+            if viewModel.isUploadingImage {
+                Color.gray.opacity(0.2)
+                ProgressView()
+            }
         }
+        .task {
+            await viewModel.onAppear()
+        }
+        
     }
     
     @ViewBuilder
     private var addButton: some View {
-        Button(action: chatManager.create) {
+        Button(action: {
+            viewModel.create()
+        }) {
             Image(systemName: "plus")
         }
         .hoverButtonStyle()
@@ -59,82 +72,5 @@ struct ChatList: View {
 extension ChatList {
     private func clearFocus() {
         focusedId = nil
-    }
-}
-
-// MARK: - ChatView
-fileprivate struct ChatField: View {
-    @Environment(ChatManager.self) private var chatManager: ChatManager
-    @State private var debouncer = Debouncer(delay: 0.7)
-    @State private var showingPopover: Bool = false
-    
-    @State private var localContent: String  /// 실제 서버에 업데이트되기 전, 로컬의 입력상태
-    var item: Chat
-    @FocusState.Binding var focusedId: String?
-    
-    init(item: Chat, focusedId: FocusState<String?>.Binding) {
-        self.item = item
-        self._focusedId = focusedId
-        self._localContent = State(initialValue: item.content)
-    }
-    
-    var body: some View {
-        if item.isImage {
-            imageView
-        } else {
-            textView
-        }
-    }
-    
-    @ViewBuilder
-    var imageView: some View {
-        HStack {
-            AsyncImage(url: URL(string: item.content)){ image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .containerRelativeFrame(.horizontal) { size, axis in
-                        size * 0.3
-                    }
-                    .onLongPressGesture {
-                         showingPopover = true
-                     }
-                    // TODO: - CustomSheetModifier
-                    .popover(isPresented: $showingPopover) {
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 600, height: 600)
-                            .padding()
-                    }
-            } placeholder: {
-                ProgressView()
-                    .font(.caption2)
-            }
-            Spacer()
-        }
-    }
-    
-    @ViewBuilder
-    var textView: some View {
-        TextEditor(text: $localContent)
-            .textEditorStyle()
-            .font(.system(size: 15))
-            .focused($focusedId, equals: item.id)
-            .shadow(radius: focusedId == item.id ? 5 : 0)
-            .onTapGesture { focusedId = item.id }
-            .onChange(of: localContent) { oldValue, newValue in
-                debouncer.debounce {
-                    if newValue.isEmpty {
-                        chatManager.remove(item)
-                        return
-                    }
-                    print("[Updating Chat - \(newValue)]")
-                    let updatedChat = item
-                    updatedChat.content = newValue
-                    updatedChat.sign = Const.Signature  /// 동일 사용자인지 구분하여, 같다면 focused가 풀리지 않음
-                    chatManager.update(updatedChat)
-                }
-            }
     }
 }
