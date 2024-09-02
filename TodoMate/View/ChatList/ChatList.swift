@@ -52,10 +52,6 @@ struct ChatList: View {
                 ProgressView()
             }
         }
-        .task {
-            await viewModel.onAppear()
-        }
-        
     }
     
     @ViewBuilder

@@ -11,7 +11,7 @@
 		45322B4A2C8449550097D530 /* UploadProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B492C8449520097D530 /* UploadProvider.swift */; };
 		45322B4C2C845F650097D530 /* ImageUploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4B2C845F650097D530 /* ImageUploadService.swift */; };
 		45322B4E2C84624B0097D530 /* ChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4D2C8462490097D530 /* ChatItem.swift */; };
-		45322B502C858B930097D530 /* ChatServiceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4F2C858B8F0097D530 /* ChatServiceViewModel.swift */; };
+		45322B502C858B930097D530 /* ChatListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4F2C858B8F0097D530 /* ChatListViewModel.swift */; };
 		453D374E2C7C8390003835CE /* UTType+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D374D2C7C838C003835CE /* UTType+Extension.swift */; };
 		453D374F2C7C8390003835CE /* UTType+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D374D2C7C838C003835CE /* UTType+Extension.swift */; };
 		453D37512C7C8451003835CE /* TodoTransferData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D37502C7C8450003835CE /* TodoTransferData.swift */; };
@@ -95,7 +95,7 @@
 		45322B492C8449520097D530 /* UploadProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadProvider.swift; sourceTree = "<group>"; };
 		45322B4B2C845F650097D530 /* ImageUploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageUploadService.swift; sourceTree = "<group>"; };
 		45322B4D2C8462490097D530 /* ChatItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatItem.swift; sourceTree = "<group>"; };
-		45322B4F2C858B8F0097D530 /* ChatServiceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatServiceViewModel.swift; sourceTree = "<group>"; };
+		45322B4F2C858B8F0097D530 /* ChatListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListViewModel.swift; sourceTree = "<group>"; };
 		453D374D2C7C838C003835CE /* UTType+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+Extension.swift"; sourceTree = "<group>"; };
 		453D37502C7C8450003835CE /* TodoTransferData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoTransferData.swift; sourceTree = "<group>"; };
 		455430992C6C43B30003E41C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
@@ -222,6 +222,7 @@
 			isa = PBXGroup;
 			children = (
 				459AA3F22C7593E800CA43F2 /* TodoService.swift */,
+				45CE6CBB2C71825B0053835E /* ChatService.swift */,
 				457B43C12C6DFA5B0049334A /* TodoRealtimeService.swift */,
 				45322B4B2C845F650097D530 /* ImageUploadService.swift */,
 			);
@@ -308,11 +309,10 @@
 		45CE6CB62C7179270053835E /* ChatList */ = {
 			isa = PBXGroup;
 			children = (
-				459AA4002C75EE9E00CA43F2 /* Debouncer.swift */,
-				45322B4F2C858B8F0097D530 /* ChatServiceViewModel.swift */,
-				45CE6CBB2C71825B0053835E /* ChatService.swift */,
+				45322B4F2C858B8F0097D530 /* ChatListViewModel.swift */,
 				45CE6CB72C7179350053835E /* ChatList.swift */,
 				45322B4D2C8462490097D530 /* ChatItem.swift */,
+				459AA4002C75EE9E00CA43F2 /* Debouncer.swift */,
 			);
 			path = ChatList;
 			sourceTree = "<group>";
@@ -640,7 +640,7 @@
 				45322B4A2C8449550097D530 /* UploadProvider.swift in Sources */,
 				459AA3FA2C75D7EA00CA43F2 /* Calendar+Extension.swift in Sources */,
 				457B43C92C6E0D140049334A /* User.swift in Sources */,
-				45322B502C858B930097D530 /* ChatServiceViewModel.swift in Sources */,
+				45322B502C858B930097D530 /* ChatListViewModel.swift in Sources */,
 				45D438F42C8028600012E9CD /* Util.swift in Sources */,
 				455C9B982C6F8DC2004A1519 /* Button+Extension.swift in Sources */,
 				45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */,
