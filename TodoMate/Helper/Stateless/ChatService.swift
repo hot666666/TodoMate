@@ -20,20 +20,36 @@ class ChatService: ChatServiceType {
     }
  
     deinit {
+        cancelTask()
+    }
+    
+    func cancelTask() {
         task?.cancel()
     }
 
-    func observeChatChanges() -> AsyncStream<DatabaseChange<ChatDTO>> {
+    func observeChatChanges() -> AsyncStream<DatabaseChange<Chat>> {
         AsyncStream { continuation in
             task = Task {
                 for await change in chatRepository.observeChatChanges() {
-                    continuation.yield(change)
+                    let mappedChange = self.mapDatabaseChange(change)
+                    continuation.yield(mappedChange)
                 }
                 
                 continuation.onTermination = { @Sendable _ in
                     self.task?.cancel()
                 }
             }
+        }
+    }
+
+    private func mapDatabaseChange(_ change: DatabaseChange<ChatDTO>) -> DatabaseChange<Chat> {
+        switch change {
+        case .added(let chatDTO):
+            return .added(chatDTO.toModel())
+        case .modified(let chatDTO):
+            return .modified(chatDTO.toModel())
+        case .removed(let chatDTO):
+            return .removed(chatDTO.toModel())
         }
     }
 }
