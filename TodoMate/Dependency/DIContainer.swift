@@ -11,17 +11,24 @@ import Foundation
 class DIContainer {
     var todoService: TodoServiceType
     var todoRealtimeService: TodoRealtimeServiceType
+    var imageUploadService: ImageUploadServiceType
     
     init(todoService: TodoServiceType,
-         todoRealtimeService: TodoRealtimeServiceType) {
+         todoRealtimeService: TodoRealtimeServiceType,
+         imageUploadService: ImageUploadServiceType
+    ) {
         self.todoService = todoService
         self.todoRealtimeService = todoRealtimeService
+        self.imageUploadService = imageUploadService
     }
 }
 
 
 extension DIContainer {
     static var stub: DIContainer {
-        .init(todoService: StubTodoService(), todoRealtimeService: StubTodoRealtimeService())
+        .init(todoService: StubTodoService(), 
+              todoRealtimeService: StubTodoRealtimeService(),
+              imageUploadService: StubImageUploadService()
+        )
     }
 }
