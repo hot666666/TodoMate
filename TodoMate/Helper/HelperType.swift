@@ -31,6 +31,14 @@ protocol ImageUploadServiceType {
     func upload(data: Data) async -> String
 }
 
+protocol ChatServiceType {
+    func fetch() async -> [Chat]
+    func remove(_ chat: Chat)
+    func update(_ chat: Chat)
+    func create(with url: String?)
+    func observeChatChanges() -> AsyncStream<DatabaseChange<ChatDTO>>
+}
+
 // Stateful
 protocol UserManagerType {
     var users: [User] { get }
@@ -39,13 +47,4 @@ protocol UserManagerType {
     // TODO: - 추가기능
     ///    func create(_ user: Todo) async
     ///    func remove(_ todo: Todo)
-}
-
-protocol ChatManagerType {
-    var chats: [Chat] { get set }
-    var formatCount: String { get }
-    func fetch() async
-    func remove(_ chat: Chat)
-    func update(_ chat: Chat)
-    func create(with url: String?)
 }
