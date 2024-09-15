@@ -42,18 +42,18 @@ class ChatListViewModel {
     @MainActor
     private func handleDatabaseChange(_ change: DatabaseChange<Chat>) {
         switch change {
-        case .added(let chatDTO):
-            if !chats.contains(where: { $0.fid == chatDTO.id }) {
-                chats.append(chatDTO)
+        case .added(let chat):
+            if !chats.contains(where: { $0.fid == chat.fid }) {
+                chats.append(chat)
             }
-        case .modified(let chatDTO):
+        case .modified(let chat):
             /// Signature가 같다면, 내가 입력 중이던 요소라 업데이트가 따로 필요 없다
-            guard (chatDTO.sign != Const.Signature) else { return }
-            if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
-                chats[index] = chatDTO
+            guard (chat.sign != Const.Signature) else { return }
+            if let index = chats.firstIndex(where: { $0.fid == chat.fid }) {
+                chats[index] = chat
             }
-        case .removed(let chatDTO):
-            if let index = chats.firstIndex(where: { $0.fid == chatDTO.id }) {
+        case .removed(let chat):
+            if let index = chats.firstIndex(where: { $0.fid == chat.fid }) {
                 chats.remove(at: index)
             }
         }
