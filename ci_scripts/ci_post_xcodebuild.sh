@@ -1,8 +1,7 @@
 #!/bin/sh
 
-# 변수 설정
-APP_NAME="TodoMate"
-VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "${CI_PRIMARY_REPOSITORY_PATH}/${APP_NAME}/Info.plist")
+APP_NAME="${CI_PRODUCT_NAME}"
+VERSION="${CI_BUILD_SHORT_VERSION_STRING}"
 ARTIFACT_PATH="${CI_AD_HOC_SIGNED_APP_PATH}"
 ZIP_NAME="${APP_NAME} ${VERSION}.zip"
 
