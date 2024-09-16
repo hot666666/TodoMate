@@ -2,7 +2,7 @@
 
 # 변수 설정
 APP_NAME="${CI_PRODUCT}"
-DEVELOPER_ID_SIGNED_APP_PATH="${CI_DEVELOPER_ID_SIGNED_APP_PATH}"
+DEVELOPER_ID_SIGNED_APP_PATH="${CI_DEVELOPER_ID_SIGNED_APP_PATH}/Volumes/workspace/developeridexport/${APP_NAME}"
 VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleShortVersionString)
 ZIP_NAME="${APP_NAME} ${VERSION}.zip"
 
