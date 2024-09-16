@@ -1,27 +1,27 @@
 #!/bin/sh
 
 # 변수 설정
-APP_NAME="${CI_PRODUCT_NAME}"
-VERSION="${CI_BUILD_SHORT_VERSION_STRING}"
-DEVELOPER_ID_APP_PATH="${CI_DEVELOPER_ID_APP_PATH}"
+APP_NAME="${CI_PRODUCT}"
+DEVELOPER_ID_SIGNED_APP_PATH="${CI_DEVELOPER_ID_SIGNED_APP_PATH}"
+VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleShortVersionString)
 ZIP_NAME="${APP_NAME} ${VERSION}.zip"
 
 # 환경변수에서 업로드 URL 가져오기
 UPLOAD_URL="${UPLOAD_SERVER_URL}"
 
 # Developer ID로 서명된 .app 파일 확인
-if [ ! -d "${DEVELOPER_ID_APP_PATH}" ]; then
-    echo "Error: Developer ID signed .app directory not found at ${DEVELOPER_ID_APP_PATH}"
+if [ ! -d "${DEVELOPER_ID_SIGNED_APP_PATH}" ]; then
+    echo "Error: Developer ID signed .app directory not found at ${DEVELOPER_ID_SIGNED_APP_PATH}"
     exit 1
 fi
 
-echo "Found signed .app at: ${DEVELOPER_ID_APP_PATH}"
+echo "Found signed .app at: ${DEVELOPER_ID_SIGNED_APP_PATH}"
 
 # 현재 디렉토리로 이동 (작업 디렉토리 확보)
 cd "${CI_WORKSPACE}"
 
 # 압축 파일 생성
-zip -r "${ZIP_NAME}" "${DEVELOPER_ID_APP_PATH}"
+zip -r "${ZIP_NAME}" "${DEVELOPER_ID_SIGNED_APP_PATH}"
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create zip file"
