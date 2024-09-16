@@ -21,7 +21,7 @@ echo "Found signed .app at: ${DEVELOPER_ID_SIGNED_APP_PATH}"
 cd "${CI_WORKSPACE}"
 
 # 압축 파일 생성
-zip -r "${ZIP_NAME}" "${DEVELOPER_ID_SIGNED_APP_PATH}"
+ditto -c -k --sequesterRsrc --keepParent "${DEVELOPER_ID_SIGNED_APP_PATH}" "${ZIP_NAME}"
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to create zip file"
