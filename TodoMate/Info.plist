@@ -4,7 +4,7 @@
 <dict>
 	<key>NSDownloadsFolderUsageDescription</key>
 	<string>This app needs access to your Downloads folder to save and run updates.</string>
-	<key>CFBundleIconName</key>
+	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
