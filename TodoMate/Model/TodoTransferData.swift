@@ -15,3 +15,11 @@ struct TodoTransferData: Codable, Transferable {
         CodableRepresentation(contentType: .todo)
     }
 }
+
+extension Todo: Transferable {
+    static var transferRepresentation: some TransferRepresentation {
+        ProxyRepresentation(exporting: { todo in
+            TodoTransferData(id: todo.id, date: todo.date)
+        })
+    }
+}

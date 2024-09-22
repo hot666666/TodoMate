@@ -80,15 +80,6 @@ extension Todo: Equatable {
     }
 }
 
-extension Todo: Transferable {
-    static var transferRepresentation: some TransferRepresentation {
-        ProxyRepresentation(exporting: { todo in
-            TodoTransferData(id: todo.id, date: todo.date)
-        })
-    }
-}
-
-
 extension Todo {
     static var stub: [Todo] {
         [.init(date: .now, content: "할일1", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
@@ -96,5 +87,13 @@ extension Todo {
          .init(date: .now, content: "할일3", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
          .init(date: .now, content: "할일4", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
          .init(date: .now, content: "할일5", detail: "할일입니다", status: .todo, fid: UUID().uuidString)]
+    }
+    
+    static var widgetStub: [Todo] {
+        [.init(date: .now, content: "할일1", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
+         .init(date: .now, content: "할일2", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
+         .init(date: .now, content: "할일3", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
+         .init(date: .now, content: "할일4", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
+         .init(date: .now, content: "할일5", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString)]
     }
 }
