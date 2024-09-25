@@ -27,6 +27,8 @@
 		457B43CB2C6E18FB0049334A /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CA2C6E18F60049334A /* UserManager.swift */; };
 		457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		459325312CA0F1F000A95193 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 459325302CA0F1F000A95193 /* Assets.xcassets */; };
+		459325342CA3A4CD00A95193 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 459325332CA3A4CD00A95193 /* Sparkle */; };
+		459325362CA3A93C00A95193 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 459325352CA3A93C00A95193 /* Config.xcconfig */; };
 		459AA3E92C743A3B00CA43F2 /* StubHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3E82C743A3600CA43F2 /* StubHelper.swift */; };
 		459AA3EE2C74489700CA43F2 /* CalendarWithTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3ED2C74489100CA43F2 /* CalendarWithTodo.swift */; };
 		459AA3F12C758EE300CA43F2 /* CalendarWithTodoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F02C758EE100CA43F2 /* CalendarWithTodoViewModel.swift */; };
@@ -119,6 +121,7 @@
 		457B43CA2C6E18F60049334A /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		457B43CC2C6F3D9C0049334A /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		459325302CA0F1F000A95193 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		459325352CA3A93C00A95193 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		459337712C97CE040037C092 /* ci_post_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_xcodebuild.sh; sourceTree = "<group>"; };
 		459AA3E82C743A3600CA43F2 /* StubHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubHelper.swift; sourceTree = "<group>"; };
 		459AA3ED2C74489100CA43F2 /* CalendarWithTodo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarWithTodo.swift; sourceTree = "<group>"; };
@@ -172,6 +175,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				459325342CA3A4CD00A95193 /* Sparkle in Frameworks */,
 				4565A62B2C6F6AF400E0D529 /* FirebaseFirestore in Frameworks */,
 				459AA4342C78D1DB00CA43F2 /* FirebaseStorage in Frameworks */,
 			);
@@ -337,6 +341,7 @@
 			isa = PBXGroup;
 			children = (
 				459AA4362C795D4700CA43F2 /* Info.plist */,
+				459325352CA3A93C00A95193 /* Config.xcconfig */,
 				4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */,
 				45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */,
 				45ACB00B2C6B65DE005F4B17 /* Const.swift */,
@@ -451,6 +456,7 @@
 			packageProductDependencies = (
 				4565A62A2C6F6AF400E0D529 /* FirebaseFirestore */,
 				459AA4332C78D1DB00CA43F2 /* FirebaseStorage */,
+				459325332CA3A4CD00A95193 /* Sparkle */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -501,6 +507,7 @@
 			mainGroup = 45E10B862C69B77300FC31CD;
 			packageReferences = (
 				4565A6292C6F6AF400E0D529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				459325322CA2D1B600A95193 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 73;
 			productRefGroup = 45E10B862C69B77300FC31CD;
@@ -519,6 +526,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				459325312CA0F1F000A95193 /* Assets.xcassets in Resources */,
+				459325362CA3A93C00A95193 /* Config.xcconfig in Resources */,
 				452304202C6DD2DF0026C24B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -762,7 +770,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -800,7 +808,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -833,7 +841,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
@@ -862,7 +870,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
@@ -912,6 +920,14 @@
 				minimumVersion = 11.2.0;
 			};
 		};
+		459325322CA2D1B600A95193 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -919,6 +935,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4565A6292C6F6AF400E0D529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		459325332CA3A4CD00A95193 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 459325322CA2D1B600A95193 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 		459AA4332C78D1DB00CA43F2 /* FirebaseStorage */ = {
 			isa = XCSwiftPackageProductDependency;

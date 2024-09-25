@@ -7,17 +7,23 @@
 
 import SwiftUI
 import Cocoa
+import Sparkle
 
-class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
-    var statusItem: NSStatusItem?
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
+    var updater: SPUUpdater?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        /// Sparkle 업데이트 관리
+        let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
+        updater = updaterController.updater
+        
+        /// 업데이트를 자동으로 확인
+        updater?.checkForUpdatesInBackground()
         
         if let window = NSApplication.shared.windows.first {
             window.delegate = self
         }
         
-        setupMenuBar()
     }
     
     func windowWillClose(_ notification: Notification) {
@@ -27,21 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 }
 
 extension AppDelegate {
-    private func setupMenuBar() {
-        if let mainMenu = NSApplication.shared.mainMenu {
-            let updateMenuItem = NSMenuItem(title: "업데이트 확인", action: #selector(openCheckAppUpdateView), keyEquivalent: "u")
-            if let appMenu = mainMenu.items.first?.submenu {
-                appMenu.addItem(updateMenuItem)
-            }
-        }
-    }
-    
-    @objc func openCheckAppUpdateView() {
-        let checkAppUpdateView = CheckAppUpdateView()
-        let hostingController = NSHostingController(rootView: checkAppUpdateView)
-        
-        let window = NSWindow(contentViewController: hostingController)
-        window.title = "업데이트 확인"
-        window.makeKeyAndOrderFront(nil)
+    func checkForUpdates() {
+        updater?.checkForUpdates()
     }
 }
