@@ -9,28 +9,30 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
 		<key>Promises (Playground) 2.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>4</integer>
+			<integer>3</integer>
 		</dict>
 		<key>Promises (Playground).xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>3</integer>
 		</dict>
 		<key>TodoMate.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<true/>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>TodoMatePreview.xcscheme_^#shared#^_</key>
+		<key>WidgetExtension.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
@@ -38,7 +40,22 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>4533EB892C9D5FB40058761F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>45CE6CA22C70CF960053835E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>45E10B8E2C69B77300FC31CD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>45FE7A0E2C9FF202009994B2</key>
 		<dict>
 			<key>primary</key>
 			<true/>
