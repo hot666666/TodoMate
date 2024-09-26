@@ -14,6 +14,7 @@
 		45322B502C858B930097D530 /* ChatListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4F2C858B8F0097D530 /* ChatListViewModel.swift */; };
 		453D374F2C7C8390003835CE /* UTType+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D374D2C7C838C003835CE /* UTType+Extension.swift */; };
 		453D37512C7C8451003835CE /* TodoTransferData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D37502C7C8450003835CE /* TodoTransferData.swift */; };
+		45483D192CA3CDDF00BB4537 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 45483D182CA3CDDF00BB4537 /* Config.xcconfig */; };
 		4554309A2C6C43B70003E41C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455430992C6C43B30003E41C /* CalendarView.swift */; };
 		455C9B962C6F8CBA004A1519 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B952C6F8CB4004A1519 /* AppDelegate.swift */; };
 		455C9B982C6F8DC2004A1519 /* Button+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B972C6F8DBC004A1519 /* Button+Extension.swift */; };
@@ -28,7 +29,6 @@
 		457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		459325312CA0F1F000A95193 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 459325302CA0F1F000A95193 /* Assets.xcassets */; };
 		459325342CA3A4CD00A95193 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 459325332CA3A4CD00A95193 /* Sparkle */; };
-		459325362CA3A93C00A95193 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 459325352CA3A93C00A95193 /* Config.xcconfig */; };
 		459AA3E92C743A3B00CA43F2 /* StubHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3E82C743A3600CA43F2 /* StubHelper.swift */; };
 		459AA3EE2C74489700CA43F2 /* CalendarWithTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3ED2C74489100CA43F2 /* CalendarWithTodo.swift */; };
 		459AA3F12C758EE300CA43F2 /* CalendarWithTodoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F02C758EE100CA43F2 /* CalendarWithTodoViewModel.swift */; };
@@ -109,6 +109,7 @@
 		45322B4F2C858B8F0097D530 /* ChatListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListViewModel.swift; sourceTree = "<group>"; };
 		453D374D2C7C838C003835CE /* UTType+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+Extension.swift"; sourceTree = "<group>"; };
 		453D37502C7C8450003835CE /* TodoTransferData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoTransferData.swift; sourceTree = "<group>"; };
+		45483D182CA3CDDF00BB4537 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		455430992C6C43B30003E41C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		455C9B952C6F8CB4004A1519 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		455C9B972C6F8DBC004A1519 /* Button+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Button+Extension.swift"; sourceTree = "<group>"; };
@@ -121,7 +122,6 @@
 		457B43CA2C6E18F60049334A /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		457B43CC2C6F3D9C0049334A /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
 		459325302CA0F1F000A95193 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		459325352CA3A93C00A95193 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		459337712C97CE040037C092 /* ci_post_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_xcodebuild.sh; sourceTree = "<group>"; };
 		459AA3E82C743A3600CA43F2 /* StubHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubHelper.swift; sourceTree = "<group>"; };
 		459AA3ED2C74489100CA43F2 /* CalendarWithTodo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarWithTodo.swift; sourceTree = "<group>"; };
@@ -341,9 +341,9 @@
 			isa = PBXGroup;
 			children = (
 				459AA4362C795D4700CA43F2 /* Info.plist */,
-				459325352CA3A93C00A95193 /* Config.xcconfig */,
 				4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */,
 				45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */,
+				45483D182CA3CDDF00BB4537 /* Config.xcconfig */,
 				45ACB00B2C6B65DE005F4B17 /* Const.swift */,
 				45D438F32C80285B0012E9CD /* Util.swift */,
 				455C9B952C6F8CB4004A1519 /* AppDelegate.swift */,
@@ -526,7 +526,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				459325312CA0F1F000A95193 /* Assets.xcassets in Resources */,
-				459325362CA3A93C00A95193 /* Config.xcconfig in Resources */,
+				45483D192CA3CDDF00BB4537 /* Config.xcconfig in Resources */,
 				452304202C6DD2DF0026C24B /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -747,6 +747,7 @@
 		};
 		45E10B9F2C69B77400FC31CD /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 45483D182CA3CDDF00BB4537 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -785,6 +786,7 @@
 		};
 		45E10BA02C69B77400FC31CD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 45483D182CA3CDDF00BB4537 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -841,7 +843,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
@@ -870,7 +872,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = NO;
