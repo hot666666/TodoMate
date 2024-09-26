@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>SUFeedURL</key>
-	<string>http://$(UPDATE_SERVER_URL)</string>
+	<string>https://$(UPDATE_SERVER_URL)</string>
 	<key>SUPublicEDKey</key>
 	<string>M7NqQCV6rYSk6+CMjTAFHYK/TqyVuuqzxTLtjR+pmvg=</string>
 	<key>UTExportedTypeDeclarations</key>
