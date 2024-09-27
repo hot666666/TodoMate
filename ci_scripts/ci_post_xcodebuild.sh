@@ -31,15 +31,24 @@ fi
 echo "Created zip file: ${ZIP_NAME}"
 
 # 서버에 업로드
-if [ -n "${UPLOAD_URL}" ]; then
-    curl -X POST -F "file=@${ZIP_NAME}" "${UPLOAD_URL}"
+if [ -n "${UPLOAD_URL}" ] && [ -n "${ZIP_NAME}" ]; then
+    echo "Attempting to upload file: ${ZIP_NAME} to URL: ${UPLOAD_URL}"
+    curl -v -X POST -F "file=@${ZIP_NAME}" "${UPLOAD_URL}" \
+         --max-time 600 \
+         --connect-timeout 10 \
+         --retry 3 \
+         --retry-delay 5 \
+         --retry-max-time 60 \
+         -H "Content-Type: multipart/form-data" \
+         -H "User-Agent: XcodeCloudUploader/1.0"
+    
+    upload_status=$?
 
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to upload file to server"
+    if [ $upload_status -ne 0 ]; then
+        echo "Error: Failed to upload file to server. Curl exit code: ${upload_status}"
         exit 1
     fi
-
-    echo "Successfully uploaded ${ZIP_NAME} to server"
 else
-    echo "UPLOAD_URL is not set. Skipping upload."
+    echo "Error: UPLOAD_URL or ZIP_NAME is not set. Skipping upload."
+    exit 1
 fi
