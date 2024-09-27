@@ -33,13 +33,12 @@ echo "Created zip file: ${ZIP_NAME}"
 # 서버에 업로드
 if [ -n "${UPLOAD_URL}" ] && [ -n "${ZIP_NAME}" ]; then
     echo "Attempting to upload file: ${ZIP_NAME} to URL: ${UPLOAD_URL}"
-    curl -v -X POST -F "file=@${ZIP_NAME}" "${UPLOAD_URL}" \
-         --max-time 600 \
-         --connect-timeout 10 \
-         --retry 3 \
-         --retry-delay 5 \
-         --retry-max-time 60 \
-         -H "Content-Type: multipart/form-data" \
+    curl -v -F "file=@${ZIP_NAME}" "${UPLOAD_URL}" \
+         --max-time 300 \
+         --connect-timeout 30 \
+         --retry 5 \
+         --retry-delay 10 \
+         --retry-max-time 120 \
          -H "User-Agent: XcodeCloudUploader/1.0"
     
     upload_status=$?
