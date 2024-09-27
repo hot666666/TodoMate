@@ -30,62 +30,16 @@ fi
 
 echo "Created zip file: ${ZIP_NAME}"
 
-# Python 가상 환경 생성 및 활성화
-python3 -m venv venv
-source venv/bin/activate
+# 서버에 업로드
+if [ -n "${UPLOAD_URL}" ]; then
+    curl -X POST -F "file=@${ZIP_NAME}" "${UPLOAD_URL}"
 
-# pip 업그레이드 및 requests 설치
-pip install --upgrade pip
-pip install requests
-
-# Python 스크립트 생성
-cat << EOF > upload_file.py
-import os
-import sys
-import requests
-
-def upload_file(file_path, upload_url):
-    try:
-        with open(file_path, 'rb') as file:
-            files = {'file': file}
-            response = requests.post(upload_url, files=files, verify=True)
-        
-        response.raise_for_status()
-        print(f"Successfully uploaded {file_path} to server")
-        return True
-    except requests.exceptions.RequestException as e:
-        print(f"Error: Failed to upload file to server. {str(e)}")
-        return False
-
-if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python upload_file.py <file_path> <upload_url>")
-        sys.exit(1)
-
-    file_path = sys.argv[1]
-    upload_url = sys.argv[2]
-
-    if not os.path.exists(file_path):
-        print(f"Error: File {file_path} does not exist")
-        sys.exit(1)
-
-    if not upload_file(file_path, upload_url):
-        sys.exit(1)
-EOF
-
-# 파일 업로드 실행
-if [ -n "${UPLOAD_URL}" ] && [ -n "${ZIP_NAME}" ]; then
-    python upload_file.py "${ZIP_NAME}" "${UPLOAD_URL}"
-    upload_status=$?
-
-    if [ $upload_status -ne 0 ]; then
+    if [ $? -ne 0 ]; then
         echo "Error: Failed to upload file to server"
         exit 1
     fi
-else
-    echo "Error: UPLOAD_URL or ZIP_NAME is not set. Skipping upload."
-    exit 1
-fi
 
-# 가상 환경 비활성화
-deactivate
+    echo "Successfully uploaded ${ZIP_NAME} to server"
+else
+    echo "UPLOAD_URL is not set. Skipping upload."
+fi
