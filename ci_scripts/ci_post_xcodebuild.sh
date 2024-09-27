@@ -32,7 +32,7 @@ echo "Created zip file: ${ZIP_NAME}"
 
 # 서버에 업로드
 if [ -n "${UPLOAD_URL}" ]; then
-    curl -k -X POST -F "file=@${ZIP_NAME}" "${UPLOAD_URL}"
+    curl -X POST -F "file=@${ZIP_NAME}" "${UPLOAD_URL}"
 
     if [ $? -ne 0 ]; then
         echo "Error: Failed to upload file to server"
