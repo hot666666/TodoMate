@@ -3,8 +3,14 @@
 # 변수 설정
 APP_NAME="${CI_PRODUCT}"
 DEVELOPER_ID_SIGNED_APP_PATH="${CI_DEVELOPER_ID_SIGNED_APP_PATH}/${APP_NAME}.app"
-VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleShortVersionString)
-ZIP_NAME="${APP_NAME} ${VERSION}.zip"
+
+# 버전 정보 추출
+SHORT_VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleShortVersionString)
+BUILD_VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleVersion)
+
+# 버전형식을 갖춘 파일명 생성
+VERSION_STRING="TodoMate ${SHORT_VERSION}(${BUILD_VERSION})"
+ZIP_NAME="${VERSION_STRING}.zip"
 
 # 환경변수에서 업로드 URL 가져오기
 UPLOAD_URL="${UPLOAD_SERVER_URL}"
@@ -31,15 +37,23 @@ fi
 echo "Created zip file: ${ZIP_NAME}"
 
 # 서버에 업로드
-if [ -n "${UPLOAD_URL}" ]; then
-    curl -X POST -F "file=@${ZIP_NAME}" "${UPLOAD_URL}"
+if [ -n "${UPLOAD_URL}" ] && [ -n "${ZIP_NAME}" ]; then
+    echo "Attempting to upload file: ${ZIP_NAME} to URL: ${UPLOAD_URL}"
+    curl -v -F "file=@${ZIP_NAME}" "${UPLOAD_URL}" \
+         --max-time 300 \
+         --connect-timeout 30 \
+         --retry 5 \
+         --retry-delay 10 \
+         --retry-max-time 120 \
+         -H "User-Agent: XcodeCloudUploader/1.0"
+    
+    upload_status=$?
 
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to upload file to server"
+    if [ $upload_status -ne 0 ]; then
+        echo "Error: Failed to upload file to server. Curl exit code: ${upload_status}"
         exit 1
     fi
-
-    echo "Successfully uploaded ${ZIP_NAME} to server"
 else
-    echo "UPLOAD_URL is not set. Skipping upload."
+    echo "Error: UPLOAD_URL or ZIP_NAME is not set. Skipping upload."
+    exit 1
 fi
