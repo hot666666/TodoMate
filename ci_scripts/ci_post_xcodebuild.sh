@@ -3,8 +3,14 @@
 # 변수 설정
 APP_NAME="${CI_PRODUCT}"
 DEVELOPER_ID_SIGNED_APP_PATH="${CI_DEVELOPER_ID_SIGNED_APP_PATH}/${APP_NAME}.app"
-VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleShortVersionString)
-ZIP_NAME="${APP_NAME} ${VERSION}.zip"
+
+# 버전 정보 추출
+SHORT_VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleShortVersionString)
+BUILD_VERSION=$(defaults read "${DEVELOPER_ID_SIGNED_APP_PATH}/Contents/Info" CFBundleVersion)
+
+# 버전형식을 갖춘 파일명 생성
+VERSION_STRING="TodoMate ${SHORT_VERSION}(${BUILD_VERSION})"
+ZIP_NAME="${VERSION_STRING}.zip"
 
 # 환경변수에서 업로드 URL 가져오기
 UPLOAD_URL="${UPLOAD_SERVER_URL}"
