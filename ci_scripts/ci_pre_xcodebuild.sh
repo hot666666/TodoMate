@@ -6,7 +6,7 @@ CONFIG_PATH="${CI_PRIMARY_REPOSITORY_PATH}/TodoMate/Config.xcconfig"
 INFO_PLIST_PATH="${CI_PRIMARY_REPOSITORY_PATH}/TodoMate/Info.plist"
 
 # 빌드 버전 정보
-VERSION="${CI_BUILD_NUMBER}"
+BUILD_NUMBER="${CI_BUILD_NUMBER}"
 
 # GoogleService-Info.plist 파일이 존재하는지 확인
 if [ ! -f "$GS_INFO_PATH" ]; then
