@@ -1,8 +1,8 @@
 //
-//  WidgetBundle.swift
-//  Widget
+//  TodoMateWidgetBundle.swift
+//  TodoMateWidget
 //
-//  Created by hs on 9/19/24.
+//  Created by hs on 10/4/24.
 //
 
 import WidgetKit
@@ -14,4 +14,3 @@ struct TodoMateWidgetBundle: WidgetBundle {
         TodoMateWidget()
     }
 }
-
