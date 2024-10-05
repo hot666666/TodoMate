@@ -17,8 +17,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
         let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
         updater = updaterController.updater
         
+#if !DEBUG
         /// 업데이트를 자동으로 확인
         updater?.checkForUpdatesInBackground()
+#endif
         
         if let window = NSApplication.shared.windows.first {
             window.delegate = self
