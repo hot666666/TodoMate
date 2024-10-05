@@ -35,7 +35,8 @@ struct TodoListItem: View {
         .frame(width: widgetFamily == .systemSmall ? 50 : 70)
         .background(Color.customBlue)
         .clipShape(.capsule)
-        .padding(widgetFamily == .systemSmall ? 3 : 5)
+        .padding(.vertical, widgetFamily == .systemSmall ? 3 : 5)
+        .padding(.horizontal, 5)
         .clipShape(RoundedRectangle(cornerRadius: widgetFamily == .systemSmall ? 3 : 5))
     }
     

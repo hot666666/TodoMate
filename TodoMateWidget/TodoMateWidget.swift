@@ -56,8 +56,11 @@ struct TodoMateWidgetEntryView : View {
     var entry: TodoEntry
 
     var body: some View {
-        ForEach(entry.todos) { todo in
-            TodoListItem(todo: todo)
+        VStack {
+            ForEach(entry.todos) { todo in
+                TodoListItem(todo: todo)
+            }
+            Spacer()
         }
         if entry.todos.isEmpty {
             Text("진행 중인 Todo가 없습니다.")
