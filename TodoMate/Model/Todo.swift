@@ -81,6 +81,12 @@ extension Todo: Equatable {
 }
 
 extension Todo {
+    func toEntity() -> TodoEntity {
+        TodoEntity(date: self.date, content: self.content, uid: self.uid, fid: self.fid)
+    }
+}
+
+extension Todo {
     static var stub: [Todo] {
         [.init(date: .now, content: "할일1", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
          .init(date: .now, content: "할일2", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
