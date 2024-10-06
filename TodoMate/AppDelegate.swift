@@ -8,6 +8,7 @@
 import SwiftUI
 import Cocoa
 import Sparkle
+import WidgetKit
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
     var updater: SPUUpdater?
@@ -29,6 +30,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
     }
     
     func windowWillClose(_ notification: Notification) {
+        WidgetCenter.shared.reloadAllTimelines()
+        
         /// x 버튼 누르면 앱 종료
         NSApplication.shared.terminate(nil)
     }
