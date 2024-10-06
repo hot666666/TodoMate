@@ -60,10 +60,11 @@ struct TodoMateWidgetEntryView : View {
             ForEach(entry.todos) { todo in
                 TodoListItem(todo: todo)
             }
-            Spacer()
         }
         if entry.todos.isEmpty {
             Text("진행 중인 Todo가 없습니다.")
+        } else {
+            Spacer()
         }
     }
 }

@@ -65,7 +65,7 @@ extension TodoRealtimeService {
                 observer.value?.todoAdded(todo)
             }
         case .modified:
-            /// 위젯 데이터 - 진행 중이면 추가, 아니면 삭제
+            /// 위젯 데이터 - 진행 중이면 추가, 아니면 삭제, 이미 존재하는 Todo의 업데이트라면 무시
             if todo.status == .inProgress {
                 await saveToModelContainer(todo.toEntity())
             } else {
@@ -91,7 +91,11 @@ extension TodoRealtimeService {
 extension TodoRealtimeService {
     @MainActor
     private func saveToModelContainer(_ entity: TodoEntity) {
+        guard let fid = entity.fid else { return }
+        
         let context = modelContainer.mainContext
+        let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == fid })
+        guard let existingEntity = try? context.fetch(fetchDescriptor).first else { return }
         context.insert(entity)
     }
     
