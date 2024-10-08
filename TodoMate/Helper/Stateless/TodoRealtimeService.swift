@@ -91,12 +91,24 @@ extension TodoRealtimeService {
 extension TodoRealtimeService {
     @MainActor
     private func saveToModelContainer(_ entity: TodoEntity) {
-        guard let fid = entity.fid else { return }
+        guard let fid = entity.fid else {
+            print("TodoEntity has no fid")
+            return
+        }
         
         let context = modelContainer.mainContext
         let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == fid })
-        guard let existingEntity = try? context.fetch(fetchDescriptor).first else { return }
-        context.insert(entity)
+        
+        do {
+            if let existingEntity = try context.fetch(fetchDescriptor).first {
+                print("TodoEntity with fid \(existingEntity.fid!) already exists")
+                return
+            }
+            context.insert(entity)
+            print("New TodoEntity inserted with fid \(fid)")
+        } catch {
+            print("Error checking for existing TodoEntity: \(error.localizedDescription)")
+        }
     }
     
     @MainActor
@@ -107,6 +119,7 @@ extension TodoRealtimeService {
         let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == todoId })
         if let existingEntity = try? context.fetch(fetchDescriptor).first {
             context.delete(existingEntity)
+            print("TodoEntity deleted")
         }
     }
 }
