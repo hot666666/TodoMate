@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import AppKit
 
 struct ChatList: View {
     @Environment(AppState.self) private var appState: AppState
