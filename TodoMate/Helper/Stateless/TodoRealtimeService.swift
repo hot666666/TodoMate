@@ -101,7 +101,8 @@ extension TodoRealtimeService {
         
         do {
             if let existingEntity = try context.fetch(fetchDescriptor).first {
-                print("TodoEntity with fid \(existingEntity.fid!) already exists")
+                existingEntity.date = entity.date
+                existingEntity.content = entity.content
                 return
             }
             context.insert(entity)
