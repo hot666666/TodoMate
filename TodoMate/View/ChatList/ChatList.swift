@@ -9,6 +9,7 @@ import SwiftUI
 import AppKit
 
 struct ChatList: View {
+    @Environment(AppState.self) private var appState: AppState
     @State var viewModel: ChatListViewModel
     @FocusState private var focusedId: String?
     
@@ -50,6 +51,11 @@ struct ChatList: View {
             if viewModel.isUploadingImage {
                 Color.gray.opacity(0.2)
                 ProgressView()
+            }
+        }
+        .onChange(of: appState.isSelectedTodo) { _, newValue in
+            if newValue {
+                clearFocus()
             }
         }
     }
