@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct ChatItem: View {
     private var viewModel: ChatListViewModel
@@ -33,27 +34,22 @@ struct ChatItem: View {
     @ViewBuilder
     var imageView: some View {
         HStack {
-            AsyncImage(url: URL(string: item.content)){ image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .containerRelativeFrame(.horizontal) { size, axis in
-                        size * 0.3
-                    }
-                    .onLongPressGesture {
-                         showingPopover = true
-                     }
-                    // TODO: - CustomSheetModifier, Local Cache
-                    .popover(isPresented: $showingPopover) {
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 1024, height: 1024)
-                            .padding()
-                    }
-            } placeholder: {
-                ProgressView()
-            }
+            KFImage(URL(string: item.content))
+                .resizable()
+                .scaledToFit()
+                .containerRelativeFrame(.horizontal) { size, _ in
+                    size * 0.3
+                }
+                .onLongPressGesture {
+                    showingPopover = true
+                }
+                .popover(isPresented: $showingPopover) {
+                    KFImage(URL(string: item.content))
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 1024, height: 1024)
+                        .padding()
+                }
             Spacer()
         }
     }

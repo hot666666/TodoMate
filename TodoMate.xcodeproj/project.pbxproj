@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		452304202C6DD2DF0026C24B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4523041F2C6DD2DF0026C24B /* GoogleService-Info.plist */; };
+		452AEE052CB65FD200000BC6 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 452AEE042CB65FD200000BC6 /* Kingfisher */; };
 		45322B4A2C8449550097D530 /* UploadProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B492C8449520097D530 /* UploadProvider.swift */; };
 		45322B4C2C845F650097D530 /* ImageUploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4B2C845F650097D530 /* ImageUploadService.swift */; };
 		45322B4E2C84624B0097D530 /* ChatItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4D2C8462490097D530 /* ChatItem.swift */; };
@@ -193,6 +194,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				452AEE052CB65FD200000BC6 /* Kingfisher in Frameworks */,
 				459325342CA3A4CD00A95193 /* Sparkle in Frameworks */,
 				4565A62B2C6F6AF400E0D529 /* FirebaseFirestore in Frameworks */,
 				459AA4342C78D1DB00CA43F2 /* FirebaseStorage in Frameworks */,
@@ -482,6 +484,7 @@
 				4565A62A2C6F6AF400E0D529 /* FirebaseFirestore */,
 				459AA4332C78D1DB00CA43F2 /* FirebaseStorage */,
 				459325332CA3A4CD00A95193 /* Sparkle */,
+				452AEE042CB65FD200000BC6 /* Kingfisher */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -516,6 +519,7 @@
 			packageReferences = (
 				4565A6292C6F6AF400E0D529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				459325322CA2D1B600A95193 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				452FBF362CB65F2F003B1999 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 45E10B862C69B77300FC31CD;
@@ -646,7 +650,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.TodoMateWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -675,7 +679,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.TodoMateWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -832,7 +836,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -871,7 +875,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.7.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -917,6 +921,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		452FBF362CB65F2F003B1999 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 		4565A6292C6F6AF400E0D529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
@@ -936,6 +948,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		452AEE042CB65FD200000BC6 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 452FBF362CB65F2F003B1999 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
 		4565A62A2C6F6AF400E0D529 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4565A6292C6F6AF400E0D529 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
