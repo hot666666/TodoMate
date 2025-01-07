@@ -1,19 +1,28 @@
 //
-//  CalendarView.swift
-//  TodoMate
+//  DateSettingView.swift
+//  TodoMate_
 //
-//  Created by hs on 8/14/24.
+//  Created by hs on 12/27/24.
 //
+
 
 import SwiftUI
 
-// MARK: - CalendarView
-struct CalendarView: View {
+struct TodoDatePopoverView: View {
+    var todo: Todo
+    
+    var body: some View {
+        CalendarView(todo: todo)
+            .padding()
+    }
+}
+
+fileprivate struct CalendarView: View {
     private let calendar: Calendar = .current
     @State private var calendarDays: [CalendarDay] = []
     @State private var currentDate: Date = .now
     @State private var selectedIndex: Int?
-    @Binding var todoDate: Date
+    var todo: Todo
     
     var body: some View {
         VStack {
@@ -25,7 +34,7 @@ struct CalendarView: View {
             }
         }
         .onAppear {
-            updateCalendarDays(todoDate: todoDate)
+            updateCalendarDays(todoDate: todo.date)
         }
     }
     
@@ -54,24 +63,23 @@ struct CalendarView: View {
     
     @ViewBuilder
     private var weekdayHeaders: some View {
-         ForEach(Const.CalendarView.WEEKDAYS, id: \.self) { day in
-             Text(day)
-                 .foregroundColor(.secondary)
-         }
-     }
-     
+        ForEach(Const.CalendarView.WEEKDAYS, id: \.self) { day in
+            Text(day)
+                .foregroundColor(.secondary)
+        }
+    }
+    
     @ViewBuilder
-     private var calendarDaysGrid: some View {
-         ForEach(Array(calendarDays.enumerated()), id: \.element.id) { index, calendarDay in
-             CalendarDayView(calendarDay: calendarDay)
-                 .aspectRatio(1, contentMode: .fit)
-                 .onTapGesture {
-                     handleCalendarDayTap(at: index)
-                 }
-         }
-     }
- }
-
+    private var calendarDaysGrid: some View {
+        ForEach(Array(calendarDays.enumerated()), id: \.element.id) { index, calendarDay in
+            CalendarDayView(calendarDay: calendarDay)
+                .aspectRatio(1, contentMode: .fit)
+                .onTapGesture {
+                    handleCalendarDayTap(at: index)
+                }
+        }
+    }
+}
 extension CalendarView {
     private func handleCalendarDayTap(at index: Int) {
         updateSelection(at: index)
@@ -87,7 +95,7 @@ extension CalendarView {
         selectedIndex = index
         
         /// Binding 값 업데이트
-        todoDate = calendarDays[index].date
+        todo.date = calendarDays[index].date
     }
     
     private func updateMonthIfNeeded(for calendarDay: CalendarDay) {
@@ -101,24 +109,23 @@ extension CalendarView {
         }
     }
 }
-
 extension CalendarView {
     private func updateMonth(by value: Int) {
-        if let newDate = calendar.addMonths(value, to: currentDate) {
+        if let newDate = calendar.date(byAdding: .month, value: value, to: currentDate) {
             currentDate = newDate
-            updateCalendarDays(todoDate: todoDate)
+            updateCalendarDays(todoDate: todo.date)
         }
     }
     
     // currentDate가 포함된 42일을 calendarDays: [CalendarDay]로 업데이트한다
     private func updateCalendarDays(todoDate: Date) {
-        let startOfMonth = calendar.startOfMonth(for: currentDate)
-        let startDayInPreviousMonth = calendar.addDays(-calendar.component(.weekday, from: startOfMonth) + 1, to: startOfMonth)
-        
+        let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: currentDate))!
+        let prefixOfFirstWeek = -calendar.component(.weekday, from: startOfMonth) + 1
+        let startDayInPreviousMonth = calendar.date(byAdding: .day, value: prefixOfFirstWeek, to: startOfMonth)!
         var days: [CalendarDay] = []
         
         for dayOffset in 0..<42 {
-            let date = calendar.addDays(dayOffset, to: startDayInPreviousMonth)
+            let date = calendar.date(byAdding: .day, value: dayOffset, to: startDayInPreviousMonth)!
             
             let monthType: CalendarMonthType
             if calendar.isDate(date, equalTo: currentDate, toGranularity: .month) {
@@ -146,8 +153,6 @@ extension CalendarView {
     }
 }
 
-
-
 // MARK: - CalendarDayView
 fileprivate struct CalendarDayView: View {
     let calendarDay: CalendarDay
@@ -171,4 +176,3 @@ fileprivate struct CalendarDayView: View {
         .contentShape(.rect)
     }
 }
-

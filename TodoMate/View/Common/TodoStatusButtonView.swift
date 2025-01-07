@@ -1,14 +1,17 @@
 //
-//  StatusButton.swift
-//  TodoMate
+//  TodoStatusButtonView.swift
+//  TodoMate_
 //
-//  Created by hs on 8/25/24.
+//  Created by hs on 12/28/24.
 //
 
 import SwiftUI
 
-struct StatusButton: View {
+
+// MARK: - TodoStatusButton
+struct TodoStatusButton: View {
     @State private var isPresented: Bool = false
+    
     var todo: Todo
     var update: (Todo) -> Void = { _ in }
     
@@ -18,9 +21,9 @@ struct StatusButton: View {
         }
         .popover(isPresented: $isPresented) {
             VStack(spacing: 0) {
-                ForEach(TodoItemStatus.allCases, id: \.self) { newStatus in
-                    ButtonView(status: newStatus) {
-                        todo.status = newStatus
+                ForEach(TodoStatus.allCases, id: \.self) { todoStatus in
+                    ButtonView(status: todoStatus) {
+                        todo.status = todoStatus
                         isPresented = false
                         update(todo)
                     }
@@ -31,11 +34,13 @@ struct StatusButton: View {
     }
 }
 
+// MARK: - ButtonView
 fileprivate struct ButtonView: View {
     @State private var isHovered: Bool = false
-    let status: TodoItemStatus
-    let action: () -> Void
     
+    let status: TodoStatus
+    let action: () -> Void
+
     var body: some View {
         Button(action: {
             action()

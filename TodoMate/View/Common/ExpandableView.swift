@@ -1,8 +1,8 @@
 //
 //  ExpandableView.swift
-//  TodoMate
+//  TodoMate_
 //
-//  Created by hs on 8/17/24.
+//  Created by hs on 12/28/24.
 //
 
 import SwiftUI
@@ -12,12 +12,11 @@ struct ExpandableView<Content: View>: View {
     let title: String
     let content: () -> Content
     
-    init(title: String, isExpanded: Bool = false, storageKey: String, @ViewBuilder content: @escaping () -> Content) {
+    init(title: String, isExpanded: Bool = true, storageKey: String, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
         self.content = content
         self._isExpanded = AppStorage(wrappedValue: isExpanded, storageKey)
     }
-    
     
     var body: some View {
         VStack {
