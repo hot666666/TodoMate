@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ImageUploadService: ImageUploadServiceType {
+final class ImageUploadService: ImageUploadServiceType {
     private let provider: UploadProviderType
     
     init(provider: UploadProviderType = UploadProvider()) {
@@ -21,5 +21,11 @@ class ImageUploadService: ImageUploadServiceType {
             print("[Upload Error]")
             return ""
         }
+    }
+}
+
+class StubImageUploadService: ImageUploadServiceType {
+    func upload(data: Data) async -> String {
+        ""
     }
 }
