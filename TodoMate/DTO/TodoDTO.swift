@@ -5,8 +5,19 @@
 //  Created by hs on 8/13/24.
 //
 
-import FirebaseFirestore
 import Foundation
+
+#if PREVIEW
+struct TodoDTO: Codable {
+    var id: String?
+    var content: String
+    var status: String
+    var detail: String
+    var date: Date
+    var uid: String
+}
+#else
+import FirebaseFirestore
 
 struct TodoDTO: Codable {
     @DocumentID var id: String?
@@ -16,6 +27,7 @@ struct TodoDTO: Codable {
     var date: Date
     var uid: String
 }
+#endif
 
 extension TodoDTO {
     func toModel() -> Todo {
