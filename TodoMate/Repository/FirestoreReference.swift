@@ -7,6 +7,8 @@
 
 import Firebase
 
+#if !PREVIEW
+import FirebaseFirestore
 class FirestoreReference {
     static let shared = FirestoreReference()
     let db = Firestore.firestore()
@@ -25,3 +27,10 @@ class FirestoreReference {
         return db.collection(FireStore.CHAT)
     }
 }
+#else
+class FirestoreReference {
+    static let shared = FirestoreReference()
+    
+    private init() {}
+}
+#endif

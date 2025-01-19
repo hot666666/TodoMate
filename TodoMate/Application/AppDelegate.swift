@@ -7,13 +7,17 @@
 
 import SwiftUI
 import Cocoa
+import FirebaseCore
 
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        
+#if !PREVIEW
         /// Firebase 초기화
-        /// FirebaseApp.configure()
+        FirebaseApp.configure()
+#endif
         
         /// WindowDelegate 설정
         if let window = NSApplication.shared.windows.first {

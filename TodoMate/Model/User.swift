@@ -1,26 +1,23 @@
 //
 //  User.swift
-//  TodoMate
+//  TodoMate_
 //
-//  Created by hs on 8/15/24.
+//  Created by hs on 12/28/24.
 //
 
-import SwiftUI
+import Foundation
 
 @Observable
 class User: Identifiable {
     let id: String = UUID().uuidString
-    var name: String
-    var fid: String
+    var nickname: String
+    var uid: String
     
-    init(name: String = "", fid: String = UUID().uuidString) {
-        self.name = name
-        self.fid = fid
+    init(nickname: String, uid: String = UUID().uuidString) {
+        self.nickname = nickname
+        self.uid = uid
     }
 }
-
 extension User {
-    static var stub: [User] {
-        [.init(name: "유저1"), .init(name: "유저2")]
-    }
+    static let stub: [User] = [.init(nickname: "hs"), .init(nickname: "jy")]
 }

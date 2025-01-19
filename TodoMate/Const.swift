@@ -24,7 +24,7 @@ extension Const {
 
 extension Const {
     enum FireStore {
-        static let USER = "todomates"
+        static let USER = "users"
         static let TODO = "todos"
         static let CHAT = "chats"
     }

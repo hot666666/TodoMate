@@ -8,7 +8,6 @@
 import Foundation
 
 protocol UserRepositoryType {
-    func createUser(user: UserDTO) async throws -> String
     func fetchUser(id: String) async throws -> UserDTO
     func fetchAllUsers() async throws -> [UserDTO]
     func updateUser(user: UserDTO) async throws
@@ -23,15 +22,8 @@ class FirestoreUserRepository: UserRepositoryType {
     }
 }
 
+#if !PREVIEW
 extension FirestoreUserRepository {
-    func createUser(user: UserDTO) async throws -> String {
-        let newUserRef = reference.userCollection().document()
-        var newUser = user
-        newUser.id = newUserRef.documentID
-        try newUserRef.setData(from: newUser)
-        return newUserRef.documentID
-    }
-    
     func fetchUser(id: String) async throws -> UserDTO {
         let docRef = reference.userCollection().document(id)
         let snapshot = try await docRef.getDocument()
@@ -49,7 +41,10 @@ extension FirestoreUserRepository {
     }
     
     func updateUser(user: UserDTO) async throws {
-        guard let userId = user.id else { throw NSError(domain: "FirestoreUserRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "User ID is missing"]) }
+        // 없으면 생성, 있으면 업데이트
+        guard let userId = user.id else {
+            throw NSError(domain: "FirestoreUserRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "User ID is missing"])
+        }
         let userRef = reference.userCollection().document(userId)
         try userRef.setData(from: user)
     }
@@ -59,3 +54,22 @@ extension FirestoreUserRepository {
         try await userRef.delete()
     }
 }
+#else
+extension FirestoreUserRepository {
+    func fetchUser(id: String) async throws -> UserDTO {
+        return UserDTO.stub[0]
+    }
+    
+    func fetchAllUsers() async throws -> [UserDTO] {
+        return UserDTO.stub
+    }
+    
+    func updateUser(user: UserDTO) async throws {
+        print("[Updating User] - \(user)")
+    }
+    
+    func deleteUser(id: String) async throws {
+        print("[Deleting User] - \(id)")
+    }
+}
+#endif
