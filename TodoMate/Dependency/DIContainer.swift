@@ -5,34 +5,19 @@
 //  Created by hs on 8/21/24.
 //
 
-import Foundation
+import Observation
 
 @Observable
-class DIContainer {
-    var chatService: ChatServiceType
-    var todoService: TodoServiceType
-    var todoRealtimeService: TodoRealtimeServiceType
-    var imageUploadService: ImageUploadServiceType
+final class DIContainer {
+    @ObservationIgnored var userService: UserServiceType
+    @ObservationIgnored var todoService: TodoServiceType
     
-    init(chatService: ChatServiceType,
-         todoService: TodoServiceType,
-         todoRealtimeService: TodoRealtimeServiceType,
-         imageUploadService: ImageUploadServiceType
-    ) {
-        self.chatService = chatService
+    init(userService: UserServiceType, todoService: TodoServiceType) {
+        self.userService = userService
         self.todoService = todoService
-        self.todoRealtimeService = todoRealtimeService
-        self.imageUploadService = imageUploadService
     }
 }
 
-
 extension DIContainer {
-    static var stub: DIContainer {
-        .init(chatService: StubChatService(),
-              todoService: StubTodoService(),
-              todoRealtimeService: StubTodoRealtimeService(),
-              imageUploadService: StubImageUploadService()
-        )
-    }
+    static let stub = DIContainer(userService: StubUserService(), todoService: StubTodoService())
 }

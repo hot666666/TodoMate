@@ -16,10 +16,13 @@ struct MainView: View {
             /// 메인 뷰
             ScrollView {
                 DashboardView(viewModel: .init(container: container))
+                
+                SignOutButton()
             }
             
             /// 오버레이 뷰 컨테이너(OverlayType)
             OverlayContainerView()
+            
         }
     }
 }
@@ -30,6 +33,7 @@ struct MainView: View {
     MainView()
         .environment(DIContainer.stub)
         .environment(OverlayManager.stub)
+        .environment(AuthManager.stub)
         .frame(width: 400, height: 400)
 }
 

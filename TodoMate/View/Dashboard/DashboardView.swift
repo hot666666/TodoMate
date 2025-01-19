@@ -44,8 +44,8 @@ struct DashboardView: View {
     }
     
     private func todoBox(for user: User) -> some View {
-        ExpandableView(title: user.name, storageKey: "user_\(user.fid)") {
-            TodoBoxView(viewModel: .init(container: container, uid: user.fid))
+        ExpandableView(title: user.nickname, storageKey: "user_\(user.uid)") {
+            TodoBoxView(viewModel: .init(container: container, uid: user.uid))
                 .padding(.horizontal, 20)
         }
     }

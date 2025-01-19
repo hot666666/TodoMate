@@ -19,19 +19,32 @@ struct TodoMateApp: App {
 }
 
 fileprivate struct _TodoMateApp: View {
-    #if PREVIEW
-        @State private var container: DIContainer = .stub
-    #else
-        // TODO: - DIContainer의 stub을 제거하고, 실제 서비스를 주입
-    @State private var container: DIContainer = .init
-    #endif
     @State private var overlayManager: OverlayManager = .init()
+
+    // TODO: - DIContainer의 stub을 제거하고, 실제 서비스를 주입
+    @State private var container: DIContainer
+    @State private var authManager: AuthManager
+    
+    init() {
+        let container: DIContainer = .init(
+            userService: UserService(),
+            todoService: StubTodoService()
+        )
+        self._container = State(initialValue: container)
+        self._authManager = State(initialValue: AuthManager(userService: container.userService))
+    }
     
     var body: some View {
-        MainView()
-            .environment(container)
-            .environment(overlayManager)
-            .frame(minWidth: 400, minHeight: 400)
+        Group {
+            if authManager.isLoggedIn {
+                MainView()
+                    .environment(overlayManager)
+                    .environment(container)
+            } else {
+                AuthView()
+            }
+        }
+        .environment(authManager)
     }
 }
 
