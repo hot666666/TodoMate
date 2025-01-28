@@ -9,25 +9,23 @@ import SwiftUI
 
 struct MainView: View {
     @Environment(DIContainer.self) private var container
-    @Environment(OverlayManager.self) private var overlayManager
+    @Environment(AuthManager.self) private var authManager
     
     var body: some View {
         ZStack {
-            /// 메인 뷰
             ScrollView {
-                DashboardView(viewModel: .init(container: container))
+                GroupDashboardView(viewModel: .init(container: container,
+                                                    userInfo: authManager.userInfo))
                 
+                // TODO: - REMOVE
                 SignOutButton()
             }
             
             /// 오버레이 뷰 컨테이너(OverlayType)
             OverlayContainerView()
-            
         }
     }
 }
-
-
 
 #Preview {
     MainView()
@@ -36,4 +34,3 @@ struct MainView: View {
         .environment(AuthManager.stub)
         .frame(width: 400, height: 400)
 }
-
