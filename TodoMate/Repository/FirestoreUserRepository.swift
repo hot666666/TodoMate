@@ -14,14 +14,13 @@ protocol UserRepositoryType {
     func deleteUser(id: String) async throws
 }
 
-class FirestoreUserRepository: UserRepositoryType {
+final class FirestoreUserRepository: UserRepositoryType {
     private let reference: FirestoreReference
     
     init(reference: FirestoreReference = .shared) {
         self.reference = reference
     }
 }
-
 #if !PREVIEW
 extension FirestoreUserRepository {
     func fetchUser(id: String) async throws -> UserDTO {
