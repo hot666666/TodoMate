@@ -1,5 +1,5 @@
 //
-//  TodoItem.swift
+//  Todo.swift
 //  TodoMate
 //
 //  Created by hs on 8/12/24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum TodoItemStatus: String, CaseIterable, Codable {
+enum TodoStatus: String, CaseIterable, Codable {
     case inComplete = "미완료"
     case todo = "시작 전"
     case inProgress = "진행 중"
@@ -28,7 +28,7 @@ class Todo: Identifiable, Codable {
     let id: String
     var date: Date
     var content: String
-    var status: TodoItemStatus
+    var status: TodoStatus
     var detail: String
     var uid: String
     var fid: String?
@@ -39,9 +39,9 @@ class Todo: Identifiable, Codable {
     
     init(id: String = UUID().uuidString,
          date: Date = .now,
-         content: String = "",
+         content: String = "이름없음",
          detail: String = "",
-         status: TodoItemStatus = .todo,
+         status: TodoStatus = .todo,
          uid: String = "",
          fid: String? = nil) {
         self.id = id
@@ -88,11 +88,11 @@ extension Todo {
 
 extension Todo {
     static var stub: [Todo] {
-        [.init(date: .now, content: "할일1", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
-         .init(date: .now, content: "할일2", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
-         .init(date: .now, content: "할일3", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
-         .init(date: .now, content: "할일4", detail: "할일입니다", status: .todo, fid: UUID().uuidString),
-         .init(date: .now, content: "할일5", detail: "할일입니다", status: .todo, fid: UUID().uuidString)]
+        [.init(date: .now, content: "할일1-hs", detail: "할일입니다", status: .todo, uid: "hs", fid: UUID().uuidString),
+         .init(date: .now, content: "할일2-hs", detail: "할일입니다", status: .todo, uid: "hs", fid: UUID().uuidString),
+         .init(date: .now, content: "할일3", detail: "할일입니다", status: .todo, uid: "jy", fid: UUID().uuidString),
+         .init(date: .now, content: "할일4", detail: "할일입니다", status: .todo, uid: "jy", fid: UUID().uuidString),
+         .init(date: .now, content: "할일5", detail: "할일입니다", status: .todo, uid: "jy", fid: UUID().uuidString)]
     }
     
     static var widgetStub: [Todo] {

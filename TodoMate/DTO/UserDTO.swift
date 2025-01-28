@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 #if PREVIEW
 struct UserDTO {
     var id: String?
@@ -22,10 +23,10 @@ struct UserDTO: Codable {
 #endif
 
 extension UserDTO {
-    static let stub: [UserDTO] = [.init(id: UUID().uuidString, nickname: "hs"), .init(id: UUID().uuidString, nickname: "jy")]
+    static let stub: [UserDTO] = [.init(id: "test", nickname: "hs"), .init(id: UUID().uuidString, nickname: "jy")]
     
     func toModel() -> User {
-        User(nickname: self.nickname, uid: self.id!)
+        User(nickname: self.nickname, uid: self.id ?? "")
     }
 }
 

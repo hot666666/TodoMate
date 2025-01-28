@@ -1,6 +1,6 @@
 //
 //  User.swift
-//  TodoMate_
+//  TodoMate
 //
 //  Created by hs on 12/28/24.
 //
@@ -18,6 +18,7 @@ class User: Identifiable {
         self.uid = uid
     }
 }
+
 extension User {
-    static let stub: [User] = [.init(nickname: "hs"), .init(nickname: "jy")]
+    static let stub: [User] = [.init(nickname: "hs", uid: "hs"), .init(nickname: "jy", uid: "jy")]
 }
