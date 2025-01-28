@@ -20,11 +20,8 @@ struct SignOutButton: View {
     }
 }
 
-
 #Preview {
     SignOutButton()
-        .environment(AuthManager(userService: StubUserService(),
-                                 userInfoService: StubUserInfoService(),
-                                 modelContainer: .forPreview()))
+        .environment(AuthManager.stub)
 }
 

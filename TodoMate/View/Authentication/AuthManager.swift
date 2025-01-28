@@ -45,12 +45,10 @@ class AuthManager: AuthManagerType {
     
     private(set) var authState: AuthState = .signedOut
     
-    init(userService: UserServiceType,
-         userInfoService: UserInfoServiceType,
-         modelContainer: ModelContainer) {
-        self.userService = userService
-        self.userInfoService = userInfoService
-        self.modelContainer = modelContainer
+    init(container: DIContainer) {
+        self.userService = container.userService
+        self.userInfoService = container.userInfoService
+        self.modelContainer = container.modelContainer
         
         /// 로컬에 저장된 유저 정보 불러오기
         self._userInfo = userInfoService.loadUserInfo()
@@ -153,9 +151,7 @@ class AuthManager: AuthManagerType {
     var authState: AuthManager.AuthState = .signedOut
     var userInfo: AuthManager.UserInfo = .empty
     
-    init(userService: UserServiceType,
-         userInfoService: UserInfoServiceType,
-         modelContainer: ModelContainer) {}
+    init(container: DIContainer) {}
     
     @MainActor
     func signIn() async {
@@ -197,9 +193,7 @@ extension AuthManager {
     }
 }
 extension AuthManager {
-    static let stub: AuthManager = .init(userService: StubUserService(),
-                                         userInfoService: StubUserInfoService(),
-                                         modelContainer: .forPreview())
+    static let stub: AuthManager = .init(container: .stub)
 }
 
 typealias UserInfo = AuthManager.UserInfo

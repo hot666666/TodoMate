@@ -60,9 +60,7 @@ fileprivate struct _TodoMateApp: View {
         let container: DIContainer = .init(modelContainer: modelContainer)
 #endif
         self._container = State(initialValue: container)
-        self._authManager = State(initialValue: AuthManager(userService: container.userService,
-                                                            userInfoService: container.userInfoService,
-                                                            modelContainer: modelContainer))
+        self._authManager = State(initialValue: AuthManager(container: container))
     }
     
     var body: some View {
