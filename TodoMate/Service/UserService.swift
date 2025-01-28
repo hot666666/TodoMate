@@ -19,7 +19,7 @@ final class UserService: UserServiceType {
     }
     
     func fetch() async -> [User] {
-        print("[Fetching User] -")
+        print("[Fetching Users] -")
         do {
             return try await userRepository.fetchAllUsers().map { $0.toModel() }
         } catch {
@@ -45,10 +45,10 @@ final class UserService: UserServiceType {
     }
 }
 
-
 class StubUserService: UserServiceType {
     func fetch() async -> [User] {
-        User.stub
+        print("[Fetching Users] - \(User.stub.count)")
+        return User.stub
     }
     
     func fetch(uid: String) async -> User? {
