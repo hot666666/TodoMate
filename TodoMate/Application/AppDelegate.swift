@@ -9,8 +9,23 @@ import SwiftUI
 import FirebaseCore
 
 #if os(macOS)
-import Cocoa
+import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        /// 새 윈도우 생성 메뉴 삭제
+        if let mainMenu = NSApplication.shared.mainMenu {
+            for item in mainMenu.items {
+                if item.title == "File", let submenu = item.submenu {
+                    for (index, subItem) in submenu.items.enumerated() {
+                        if subItem.title == "New Window" {
+                            submenu.removeItem(at: index)
+                            break
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         
@@ -23,6 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if let window = NSApplication.shared.windows.first {
             window.delegate = self
         }
+        
         
     }
     
