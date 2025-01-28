@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
-import Cocoa
 import FirebaseCore
 
-
+#if os(macOS)
+import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -35,3 +35,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return true
     }
 }
+#elseif os(iOS)
+import UIKit
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+#if !PREVIEW
+        /// Firebase 초기화
+        FirebaseApp.configure()
+#endif
+        return true
+    }
+}
+#endif
+    
+
