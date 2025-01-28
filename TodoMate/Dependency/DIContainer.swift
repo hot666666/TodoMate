@@ -6,18 +6,41 @@
 //
 
 import Observation
+import SwiftData
 
 @Observable
 final class DIContainer {
-    @ObservationIgnored var userService: UserServiceType
-    @ObservationIgnored var todoService: TodoServiceType
+    @ObservationIgnored let modelContainer: ModelContainer
+    @ObservationIgnored let userService: UserServiceType
+    @ObservationIgnored let todoService: TodoServiceType
+    @ObservationIgnored let chatService: ChatServiceType
+    @ObservationIgnored let chatStreamProvider: ChatStreamProviderType
+    @ObservationIgnored let todoStreamProvider: TodoStreamProviderType
+    @ObservationIgnored let userInfoService: UserInfoServiceType
     
-    init(userService: UserServiceType, todoService: TodoServiceType) {
+    init(modelContainer: ModelContainer,
+         userService: UserServiceType = UserService(),
+         todoService: TodoServiceType = TodoService(),
+         chatService: ChatServiceType = ChatService(),
+         chatStreamProvider: ChatStreamProviderType = FirestoreChatStreamProvider(),
+         todoStreamProvider: TodoStreamProviderType = FirestoreTodoStreamProvider(),
+         userInfoService: UserInfoServiceType = UserInfoService()) {
+        self.modelContainer = modelContainer
         self.userService = userService
         self.todoService = todoService
+        self.chatService = chatService
+        self.chatStreamProvider = chatStreamProvider
+        self.todoStreamProvider = todoStreamProvider
+        self.userInfoService = userInfoService
     }
 }
 
 extension DIContainer {
-    static let stub = DIContainer(userService: StubUserService(), todoService: StubTodoService())
+    static let stub = DIContainer(modelContainer: .forPreview(),
+                                  userService: StubUserService(),
+                                  todoService: StubTodoService(),
+                                  chatService: StubChatService(),
+                                  chatStreamProvider: FirestoreChatStreamProvider(),
+                                  todoStreamProvider: FirestoreTodoStreamProvider(),
+                                  userInfoService: StubUserInfoService())
 }
