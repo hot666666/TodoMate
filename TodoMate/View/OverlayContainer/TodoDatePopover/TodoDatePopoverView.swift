@@ -5,7 +5,6 @@
 //  Created by hs on 12/27/24.
 //
 
-
 import SwiftUI
 
 struct TodoDatePopoverView: View {
@@ -80,6 +79,7 @@ fileprivate struct CalendarView: View {
         }
     }
 }
+
 extension CalendarView {
     private func handleCalendarDayTap(at index: Int) {
         updateSelection(at: index)
@@ -109,6 +109,7 @@ extension CalendarView {
         }
     }
 }
+
 extension CalendarView {
     private func updateMonth(by value: Int) {
         if let newDate = calendar.date(byAdding: .month, value: value, to: currentDate) {
@@ -175,4 +176,12 @@ fileprivate struct CalendarDayView: View {
         }
         .contentShape(.rect)
     }
+}
+
+#Preview {
+    VStack {
+        TodoDatePopoverView(todo: Todo.stub[0])
+            .frame(width: 200, height: 200)
+    }
+    .frame(width: 300, height: 300)
 }

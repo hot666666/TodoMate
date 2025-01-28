@@ -11,11 +11,13 @@ struct TodoSheetView: View {
     @FocusState private var focusedField: Field?
     
     var todo: Todo
-    let update: (Todo) -> Void
     
     var body: some View {
         ZStack {
             clearFocusBackground
+                .onTapGesture {
+                    focusedField = nil
+                }
             
             VStack(alignment: .leading, spacing: 20) {
                 todoContent
@@ -26,37 +28,34 @@ struct TodoSheetView: View {
             }
             .padding(60)
         }
-        .onDisappear {
-            // TODO: - update after dirty check
-            update(todo)
-        }
-            
     }
     
+    @ViewBuilder
     private var todoContent: some View {
         TodoSheetContent(content: Bindable(todo).content)
             .focused($focusedField, equals: .content)
     }
     
+    @ViewBuilder
     private var todoDate: some View {
         TodoSheetDate(todo: todo)
     }
     
+    @ViewBuilder
     private var todoStatus: some View {
         TodoSheetStatus(todo: todo)
     }
     
+    @ViewBuilder
     private var todoDetail: some View {
         TodoSheetDetail(detail: Bindable(todo).detail)
             .focused($focusedField, equals: .detail)
     }
     
+    @ViewBuilder
     private var clearFocusBackground: some View {
         Color.clear
             .contentShape(Rectangle())
-            .onTapGesture {
-                focusedField = nil
-            }
     }
 }
 extension TodoSheetView {
@@ -123,7 +122,9 @@ fileprivate struct TodoSheetStatus: View {
         HStack(spacing: 20) {
             Text(Image(systemName: "circle.dotted")).bold() + Text(" 상태")
             
-            TodoStatusButton(todo: todo)
+            TodoStatusButton(status: todo.status) { newStatus in
+                todo.status = newStatus
+            }
         }
     }
 }
@@ -151,9 +152,26 @@ fileprivate struct TodoSheetDetail: View {
     
 }
 
-#Preview {
-    TodoSheetView(todo: .default, update: { _ in })
+#Preview("Todo-Mine Sheet") {
+    let authManager = AuthManager.stub
+    
+    return TodoSheetView(todo: Todo.stub.first!)
         .frame(width: 400, height: 400)
         .environment(OverlayManager.stub)
-        
+        .environment(authManager)
+        .task {
+            await authManager.signIn()
+        }
+}
+
+#Preview("Todo-Not Mine Sheet") {
+    let authManager = AuthManager.stub
+    
+    return TodoSheetView(todo: Todo.stub.last!)
+        .frame(width: 400, height: 400)
+        .environment(OverlayManager.stub)
+        .environment(authManager)
+        .task {
+            await authManager.signIn()
+        }
 }
