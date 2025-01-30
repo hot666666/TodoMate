@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout Repository
@@ -19,8 +19,9 @@ jobs:
           echo "APP_NAME=TodoMate" >> $GITHUB_ENV
           echo "BUNDLE_ID=io.hotcs6.TodoMate" >> $GITHUB_ENV
 
-      - name: Set Up Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app
+      # Xcode 버전 설정
+      - name: Set Up Xcode 16.2
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
       - name: Build macOS App(Build Configuration-Release, macOS)
         run: |
