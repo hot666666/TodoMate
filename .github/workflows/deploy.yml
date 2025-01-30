@@ -22,6 +22,10 @@ jobs:
           echo "APP_NAME=TodoMate" >> $GITHUB_ENV
           echo "BUNDLE_ID=io.hotcs6.TodoMate" >> $GITHUB_ENV
 
+      - name: Decode GoogleService-Info.plist
+        run: |
+          echo ${{ secrets.GOOGLE_SERVICE_INFO }} | base64 --decode > $APP_NAME/GoogleService-Info.plist
+
       - name: Update CFBundleVersion in Info.plist
         run: |
           INFO_PLIST_PATH="./$APP_NAME/Info.plist"
