@@ -22,13 +22,13 @@ jobs:
       - name: Set Up Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
-      - name: Build macOS App
+      - name: Build macOS App(Build Configuration-Release, macOS)
         run: |
           xcodebuild -project $APP_NAME.xcodeproj \
             -scheme $APP_NAME \
-            -configuration Release \  # Scheme의 Build Configuration을 Release로 설정
+            -configuration Release \
             -sdk macosx \
-            -destination 'platform=macOS' \  # macOS용으로 빌드
+            -destination 'platform=macOS' \
             -archivePath build/$APP_NAME.xcarchive archive
           xcodebuild -exportArchive \
             -archivePath build/$APP_NAME.xcarchive \
