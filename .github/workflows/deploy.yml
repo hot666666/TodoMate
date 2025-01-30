@@ -78,8 +78,6 @@ jobs:
             DEVELOPMENT_TEAM=8PRWAG4355 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
-            PROVISIONING_PROFILE=$HOME/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision \
-            PROVISIONING_PROFILE_SPECIFIER="TodoMate"
             archive
 
           xcodebuild -exportArchive \
