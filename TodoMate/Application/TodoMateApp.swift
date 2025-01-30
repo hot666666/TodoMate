@@ -45,6 +45,13 @@ struct TodoMateApp: App {
                 }
         }
         .modelContainer(sharedModelContainer)
+        .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button("업데이트") {
+                    appDelegate.checkForUpdates()
+                }
+            }
+        }
     }
 }
 

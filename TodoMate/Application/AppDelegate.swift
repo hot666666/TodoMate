@@ -9,8 +9,11 @@ import SwiftUI
 import FirebaseCore
 
 #if os(macOS)
+import Sparkle
 import AppKit
-class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
+    var updater: SPUUpdater?
+    
     func applicationWillFinishLaunching(_ notification: Notification) {
         /// 새 윈도우 생성 메뉴 삭제
         if let mainMenu = NSApplication.shared.mainMenu {
@@ -32,12 +35,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 #if !PREVIEW
         /// Firebase 초기화
         FirebaseApp.configure()
+        
+        /// Sparkle Controller 설정
+        let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
+        updater = updaterController.updater
+
+        /// 업데이트를 자동으로 확인
+        updater?.checkForUpdatesInBackground()
 #endif
         
         /// WindowDelegate 설정
         if let window = NSApplication.shared.windows.first {
             window.delegate = self
         }
+        
         
         
     }
@@ -49,6 +60,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
+    }
+}
+extension AppDelegate {
+    func checkForUpdates() {
+        updater?.checkForUpdates()
     }
 }
 #elseif os(iOS)
