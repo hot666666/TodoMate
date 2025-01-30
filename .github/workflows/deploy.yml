@@ -1,0 +1,97 @@
+name: Deploy(Build->Notarize->Upload Release->Update appcast.xml)
+
+on:
+  push:
+    tags:
+      - "*" # 모든 태그 푸시 시 실행
+
+jobs:
+  build-and-deploy:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set VERSION, APP_NAME, BUNDLE_ID
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "APP_NAME=TodoMate" >> $GITHUB_ENV
+          echo "BUNDLE_ID=io.hotcs6.TodoMate" >> $GITHUB_ENV
+
+      - name: Set Up Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build macOS App
+        run: |
+          xcodebuild -project $APP_NAME.xcodeproj \
+            -scheme $APP_NAME \
+            -configuration Release \  # Scheme의 Build Configuration을 Release로 설정
+            -sdk macosx \
+            -destination 'platform=macOS' \  # macOS용으로 빌드
+            -archivePath build/$APP_NAME.xcarchive archive
+          xcodebuild -exportArchive \
+            -archivePath build/$APP_NAME.xcarchive \
+            -exportPath build/ \
+            -exportOptionsPlist exportOptions.plist
+
+      - name: Find and Zip Built App
+        id: find_app
+        run: |
+          echo "Searching for built app..."
+          APP_PATH=$(find build -name "*.app" | head -n 1)
+          echo "Found app at: $APP_PATH"
+
+          ZIP_PATH="build/${APP_PATH##*/}.zip"
+          echo "Creating zip at: $ZIP_PATH"
+
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+          echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
+
+          echo "Zip file created. Size: $(ls -lh "$ZIP_PATH" | awk '{print $5}')"
+
+      - name: Notarize App using App-Specific Password
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+        run: |
+          xcrun altool --notarize-app -f "$APP_ZIP" \
+          --primary-bundle-id "$BUNDLE_ID" \
+          -u "$APPLE_ID" -p "$APP_PASSWORD"
+
+      - name: Upload Release Asset to GitHub
+        id: upload-release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${APP_ZIP}
+
+      - name: Set up Python and install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install PyNaCl
+
+      - name: Generate appcast.xml
+        working-directory: ${APP_NAME}/script
+        run: |
+          echo "Generating appcast.xml..."
+          echo "Working directory: $(pwd)"
+          echo "Input parameters:"
+          echo "Version: $VERSION"
+          echo "App path: $APP_ZIP"
+          echo "Upload URL: ${{ steps.upload-release.outputs.upload_url }}"
+
+          python3 appcast_generator.py --version "$VERSION" \
+            --path "$APP_ZIP" \
+            --url "${{ steps.upload-release.outputs.upload_url }}" \
+            --edSignature "${{ secrets.ED25519 }}"
+
+          echo "appcast.xml generated successfully:"
+          cat appcast.xml
+
+      - name: Deploy appcast.xml to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: .
+          target-folder: appcast # appcast.xml만 업로드
+          clean: false
