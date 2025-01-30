@@ -91,7 +91,8 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath build/$APP_NAME.xcarchive \
             -exportPath build/ \
-            -exportOptionsPlist exportOptions.plist
+            -exportOptionsPlist exportOptions.plist \
+            -allowProvisioningUpdates
 
       - name: Find and Zip Built App
         id: find_app
