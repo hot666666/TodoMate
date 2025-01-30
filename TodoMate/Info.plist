@@ -25,9 +25,9 @@
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://$(UPDATE_SERVER_URL)</string>
+	<string>https://hot666666.github.io/TodoMate/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>M7NqQCV6rYSk6+CMjTAFHYK/TqyVuuqzxTLtjR+pmvg=</string>
+	<string>qOd8x4y8USYRC130QuJiaYSUerRpM5z9lML2LSVmimM=</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
