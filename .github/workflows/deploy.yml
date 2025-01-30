@@ -114,9 +114,15 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
         run: |
-          xcrun altool --notarize-app -f "$APP_ZIP" \
-          --primary-bundle-id "$BUNDLE_ID" \
-          -u "$APPLE_ID" -p "$APP_PASSWORD"
+
+          xcrun notarytool store-credentials "AC_CREDENTIALS" \
+          --apple-id "$APPLE_ID" \
+          --team-id "8PRWAG4355" \
+          --password "$APP_PASSWORD"
+
+          xcrun notarytool submit "$APP_ZIP" --keychain-profile "AC_CREDENTIALS" --wait
+
+          xcrun stapler staple "$APP_ZIP"
 
       - name: Upload Release Asset to GitHub
         id: upload-release
