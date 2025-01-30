@@ -10,15 +10,17 @@ import Foundation
 @Observable
 class User: Identifiable {
     let id: String = UUID().uuidString
-    var nickname: String
     var uid: String
+    var nickname: String
+    var gid: String
     
-    init(nickname: String, uid: String = UUID().uuidString) {
-        self.nickname = nickname
+    init(uid: String = UUID().uuidString, nickname: String, gid: String = "") {
         self.uid = uid
+        self.nickname = nickname
+        self.gid = gid
     }
 }
 
 extension User {
-    static let stub: [User] = [.init(nickname: "hs", uid: "hs"), .init(nickname: "jy", uid: "jy")]
+    static let stub: [User] = [.init(uid: "hs", nickname: "hs", gid: UserGroup.stub.id), .init(uid: "jy", nickname: "jy", gid: UserGroup.stub.id)]
 }
