@@ -69,17 +69,17 @@ jobs:
 
       - name: Build macOS App(Build Configuration-Release, macOS, manual code signing)
         run: |
-          # -allowProvisioningUpdates archive!!!
           xcodebuild -project $APP_NAME.xcodeproj \
             -scheme $APP_NAME \
             -configuration Release \
             -sdk macosx \
             -destination 'platform=macOS' \
-            -archivePath build/$APP_NAME.xcarchive archive \
+            -archivePath build/$APP_NAME.xcarchive \
             DEVELOPMENT_TEAM=8PRWAG4355 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             PROVISIONING_PROFILE=$HOME/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision \
+            PROVISIONING_PROFILE_SPECIFIER="TodoMate"
             archive
 
           xcodebuild -exportArchive \
