@@ -65,7 +65,7 @@ jobs:
       - name: Set Up Xcode 16.2
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
-      - name: Build macOS App(Build Configuration-Release, macOS)
+      - name: Build macOS App(Build Configuration-Release, macOS, manual code signing)
         run: |
           # -allowProvisioningUpdates archive!!!
           xcodebuild -project $APP_NAME.xcodeproj \
@@ -74,7 +74,11 @@ jobs:
             -sdk macosx \
             -destination 'platform=macOS' \
             -archivePath build/$APP_NAME.xcarchive archive \
-            -allowProvisioningUpdates archive
+            DEVELOPMENT_TEAM=2C4MAHSGGA \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
+            archive
+
           xcodebuild -exportArchive \
             -archivePath build/$APP_NAME.xcarchive \
             -exportPath build/ \

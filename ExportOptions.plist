@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>destination</key>
-	<string>export</string>
-	<key>method</key>
-	<string>developer-id</string>
-	<key>signingStyle</key>
-	<string>automatic</string>
-	<key>teamID</key>
-	<string>8PRWAG4355</string>
-</dict>
+	<dict>
+		<key>method</key>
+		<string>developer-id</string>
+		<key>teamID</key>
+		<string>2C4MAHSGGA</string>
+		<key>signingStyle</key>
+		<string>manual</string>
+		<key>signingCertificate</key>
+		<string>Developer ID Application</string>
+		<key>provisioningProfiles</key>
+		<dict>
+			<key>io.hotcs6.TodoMate</key>
+			<string>8PRWAG4355</string>
+			<key>io.hotcs6.TodoMate.TodoMateWidget</key>
+			<string>8PRWAG4355</string>
+		</dict>
+	</dict>
 </plist>
