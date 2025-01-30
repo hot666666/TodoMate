@@ -5,11 +5,11 @@
 //  Created by hs on 1/19/25.
 //
 
+import SwiftUI
+import SwiftData
 import FirebaseCore
 import FirebaseAuth
 import GoogleSignIn
-import SwiftUI
-import SwiftData
 
 enum AuthError: Error {
     case invalidAppConfiguration
@@ -21,6 +21,7 @@ enum AuthError: Error {
 protocol AuthManagerType {
     var authState: AuthManager.AuthState { get }
     var userInfo: AuthManager.UserInfo { get }
+    func updateUserInfo(_ gid: String)
     func signIn() async
     func signOut() async
 }
@@ -102,9 +103,9 @@ class AuthManager: AuthManagerType {
                 throw AuthError.failedToGetUserID
             }
             
-            await createUserIfNeeded(uid: user.uid, name: user.displayName ?? "Unknown")
+            let fUser = await handleUserAuthentication(uid: user.uid, name: user.displayName ?? "Unknown")
             await removeAllTodoEntity()
-            userInfo = .init(id: user.uid, token: idToken)
+            userInfo = .init(id: fUser.uid, token: idToken, gid: fUser.gid)
             print("Sign in successful for user: \(userInfo.id)")
         } catch {
             authState = .signedOut
@@ -126,17 +127,24 @@ class AuthManager: AuthManagerType {
         authState = .signedOut
         print("User signed out successfully")
     }
+    
+    // TODO: - 다른 요소에 대해서도 업데이트가 필요한 경우 추가
+    func updateUserInfo(_ gid: String) {
+        userInfo = .init(id: userInfo.id, token: userInfo.token, gid: gid)
+    }
 }
 extension AuthManager {
-    private func createUserIfNeeded(uid: String, name: String) async {
-        if let existingUser = await userService.fetch(uid: uid){
-            print("User already exists with uid: \(existingUser.uid)")
-            return
+    private func handleUserAuthentication(uid: String, name: String) async -> User {
+        guard let existingUser = await userService.fetch(uid: uid) else {
+            let newUser = User(uid: uid, nickname: name)
+            
+            await userService.update(newUser)
+            print("Created new user: \(newUser.uid)")
+            return newUser
         }
         
-        let newUser = User(nickname: name, uid: uid)
-        userService.update(newUser)
-        print("Created new user: \(newUser)")
+        print("User already exists with uid: \(existingUser.uid)")
+        return existingUser
     }
     
     @MainActor
@@ -153,12 +161,16 @@ class AuthManager: AuthManagerType {
     
     init(container: DIContainer) {}
     
+    func updateUserInfo(_ gid: String) {
+        userInfo = .init(id: userInfo.id, token: userInfo.token, gid: gid)
+    }
+    
     @MainActor
     func signIn() async {
         authState = .loading
         
         try? await Task.sleep(nanoseconds: 1_000_000_000)
-        userInfo = .init(id: User.stub[0].uid, token: UUID().uuidString)
+        userInfo = .init(id: User.stub[0].uid, token: UUID().uuidString, gid: "")
         print("User signed in")
         
         authState = .signedIn
@@ -166,7 +178,7 @@ class AuthManager: AuthManagerType {
     
     @MainActor
     func signOut() async {
-        userInfo = .empty
+        authState = .loading
         
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         userInfo = .empty
@@ -187,13 +199,21 @@ extension AuthManager {
     struct UserInfo: Codable {
         let id: String
         let token: String
+        let gid: String
         
-        static let empty = UserInfo(id: "", token: "")
-        static let stub = UserInfo(id: User.stub[0].uid, token: UUID().uuidString)
+        static let empty = UserInfo(id: "", token: "", gid: "")
+        static let stub = UserInfo(id: User.stub[0].uid, token: UUID().uuidString, gid: "")
+        static let hasGroupStub = UserInfo(id: User.stub[0].uid, token: UUID().uuidString, gid: UserGroup.stub.id)
     }
 }
 extension AuthManager {
     static let stub: AuthManager = .init(container: .stub)
+    static var signedInAndHasGroupStub: AuthManager {
+        let manager = AuthManager(container: .stub)
+        manager.userInfo = .hasGroupStub
+        manager.authState = .signedIn
+        return manager
+    }
 }
 
 typealias UserInfo = AuthManager.UserInfo

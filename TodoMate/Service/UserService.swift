@@ -8,7 +8,7 @@
 protocol UserServiceType {
     func fetch() async -> [User]
     func fetch(uid: String) async -> User?
-    func update(_ user: User)
+    func update(_ user: User) async
 }
 
 final class UserService: UserServiceType {
@@ -33,14 +33,12 @@ final class UserService: UserServiceType {
         return try? await userRepository.fetchUser(id: uid).toModel()
     }
     
-    func update(_ user: User) {
+    func update(_ user: User) async {
         print("[Updating User] - \(user)")
-        Task {
-            do {
-                try await userRepository.updateUser(user: user.toDTO())
-            } catch {
-                print("Error updating users: \(error)")
-            }
+        do {
+            try await userRepository.updateUser(user: user.toDTO())
+        } catch {
+            print("Error updating users: \(error)")
         }
     }
 }

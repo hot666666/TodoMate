@@ -9,22 +9,35 @@ import SwiftUI
 
 struct MainView: View {
     @Environment(DIContainer.self) private var container
+    @Environment(OverlayManager.self) private var overlayManager
     @Environment(AuthManager.self) private var authManager
     
     var body: some View {
         ZStack {
-            ScrollView {
+            if authManager.userInfo.gid.isEmpty {
+                JoinGroupView()
+            } else {
                 GroupDashboardView(viewModel: .init(container: container,
                                                     userInfo: authManager.userInfo))
-                
-                // TODO: - REMOVE
-                SignOutButton()
+                .onDisappear {
+                    overlayManager.reset()
+                }
             }
             
             /// 오버레이 뷰 컨테이너(OverlayType)
             OverlayContainerView()
         }
     }
+    
+    
+}
+
+#Preview("Signed In") {
+    MainView()
+        .environment(DIContainer.stub)
+        .environment(OverlayManager.stub)
+        .environment(AuthManager.signedInAndHasGroupStub)
+        .frame(width: 400, height: 400)
 }
 
 #Preview {
