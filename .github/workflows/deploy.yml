@@ -67,12 +67,14 @@ jobs:
 
       - name: Build macOS App(Build Configuration-Release, macOS)
         run: |
+          # -allowProvisioningUpdates archive!!!
           xcodebuild -project $APP_NAME.xcodeproj \
             -scheme $APP_NAME \
             -configuration Release \
             -sdk macosx \
             -destination 'platform=macOS' \
-            -archivePath build/$APP_NAME.xcarchive archive
+            -archivePath build/$APP_NAME.xcarchive archive \
+            -allowProvisioningUpdates archive
           xcodebuild -exportArchive \
             -archivePath build/$APP_NAME.xcarchive \
             -exportPath build/ \
