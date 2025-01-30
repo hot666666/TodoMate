@@ -26,6 +26,10 @@ final class FirestoreReference {
     func chatCollection() -> CollectionReference {
         return db.collection(FireStore.CHAT)
     }
+    
+    func groupCollection() -> CollectionReference {
+        return db.collection(FireStore.GROUP)
+    }
 }
 #else
 class FirestoreReference {
