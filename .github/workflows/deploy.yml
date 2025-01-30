@@ -3,10 +3,11 @@ name: Deploy(Build->Notarize->Upload Release->Update appcast.xml)
 on:
   push:
     tags:
-      - "*" # 모든 태그 푸시 시 실행
+      - "*"
 
 jobs:
   build-and-deploy:
+    # macOS 버전 지정(latest로 해당 버전이 지정안됨)
     runs-on: macos-15
 
     steps:
@@ -18,6 +19,17 @@ jobs:
           echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           echo "APP_NAME=TodoMate" >> $GITHUB_ENV
           echo "BUNDLE_ID=io.hotcs6.TodoMate" >> $GITHUB_ENV
+
+      - name: Update CFBundleVersion in Info.plist
+        run: |
+          INFO_PLIST_PATH="./$APP_NAME/Info.plist"
+          if [ -f "$INFO_PLIST_PATH" ]; then
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $VERSION" "$INFO_PLIST_PATH" || \
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" "$INFO_PLIST_PATH"
+            echo "Updated CFBundleVersion to $VERSION in Info.plist"
+          else
+            echo "Info.plist not found at $INFO_PLIST_PATH"
+          fi
 
       # Xcode 버전 설정
       - name: Set Up Xcode 16.2

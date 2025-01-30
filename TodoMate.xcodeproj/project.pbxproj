@@ -21,7 +21,7 @@
 		451DEDD32D3E4E1B00A20417 /* TodoBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDD22D3E4E1B00A20417 /* TodoBoardViewModel.swift */; };
 		451DEDE32D3E8D2F00A20417 /* ChatBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDE22D3E8D2B00A20417 /* ChatBoardView.swift */; };
 		451DEDE62D3E9BD000A20417 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 451DEDE52D3E9BD000A20417 /* FirebaseFirestore */; };
-		451DEDE72D3EA11300A20417 /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 45B655E92CAFDF2C008F6443 /* TodoMateWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		451DEDE72D3EA11300A20417 /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 45B655E92CAFDF2C008F6443 /* TodoMateWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		451DEDF92D40BF2800A20417 /* ChatBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDF82D40BF2800A20417 /* ChatBoardViewModel.swift */; };
 		451DEDFD2D40CC7100A20417 /* FirestoreChatStreamProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDFC2D40CC6B00A20417 /* FirestoreChatStreamProvider.swift */; };
 		4526B0AD2D41E58700DC90F5 /* FStorageReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4526B0AC2D41E58700DC90F5 /* FStorageReference.swift */; };
@@ -760,7 +760,6 @@
 /* Begin PBXTargetDependency section */
 		451DEDE92D3EA11300A20417 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilter = ios;
 			target = 45B655E82CAFDF2C008F6443 /* TodoMateWidgetExtension */;
 			targetProxy = 451DEDE82D3EA11300A20417 /* PBXContainerItemProxy */;
 		};
