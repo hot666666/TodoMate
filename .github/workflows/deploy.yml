@@ -74,7 +74,7 @@ jobs:
             -sdk macosx \
             -destination 'platform=macOS' \
             -archivePath build/$APP_NAME.xcarchive archive \
-            DEVELOPMENT_TEAM=2C4MAHSGGA \
+            DEVELOPMENT_TEAM=8PRWAG4355 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             archive
