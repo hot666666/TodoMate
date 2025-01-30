@@ -2,8 +2,10 @@ name: Deploy(Build->Notarize->Upload Release->Update appcast.xml)
 
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - deploy
+    # tags:
+    #   - "*"
 
 jobs:
   build-and-deploy:
