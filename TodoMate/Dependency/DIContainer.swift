@@ -14,6 +14,7 @@ final class DIContainer {
     @ObservationIgnored let userService: UserServiceType
     @ObservationIgnored let todoService: TodoServiceType
     @ObservationIgnored let chatService: ChatServiceType
+    @ObservationIgnored let groupService: GroupServiceType
     @ObservationIgnored let chatStreamProvider: ChatStreamProviderType
     @ObservationIgnored let todoStreamProvider: TodoStreamProviderType
     @ObservationIgnored let userInfoService: UserInfoServiceType
@@ -22,6 +23,7 @@ final class DIContainer {
          userService: UserServiceType = UserService(),
          todoService: TodoServiceType = TodoService(),
          chatService: ChatServiceType = ChatService(),
+         groupService: GroupServiceType = GroupService(),
          chatStreamProvider: ChatStreamProviderType = FirestoreChatStreamProvider(),
          todoStreamProvider: TodoStreamProviderType = FirestoreTodoStreamProvider(),
          userInfoService: UserInfoServiceType = UserInfoService()) {
@@ -29,6 +31,7 @@ final class DIContainer {
         self.userService = userService
         self.todoService = todoService
         self.chatService = chatService
+        self.groupService = groupService
         self.chatStreamProvider = chatStreamProvider
         self.todoStreamProvider = todoStreamProvider
         self.userInfoService = userInfoService
@@ -40,6 +43,7 @@ extension DIContainer {
                                   userService: StubUserService(),
                                   todoService: StubTodoService(),
                                   chatService: StubChatService(),
+                                  groupService: StubGroupService(),
                                   chatStreamProvider: FirestoreChatStreamProvider(),
                                   todoStreamProvider: FirestoreTodoStreamProvider(),
                                   userInfoService: StubUserInfoService())

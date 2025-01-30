@@ -30,6 +30,8 @@ struct OverlayContainerView: View {
             TodoSheet(todo: todo, isMine: isMine, update: update)
         case .todoDate(let anchor, let todo):
             TodoDatePopover(anchor: anchor, todo: todo)
+        case .profile(let user, let updateGroup):
+            ProfileSheet(user: user, updateGroup: updateGroup)
         }
     }
     
@@ -38,6 +40,23 @@ struct OverlayContainerView: View {
         // 오버레이 뷰를 닫는 뷰
         Color.black.opacity(0.3)
             .edgesIgnoringSafeArea(.all)
+    }
+}
+
+// MARK: - ProfileSheet
+fileprivate struct ProfileSheet: View {
+    let user: User
+    let updateGroup: () async -> Void
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ProfileSheetView(user: user, updateGroup: updateGroup)
+                .frame(width: geometry.size.width * 0.5,
+                       height: geometry.size.height * 0.5)
+                .background(.regularMaterial)
+                .cornerRadius(10)
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+        }
     }
 }
 

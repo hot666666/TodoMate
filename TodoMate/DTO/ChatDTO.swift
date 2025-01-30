@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 #if PREVIEW
 struct ChatDTO {
     var id: String?

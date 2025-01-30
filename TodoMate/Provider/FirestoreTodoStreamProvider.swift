@@ -63,6 +63,7 @@ extension FirestoreTodoStreamProvider {
             
             continuation.onTermination = { @Sendable _ in
                 /// 스트림이 종료될 때 리스너 해제
+                print("[FirestoreTodoStreamProvider] - Stream Terminated")
                 listener.remove()
             }
         }

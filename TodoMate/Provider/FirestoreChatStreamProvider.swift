@@ -48,6 +48,7 @@ extension FirestoreChatStreamProvider {
                 }
             
             continuation.onTermination = { @Sendable _ in
+                print("[FirestoreChatStreamProvider] - Stream Terminated")
                 /// 스트림이 종료될 때 리스너 해제
                 listener.remove()
             }

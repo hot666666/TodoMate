@@ -7,12 +7,15 @@
 
 import SwiftUI
 
-struct ExpandableView<Content: View>: View {
+struct ExpandableView<Title: View, Content: View>: View {
     @AppStorage private var isExpanded: Bool
-    let title: String
+    let title: () -> Title
     let content: () -> Content
     
-    init(title: String, isExpanded: Bool = true, storageKey: String, @ViewBuilder content: @escaping () -> Content) {
+    init(isExpanded: Bool = true,
+         storageKey: String,
+         @ViewBuilder title: @escaping () -> Title,
+         @ViewBuilder content: @escaping () -> Content) {
         self.title = title
         self.content = content
         self._isExpanded = AppStorage(wrappedValue: isExpanded, storageKey)
@@ -26,7 +29,7 @@ struct ExpandableView<Content: View>: View {
                 HStack {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                         .frame(width: 20)
-                    Text(" \(title)")
+                    title()
                     Spacer()
                 }
                 .font(.title3)
