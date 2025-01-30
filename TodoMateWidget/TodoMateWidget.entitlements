@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>$(TeamIdentifierPrefix)io.hotcs6.TodoMate</string>
+		<string>group.io.hotcs6.TodoMate</string>
 	</array>
 </dict>
 </plist>

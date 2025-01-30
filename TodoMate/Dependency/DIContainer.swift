@@ -5,34 +5,42 @@
 //  Created by hs on 8/21/24.
 //
 
-import Foundation
+import Observation
+import SwiftData
 
 @Observable
-class DIContainer {
-    var chatService: ChatServiceType
-    var todoService: TodoServiceType
-    var todoRealtimeService: TodoRealtimeServiceType
-    var imageUploadService: ImageUploadServiceType
+final class DIContainer {
+    @ObservationIgnored let modelContainer: ModelContainer
+    @ObservationIgnored let userService: UserServiceType
+    @ObservationIgnored let todoService: TodoServiceType
+    @ObservationIgnored let chatService: ChatServiceType
+    @ObservationIgnored let chatStreamProvider: ChatStreamProviderType
+    @ObservationIgnored let todoStreamProvider: TodoStreamProviderType
+    @ObservationIgnored let userInfoService: UserInfoServiceType
     
-    init(chatService: ChatServiceType,
-         todoService: TodoServiceType,
-         todoRealtimeService: TodoRealtimeServiceType,
-         imageUploadService: ImageUploadServiceType
-    ) {
-        self.chatService = chatService
+    init(modelContainer: ModelContainer,
+         userService: UserServiceType = UserService(),
+         todoService: TodoServiceType = TodoService(),
+         chatService: ChatServiceType = ChatService(),
+         chatStreamProvider: ChatStreamProviderType = FirestoreChatStreamProvider(),
+         todoStreamProvider: TodoStreamProviderType = FirestoreTodoStreamProvider(),
+         userInfoService: UserInfoServiceType = UserInfoService()) {
+        self.modelContainer = modelContainer
+        self.userService = userService
         self.todoService = todoService
-        self.todoRealtimeService = todoRealtimeService
-        self.imageUploadService = imageUploadService
+        self.chatService = chatService
+        self.chatStreamProvider = chatStreamProvider
+        self.todoStreamProvider = todoStreamProvider
+        self.userInfoService = userInfoService
     }
 }
 
-
 extension DIContainer {
-    static var stub: DIContainer {
-        .init(chatService: StubChatService(),
-              todoService: StubTodoService(),
-              todoRealtimeService: StubTodoRealtimeService(),
-              imageUploadService: StubImageUploadService()
-        )
-    }
+    static let stub = DIContainer(modelContainer: .forPreview(),
+                                  userService: StubUserService(),
+                                  todoService: StubTodoService(),
+                                  chatService: StubChatService(),
+                                  chatStreamProvider: FirestoreChatStreamProvider(),
+                                  todoStreamProvider: FirestoreTodoStreamProvider(),
+                                  userInfoService: StubUserInfoService())
 }

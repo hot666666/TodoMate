@@ -10,7 +10,7 @@ import SwiftData
 
 @Model
 class TodoEntity {
-    /// TodoStatus : "진행 중", .customBlue
+    /// TodoStatus는 "진행 중"인 경우만 기록하기에 따로 저장하지 않음
     var date: Date
     var content: String
     var uid: String
@@ -23,10 +23,9 @@ class TodoEntity {
         self.fid = fid
     }
 }
-
 extension TodoEntity {
     static var stub: [TodoEntity] {
-        [.init(date: .now, content: "할일1", uid: UUID().uuidString, fid: UUID().uuidString),
-         .init(date: .now, content: "할일5", uid: UUID().uuidString, fid: UUID().uuidString)]
+        [.init(date: .now, content: "할일1", uid: "hs", fid: UUID().uuidString),
+         .init(date: .now, content: "할일2", uid: "hs", fid: UUID().uuidString)]
     }
 }

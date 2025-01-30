@@ -12,49 +12,16 @@ protocol TodoRepositoryType {
     func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO]
     func updateTodo(todo: TodoDTO) async throws
     func deleteTodo(todoId: String) async throws
-    func observeTodoChanges() -> AsyncStream<DatabaseChange<TodoDTO>>
 }
 
-class FirestoreTodoRepository: TodoRepositoryType {
+final class FirestoreTodoRepository: TodoRepositoryType {
     private let reference: FirestoreReference
     
     init(reference: FirestoreReference = .shared) {
         self.reference = reference
     }
 }
-
-extension FirestoreTodoRepository {
-    func observeTodoChanges() -> AsyncStream<DatabaseChange<TodoDTO>> {
-        AsyncStream { continuation in
-            let listener = reference.todoCollection().addSnapshotListener { querySnapshot, error in
-                guard let snapshot = querySnapshot else {
-                    if let error = error {
-                        print("Error fetching snapshots: \(error)")
-                    }
-                    return
-                }
-                
-                snapshot.documentChanges.forEach { diff in
-                    if let todoDTO = try? diff.document.data(as: TodoDTO.self) {
-                        switch diff.type {
-                        case .added:
-                            continuation.yield(.added(todoDTO))
-                        case .modified:
-                            continuation.yield(.modified(todoDTO))
-                        case .removed:
-                            continuation.yield(.removed(todoDTO))
-                        }
-                    }
-                }
-            }
-            
-            continuation.onTermination = { @Sendable _ in
-                listener.remove()
-            }
-        }
-    }
-}
-
+#if !PREVIEW
 extension FirestoreTodoRepository {
     func createTodo(todo: TodoDTO) async throws {
         let todoDocRef = reference.todoCollection().document()
@@ -91,3 +58,22 @@ extension FirestoreTodoRepository {
         try await todoDocRef.delete()
     }
 }
+#else
+extension FirestoreTodoRepository {
+    func createTodo(todo: TodoDTO) async throws {
+        print("[Creating Todo] - \(todo)")
+    }
+    
+    func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO] {
+        return TodoDTO.stub
+    }
+    
+    func updateTodo(todo: TodoDTO) async throws {
+        print("[Updating Todo] - \(todo)")
+    }
+    
+    func deleteTodo(todoId: String) async throws {
+        print("[Deleting Todo] - \(todoId)")
+    }
+}
+#endif
