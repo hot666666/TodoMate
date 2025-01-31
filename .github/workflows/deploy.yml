@@ -96,6 +96,15 @@ jobs:
             -exportOptionsPlist exportOptions.plist \
             -allowProvisioningUpdates
 
+      - name: Apply Hardened Runtime to Sparkle Updater
+        run: |
+          APP_PATH="$APP_ZIP/TodoMate.app"
+          UPDATER_PATH="$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+          # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+
+          codesign --force --deep --sign "$SIGNING_IDENTITY" --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" "$UPDATER_PATH"
+
       - name: Find and Zip Built App
         id: find_app
         run: |
