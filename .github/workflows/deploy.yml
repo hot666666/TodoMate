@@ -107,11 +107,9 @@ jobs:
           SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
 
           # Sparkle 앱에 서명
-          UPDATER_PATH="$APP_PATH/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
-          codesign --force --deep --sign "$SIGNING_IDENTITY" --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" "$UPDATER_PATH"
-
-          # 앱 전체에 서명(Sparkle 서명오류)
-          codesign --force --sign "$SIGNING_IDENTITY" --timestamp --deep $APP_PATH
+          SPARKLE_PATH="$APP_PATH/Contents/Frameworks/Sparkle.framework"
+          codesign --force --timestamp --deep --sign "$SIGNING_IDENTITY" \
+          --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" $SPARKLE_PATH
 
           ZIP_PATH="build/${APP_PATH##*/}.zip"
           echo "Creating zip at: $ZIP_PATH"
