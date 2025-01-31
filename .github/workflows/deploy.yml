@@ -186,6 +186,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: .
+          folder: $(pwd)/script
           target-folder: appcast # appcast.xml만 업로드
           clean: false
