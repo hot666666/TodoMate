@@ -96,20 +96,28 @@ jobs:
             -exportOptionsPlist exportOptions.plist \
             -allowProvisioningUpdates
 
+      - name: Harden Sparkle Framework
+        run: |
+          SPARKLE_FRAMEWORK_PATH="build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks/Sparkle.framework"
+          # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+
+          # Sparkle 프레임워크 내부 실행 파일 서명
+          find "$SPARKLE_FRAMEWORK_PATH" -type f -perm +111 -exec codesign --force --deep --timestamp \
+          --options=runtime --sign "$SIGNING_IDENTITY" \
+          --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" {} \;
+
+          # 최상위 Sparkle Framework 재서명
+          codesign --force --deep --timestamp \
+          --options=runtime --sign "$SIGNING_IDENTITY" \
+          "$SPARKLE_FRAMEWORK_PATH"
+
       - name: Find and Zip Built App
         id: find_app
         run: |
           echo "Searching for built app..."
           APP_PATH=$(find build -name "*.app" | head -n 1)
           echo "Found app at: $APP_PATH"
-
-          # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
-          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
-
-          # Sparkle 앱에 서명
-          SPARKLE_PATH="$GITHUB_WORKSPACE/$APP_PATH/Contents/Frameworks/Sparkle.framework"
-          codesign --force --timestamp --deep --sign "$SIGNING_IDENTITY" \
-          --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" $SPARKLE_PATH
 
           ZIP_PATH="build/${APP_PATH##*/}.zip"
           echo "Creating zip at: $ZIP_PATH"

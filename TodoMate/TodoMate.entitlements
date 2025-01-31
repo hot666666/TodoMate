@@ -10,7 +10,5 @@
 	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<key>com.apple.security.get-task-allow</key>
-	<true/>
 </dict>
 </plist>
