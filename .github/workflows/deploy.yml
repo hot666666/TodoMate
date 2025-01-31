@@ -140,7 +140,17 @@ jobs:
 
           xcrun notarytool submit "$APP_ZIP" --keychain-profile "AC_CREDENTIALS" --wait
 
-          xcrun stapler staple "$APP_ZIP"
+          xcrun stapler staple "$APP_PATH"
+
+      - name: Recreate ZIP for Stapled App
+        run: |
+          ZIP_PATH="build/${APP_PATH##*/}.zip"
+          echo "Recreating zip at: $ZIP_PATH"
+
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+          echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
+
+          echo "Zip file recreated. Size: $(ls -lh "$ZIP_PATH" | awk '{print $5}')"
 
       - name: Upload Release Asset to GitHub
         id: upload-release
