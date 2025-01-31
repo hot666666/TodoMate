@@ -159,8 +159,10 @@ jobs:
 
       - name: Set up Python and install dependencies
         run: |
+          python3 -m venv venv
+          source venv/bin/activate
           python3 -m pip install --upgrade pip
-          pip3 install PyNaCl
+          pip install PyNaCl requests
 
       - name: Generate appcast.xml
         working-directory: ${APP_NAME}/script
