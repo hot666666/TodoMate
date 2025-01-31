@@ -86,6 +86,8 @@ jobs:
             DEVELOPMENT_TEAM=8PRWAG4355 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
+            OTHER_CODE_SIGN_FLAGS="--entitlements TodoMate.entitlements" \
+            ENABLE_HARDENED_RUNTIME=YES \
             archive
 
           xcodebuild -exportArchive \
