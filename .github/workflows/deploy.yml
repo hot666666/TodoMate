@@ -140,7 +140,8 @@ jobs:
 
           xcrun notarytool submit "$APP_ZIP" --keychain-profile "AC_CREDENTIALS" --wait
 
-          xcrun stapler staple "build/$APP_PATH"
+          APP_PATH=$(find build -name "*.app" | head -n 1)
+          xcrun stapler staple "$APP_PATH"
 
       - name: Recreate ZIP for Stapled App
         run: |
