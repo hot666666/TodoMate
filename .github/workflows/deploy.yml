@@ -165,6 +165,7 @@ jobs:
           pip install PyNaCl requests
 
       - name: Generate appcast.xml
+        working-directory: $(pwd)/script
         run: |
           echo "Generating appcast.xml..."
           echo "Working directory: $(pwd)"
@@ -173,7 +174,7 @@ jobs:
           echo "App path: $APP_ZIP"
           echo "Upload URL: ${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}"
 
-          python3 script/appcast_generator.py --version "$VERSION" \
+          python3 appcast_generator.py --version "$VERSION" \
             --path "$APP_ZIP" \
             --url "${{ steps.upload-release.outputs.upload_url }}" \
             --edSignature "${{ secrets.ED25519 }}"
@@ -185,6 +186,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: script
+          folder: .
           target-folder: appcast # appcast.xml만 업로드
           clean: false
