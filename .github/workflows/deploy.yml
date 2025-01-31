@@ -71,15 +71,6 @@ jobs:
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
           cp $WIDGET_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      - name: Check Entitlements File
-        run: |
-          if [ -f "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" ]; then
-            echo "Entitlements file exists."
-          else
-            echo "Entitlements file does not exist."
-            exit 1
-          fi
-
       # Xcode 버전 설정
       - name: Set Up Xcode 16.2
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
@@ -95,7 +86,7 @@ jobs:
             DEVELOPMENT_TEAM=8PRWAG4355 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
-            OTHER_CODE_SIGN_FLAGS="--entitlements $APP_NAME/TodoMate.entitlements" \
+            OTHER_CODE_SIGN_FLAGS="--entitlements $GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" \
             ENABLE_HARDENED_RUNTIME=YES \
             archive
 
