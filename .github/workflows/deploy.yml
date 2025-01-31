@@ -101,6 +101,12 @@ jobs:
           APP_PATH=$(find build -name "*.app" | head -n 1)
           echo "Found app at: $APP_PATH"
 
+          # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+
+          # 앱 전체에 서명(Sparkle 서명오류)
+          codesign --force --sign "$SIGNING_IDENTITY" --timestamp --deep $APP_PATH
+
           ZIP_PATH="build/${APP_PATH##*/}.zip"
           echo "Creating zip at: $ZIP_PATH"
 
