@@ -118,6 +118,7 @@ jobs:
           echo "Searching for built app..."
           APP_PATH=$(find build -name "*.app" | head -n 1)
           echo "Found app at: $APP_PATH"
+          echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
 
           ZIP_PATH="build/${APP_PATH##*/}.zip"
           echo "Creating zip at: $ZIP_PATH"
@@ -140,7 +141,6 @@ jobs:
 
           xcrun notarytool submit "$APP_ZIP" --keychain-profile "AC_CREDENTIALS" --wait
 
-          APP_PATH=$(find build -name "*.app" | head -n 1)
           xcrun stapler staple "$APP_PATH"
 
       - name: Recreate ZIP for Stapled App
