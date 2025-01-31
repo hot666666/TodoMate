@@ -107,7 +107,7 @@ jobs:
           SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
 
           # Sparkle 앱에 서명
-          SPARKLE_PATH="$APP_PATH/Contents/Frameworks/Sparkle.framework"
+          SPARKLE_PATH="$GITHUB_WORKSPACE/$APP_PATH/Contents/Frameworks/Sparkle.framework"
           codesign --force --timestamp --deep --sign "$SIGNING_IDENTITY" \
           --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" $SPARKLE_PATH
 
