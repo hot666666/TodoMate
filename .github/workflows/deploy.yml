@@ -167,15 +167,14 @@ jobs:
       - name: Generate appcast.xml
         run: |
           echo "Generating appcast.xml..."
-          echo "Working directory: ${pwd}"
           echo "Input parameters:"
           echo "Version: $VERSION"
           echo "App path: $APP_ZIP"
           echo "Upload URL: ${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}"
 
-          python3 TodoMate/script/appcast_generator.py --version "$VERSION" \
-            --path "$APP_ZIP" \
-            --url "${{ steps.upload-release.outputs.upload_url }}" \
+          python3 script/appcast_generator.py --version "$VERSION" \
+            --path "$GITHUB_WORKSPACE/$APP_ZIP" \
+            --url "${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}" \
             --edSignature "${{ secrets.ED25519 }}"
 
           echo "appcast.xml generated successfully:"
@@ -185,6 +184,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: TodoMate/script
+          folder: script
           target-folder: appcast # appcast.xml만 업로드
           clean: false
