@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+  <channel>
+    <title>TodoMate 업데이트</title>
+    <description>MacOS용 최신 업데이트</description>
+    <link>https://github.com/hot666666/TodoMate/releases</link>
+    <item>
+      <title>Version 2.0.0</title>
+      <description>새로운 업데이트 가능: TodoMate 버전 2.0.0.</description>
+      <pubDate>Sat, 01 Feb 2025 04:43:15 +0000</pubDate>
+      <enclosure sparkle:shortVersionString="2.0.0" sparkle:version="1" sparkle:sha256="8fcef19688f4e478eead05277d422d0d5a78c0ac739cd1a7e51e8167d752c049" sparkle:edSignature="2ncun2Zr9/kFO0SJDUrYfswvXgFKR0YNr+eXymQfK2xHkTjIlDRK9LpQtsMnTD7OcO3jdrXt6l6+XUcReTxmDA==" url="https://github.com/hot666666/TodoMate/releases/download/2.0.0/TodoMate.app.zip" length="14670899" type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
