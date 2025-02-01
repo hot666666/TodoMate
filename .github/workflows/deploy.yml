@@ -83,6 +83,7 @@ jobs:
             -archivePath build/$APP_NAME.xcarchive \
             DEVELOPMENT_TEAM=8PRWAG4355 \
             CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
             OTHER_CODE_SIGN_FLAGS="--entitlements $GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" \
             ENABLE_HARDENED_RUNTIME=YES \
             archive
