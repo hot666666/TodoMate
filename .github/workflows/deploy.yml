@@ -181,10 +181,15 @@ jobs:
           echo "appcast.xml generated successfully:"
           cat appcast.xml
 
-      - name: Deploy appcast.xml to GitHub Pages
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p appcast
+          cp appcast.xml appcast/
+
+      - name: Deploy only appcast.xml to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: script
-          target-folder: appcast # appcast.xml만 업로드
+          folder: appcast
+          target-folder:
           clean: false
