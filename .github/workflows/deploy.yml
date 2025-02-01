@@ -82,7 +82,7 @@ jobs:
             -destination 'platform=macOS,arch=arm64' \
             -archivePath build/$APP_NAME.xcarchive \
             DEVELOPMENT_TEAM=8PRWAG4355 \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             OTHER_CODE_SIGN_FLAGS="--entitlements $GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" \
             ENABLE_HARDENED_RUNTIME=YES \
@@ -96,19 +96,19 @@ jobs:
 
       - name: Harden Sparkle Framework
         run: |
-          # SPARKLE_FRAMEWORK_PATH="build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks/Sparkle.framework"
+          SPARKLE_FRAMEWORK_PATH="build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks/Sparkle.framework"
           # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
-          # SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
 
           # Sparkle 프레임워크 내부 실행 파일 서명
-          # find "$SPARKLE_FRAMEWORK_PATH" -type f -perm +111 -exec codesign --force --deep --timestamp \
-          # --options=runtime --sign "$SIGNING_IDENTITY" \
-          # --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" {} \;
+          find "$SPARKLE_FRAMEWORK_PATH" -type f -perm +111 \
+          -exec codesign --force --deep --timestamp --options=runtime --sign "$SIGNING_IDENTITY" \
+          --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" {} \;
 
           # 최상위 Sparkle Framework 재서명
-          # codesign --force --deep --timestamp \
-          # --options=runtime --sign "$SIGNING_IDENTITY" \
-          # "$SPARKLE_FRAMEWORK_PATH"
+          codesign --force --deep --timestamp \
+          --options=runtime --sign "$SIGNING_IDENTITY" \
+          "$SPARKLE_FRAMEWORK_PATH"
 
       - name: Find and Zip Built App
         id: find_app
@@ -180,11 +180,6 @@ jobs:
 
           echo "appcast.xml generated successfully:"
           cat appcast.xml
-
-      - name: Prepare deployment folder
-        run: |
-          mkdir -p appcast
-          cp appcast.xml appcast/
 
       - name: Deploy only appcast.xml to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
