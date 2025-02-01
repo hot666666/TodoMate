@@ -85,27 +85,29 @@ jobs:
             ENABLE_HARDENED_RUNTIME=YES \
             archive
 
+          codesign --force --deep --options runtime --sign - \
+          "$GITHUB_WORKSPACE/$APP_NAME/Frameworks/Sparkle.framework"
+
           xcodebuild -exportArchive \
             -archivePath build/$APP_NAME.xcarchive \
             -exportPath build/ \
             -exportOptionsPlist exportOptions.plist \
-            -allowProvisioningUpdates
 
-      - name: Harden Sparkle Framework
-        run: |
-          SPARKLE_FRAMEWORK_PATH="build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks/Sparkle.framework"
-          # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
-          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+      # - name: Harden Sparkle Framework
+      #   run: |
+      #     SPARKLE_FRAMEWORK_PATH="build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks/Sparkle.framework"
+      #     # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
+      #     SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
 
-          # Sparkle 프레임워크 내부 실행 파일 서명
-          find "$SPARKLE_FRAMEWORK_PATH" -type f -perm +111 \
-          -exec codesign --force --deep --timestamp --options=runtime --sign "$SIGNING_IDENTITY" \
-          --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" {} \;
+      #     # Sparkle 프레임워크 내부 실행 파일 서명
+      #     find "$SPARKLE_FRAMEWORK_PATH" -type f -perm +111 \
+      #     -exec codesign --force --deep --timestamp --options=runtime --sign "$SIGNING_IDENTITY" \
+      #     --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" {} \;
 
-          # 최상위 Sparkle Framework 재서명
-          codesign --force --deep --timestamp \
-          --options=runtime --sign "$SIGNING_IDENTITY" \
-          "$SPARKLE_FRAMEWORK_PATH"
+      #     # 최상위 Sparkle Framework 재서명
+      #     codesign --force --deep --timestamp \
+      #     --options=runtime --sign "$SIGNING_IDENTITY" \
+      #     "$SPARKLE_FRAMEWORK_PATH"
 
       - name: Find and Zip Built App
         id: find_app
@@ -138,50 +140,55 @@ jobs:
 
           xcrun stapler staple "$APP_PATH"
 
-      - name: Recreate ZIP for Stapled App
-        run: |
-          ZIP_PATH="build/${APP_PATH##*/}.zip"
-          echo "Recreating zip at: $ZIP_PATH"
+      # - name: Recreate ZIP for Stapled App
+      #   run: |
+      #     ZIP_PATH="build/${APP_PATH##*/}.zip"
+      #     echo "Recreating zip at: $ZIP_PATH"
 
-          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
-          echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
+      #     ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+      #     echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
 
-          echo "Zip file recreated. Size: $(ls -lh "$ZIP_PATH" | awk '{print $5}')"
+      #     echo "Zip file recreated. Size: $(ls -lh "$ZIP_PATH" | awk '{print $5}')"
 
-      - name: Upload Release Asset to GitHub
-        id: upload-release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ env.APP_ZIP }}
+      # - name: Upload Release Asset to GitHub
+      #   id: upload-release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: ${{ env.APP_ZIP }}
 
-      - name: Set up Python and install dependencies
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          python3 -m pip install --upgrade pip
-          pip install PyNaCl requests
+      # - name: Set up Python and install dependencies
+      #   run: |
+      #     python3 -m venv venv
+      #     source venv/bin/activate
+      #     python3 -m pip install --upgrade pip
+      #     pip install PyNaCl requests
 
-      - name: Generate appcast.xml
-        run: |
-          source venv/bin/activate
-          echo "Generating appcast.xml..."
-          echo "Input parameters:"
-          echo "Version: $VERSION"
-          echo "App path: $APP_ZIP"
-          echo "Upload URL: ${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}"
+      # - name: Generate appcast.xml
+      #   run: |
+      #     source venv/bin/activate
+      #     echo "Generating appcast.xml..."
+      #     echo "Input parameters:"
+      #     echo "Version: $VERSION"
+      #     echo "App path: $APP_ZIP"
+      #     echo "Upload URL: ${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}"
 
-          python3 script/appcast_generator.py --version "$VERSION" \
-            --path "$GITHUB_WORKSPACE/$APP_ZIP" \
-            --url "${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}" \
-            --edSignature "${{ secrets.ED25519 }}"
+      #     python3 script/appcast_generator.py --version "$VERSION" \
+      #       --path "$GITHUB_WORKSPACE/$APP_ZIP" \
+      #       --url "${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}" \
+      #       --edSignature "${{ secrets.ED25519 }}"
 
-          echo "appcast.xml generated successfully:"
-          cat appcast.xml
+      #     echo "appcast.xml generated successfully:"
+      #     cat appcast.xml
 
-      - name: Deploy only appcast.xml to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: appcast
-          target-folder:
-          clean: false
+      # - name: Prepare deployment folder
+      #   run: |
+      #     mkdir -p appcast
+      #     cp appcast.xml appcast/
+
+      # - name: Deploy only appcast.xml to GitHub Pages
+      #   uses: JamesIves/github-pages-deploy-action@v4
+      #   with:
+      #     branch: gh-pages
+      #     folder: appcast
+      #     target-folder:
+      #     clean: false
