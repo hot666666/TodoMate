@@ -85,7 +85,8 @@ jobs:
             ENABLE_HARDENED_RUNTIME=YES \
             archive
 
-          codesign --force --deep --options runtime --sign - \
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+          codesign --force --deep --options runtime --sign "$SIGNING_IDENTITY" \
           build/$APP_NAME/Frameworks/Sparkle.framework"
 
           xcodebuild -exportArchive \
