@@ -166,6 +166,7 @@ jobs:
 
       - name: Generate appcast.xml
         run: |
+          source venv/bin/activate
           echo "Generating appcast.xml..."
           echo "Input parameters:"
           echo "Version: $VERSION"
