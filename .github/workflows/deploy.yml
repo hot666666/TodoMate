@@ -88,16 +88,9 @@ jobs:
           # 빌드 경로에서 Sparkle.framework 검색
           sparkle_path=$(find build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks -name "Sparkle.framework")
 
-          # Sparkle.framework이 발견되었는지 확인
-          if [ -n "$sparkle_path" ]; then
-            echo "Found Sparkle.framework at: $sparkle_path"
-
-            # Sparkle.framework 서명
-            #SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
-            codesign --force --deep --options runtime --sign - "$sparkle_path"
-          else
-            echo "Sparkle.framework not found in the archive"
-          fi
+          # Sparkle.framework 서명
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+          codesign --force --deep --options runtime --sign "$SIGNING_IDENTITY" "$sparkle_path"
 
           xcodebuild -exportArchive \
             -archivePath build/$APP_NAME.xcarchive \
