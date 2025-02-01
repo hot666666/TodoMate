@@ -13,9 +13,9 @@
 		<key>provisioningProfiles</key>
 		<dict>
 			<key>io.hotcs6.TodoMate</key>
-			<string>Developer ID Application</string>
+			<string>TodoMate</string>
 			<key>io.hotcs6.TodoMate.TodoMateWidget</key>
-			<string>Developer ID Application</string>
+			<string>TodoMateWidget</string>
 		</dict>
 	</dict>
 </plist>
