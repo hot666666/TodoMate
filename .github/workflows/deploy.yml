@@ -81,9 +81,6 @@ jobs:
             -sdk macosx \
             -destination 'platform=macOS,arch=arm64' \
             -archivePath build/$APP_NAME.xcarchive \
-            DEVELOPMENT_TEAM=8PRWAG4355 \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Developer ID Application" \
             OTHER_CODE_SIGN_FLAGS="--entitlements $GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" \
             ENABLE_HARDENED_RUNTIME=YES \
             archive
