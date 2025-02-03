@@ -81,6 +81,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 }
+extension AppDelegate {
+    func checkForUpdates() {
+    }
+}
 #endif
     
 
