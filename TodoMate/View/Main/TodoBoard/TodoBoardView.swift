@@ -9,30 +9,26 @@ import SwiftUI
 
 struct TodoBoardView: View {
     @Environment(DIContainer.self) private var container
-    @Environment(OverlayManager.self) private var overlayManager
     @State private var viewModel: TodoBoardViewModel
-    private let updateGroup: () async -> Void
-    var users: [User]
     
-    init(viewModel: TodoBoardViewModel, users: [User], updateGroup: @escaping () async -> Void) {
+    init(viewModel: TodoBoardViewModel) {
         self._viewModel = State(initialValue: viewModel)
-        self.users = users
-        self.updateGroup = updateGroup
     }
     
     var body: some View {
         VStack {
-            ForEach(users) { user in
+            ForEach(viewModel.users) { user in
                 todoBox(for: user)
             }
             
-            if users.isEmpty {
+            if viewModel.users.isEmpty {
                 placeholder
             }
             
             Spacer(minLength: 20)
         }
         .task {
+            await viewModel.fetchGroupUser()
             await viewModel.observeChanges()
         }
     }
@@ -42,20 +38,18 @@ struct TodoBoardView: View {
         ExpandableView(
             storageKey: user.uid,
             title: {
-                TodoBoxTitleView(
-                    user: user,
-                    currentUserId: viewModel.userInfo.id,
-                    onSettingsTap: {
-                        overlayManager.push(.profile(user, updateGroup: updateGroup))
-                    }
-                )
+                TodoBoxTitleView(nickname: user.nickname) {
+                    ProfileButton(user: user,
+                                  isMe: viewModel.isMe(user),
+                                  updateGroup: viewModel.fetchGroupUser)
+                }
             },
             content: {
                 TodoBoxView(
                     viewModel: .init(
                         container: container,
                         user: user,
-                        userInfo: viewModel.userInfo,
+                        isMine: viewModel.isMe(user),
                         onAppear: viewModel.addObserver,
                         onDisappear: viewModel.removeObserver
                     )
@@ -68,39 +62,50 @@ struct TodoBoardView: View {
     @ViewBuilder
     private var placeholder: some View {
         ReadonlyTodoList(todos: [])
-            .opacity(0.6)
+            .opacity(0.7)
     }
 }
 
-fileprivate struct TodoBoxTitleView: View {
+// MARK: - ProfileButton
+fileprivate struct ProfileButton: View {
+    @Environment(OverlayManager.self) private var overlayManager
+    
     let user: User
-    let currentUserId: String
-    let onSettingsTap: () -> Void
+    let isMe: Bool
+    let updateGroup: () async -> Void
+    
+    var body: some View {
+        Button(action: {
+            overlayManager.push(.profile(user, updateGroup: updateGroup))
+        }) {
+            Image(systemName: "gearshape.fill")
+        }
+        .hoverButtonStyle2()
+        .opacity(isMe ? 0.7 : 0)
+    }
+}
+    
+// MARK: - TodoBoxTitleView
+fileprivate struct TodoBoxTitleView<ProfileButton: View>: View {
+    let nickname: String
+    let profileButton: () -> ProfileButton
     
     var body: some View {
         HStack {
-            Text(user.nickname)
+            Text(nickname)
             Spacer()
-            if user.uid == currentUserId {
-                Button(action: onSettingsTap) {
-                    Image(systemName: "gearshape.fill")
-                }
-                .hoverButtonStyle2()
-                .opacity(0.7)
+            profileButton()
                 .padding(.trailing, 20)
-            }
         }
     }
 }
 
+
 #Preview {
     ScrollView {
         VStack{
-            TodoBoardView(viewModel: .init(container: .stub,
-                                           userInfo: AuthManager.UserInfo.stub),
-                          users: User.stub,
-                          updateGroup: {})
-                                           
+            TodoBoardView(viewModel: .init(container: DIContainer.stub,
+                                           userInfo: UserInfo.stub))
             Spacer()
         }
     }
