@@ -102,6 +102,7 @@ fileprivate struct TodoSheetDate: View {
                             }
                     }
                 )
+                .disabled(todo.status == .inProgress)
         }
     }
     
