@@ -32,6 +32,8 @@ struct OverlayContainerView: View {
             TodoDatePopover(anchor: anchor, todo: todo)
         case .profile(let user, let updateGroup):
             ProfileSheet(user: user, updateGroup: updateGroup)
+        case .calendar(let user, let isMine):
+            TodoCalendar(user: user, isMine: isMine, onDismiss: overlayManager.pop)
         }
     }
     
@@ -96,3 +98,20 @@ fileprivate struct TodoDatePopover: View {
             .position(anchor)
     }
 }
+
+// MARK: - TodoCalendar
+fileprivate struct TodoCalendar: View {
+    @Environment(DIContainer.self) private var container
+    let user: User
+    let isMine: Bool
+    let onDismiss: () -> Void
+    
+    var body: some View {
+        TodoCalendarView(viewModel: .init(container: container,
+                                          user: user,
+                                          isMine: isMine,
+                                          onDismiss: onDismiss))
+        .background(Color.customBlack)
+    }
+}
+

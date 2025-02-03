@@ -9,6 +9,7 @@ import Foundation
 
 protocol TodoRepositoryType {
     func createTodo(todo: TodoDTO) async throws
+    func createTodo(_ todo: TodoDTO) async throws -> TodoDTO
     func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO]
     func updateTodo(todo: TodoDTO) async throws
     func deleteTodo(todoId: String) async throws
@@ -23,6 +24,14 @@ final class FirestoreTodoRepository: TodoRepositoryType {
 }
 #if !PREVIEW
 extension FirestoreTodoRepository {
+    func createTodo(_ todo: TodoDTO) async throws -> TodoDTO {
+        let todoDocRef = reference.todoCollection().document()
+        var newTodo = todo
+        newTodo.id = todoDocRef.documentID
+        try todoDocRef.setData(from: newTodo)
+        return newTodo
+    }
+    
     func createTodo(todo: TodoDTO) async throws {
         let todoDocRef = reference.todoCollection().document()
         var newTodo = todo
@@ -60,6 +69,11 @@ extension FirestoreTodoRepository {
 }
 #else
 extension FirestoreTodoRepository {
+    func createTodo(_ todo: TodoDTO) async throws -> TodoDTO {
+        print("[Creating Todo] - \(todo)")
+        return todo
+    }
+    
     func createTodo(todo: TodoDTO) async throws {
         print("[Creating Todo] - \(todo)")
     }

@@ -1,0 +1,182 @@
+name: Deploy(Build->Notarize->Upload Release->Update appcast.xml)
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-and-deploy:
+    # macOS 버전 지정(latest로 해당 15버전이 지정안됨, Xcode도 지정 필요)
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set VERSION, RUN_NUMBER, APP_NAME, BUNDLE_ID, TEAM_ID
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "RUN_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+          echo "APP_NAME=TodoMate" >> $GITHUB_ENV
+          echo "BUNDLE_ID=io.hotcs6.TodoMate" >> $GITHUB_ENV
+          echo "TEAM_ID=8PRWAG4355" >> $GITHUB_ENV
+
+      - name: Decode GoogleService-Info.plist
+        run: |
+          echo ${{ secrets.GOOGLE_SERVICE_INFO }} | base64 --decode > $APP_NAME/GoogleService-Info.plist
+
+      - name: Install Apple certificate and provisioning profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          WIDGET_PROVISION_PROFILE_BASE64: ${{ secrets.WIDGET_PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          WIDGET_PP_PATH=$RUNNER_TEMP/widget_pp.mobileprovision
+
+          # Import certificate and provisioning profile
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          echo -n "$WIDGET_PROVISION_PROFILE_BASE64" | base64 --decode -o $WIDGET_PP_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # Apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp $WIDGET_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Set Up Xcode 16.2
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Update Info.plist(Add version, short version)
+        run: |
+          INFO_PLIST_PATH="./$APP_NAME/Info.plist"
+          if [ -f "$INFO_PLIST_PATH" ]; then
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $RUN_NUMBER" "$INFO_PLIST_PATH"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$INFO_PLIST_PATH"
+            
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $RUN_NUMBER" "$INFO_PLIST_PATH"
+            /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$INFO_PLIST_PATH"
+          else
+            echo "Info.plist not found at $INFO_PLIST_PATH"
+            exit 1
+          fi
+
+      - name: Build App
+        run: |
+          xcodebuild -project $APP_NAME.xcodeproj \
+            -scheme $APP_NAME \
+            -configuration Release \
+            -sdk macosx \
+            -destination 'platform=macOS,arch=arm64' \
+            -archivePath build/$APP_NAME.xcarchive \
+            OTHER_CODE_SIGN_FLAGS="--entitlements $GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" \
+            ENABLE_HARDENED_RUNTIME=YES \
+            archive
+
+      - name: Sign Sparkle.framework
+        run: |
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+
+          # Find Sparkle.framework path
+          sparkle_path=$(find build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks -name "Sparkle.framework")
+
+          if [ -n "$sparkle_path" ]; then
+            codesign --force --deep --options runtime --sign "$SIGNING_IDENTITY" "$sparkle_path"
+          else
+            echo "Sparkle.framework not found in the archive"
+            exit 1
+          fi
+
+      - name: Export App
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/$APP_NAME.xcarchive \
+            -exportPath build/ \
+            -exportOptionsPlist exportOptions.plist \
+
+      - name: Find and Zip Built App
+        id: find_app
+        run: |
+          APP_PATH=$(find build -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found in build directory"
+            exit 1
+          fi
+
+          echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
+
+          ZIP_PATH="build/${APP_PATH##*/}.zip"
+          echo "Creating zip at: $ZIP_PATH"
+
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+          echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
+
+      - name: Notarize App using App-Specific Password
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+        run: |
+          xcrun notarytool store-credentials "AC_CREDENTIALS" \
+          --apple-id "$APPLE_ID" \
+          --team-id "$TEAM_ID" \
+          --password "$APP_PASSWORD"
+
+          xcrun notarytool submit "$APP_ZIP" --keychain-profile "AC_CREDENTIALS" --wait
+
+          xcrun stapler staple "$APP_PATH"
+
+      - name: Recreate ZIP for Stapled App
+        run: |
+          ZIP_PATH="build/${APP_PATH##*/}.zip"
+          echo "Recreating zip at: $ZIP_PATH"
+
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+          echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
+
+      - name: Upload Release Asset to GitHub
+        id: upload-release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "$APP_ZIP"
+
+      - name: Generate appcast.xml
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          python3 -m pip install --upgrade pip
+          pip install PyNaCl
+
+          python3 script/appcast_generator.py --version "$VERSION" \
+          --runNumber "$RUN_NUMBER" \
+          --path "$GITHUB_WORKSPACE/$APP_ZIP" \
+          --url "${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}" \
+          --edSignature "${{ secrets.ED25519 }}"
+
+          # for GitHub Pages
+          mkdir -p appcast
+          cp appcast.xml appcast/
+          cat appcast/appcast.xml
+
+      - name: Update appcast.xml for GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: appcast
+          target-folder:
+          clean: false
