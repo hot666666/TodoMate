@@ -7,33 +7,24 @@ on:
 
 jobs:
   build-and-deploy:
-    # macOS 버전 지정(latest로 해당 버전이 지정안됨)
+    # macOS 버전 지정(latest로 해당 15버전이 지정안됨, Xcode도 지정 필요)
     runs-on: macos-15
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set VERSION, APP_NAME, BUNDLE_ID
+      - name: Set VERSION, RUN_NUMBER, APP_NAME, BUNDLE_ID, TEAM_ID
         run: |
           echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo "RUN_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
           echo "APP_NAME=TodoMate" >> $GITHUB_ENV
           echo "BUNDLE_ID=io.hotcs6.TodoMate" >> $GITHUB_ENV
+          echo "TEAM_ID=8PRWAG4355" >> $GITHUB_ENV
 
       - name: Decode GoogleService-Info.plist
         run: |
           echo ${{ secrets.GOOGLE_SERVICE_INFO }} | base64 --decode > $APP_NAME/GoogleService-Info.plist
-
-      - name: Update CFBundleVersion in Info.plist
-        run: |
-          INFO_PLIST_PATH="./$APP_NAME/Info.plist"
-          if [ -f "$INFO_PLIST_PATH" ]; then
-            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $VERSION" "$INFO_PLIST_PATH" || \
-            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $VERSION" "$INFO_PLIST_PATH"
-            echo "Updated CFBundleVersion to $VERSION in Info.plist"
-          else
-            echo "Info.plist not found at $INFO_PLIST_PATH"
-          fi
 
       - name: Install Apple certificate and provisioning profile
         env:
@@ -69,11 +60,24 @@ jobs:
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
           cp $WIDGET_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      # Xcode 버전 설정
       - name: Set Up Xcode 16.2
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
-      - name: Build macOS App(Build Configuration-Release, macOS, manual code signing)
+      - name: Update Info.plist(Add version, short version)
+        run: |
+          INFO_PLIST_PATH="./$APP_NAME/Info.plist"
+          if [ -f "$INFO_PLIST_PATH" ]; then
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $RUN_NUMBER" "$INFO_PLIST_PATH"
+            /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$INFO_PLIST_PATH"
+            
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $RUN_NUMBER" "$INFO_PLIST_PATH"
+            /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$INFO_PLIST_PATH"
+          else
+            echo "Info.plist not found at $INFO_PLIST_PATH"
+            exit 1
+          fi
+
+      - name: Build App
         run: |
           xcodebuild -project $APP_NAME.xcodeproj \
             -scheme $APP_NAME \
@@ -85,40 +89,36 @@ jobs:
             ENABLE_HARDENED_RUNTIME=YES \
             archive
 
-          # 빌드 경로에서 Sparkle.framework 검색
+      - name: Sign Sparkle.framework
+        run: |
+          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
+
+          # Find Sparkle.framework path
           sparkle_path=$(find build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks -name "Sparkle.framework")
 
-          # Sparkle.framework 서명
-          SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
-          codesign --force --deep --options runtime --sign "$SIGNING_IDENTITY" "$sparkle_path"
+          if [ -n "$sparkle_path" ]; then
+            codesign --force --deep --options runtime --sign "$SIGNING_IDENTITY" "$sparkle_path"
+          else
+            echo "Sparkle.framework not found in the archive"
+            exit 1
+          fi
 
+      - name: Export App
+        run: |
           xcodebuild -exportArchive \
             -archivePath build/$APP_NAME.xcarchive \
             -exportPath build/ \
             -exportOptionsPlist exportOptions.plist \
 
-      # - name: Harden Sparkle Framework
-      #   run: |
-      #     SPARKLE_FRAMEWORK_PATH="build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app/Contents/Frameworks/Sparkle.framework"
-      #     # 현재 사용 중인 서명 인증서 이름을 동적으로 가져오기
-      #     SIGNING_IDENTITY=$(xcrun security find-identity | grep "Developer ID Application" | head -n 1 | awk -F'"' '{print $2}')
-
-      #     # Sparkle 프레임워크 내부 실행 파일 서명
-      #     find "$SPARKLE_FRAMEWORK_PATH" -type f -perm +111 \
-      #     -exec codesign --force --deep --timestamp --options=runtime --sign "$SIGNING_IDENTITY" \
-      #     --entitlements "$GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" {} \;
-
-      #     # 최상위 Sparkle Framework 재서명
-      #     codesign --force --deep --timestamp \
-      #     --options=runtime --sign "$SIGNING_IDENTITY" \
-      #     "$SPARKLE_FRAMEWORK_PATH"
-
       - name: Find and Zip Built App
         id: find_app
         run: |
-          echo "Searching for built app..."
           APP_PATH=$(find build -name "*.app" | head -n 1)
-          echo "Found app at: $APP_PATH"
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found in build directory"
+            exit 1
+          fi
+
           echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
 
           ZIP_PATH="build/${APP_PATH##*/}.zip"
@@ -127,72 +127,56 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
           echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
 
-          echo "Zip file created. Size: $(ls -lh "$ZIP_PATH" | awk '{print $5}')"
-
       - name: Notarize App using App-Specific Password
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
         run: |
-
           xcrun notarytool store-credentials "AC_CREDENTIALS" \
           --apple-id "$APPLE_ID" \
-          --team-id "8PRWAG4355" \
+          --team-id "$TEAM_ID" \
           --password "$APP_PASSWORD"
 
           xcrun notarytool submit "$APP_ZIP" --keychain-profile "AC_CREDENTIALS" --wait
 
           xcrun stapler staple "$APP_PATH"
 
-      # - name: Recreate ZIP for Stapled App
-      #   run: |
-      #     ZIP_PATH="build/${APP_PATH##*/}.zip"
-      #     echo "Recreating zip at: $ZIP_PATH"
+      - name: Recreate ZIP for Stapled App
+        run: |
+          ZIP_PATH="build/${APP_PATH##*/}.zip"
+          echo "Recreating zip at: $ZIP_PATH"
 
-      #     ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
-      #     echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+          echo "APP_ZIP=$ZIP_PATH" >> $GITHUB_ENV
 
-      #     echo "Zip file recreated. Size: $(ls -lh "$ZIP_PATH" | awk '{print $5}')"
+      - name: Upload Release Asset to GitHub
+        id: upload-release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "$APP_ZIP"
 
-      # - name: Upload Release Asset to GitHub
-      #   id: upload-release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: ${{ env.APP_ZIP }}
+      - name: Generate appcast.xml
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          python3 -m pip install --upgrade pip
+          pip install PyNaCl
 
-      # - name: Set up Python and install dependencies
-      #   run: |
-      #     python3 -m venv venv
-      #     source venv/bin/activate
-      #     python3 -m pip install --upgrade pip
-      #     pip install PyNaCl requests
+          python3 script/appcast_generator.py --version "$VERSION" \
+          --runNumber "$RUN_NUMBER" \
+          --path "$GITHUB_WORKSPACE/$APP_ZIP" \
+          --url "${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}" \
+          --edSignature "${{ secrets.ED25519 }}"
 
-      # - name: Generate appcast.xml
-      #   run: |
-      #     source venv/bin/activate
-      #     echo "Generating appcast.xml..."
-      #     echo "Input parameters:"
-      #     echo "Version: $VERSION"
-      #     echo "App path: $APP_ZIP"
-      #     echo "Upload URL: ${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}"
+          # for GitHub Pages
+          mkdir -p appcast
+          cp appcast.xml appcast/
+          cat appcast/appcast.xml
 
-      #     python3 script/appcast_generator.py --version "$VERSION" \
-      #       --path "$GITHUB_WORKSPACE/$APP_ZIP" \
-      #       --url "${{ fromJSON(steps.upload-release.outputs.assets)[0].browser_download_url }}" \
-      #       --edSignature "${{ secrets.ED25519 }}"
-
-      #     echo "appcast.xml generated successfully:"
-      #     cat appcast.xml
-
-      # - name: Prepare deployment folder
-      #   run: |
-      #     mkdir -p appcast
-      #     cp appcast.xml appcast/
-
-      # - name: Deploy only appcast.xml to GitHub Pages
-      #   uses: JamesIves/github-pages-deploy-action@v4
-      #   with:
-      #     branch: gh-pages
-      #     folder: appcast
-      #     target-folder:
-      #     clean: false
+      - name: Update appcast.xml for GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: appcast
+          target-folder:
+          clean: false
