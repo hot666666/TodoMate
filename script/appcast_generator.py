@@ -46,7 +46,7 @@ def sign_update(file_path, ed_signature_key):
         sys.exit(1)
 
 
-def create_appcast(version, file_path, download_url, ed_signature):
+def create_appcast(version, run_number, file_path, download_url, ed_signature):
     """Create appcast XML structure."""
 
     # Create root element
@@ -75,12 +75,12 @@ def create_appcast(version, file_path, download_url, ed_signature):
     # Add enclosure(sparkle:shortVersionString | version | sha256 | edSignature, url, length, type)
     enclosure = ET.SubElement(item, "enclosure")
     enclosure.set("sparkle:shortVersionString", f"{version}")
-    enclosure.set("sparkle:version", f"{1}")
+    enclosure.set("sparkle:version", f"{run_number}")
     enclosure.set("sparkle:sha256", calculate_file_hash(file_path))
     enclosure.set("sparkle:edSignature", sign_update(file_path, ed_signature))
     enclosure.set("url", download_url)
     enclosure.set("length", str(get_file_size(file_path)))
-    enclosure.set("type", "application/octet-stream")
+    enclosure.set("type", "application/zip")
 
     return rss
 
@@ -96,6 +96,8 @@ def main():
     parser = argparse.ArgumentParser(
         description='Generate Sparkle appcast.xml')
     parser.add_argument('--version', required=True,
+                        help='Short Version number of the release')
+    parser.add_argument('--runNumber', required=True,
                         help='Version number of the release')
     parser.add_argument('--path', required=True, help='Path to the ZIP file')
     parser.add_argument('--url', required=True,
@@ -111,7 +113,7 @@ def main():
         sys.exit(1)
 
     # Create appcast
-    appcast = create_appcast(args.version, args.path,
+    appcast = create_appcast(args.version, args.runNumber,args.path,
                              args.url, args.edSignature)
 
     # Write to file
