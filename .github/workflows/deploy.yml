@@ -153,7 +153,7 @@ jobs:
         id: upload-release
         uses: softprops/action-gh-release@v1
         with:
-          files: "$APP_ZIP"
+          files: ${{ env.APP_ZIP }}
 
       - name: Generate appcast.xml
         run: |
