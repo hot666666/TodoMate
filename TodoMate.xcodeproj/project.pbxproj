@@ -21,7 +21,7 @@
 		451DEDD32D3E4E1B00A20417 /* TodoBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDD22D3E4E1B00A20417 /* TodoBoardViewModel.swift */; };
 		451DEDE32D3E8D2F00A20417 /* ChatBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDE22D3E8D2B00A20417 /* ChatBoardView.swift */; };
 		451DEDE62D3E9BD000A20417 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 451DEDE52D3E9BD000A20417 /* FirebaseFirestore */; };
-		451DEDE72D3EA11300A20417 /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 45B655E92CAFDF2C008F6443 /* TodoMateWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		451DEDE72D3EA11300A20417 /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 45B655E92CAFDF2C008F6443 /* TodoMateWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		451DEDF92D40BF2800A20417 /* ChatBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDF82D40BF2800A20417 /* ChatBoardViewModel.swift */; };
 		451DEDFD2D40CC7100A20417 /* FirestoreChatStreamProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDFC2D40CC6B00A20417 /* FirestoreChatStreamProvider.swift */; };
 		4526B0AD2D41E58700DC90F5 /* FStorageReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4526B0AC2D41E58700DC90F5 /* FStorageReference.swift */; };
@@ -34,6 +34,9 @@
 		4526B0E12D48F58900DC90F5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 4526B0E02D48F58900DC90F5 /* FirebaseFirestore */; };
 		45322B4A2C8449550097D530 /* StorageUploadProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B492C8449520097D530 /* StorageUploadProvider.swift */; };
 		45322B4C2C845F650097D530 /* ImageUploadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45322B4B2C845F650097D530 /* ImageUploadService.swift */; };
+		4538446A2D4F3E3B002B8721 /* TodoCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453844692D4F3E33002B8721 /* TodoCalendarView.swift */; };
+		4538446C2D4F3E88002B8721 /* TodoCalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4538446B2D4F3E82002B8721 /* TodoCalendarViewModel.swift */; };
+		4538446E2D4F40C6002B8721 /* Calendar+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4538446D2D4F40C0002B8721 /* Calendar+Extension.swift */; };
 		453D374F2C7C8390003835CE /* UTType+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D374D2C7C838C003835CE /* UTType+Extension.swift */; };
 		453D37512C7C8451003835CE /* TodoTransferData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453D37502C7C8450003835CE /* TodoTransferData.swift */; };
 		453FC0DB2CAE807800574437 /* TodoEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453FC0DA2CAE805400574437 /* TodoEntity.swift */; };
@@ -62,7 +65,7 @@
 		45962CF92D491D0B00089A48 /* UserGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF82D491D0B00089A48 /* UserGroup.swift */; };
 		45962D082D49EB0E00089A48 /* JoinGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962D072D49EB0E00089A48 /* JoinGroupView.swift */; };
 		45962D0F2D4A5DD600089A48 /* ProfileSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962D0E2D4A5DD400089A48 /* ProfileSheet.swift */; };
-		45962D2C2D4B128300089A48 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 45962D2B2D4B128300089A48 /* Sparkle */; };
+		45962D2C2D4B128300089A48 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = 45962D2B2D4B128300089A48 /* Sparkle */; };
 		459AA3F82C75CA2B00CA43F2 /* DIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F72C75CA2800CA43F2 /* DIContainer.swift */; };
 		459AA3FD2C75DFCE00CA43F2 /* DatabaseChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3FC2C75DFCC00CA43F2 /* DatabaseChange.swift */; };
 		459AA4062C76023D00CA43F2 /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA4052C76023600CA43F2 /* String+Extension.swift */; };
@@ -122,6 +125,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		451525522D508BCB006F6847 /* TodoMateDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TodoMateDebug.entitlements; sourceTree = "<group>"; };
+		451525532D509496006F6847 /* InfoDebug.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = InfoDebug.plist; sourceTree = "<group>"; };
 		451DEDA02D3CD8FE00A20417 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		451DEDA42D3CDB5D00A20417 /* SignOutButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignOutButton.swift; sourceTree = "<group>"; };
 		451DEDB92D3CF19800A20417 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
@@ -143,6 +148,9 @@
 		4526B0D62D48F56500DC90F5 /* TodoMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		45322B492C8449520097D530 /* StorageUploadProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageUploadProvider.swift; sourceTree = "<group>"; };
 		45322B4B2C845F650097D530 /* ImageUploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageUploadService.swift; sourceTree = "<group>"; };
+		453844692D4F3E33002B8721 /* TodoCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarView.swift; sourceTree = "<group>"; };
+		4538446B2D4F3E82002B8721 /* TodoCalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarViewModel.swift; sourceTree = "<group>"; };
+		4538446D2D4F40C0002B8721 /* Calendar+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Extension.swift"; sourceTree = "<group>"; };
 		453D374D2C7C838C003835CE /* UTType+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UTType+Extension.swift"; sourceTree = "<group>"; };
 		453D37502C7C8450003835CE /* TodoTransferData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoTransferData.swift; sourceTree = "<group>"; };
 		453FC0DA2CAE805400574437 /* TodoEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEntity.swift; sourceTree = "<group>"; };
@@ -313,6 +321,15 @@
 			path = Provider;
 			sourceTree = "<group>";
 		};
+		4538446F2D4F612A002B8721 /* TodoCalendar */ = {
+			isa = PBXGroup;
+			children = (
+				453844692D4F3E33002B8721 /* TodoCalendarView.swift */,
+				4538446B2D4F3E82002B8721 /* TodoCalendarViewModel.swift */,
+			);
+			path = TodoCalendar;
+			sourceTree = "<group>";
+		};
 		453FC0D92CAE803D00574437 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -358,6 +375,7 @@
 				45962D0D2D4A5DC300089A48 /* ProfileSheet */,
 				4541C9A02D2D4953006A9C60 /* TodoSheet */,
 				4541C99E2D2D4953006A9C60 /* TodoDatePopover */,
+				4538446F2D4F612A002B8721 /* TodoCalendar */,
 			);
 			path = OverlayContainer;
 			sourceTree = "<group>";
@@ -446,7 +464,9 @@
 			isa = PBXGroup;
 			children = (
 				459AA4362C795D4700CA43F2 /* Info.plist */,
+				451525532D509496006F6847 /* InfoDebug.plist */,
 				45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */,
+				451525522D508BCB006F6847 /* TodoMateDebug.entitlements */,
 				45ACB00B2C6B65DE005F4B17 /* Const.swift */,
 				459AA3F62C75CA2000CA43F2 /* Dependency */,
 				451DEDFE2D40D76900A20417 /* FirebaseReference */,
@@ -486,6 +506,7 @@
 				455C9B972C6F8DBC004A1519 /* Button+Extension.swift */,
 				457B43CC2C6F3D9C0049334A /* Color+Extension.swift */,
 				45ED09072C6AEC0B005A8096 /* Date+Extension.swift */,
+				4538446D2D4F40C0002B8721 /* Calendar+Extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -694,6 +715,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				455C9B962C6F8CBA004A1519 /* AppDelegate.swift in Sources */,
+				4538446A2D4F3E3B002B8721 /* TodoCalendarView.swift in Sources */,
 				45962D0F2D4A5DD600089A48 /* ProfileSheet.swift in Sources */,
 				457B43C42C6DFFBA0049334A /* FirestoreUserRepository.swift in Sources */,
 				4541C99A2D2D472C006A9C60 /* TodoService.swift in Sources */,
@@ -745,9 +767,11 @@
 				4526B0D12D48C6E900DC90F5 /* UserInfoService.swift in Sources */,
 				45962CF52D491BF300089A48 /* FirestoreGroupRepository.swift in Sources */,
 				45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */,
+				4538446E2D4F40C6002B8721 /* Calendar+Extension.swift in Sources */,
 				451DEDD12D3E4E0600A20417 /* TodoBoxViewModel.swift in Sources */,
 				45CE6CBE2C7190D40053835E /* ChatDTO.swift in Sources */,
 				451DEDBA2D3CF19800A20417 /* AuthManager.swift in Sources */,
+				4538446C2D4F3E88002B8721 /* TodoCalendarViewModel.swift in Sources */,
 				45ACB00C2C6B65E1005F4B17 /* Const.swift in Sources */,
 				45962CF72D491CB500089A48 /* GroupDTO.swift in Sources */,
 				457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */,
@@ -760,6 +784,7 @@
 /* Begin PBXTargetDependency section */
 		451DEDE92D3EA11300A20417 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 45B655E82CAFDF2C008F6443 /* TodoMateWidgetExtension */;
 			targetProxy = 451DEDE82D3EA11300A20417 /* PBXContainerItemProxy */;
 		};
@@ -916,16 +941,13 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMate.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 8PRWAG4355;
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -946,8 +968,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMate iPad";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMate;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -968,14 +988,10 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = TodoMateWidget/TodoMateWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 8PRWAG4355;
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TodoMateWidget/Info.plist;
@@ -991,8 +1007,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.TodoMateWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMateWidget iPad";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMateWidget;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -1011,14 +1025,10 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = TodoMateWidget/TodoMateWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 8PRWAG4355;
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TodoMateWidget/Info.plist;
@@ -1034,8 +1044,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.TodoMateWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMateWidget iPad";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMateWidget;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -1077,7 +1085,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.TodoMateWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMateWidget iPad";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMateWidget iOS";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMateWidget;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -1218,22 +1226,19 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMate.entitlements;
+				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMateDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 8PRWAG4355;
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMate/Info.plist;
+				INFOPLIST_FILE = TodoMate/InfoDebug.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -1250,8 +1255,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMate iPad";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMate;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -1281,6 +1284,7 @@
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 8PRWAG4355;
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1301,7 +1305,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMate iPad";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMate iOS";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMate;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;

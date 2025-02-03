@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.937643864657-13cj5pccsikovhaqa4e4qivolanp9fd7</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableDownloaderService</key>
+	<false/>
+	<key>SUEnableInstallerLauncherService</key>
+	<false/>
+	<key>SUFeedURL</key>
+	<string>https://hot666666.github.io/TodoMate/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>qOd8x4y8USYRC130QuJiaYSUerRpM5z9lML2LSVmimM=</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeIdentifier</key>
+			<string>io.hotcs6.TodoMate</string>
+			<key>UTTypeTagSpecification</key>
+			<dict/>
+		</dict>
+	</array>
+</dict>
+</plist>
