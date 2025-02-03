@@ -11,17 +11,30 @@ import SwiftData
 @Observable
 class TodoBoardViewModel {
     private let todoStreamProvider: TodoStreamProviderType
+    private let userService: UserServiceType
     private let modelContainer: ModelContainer
     private var observers: [String: [WeakTodoObserver]] = [:]
     
     @ObservationIgnored let userInfo: UserInfo
+    var users: [User] = []
     
     init(container: DIContainer, userInfo: UserInfo) {
         self.todoStreamProvider = container.todoStreamProvider
+        self.userService = container.userService
         self.modelContainer = container.modelContainer
         self.userInfo = userInfo
     }
     
+    @MainActor
+    func fetchGroupUser() async {
+        users = await userService.fetch()
+    }
+    
+    func isMe(_ user: User) -> Bool {
+        user.uid == userInfo.id
+    }
+}
+extension TodoBoardViewModel {
     func observeChanges() async {
         for await change in todoStreamProvider.createTodoStream() {
             if !observers.isEmpty {
@@ -47,7 +60,9 @@ class TodoBoardViewModel {
                 observer.value?.todoAdded(todo)
             }
         case .modified(let todo):
-            /// 위젯 데이터 - 진행 중이면 추가, 아니면 삭제, 이미 존재하는 Todo의 업데이트라면 무시
+            /// 위젯 데이터 - 본인 것만 진행 중이면 추가, 아니면 삭제, 이미 존재하는 Todo의 업데이트라면 무시
+            guard todo.uid == userInfo.id else { break }
+            
             if todo.status == .inProgress {
                 await saveToModelContainer(todo)
             } else {
@@ -59,6 +74,8 @@ class TodoBoardViewModel {
             }
         case .removed(let todo):
             /// 위젯 데이터 - 존재하면 삭제
+            guard todo.uid == userInfo.id else { break }
+
             await deleteFromModelContainer(todo.fid)
             
             for observer in observers {
@@ -70,9 +87,6 @@ class TodoBoardViewModel {
 extension TodoBoardViewModel {
     @MainActor
     private func saveToModelContainer(_ todo: Todo) async {
-        /// 본인 것만 위젯에 표시
-        guard todo.uid == userInfo.id else { return }
-        
         let entity = todo.toEntity()
         guard let fid = entity.fid else {
             print("TodoEntity has no fid")
@@ -96,12 +110,12 @@ extension TodoBoardViewModel {
     }
     
     @MainActor
-    private func deleteFromModelContainer(_ todoId: String?) async {
-        guard let todoId else { return }
+    private func deleteFromModelContainer(_ todoFid: String?) async {
+        guard let todoFid else { return }
         
         let context = modelContainer.mainContext
         
-        let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == todoId })
+        let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == todoFid })
         if let existingEntity = try? context.fetch(fetchDescriptor).first {
             context.delete(existingEntity)
             print("TodoEntity deleted")

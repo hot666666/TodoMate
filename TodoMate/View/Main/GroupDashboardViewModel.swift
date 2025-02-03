@@ -10,7 +10,8 @@ import SwiftUI
 @Observable
 class GroupDashboardViewModel {
     private let userService: UserServiceType
-    private let userInfo: UserInfo
+    
+    @ObservationIgnored let userInfo: UserInfo
     
     var users: [User] = []
     

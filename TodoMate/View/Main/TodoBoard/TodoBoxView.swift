@@ -49,6 +49,8 @@ struct TodoBoxView: View {
     private var header: some View {
         HStack(spacing: 3) {
             Label("오늘의 투두", systemImage: "list.dash")
+            Spacer()
+            CalendarButton(user: viewModel.user, isMine: viewModel.isMine)
         }
         .bold()
         .padding(5)
@@ -67,8 +69,25 @@ struct TodoBoxView: View {
     }
 }
 
+// MARK: - CalendarButton
+fileprivate struct CalendarButton: View {
+    @Environment(OverlayManager.self) private var overlayManager
+    
+    let user: User
+    let isMine: Bool
+    
+    var body: some View {
+        Button(action: {
+            overlayManager.push(.calendar(user, isMine: isMine))
+        }) {
+            Image(systemName: "calendar")
+        }
+        .hoverButtonStyle()
+    }
+}
+
 // MARK: - EditableTodoList
-private struct EditableTodoList: View {
+fileprivate struct EditableTodoList: View {
     @Environment(OverlayManager.self) private var overlayManager
     
     let todos: [Todo]
@@ -79,12 +98,10 @@ private struct EditableTodoList: View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(todos) { todo in
                 BaseTodoRow(todo: todo) {
-                    
                     TodoStatusButton(status: todo.status) { newStatus in
                         todo.status = newStatus
                         updateTodo(todo)
                     }
-                    
                 }
                 .onTapGesture {
                     overlayManager.push(.todo(todo,
@@ -119,10 +136,8 @@ struct ReadonlyTodoList: View {
         VStack(alignment: .leading, spacing: 5) {
             ForEach(todos) { todo in
                 BaseTodoRow(todo: todo) {
-                    
                     TodoStatusButton(status: todo.status) { _ in }
                         .disabled(true)
-                    
                 }
                 .onTapGesture {
                     overlayManager.push(.todo(todo,
@@ -137,7 +152,7 @@ struct ReadonlyTodoList: View {
 }
 
 // MARK: - BaseTodoRow
-private struct BaseTodoRow<Button: View>: View {
+fileprivate struct BaseTodoRow<Button: View>: View {
     @State private var isHovering = false
     let todo: Todo
     let statusButton: () -> Button

@@ -9,7 +9,6 @@ import SwiftUI
 
 struct GroupDashboardView: View {
     @Environment(DIContainer.self) private var container
-    @Environment(AuthManager.self) private var authManager
     @State private var viewModel: GroupDashboardViewModel
     
     init(viewModel: GroupDashboardViewModel) {
@@ -20,18 +19,13 @@ struct GroupDashboardView: View {
         ScrollView {
             VStack {
                 ChatBoardView(viewModel: .init(container: container,
-                                               userInfo: authManager.userInfo))
+                                               userInfo: viewModel.userInfo))
                 TodoBoardView(viewModel: .init(container: container,
-                                               userInfo: authManager.userInfo),
-                              users: viewModel.users,
-                              updateGroup: viewModel.fetchUser)
+                                               userInfo: viewModel.userInfo))
+                }
             }
             .padding(.bottom, 50)
         }
-        .task {
-            await viewModel.fetchUser()
-        }
-    }
 }
 
 #Preview {
