@@ -19,7 +19,6 @@ class TodoBoxViewModel {
     @ObservationIgnored let isMine: Bool
     
     var todos: [Todo] = []
-    var draggingTodo: Todo?
     
     init (container: DIContainer,
           user: User,
@@ -77,7 +76,6 @@ extension TodoBoxViewModel {
         
         todos.move(fromOffsets: source, toOffset: destination)
     }
-        
 }
 extension TodoBoxViewModel: TodoObserverType {
     func todoAdded(_ todo: Todo) {

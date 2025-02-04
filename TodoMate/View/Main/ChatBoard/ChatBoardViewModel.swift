@@ -20,7 +20,8 @@ class ChatBoardViewModel {
         self.chatStreamProvider = container.chatStreamProvider
         self.userInfo = userInfo
     }
-    
+}
+extension ChatBoardViewModel {
     func observeChanges() async {
         for await change in chatStreamProvider.createChatStream() {
             print("[Observed Chat change in FirebaseFirestore] - ", change)
