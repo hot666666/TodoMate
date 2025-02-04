@@ -7,14 +7,15 @@
 
 import SwiftUI
 
-struct CustomList<Item: Identifiable, ItemView: View, ContextMenu: View>: View {
+
+// MARK: - CustomList
+/// List 뷰 기본 스타일들을 제외, onMove 기능 추가, rowHeight(동일) 동적 계산으로 스크롤 제거
+struct CustomList<Item: Identifiable, ItemView: View>: View {
     @State private var rowHeight: CGFloat = 1
     
     let items: [Item]
-    let itemView: (Item) -> ItemView
-    let contextMenu: (Item) -> ContextMenu
-    let onTap: (Item) -> Void
     let onMove: (IndexSet, Int) -> Void
+    let itemView: (Item) -> ItemView
     
     var body: some View {
         List {
@@ -26,13 +27,6 @@ struct CustomList<Item: Identifiable, ItemView: View, ContextMenu: View>: View {
                             rowHeight = proxy.size.height
                         }
                     })
-//                    .border(.red)
-                    .onTapGesture {
-                        onTap(item)
-                    }
-                    .contextMenu {
-                        contextMenu(item)
-                    }
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -44,7 +38,6 @@ struct CustomList<Item: Identifiable, ItemView: View, ContextMenu: View>: View {
             }
             .onMove(perform: onMove)
         }
-//        .border(.blue)
         .frame(height: CGFloat(items.count) * rowHeight)
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
