@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - TodoBoardView
 struct TodoBoardView: View {
     @Environment(DIContainer.self) private var container
     @State private var viewModel: TodoBoardViewModel
@@ -18,7 +19,13 @@ struct TodoBoardView: View {
     var body: some View {
         VStack {
             ForEach(viewModel.users) { user in
-                todoBox(for: user)
+                UserTodoSection(
+                    user: user,
+                    isMe: viewModel.isMe(user),
+                    onUpdateGroup: viewModel.fetchGroupUser,
+                    addObserver: viewModel.addObserver,
+                    removeObserver: viewModel.removeObserver
+                )
             }
             
             if viewModel.users.isEmpty {
@@ -34,35 +41,66 @@ struct TodoBoardView: View {
     }
     
     @ViewBuilder
-    private func todoBox(for user: User) -> some View {
+    private var placeholder: some View {
+        GroupBox {
+            VStack(alignment: .leading) {
+                Label("오늘의 투두", systemImage: "list.dash")
+                Divider()
+                    .padding(.bottom)
+            }
+            .padding(5)
+        }
+        .opacity(0.7)
+        .padding(.horizontal, 20)
+    }
+}
+
+// MARK: - UserTodoSection
+fileprivate  struct UserTodoSection: View {
+    @Environment(DIContainer.self) private var container
+    
+    let user: User
+    let isMe: Bool
+    let onUpdateGroup: () async -> Void
+    let addObserver: (TodoObserverType, String) -> Void
+    let removeObserver: (TodoObserverType, String) -> Void
+    
+    var body: some View {
         ExpandableView(
             storageKey: user.uid,
-            title: {
-                TodoBoxTitleView(nickname: user.nickname) {
-                    ProfileButton(user: user,
-                                  isMe: viewModel.isMe(user),
-                                  updateGroup: viewModel.fetchGroupUser)
-                }
-            },
-            content: {
-                TodoBoxView(
-                    viewModel: .init(
-                        container: container,
-                        user: user,
-                        isMine: viewModel.isMe(user),
-                        onAppear: viewModel.addObserver,
-                        onDisappear: viewModel.removeObserver
-                    )
-                )
-                .padding(.horizontal, 20)
-            }
+            header: { sectionHeader },
+            content: { todoBoxContent }
         )
     }
     
     @ViewBuilder
-    private var placeholder: some View {
-        ReadonlyTodoList(todos: [])
-            .opacity(0.7)
+    private var header: some View {
+        HStack {
+            Text(user.nickname)
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    private var sectionHeader: some View {
+        header
+            .overlay(alignment: .topTrailing) {
+                ProfileButton(user: user, updateGroup: onUpdateGroup)
+                    .opacity(isMe ? 1 : 0)
+            }
+    }
+    
+    @ViewBuilder
+    private var todoBoxContent: some View {
+        TodoBoxView(
+            viewModel: .init(
+                container: container,
+                user: user,
+                isMine: isMe,
+                onAppear: addObserver,
+                onDisappear: removeObserver
+            )
+        )
     }
 }
 
@@ -71,7 +109,6 @@ fileprivate struct ProfileButton: View {
     @Environment(OverlayManager.self) private var overlayManager
     
     let user: User
-    let isMe: Bool
     let updateGroup: () async -> Void
     
     var body: some View {
@@ -81,22 +118,7 @@ fileprivate struct ProfileButton: View {
             Image(systemName: "gearshape.fill")
         }
         .hoverButtonStyle2()
-        .opacity(isMe ? 0.7 : 0)
-    }
-}
-    
-// MARK: - TodoBoxTitleView
-fileprivate struct TodoBoxTitleView<ProfileButton: View>: View {
-    let nickname: String
-    let profileButton: () -> ProfileButton
-    
-    var body: some View {
-        HStack {
-            Text(nickname)
-            Spacer()
-            profileButton()
-                .padding(.trailing, 20)
-        }
+        .padding(.trailing, 20)
     }
 }
 
@@ -104,8 +126,7 @@ fileprivate struct TodoBoxTitleView<ProfileButton: View>: View {
 #Preview {
     ScrollView {
         VStack{
-            TodoBoardView(viewModel: .init(container: DIContainer.stub,
-                                           userInfo: UserInfo.stub))
+            TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: UserInfo.stub))
             Spacer()
         }
     }
