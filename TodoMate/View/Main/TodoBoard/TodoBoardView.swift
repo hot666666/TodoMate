@@ -25,7 +25,7 @@ struct TodoBoardView: View {
                 placeholder
             }
             
-            Spacer(minLength: 20)
+            Spacer(minLength: 50)
         }
         .task {
             await viewModel.fetchGroupUser()
