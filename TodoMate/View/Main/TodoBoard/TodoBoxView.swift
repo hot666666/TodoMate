@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - TodoBoxView
 struct TodoBoxView: View {
     @State private var viewModel: TodoBoxViewModel
     
@@ -17,28 +18,21 @@ struct TodoBoxView: View {
     var body: some View {
         GroupBox {
             VStack(alignment: .leading) {
-                header
+                boxHeader
+                
                 Divider()
-
-                if viewModel.isMine {
-                    EditableTodoList(
-                        todos: viewModel.todos,
-                        updateTodo: viewModel.updateTodo,
-                        removeTodo: viewModel.removeTodo)
-                } else {
-                    ReadonlyTodoList(todos: viewModel.todos)
-                }
+                
+                todoList
+                    .task {
+                        await viewModel.fetchTodos()
+                    }
                 
                 addButton
-                    .opacity(viewModel.isMine ? 1 : 0)
             }
-            .padding(.vertical, 5)
         }
+        .padding(.horizontal, 20)
         .onAppear {
             viewModel.onAppear()
-        }
-        .task {
-            await viewModel.fetchTodos()
         }
         .onDisappear {
             viewModel.onDisappear()
@@ -50,10 +44,28 @@ struct TodoBoxView: View {
         HStack(spacing: 3) {
             Label("오늘의 투두", systemImage: "list.dash")
             Spacer()
-            CalendarButton(user: viewModel.user, isMine: viewModel.isMine)
         }
         .bold()
         .padding(5)
+    }
+    
+    @ViewBuilder
+    private var boxHeader: some View {
+        header
+            .overlay(alignment: .topTrailing) {
+                UserCalendarButton(user: viewModel.user, isMine: viewModel.isMine)
+            }
+    }
+    
+    @ViewBuilder
+    private var todoList: some View {
+        TodoList(
+            todos: viewModel.todos,
+            isMine: viewModel.isMine,
+            moveTodo: viewModel.moveTodo,
+            updateTodo: viewModel.updateTodo,
+            removeTodo: viewModel.removeTodo
+        )
     }
     
     @ViewBuilder
@@ -64,13 +76,58 @@ struct TodoBoxView: View {
             Image(systemName: "plus")
         }
         .hoverButtonStyle()
-        .padding(.leading, 20)
-        .padding(.top, 5)
+        .padding(.leading, 5)
+        .padding(.bottom, 5)
+        .opacity(viewModel.isMine ? 1 : 0)
     }
 }
 
-// MARK: - CalendarButton
-fileprivate struct CalendarButton: View {
+// MARK: - TodoList
+fileprivate struct TodoList: View {
+    @Environment(OverlayManager.self) private var overlayManager
+    
+    let todos: [Todo]
+    let isMine: Bool
+    let moveTodo: (IndexSet, Int) -> Void
+    let updateTodo: (Todo) -> Void
+    let removeTodo: (Todo) -> Void
+    
+    var body: some View {
+        CustomList(items: todos, onMove: moveTodo) { todo in
+            todoRow(todo)
+                .contextMenu {
+                    removeButton(todo)
+                }
+                .onTapGesture {
+                    overlayManager.push(.todo(todo, isMine: isMine, update: updateTodo))
+                }
+        }
+    }
+    
+    @ViewBuilder
+    private func todoRow(_ todo: Todo) -> some View {
+        BaseTodoRow(todo: todo) {
+            TodoStatusButton(status: todo.status) { newStatus in
+                todo.status = newStatus
+                updateTodo(todo)
+            }
+            .disabled(!isMine)
+        }
+    }
+    
+    @ViewBuilder
+    private func removeButton(_ todo: Todo) -> some View {
+        Button(action: {
+            removeTodo(todo)
+        }) {
+            Text(Image(systemName: "trash"))+Text(" 삭제")
+        }
+        .disabled(!isMine)
+    }
+}
+
+// MARK: - UserCalendarButton
+fileprivate struct UserCalendarButton: View {
     @Environment(OverlayManager.self) private var overlayManager
     
     let user: User
@@ -83,77 +140,14 @@ fileprivate struct CalendarButton: View {
             Image(systemName: "calendar")
         }
         .hoverButtonStyle()
-    }
-}
-
-// MARK: - EditableTodoList
-fileprivate struct EditableTodoList: View {
-    @Environment(OverlayManager.self) private var overlayManager
-    
-    let todos: [Todo]
-    let updateTodo: (Todo) -> Void
-    let removeTodo: (Todo) -> Void
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            ForEach(todos) { todo in
-                BaseTodoRow(todo: todo) {
-                    TodoStatusButton(status: todo.status) { newStatus in
-                        todo.status = newStatus
-                        updateTodo(todo)
-                    }
-                }
-                .onTapGesture {
-                    overlayManager.push(.todo(todo,
-                                              isMine: true,
-                                              update: updateTodo))
-                }
-                .contextMenu {
-                    removeButton(todo)
-                }
-            }
-            .padding([.top, .trailing], 5)
-            .padding(.leading)
-        }
-    }
-    
-    @ViewBuilder
-    private func removeButton(_ todo: Todo) -> some View {
-        Button(action: {
-            removeTodo(todo)
-        }) {
-            Text(Image(systemName: "trash"))+Text(" 삭제")
-        }
-    }
-}
- 
-// MARK: - ReadonlyTodoList
-struct ReadonlyTodoList: View {
-    @Environment(OverlayManager.self) private var overlayManager
-    let todos: [Todo]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            ForEach(todos) { todo in
-                BaseTodoRow(todo: todo) {
-                    TodoStatusButton(status: todo.status) { _ in }
-                        .disabled(true)
-                }
-                .onTapGesture {
-                    overlayManager.push(.todo(todo,
-                                              isMine: false,
-                                              update: { _ in }))
-                }
-            }
-            .padding([.top, .trailing], 5)
-            .padding(.leading)
-        }
+        .padding(.trailing, 5)
     }
 }
 
 // MARK: - BaseTodoRow
-fileprivate struct BaseTodoRow<Button: View>: View {
+struct BaseTodoRow<Button: View>: View {
     @State private var isHovering = false
+    
     let todo: Todo
     let statusButton: () -> Button
     
@@ -182,4 +176,15 @@ fileprivate struct BaseTodoRow<Button: View>: View {
                 .opacity(isHovering ? 0.2 : 0)
         )
     }
+}
+
+
+#Preview {
+    TodoBoxView(viewModel: .init(container: .stub,
+                                 user: User.stub[0],
+                                 isMine: true,
+                                 onAppear: {_,_ in },
+                                 onDisappear: {_,_ in }))
+    .frame(width: 400, height: 400)
+    .environment(OverlayManager.stub)
 }

@@ -19,6 +19,7 @@ struct MainView: View {
             } else {
                 GroupDashboardView(viewModel: .init(container: container,
                                                     userInfo: authManager.userInfo))
+                .disabled(!overlayManager.stack.isEmpty)
                 .onDisappear {
                     overlayManager.reset()
                 }
@@ -28,8 +29,6 @@ struct MainView: View {
             OverlayContainerView()
         }
     }
-    
-    
 }
 
 #Preview("Signed In") {
@@ -37,7 +36,7 @@ struct MainView: View {
         .environment(DIContainer.stub)
         .environment(OverlayManager.stub)
         .environment(AuthManager.signedInAndHasGroupStub)
-        .frame(width: 400, height: 400)
+        .frame(width: 500, height: 400)
 }
 
 #Preview {

@@ -18,15 +18,17 @@ final class DIContainer {
     @ObservationIgnored let chatStreamProvider: ChatStreamProviderType
     @ObservationIgnored let todoStreamProvider: TodoStreamProviderType
     @ObservationIgnored let userInfoService: UserInfoServiceType
+    @ObservationIgnored let todoOrderService: TodoOrderServiceType
     
     init(modelContainer: ModelContainer,
-         userService: UserServiceType = UserService(),
-         todoService: TodoServiceType = TodoService(),
-         chatService: ChatServiceType = ChatService(),
-         groupService: GroupServiceType = GroupService(),
-         chatStreamProvider: ChatStreamProviderType = FirestoreChatStreamProvider(),
-         todoStreamProvider: TodoStreamProviderType = FirestoreTodoStreamProvider(),
-         userInfoService: UserInfoServiceType = UserInfoService()) {
+         userService: UserServiceType,
+         todoService: TodoServiceType,
+         chatService: ChatServiceType,
+         groupService: GroupServiceType,
+         chatStreamProvider: ChatStreamProviderType,
+         todoStreamProvider: TodoStreamProviderType,
+         userInfoService: UserInfoServiceType,
+         todoOrderService: TodoOrderServiceType) {
         self.modelContainer = modelContainer
         self.userService = userService
         self.todoService = todoService
@@ -35,6 +37,7 @@ final class DIContainer {
         self.chatStreamProvider = chatStreamProvider
         self.todoStreamProvider = todoStreamProvider
         self.userInfoService = userInfoService
+        self.todoOrderService = todoOrderService
     }
 }
 
@@ -44,7 +47,8 @@ extension DIContainer {
                                   todoService: StubTodoService(),
                                   chatService: StubChatService(),
                                   groupService: StubGroupService(),
-                                  chatStreamProvider: FirestoreChatStreamProvider(),
-                                  todoStreamProvider: FirestoreTodoStreamProvider(),
-                                  userInfoService: StubUserInfoService())
+                                  chatStreamProvider: StubChatStreamProvider(),
+                                  todoStreamProvider: StubTodoStreamProvider(),
+                                  userInfoService: StubUserInfoService(),
+                                  todoOrderService: StubTodoOrderService())
 }

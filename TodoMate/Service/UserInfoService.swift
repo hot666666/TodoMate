@@ -7,11 +7,6 @@
 
 import Foundation
 
-protocol UserInfoServiceType {
-    func saveUserInfo(_ userInfo: UserInfo)
-    func loadUserInfo() -> UserInfo
-}
-
 class UserInfoService: UserInfoServiceType {
     private let userDefaults = UserDefaults.standard
     private let userInfoKey = Const.UserInfoKey
@@ -29,11 +24,5 @@ class UserInfoService: UserInfoServiceType {
         }
         return .empty // 기본값
     }
-}
-
-class StubUserInfoService: UserInfoServiceType {
-    func saveUserInfo(_ userInfo: UserInfo) { }
-
-    func loadUserInfo() -> UserInfo { .stub }
 }
 

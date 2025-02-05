@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import Foundation
 
 @Observable
 class TodoBoxViewModel {
     private let calendar: Calendar = .current
     private let todoService: TodoServiceType
+    private let todoOrderService: TodoOrderServiceType
     
     private var addObserver: (TodoObserverType, String) -> Void
     private var removeObserver: (TodoObserverType, String) -> Void
@@ -26,6 +28,7 @@ class TodoBoxViewModel {
           onAppear: @escaping (TodoObserverType, String) -> Void,
           onDisappear: @escaping (TodoObserverType, String) -> Void) {
         self.todoService = container.todoService
+        self.todoOrderService = container.todoOrderService
         self.user = user
         self.isMine = isMine
         self.addObserver = onAppear
@@ -43,7 +46,27 @@ class TodoBoxViewModel {
 extension TodoBoxViewModel {
     @MainActor
     func fetchTodos() async {
-        self.todos = await todoService.fetchToday(userId: user.uid)
+        guard isMine else {
+            self.todos = await todoService.fetchToday(userId: user.uid)
+            return
+        }
+            
+        // TODO: - 동일시점 아닌 경우 처리
+        let today: Date = .now
+        var fetchedTodos = await todoService.fetchToday(userId: user.uid)
+        
+        if let lastSavedDate = todoOrderService.loadDate(),
+           calendar.isDate(lastSavedDate, inSameDayAs: today)
+        {
+            let savedOrder = todoOrderService.loadOrder()
+            fetchedTodos.sort { savedOrder.firstIndex(of: $0.fid ?? "") ?? Int.max < savedOrder.firstIndex(of: $1.fid ?? "") ?? Int.max }
+        } else {
+            todoOrderService.saveDate(today)
+            let order = fetchedTodos.map { $0.fid ?? "" }
+            todoOrderService.saveOrder(order)
+        }
+        
+        self.todos = fetchedTodos
     }
     
     func updateTodo(_ todo: Todo) {
@@ -57,8 +80,10 @@ extension TodoBoxViewModel {
         todoService.create(todo)
         
 #if PREVIEW
+        todo.fid = UUID().uuidString
         todos.append(todo)
 #endif
+        saveTodoOrder()
     }
     
     func removeTodo(_ todo: Todo) {
@@ -68,6 +93,21 @@ extension TodoBoxViewModel {
 #if PREVIEW
         todos.removeAll { $0.id == todo.id }
 #endif
+        saveTodoOrder()
+    }
+}
+extension TodoBoxViewModel {
+    func moveTodo(from source: IndexSet, to destination: Int) {
+        guard isMine else { return }
+        
+        todos.move(fromOffsets: source, toOffset: destination)
+        saveTodoOrder()
+    }
+    
+    private func saveTodoOrder() {
+        let order = todos.map { $0.fid ?? "" }
+        todoOrderService.saveOrder(order)
+        print("Saved order: \(order)")
     }
 }
 extension TodoBoxViewModel: TodoObserverType {

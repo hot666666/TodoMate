@@ -7,9 +7,6 @@
 
 import Foundation
 
-protocol UploadProviderType {
-    func upload(path: String, data: Data, fileName: String) async throws -> String
-}
 
 final class UploadProvider: UploadProviderType {
     let storage: FStorageReference
