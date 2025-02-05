@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - TodoCalendarView
 struct TodoCalendarView: View {
     @State private var viewModel: TodoCalendarViewModel
     
@@ -123,7 +124,7 @@ fileprivate struct TodoCalendarDay: View {
             Spacer()
         }
         .contentShape(.rect)
-        .background(RoundedRectangle(cornerRadius: 5).fill(Color.customGrayBg.opacity(0.2)))
+        .background(RoundedRectangle(cornerRadius: 3).fill(Color.customGrayBg.opacity(0.2)))
         .padding(1)
         .onHover { isHovering = $0 }
     }
@@ -230,6 +231,7 @@ fileprivate struct HoverStyledButton: View {
         .hoverButtonStyle()
     }
 }
+
 
 #Preview {
     TodoCalendarView(viewModel: .init(container: .stub,

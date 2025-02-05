@@ -29,7 +29,6 @@ class TodoCalendarViewModel {
         updateCalendarDays()
     }
 }
-
 extension TodoCalendarViewModel {
     func setDropTarget(status: Bool) {
         isDropTargeted = status
@@ -58,7 +57,24 @@ extension TodoCalendarViewModel {
         return true
     }
 }
-
+extension TodoCalendarViewModel {
+    func moveMonth(by value: Int) {
+        let updatedDate = calendar.addMonths(value, to: currentDate)!
+        currentDate = updatedDate
+        updateCalendarDays()
+        Task {
+            await fetch()
+        }
+    }
+    
+    func currentMonth() {
+        currentDate = .now
+        updateCalendarDays()
+        Task {
+            await fetch()
+        }
+    }
+}
 extension TodoCalendarViewModel {
     @MainActor
     func fetch() async {
@@ -109,25 +125,7 @@ extension TodoCalendarViewModel {
         todos[oldTodoDate, default: []].removeAll { $0.fid == newTodo.fid }
         todos[newTodoDate, default: []].append(newTodo)
     }
-    
-    func moveMonth(by value: Int) {
-        let updatedDate = calendar.addMonths(value, to: currentDate)!
-        currentDate = updatedDate
-        updateCalendarDays()
-        Task {
-            await fetch()
-        }
-    }
-    
-    func currentMonth() {
-        currentDate = .now
-        updateCalendarDays()
-        Task {
-            await fetch()
-        }
-    }
 }
-
 extension TodoCalendarViewModel {
     private func updateCalendarDays() {
         let startOfMonth = calendar.startOfMonth(for: currentDate)
