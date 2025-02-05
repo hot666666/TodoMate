@@ -77,6 +77,7 @@ struct TodoBoxView: View {
         }
         .hoverButtonStyle()
         .padding(.leading, 5)
+        .padding(.bottom, 5)
         .opacity(viewModel.isMine ? 1 : 0)
     }
 }
