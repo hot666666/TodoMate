@@ -35,7 +35,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4526B0D52D48F56500DC90F5"
+               BlueprintIdentifier = "4560E38D2D538DB5008B09AA"
                BuildableName = "TodoMateTests.xctest"
                BlueprintName = "TodoMateTests"
                ReferencedContainer = "container:TodoMate.xcodeproj">
@@ -44,7 +44,7 @@
       </Testables>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Preview"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"

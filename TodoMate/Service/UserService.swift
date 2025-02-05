@@ -5,12 +5,6 @@
 //  Created by hs on 12/28/24.
 //
 
-protocol UserServiceType {
-    func fetch() async -> [User]
-    func fetch(uid: String) async -> User?
-    func update(_ user: User) async
-}
-
 final class UserService: UserServiceType {
     private let userRepository: UserRepositoryType
     
@@ -43,17 +37,4 @@ final class UserService: UserServiceType {
     }
 }
 
-class StubUserService: UserServiceType {
-    func fetch() async -> [User] {
-        print("[Fetching Users] - \(User.stub.count)")
-        return User.stub
-    }
-    
-    func fetch(uid: String) async -> User? {
-        return User.stub.first
-    }
-    
-    func update(_ user: User) {
-        print("[Updating User] - \(user)")
-    }
-}
+

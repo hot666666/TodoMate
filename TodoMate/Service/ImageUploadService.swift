@@ -7,10 +7,6 @@
 
 import Foundation
 
-protocol ImageUploadServiceType {
-    func upload(data: Data) async -> String  /// URL
-}
-
 final class ImageUploadService: ImageUploadServiceType {
     private let provider: UploadProviderType
     
@@ -28,8 +24,3 @@ final class ImageUploadService: ImageUploadServiceType {
     }
 }
 
-class StubImageUploadService: ImageUploadServiceType {
-    func upload(data: Data) async -> String {
-        ""
-    }
-}

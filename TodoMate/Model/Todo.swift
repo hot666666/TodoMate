@@ -88,11 +88,11 @@ extension Todo {
 
 extension Todo {
     static var stub: [Todo] {
-        [.init(date: .now, content: "할일1-hs", detail: "할일입니다", status: .todo, uid: "hs", fid: UUID().uuidString),
-         .init(date: .now, content: "할일2-hs", detail: "할일입니다", status: .todo, uid: "hs", fid: UUID().uuidString),
-         .init(date: .now, content: "할일3", detail: "할일입니다", status: .todo, uid: "jy", fid: UUID().uuidString),
-         .init(date: .now, content: "할일4", detail: "할일입니다", status: .todo, uid: "jy", fid: UUID().uuidString),
-         .init(date: .now, content: "할일5", detail: "할일입니다", status: .todo, uid: "jy", fid: UUID().uuidString)]
+        [.init(date: .now, content: "할일1-hs", detail: "할일입니다", status: .todo, uid: User.stub[0].uid, fid: "firebase-id"),
+         .init(date: .now, content: "할일2-hs", detail: "할일입니다", status: .todo, uid: User.stub[0].uid, fid: "firebase-id2"),
+         .init(date: .now, content: "할일1-jy", detail: "할일입니다", status: .todo, uid: User.stub[1].uid, fid: "firebase-id3"),
+         .init(date: .now, content: "할일2-jy", detail: "할일입니다", status: .todo, uid: User.stub[1].uid, fid: "firebase-id4"),
+         .init(date: .now, content: "할일3-jy", detail: "할일입니다", status: .todo, uid: User.stub[1].uid, fid: "firebase-id5")]
     }
     
     static var widgetStub: [Todo] {

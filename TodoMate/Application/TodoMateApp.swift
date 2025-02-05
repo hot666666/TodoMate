@@ -64,7 +64,15 @@ fileprivate struct _TodoMateApp: View {
 #if PREVIEW
         let container: DIContainer = .stub
 #else
-        let container: DIContainer = .init(modelContainer: modelContainer)
+        let container: DIContainer = .init(modelContainer: modelContainer,
+                                           userService: UserService(),
+                                           todoService: TodoService(),
+                                           chatService: ChatService(),
+                                           groupService: GroupService(),
+                                           chatStreamProvider: FirestoreChatStreamProvider(),
+                                           todoStreamProvider: FirestoreTodoStreamProvider(),
+                                           userInfoService: UserInfoService(),
+                                           todoOrderService: TodoOrderService())
 #endif
         self._container = State(initialValue: container)
         self._authManager = State(initialValue: AuthManager(container: container))

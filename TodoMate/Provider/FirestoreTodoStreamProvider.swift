@@ -9,10 +9,6 @@
 import Foundation
 #endif
 
-protocol TodoStreamProviderType {
-    func createTodoStream() -> AsyncStream<DatabaseChange<Todo>>
-}
-
 final class FirestoreTodoStreamProvider: TodoStreamProviderType {
     private let reference: FirestoreReference
     
@@ -23,11 +19,10 @@ final class FirestoreTodoStreamProvider: TodoStreamProviderType {
 #if DEBUG
     private let calendar = Calendar.current
     private let today = Calendar.current.startOfDay(for: .now)
-    private var startDateForDebug: Date { calendar.date(byAdding: .day, value: -4, to: today)! }
-    private var endDateForDebug: Date { calendar.date(byAdding: .day, value: 3, to: today)! }
+    private var startDateForDebug: Date { calendar.date(byAdding: .day, value: -2, to: today)! }
+    private var endDateForDebug: Date { calendar.date(byAdding: .day, value: 1, to: today)! }
 #endif
 }
-#if !PREVIEW
 extension FirestoreTodoStreamProvider {
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
         AsyncStream { continuation in
@@ -69,15 +64,3 @@ extension FirestoreTodoStreamProvider {
         }
     }
 }
-#else
-extension FirestoreTodoStreamProvider {
-    func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
-        AsyncStream { continuation in
-            for todo in Todo.stub {
-                continuation.yield(.added(todo))
-            }
-            continuation.finish()
-        }
-    }
-}
-#endif
