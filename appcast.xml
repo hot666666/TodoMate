@@ -7,8 +7,8 @@
     <item>
       <title>Version 2.0.0</title>
       <description>새로운 업데이트 가능: TodoMate 버전 2.0.0.</description>
-      <pubDate>Mon, 03 Feb 2025 08:16:30 +0000</pubDate>
-      <enclosure sparkle:shortVersionString="2.0.0" sparkle:version="64" sparkle:sha256="5b3cb5252b0422cb81a7ce47b9d9c5725e2eb21c9735e34ccb5b192b6539917b" sparkle:edSignature="dTSgflnt7RyGCWWuSMiDIxmbquIZPGc9UiGmnIMYK0yf2FFIhLSP9QMIV95gr2lyckZaM2Ahg+ITtqMd6djKDg==" url="https://github.com/hot666666/TodoMate/releases/download/2.0.0/TodoMate.app.zip" length="11945548" type="application/zip"/>
+      <pubDate>Sun, 09 Feb 2025 11:41:39 +0000</pubDate>
+      <enclosure sparkle:shortVersionString="2.0.0" sparkle:version="65" sparkle:sha256="6210f325be047fb6c021f9b48607ad8516a494cbd118d1f02d17e95cf890493c" sparkle:edSignature="AZNFrnJ5aY7YSbOhbD+JFmTGnUb0Ht3ckYY+O6wyeqWiSP7O7IHZbdXAKYUNp6YADnGHS09jS6+z23bVKV+nCA==" url="https://github.com/hot666666/TodoMate/releases/download/2.0.0/TodoMate.app.zip" length="14559325" type="application/zip"/>
     </item>
   </channel>
 </rss>
