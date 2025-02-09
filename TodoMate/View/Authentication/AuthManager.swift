@@ -20,7 +20,7 @@ enum AuthError: Error {
 
 protocol AuthManagerType {
     var authState: AuthManager.AuthState { get }
-    var userInfo: AuthManager.UserInfo { get }
+    var userInfo: UserInfo { get }
     func updateUserInfo(_ gid: String)
     func signIn() async
     func signOut() async
@@ -195,16 +195,6 @@ extension AuthManager {
         case loading
 //        case error(String)
     }
-    
-    struct UserInfo: Codable {
-        let id: String
-        let token: String
-        let gid: String
-        
-        static let empty = UserInfo(id: "", token: "", gid: "")
-        static let stub = UserInfo(id: User.stub[0].uid, token: UUID().uuidString, gid: "")
-        static let hasGroupStub = UserInfo(id: User.stub[0].uid, token: UUID().uuidString, gid: UserGroup.stub.id)
-    }
 }
 extension AuthManager {
     static let stub: AuthManager = .init(container: .stub)
@@ -215,5 +205,3 @@ extension AuthManager {
         return manager
     }
 }
-
-typealias UserInfo = AuthManager.UserInfo

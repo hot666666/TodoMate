@@ -30,6 +30,8 @@ extension Const {
 }
 extension Const {
     static let UserInfoKey = "userInfo"
+    static let TodoOrderDateKey = "todoOrderDate"
+    static let TodoOrderKey = "todoOrder"
 }
 
 typealias FireStore = Const.FireStore

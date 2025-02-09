@@ -22,10 +22,9 @@ struct GroupDashboardView: View {
                                                userInfo: viewModel.userInfo))
                 TodoBoardView(viewModel: .init(container: container,
                                                userInfo: viewModel.userInfo))
-                }
             }
-            .padding(.bottom, 50)
         }
+    }
 }
 
 #Preview {

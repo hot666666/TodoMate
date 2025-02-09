@@ -5,11 +5,6 @@
 //  Created by hs on 1/28/25.
 //
 
-protocol GroupServiceType {
-    func fetch(groupId: String) async -> UserGroup?
-    func update(_ group: UserGroup) async
-}
-
 final class GroupService: GroupServiceType {
     private let groupRepository: GroupRepositoryType
 
@@ -34,15 +29,3 @@ extension GroupService {
             
 }
 
-class StubGroupService: GroupServiceType {
-    func fetch(groupId: String) async -> UserGroup? {
-        if groupId == UserGroup.stub.id {
-            return UserGroup.stub
-        }
-        return nil
-    }
-    
-    func update(_ group: UserGroup) async {
-        print("[Updating Group - \(group.id)] - ")
-    }
-}

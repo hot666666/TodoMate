@@ -5,10 +5,6 @@
 //  Created by hs on 1/22/25.
 //
 
-protocol ChatStreamProviderType {
-    func createChatStream() -> AsyncStream<DatabaseChange<Chat>>
-}
-
 final class FirestoreChatStreamProvider: ChatStreamProviderType {
     private let reference: FirestoreReference
     
@@ -16,7 +12,6 @@ final class FirestoreChatStreamProvider: ChatStreamProviderType {
         self.reference = reference
     }
 }
-#if !PREVIEW
 extension FirestoreChatStreamProvider {
     func createChatStream() -> AsyncStream<DatabaseChange<Chat>> {
         AsyncStream { continuation in
@@ -55,15 +50,3 @@ extension FirestoreChatStreamProvider {
         }
     }
 }
-#else
-extension FirestoreChatStreamProvider {
-    func createChatStream() -> AsyncStream<DatabaseChange<Chat>> {
-        AsyncStream { continuation in
-            for chat in Chat.stub {
-                continuation.yield(.added(chat))
-            }
-            continuation.finish()
-        }
-    }
-}
-#endif

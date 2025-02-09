@@ -25,13 +25,14 @@ class TodoBoardViewModel {
         self.userInfo = userInfo
     }
     
+    func isMe(_ user: User) -> Bool {
+        user.uid == userInfo.id
+    }
+}
+extension TodoBoardViewModel {
     @MainActor
     func fetchGroupUser() async {
         users = await userService.fetch()
-    }
-    
-    func isMe(_ user: User) -> Bool {
-        user.uid == userInfo.id
     }
 }
 extension TodoBoardViewModel {

@@ -34,11 +34,12 @@ enum OverlayType: Identifiable, Equatable {
 @Observable
 class OverlayManager {
     var stack: [OverlayType] = []
-    var isOverlayPresented: Bool {
-        !stack.isEmpty
-    }
 
     func push(_ overlay: OverlayType) {
+#if os(macOS)
+        /// TextEditor는 disabled 상태에서도 포커스를 받아서 키보드 입력을 받아들이는 문제가 있어서, 직접 포커스를 해제
+        NSApplication.shared.keyWindow?.makeFirstResponder(nil)
+#endif
         stack.append(overlay)
     }
 

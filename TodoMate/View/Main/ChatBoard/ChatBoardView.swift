@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - ChatBoardView
 struct ChatBoardView: View {
     @State private var viewModel: ChatBoardViewModel
     
@@ -17,99 +18,114 @@ struct ChatBoardView: View {
     var body: some View {
         ExpandableView(
             storageKey: "chatlist",
-            title: {
+            header: {
                 Text("채팅")
             },
             content: {
-                ChatBoardContainer()
+                chatListContent
                     .task {
                         await viewModel.observeChanges()
                     }
-                    .environment(viewModel)
-                    .padding(.horizontal, 10)
-            })
+            }
+        )
         .padding(.bottom)
+    }
+    
+    @ViewBuilder
+    private var chatListContent: some View {
+        ChatListContent(
+                chats: viewModel.chats,
+                createChat: viewModel.createChat,
+                updateChat: viewModel.updateChat,
+                removeChat: viewModel.removeChat
+            )
+        .padding(.horizontal, 10)
     }
 }
 
-// MARK: - ChatBoardContainer
-fileprivate struct ChatBoardContainer: View {
-    @Environment(OverlayManager.self) private var overlayManager
-    @Environment(ChatBoardViewModel.self) private var viewModel
+// MARK: - ChatListContent
+fileprivate struct ChatListContent: View {
     @FocusState private var focusedId: String?
+    let chats: [Chat]
+    let createChat: (String?) -> Void
+    let updateChat: (Chat) -> Void
+    let removeChat: (Chat) -> Void
     
     var body: some View {
         ZStack {
             clearFocusBackground
-                .onTapGesture { clearFocus() }
             
-            VStack(alignment: .leading) {
-                ForEach(viewModel.chats) { chat in
-                    ChatRow(chat: chat, focusedId: $focusedId)
-                        .contextMenu {
-                            removeButton(chat)
-                        }
-                }
-                addButton
-                Spacer()
-            }
-            .onChange(of: overlayManager.isOverlayPresented) {
-                if $1 { clearFocus() }
-            }
+            chatList
         }
     }
     
     @ViewBuilder
     private var clearFocusBackground: some View {
         Color.clear
-            .contentShape(.rect)
+            .contentShape(Rectangle())
+            .onTapGesture { focusedId = nil }
     }
     
     @ViewBuilder
-    private var addButton: some View {
-        HStack{
-            Button(action: {
-                viewModel.createChat()
-            }) {
-                Image(systemName: "plus")
+    private var chatList: some View {
+        VStack(alignment: .leading) {
+            ForEach(chats) { chat in
+                ChatRow(chat: chat, updateChat: updateChat, removeChat: removeChat)
+                    .focused($focusedId, equals: chat.id)
+                    .contextMenu {
+                        removeButton(chat)
+                    }
+
             }
-            .hoverButtonStyle()
-            .padding(.leading, 25)
             
+            addButton
             Spacer()
         }
     }
     
     @ViewBuilder
+    private var addButton: some View {
+        Button(action: {
+            createChat(nil)
+        }) {
+            Image(systemName: "plus")
+        }
+        .hoverButtonStyle()
+        .padding(.leading, 25)
+        
+        Spacer()
+    }
+    
+    @ViewBuilder
     private func removeButton(_ chat: Chat) -> some View {
-        Button(role: .destructive) {
-            viewModel.removeChat(chat)
+        Button {
+            removeChat(chat)
         } label: {
             Text(Image(systemName: "trash"))+Text(" 삭제")
         }
     }
-    
-    private func clearFocus() { focusedId = nil }
 }
 
 // MARK: - ChatRow
 fileprivate struct ChatRow: View {
-    @Environment(ChatBoardViewModel.self) private var viewModel
     @State private var isHovered: Bool = false
     
     let chat: Chat
-    @FocusState.Binding var focusedId: String?
+    let updateChat: (Chat) -> Void
+    let removeChat: (Chat) -> Void
     
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
             // TODO: - 채팅 이동 처리
             ellipsis
                 .opacity(isHovered ? 1 : 0)
-                
-            ChatInput(chat: chat,
-                      onSubmit: viewModel.updateChat,
-                      onDelete: viewModel.removeChat)
-            .focused($focusedId, equals: chat.id)
+  
+            
+            ChatInput(
+                chat: chat,
+                onSubmit: updateChat,
+                onDelete: removeChat
+            )
         }
         .onHover { isHovered = $0 }
     }
@@ -128,28 +144,18 @@ fileprivate struct ChatRow: View {
 fileprivate struct ChatInput: View {
     /// 디바운스용 Task(코루틴). 매번 텍스트가 바뀔 때마다 재생성.
     @State private var debouncingTask: Task<Void, Never>? = nil
+    private let placeholder: String = "메시지를 입력하세요"
     
     var chat: Chat
-    let placeholder: String = "메시지를 입력하세요"
     let onSubmit: (Chat) -> Void
     let onDelete: (Chat) -> Void
     
     var body: some View {
         // TODO: - 텍스트 높낮이 일정하게 맞추기
         ZStack(alignment: .topLeading) {
-            /// placeholder
-            Group {
-                if chat.content.isEmpty {
-                    Text(placeholder)
-                        .foregroundColor(.gray.opacity(0.5))
-                        .padding(.leading, 5)
-#if os(iOS)
-                                .padding(.top, 10)
-#endif
-                }
-            }
-            .allowsHitTesting(false)
-
+            emptyContent
+                .allowsHitTesting(false)
+            
             TextEditor(text: Bindable(chat).content)
                 .scrollDisabled(true)
                 .scrollIndicators(.hidden)
@@ -164,6 +170,17 @@ fileprivate struct ChatInput: View {
         .onChange(of: chat.content) {
             scheduleDebouncedSubmit(isDelete: $1.isEmpty)
         }
+    }
+    
+    @ViewBuilder
+    private var emptyContent: some View {
+        Text(placeholder)
+            .opacity(chat.content.isEmpty ? 0.5 : 0)
+            .foregroundColor(.gray.opacity(0.5))
+            .padding(.leading, 5)
+#if os(iOS)
+            .padding(.top, 10)
+#endif
     }
     
     private func scheduleDebouncedSubmit(isDelete: Bool = false) {
@@ -182,6 +199,54 @@ fileprivate struct ChatInput: View {
         }
     }
 }
+
+// MARK: - ChatList
+fileprivate struct ChatList: View {
+    @FocusState.Binding var focusedId: String?
+    let chats: [Chat]
+    let createChat: (String?) -> Void
+    let updateChat: (Chat) -> Void
+    let removeChat: (Chat) -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            ForEach(chats) { chat in
+                ChatRow(chat: chat, updateChat: updateChat, removeChat: removeChat)
+                    .focused($focusedId, equals: chat.id)
+                    .contextMenu {
+                        removeButton(chat)
+                    }
+
+            }
+            
+            addButton
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    private var addButton: some View {
+        Button(action: {
+            createChat(nil)
+        }) {
+            Image(systemName: "plus")
+        }
+        .hoverButtonStyle()
+        .padding(.leading, 25)
+        
+        Spacer()
+    }
+    
+    @ViewBuilder
+    private func removeButton(_ chat: Chat) -> some View {
+        Button {
+            removeChat(chat)
+        } label: {
+            Text(Image(systemName: "trash"))+Text(" 삭제")
+        }
+    }
+}
+
 
 #Preview {
     VStack {
