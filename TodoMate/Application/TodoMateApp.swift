@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import WidgetKit
+import FirebaseCore
 
 @main
 struct TodoMateApp: App {
@@ -17,6 +18,11 @@ struct TodoMateApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 #endif
     @Environment(\.scenePhase) private var scenePhase
+    
+    init() {
+        /// 앱 시작 시 가장 처음 Firebase 초기화 진행 보장
+        FirebaseApp.configure()
+    }
     
     private var sharedModelContainer: ModelContainer = {
         let schema = Schema([TodoEntity.self])

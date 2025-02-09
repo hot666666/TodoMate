@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import FirebaseCore
 
 #if os(macOS)
 import Sparkle
@@ -32,10 +31,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         
-#if !PREVIEW
-        /// Firebase 초기화
-        FirebaseApp.configure()
-        
+#if !PREVIEW        
         /// Sparkle Controller 설정
         let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
         updater = updaterController.updater
