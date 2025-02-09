@@ -20,8 +20,8 @@ enum AuthError: Error {
 
 protocol AuthManagerType {
     var authState: AuthManager.AuthState { get }
-    var userInfo: UserInfo { get }
-    func updateUserInfo(_ gid: String)
+    var authenticatedUser: AuthenticatedUser { get }
+    func updateUserGroup(_ gid: String)
     func signIn() async
     func signOut() async
 }
@@ -33,13 +33,13 @@ class AuthManager: AuthManagerType {
     private let userInfoService: UserInfoServiceType
     private let modelContainer: ModelContainer
     
-    private var _userInfo: UserInfo
+    private var _authenticatedUser: AuthenticatedUser
     
     // TODO: - 로컬에 값은 존재 하나, 서버에 유저 정보가 없는 경우 처리
-    private(set) var userInfo: UserInfo {
-        get { _userInfo }
+    private(set) var authenticatedUser: AuthenticatedUser {
+        get { _authenticatedUser }
         set {
-            _userInfo = newValue
+            _authenticatedUser = newValue
             userInfoService.saveUserInfo(newValue)
         }
     }
@@ -52,8 +52,8 @@ class AuthManager: AuthManagerType {
         self.modelContainer = container.modelContainer
         
         /// 로컬에 저장된 유저 정보 불러오기
-        self._userInfo = userInfoService.loadUserInfo()
-        self.authState = _userInfo.id.isEmpty ? .signedOut : .signedIn
+        self._authenticatedUser = userInfoService.loadUserInfo()
+        self.authState = _authenticatedUser.id.isEmpty ? .signedOut : .signedIn
     }
     
     @MainActor
@@ -105,8 +105,8 @@ class AuthManager: AuthManagerType {
             
             let fUser = await handleUserAuthentication(uid: user.uid, name: user.displayName ?? "Unknown")
             await removeAllTodoEntity()
-            userInfo = .init(id: fUser.uid, token: idToken, gid: fUser.gid)
-            print("Sign in successful for user: \(userInfo.id)")
+            authenticatedUser = .init(id: fUser.uid, token: idToken, gid: fUser.gid)
+            print("Sign in successful for user: \(authenticatedUser.id)")
         } catch {
             authState = .signedOut
             print("Authentication failed: \(error.localizedDescription)")
@@ -122,15 +122,15 @@ class AuthManager: AuthManagerType {
         
         GIDSignIn.sharedInstance.signOut()
         await removeAllTodoEntity()
-        userInfo = .empty
+        authenticatedUser = .empty
         
         authState = .signedOut
         print("User signed out successfully")
     }
     
     // TODO: - 다른 요소에 대해서도 업데이트가 필요한 경우 추가
-    func updateUserInfo(_ gid: String) {
-        userInfo = .init(id: userInfo.id, token: userInfo.token, gid: gid)
+    func updateUserGroup(_ gid: String) {
+        authenticatedUser = .init(id: authenticatedUser.id, token: authenticatedUser.token, gid: gid)
     }
 }
 extension AuthManager {
@@ -157,7 +157,7 @@ extension AuthManager {
 @Observable
 class AuthManager: AuthManagerType {
     var authState: AuthManager.AuthState = .signedOut
-    var userInfo: AuthManager.UserInfo = .empty
+    var authenticatedUser: AuthManager.UserInfo = .empty
     
     init(container: DIContainer) {}
     
@@ -200,7 +200,7 @@ extension AuthManager {
     static let stub: AuthManager = .init(container: .stub)
     static var signedInAndHasGroupStub: AuthManager {
         let manager = AuthManager(container: .stub)
-        manager.userInfo = .hasGroupStub
+        manager.authenticatedUser = AuthenticatedUser.hasGroupStub
         manager.authState = .signedIn
         return manager
     }

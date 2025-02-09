@@ -11,11 +11,11 @@ import SwiftUI
 class ChatBoardViewModel {
     private let chatService: ChatServiceType
     private let chatStreamProvider: ChatStreamProviderType
-    private let userInfo: UserInfo
+    private let userInfo: AuthenticatedUser
     
     var chats: [Chat] = []
     
-    init(container: DIContainer, userInfo: UserInfo) {
+    init(container: DIContainer, userInfo: AuthenticatedUser) {
         self.chatService = container.chatService
         self.chatStreamProvider = container.chatStreamProvider
         self.userInfo = userInfo

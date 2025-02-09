@@ -11,15 +11,15 @@ class UserInfoService: UserInfoServiceType {
     private let userDefaults = UserDefaults.standard
     private let userInfoKey = Const.UserInfoKey
 
-    func saveUserInfo(_ userInfo: UserInfo) {
+    func saveUserInfo(_ userInfo: AuthenticatedUser) {
         if let encoded = try? JSONEncoder().encode(userInfo) {
             userDefaults.set(encoded, forKey: userInfoKey)
         }
     }
 
-    func loadUserInfo() -> UserInfo {
+    func loadUserInfo() -> AuthenticatedUser {
         if let savedData = userDefaults.data(forKey: userInfoKey),
-           let decoded = try? JSONDecoder().decode(UserInfo.self, from: savedData) {
+           let decoded = try? JSONDecoder().decode(AuthenticatedUser.self, from: savedData) {
             return decoded
         }
         return .empty // 기본값

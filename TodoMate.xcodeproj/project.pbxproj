@@ -22,7 +22,7 @@
 		451DEDD32D3E4E1B00A20417 /* TodoBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDD22D3E4E1B00A20417 /* TodoBoardViewModel.swift */; };
 		451DEDE32D3E8D2F00A20417 /* ChatBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDE22D3E8D2B00A20417 /* ChatBoardView.swift */; };
 		451DEDE62D3E9BD000A20417 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 451DEDE52D3E9BD000A20417 /* FirebaseFirestore */; };
-		451DEDE72D3EA11300A20417 /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 45B655E92CAFDF2C008F6443 /* TodoMateWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		451DEDE72D3EA11300A20417 /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 45B655E92CAFDF2C008F6443 /* TodoMateWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		451DEDF92D40BF2800A20417 /* ChatBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDF82D40BF2800A20417 /* ChatBoardViewModel.swift */; };
 		451DEDFD2D40CC7100A20417 /* FirestoreChatStreamProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDFC2D40CC6B00A20417 /* FirestoreChatStreamProvider.swift */; };
 		4526B0AD2D41E58700DC90F5 /* FStorageReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4526B0AC2D41E58700DC90F5 /* FStorageReference.swift */; };
@@ -77,8 +77,8 @@
 		4560E3B82D53971F008B09AA /* UserServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4560E3AC2D5396C6008B09AA /* UserServiceType.swift */; };
 		4560E3B92D539737008B09AA /* DIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA3F72C75CA2800CA43F2 /* DIContainer.swift */; };
 		4560E3BA2D539746008B09AA /* ModelContainer+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4526B0B32D42394600DC90F5 /* ModelContainer+Extension.swift */; };
-		4560E3BD2D539897008B09AA /* UserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4560E3BC2D539893008B09AA /* UserInfo.swift */; };
-		4560E3BE2D539897008B09AA /* UserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4560E3BC2D539893008B09AA /* UserInfo.swift */; };
+		4560E3BD2D539897008B09AA /* AuthenticatedUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4560E3BC2D539893008B09AA /* AuthenticatedUser.swift */; };
+		4560E3BE2D539897008B09AA /* AuthenticatedUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4560E3BC2D539893008B09AA /* AuthenticatedUser.swift */; };
 		4560E3BF2D539A04008B09AA /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB42C7178600053835E /* Chat.swift */; };
 		4560E3C02D539A0E008B09AA /* WeakTodoObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4526B0B12D422B0900DC90F5 /* WeakTodoObserver.swift */; };
 		4560E3C32D539B7D008B09AA /* UploadProviderType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4560E3C22D539B7D008B09AA /* UploadProviderType.swift */; };
@@ -211,7 +211,7 @@
 		4560E3AC2D5396C6008B09AA /* UserServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserServiceType.swift; sourceTree = "<group>"; };
 		4560E3AE2D5396CD008B09AA /* GroupServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupServiceType.swift; sourceTree = "<group>"; };
 		4560E3B02D5396D9008B09AA /* ImageUploadServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageUploadServiceType.swift; sourceTree = "<group>"; };
-		4560E3BC2D539893008B09AA /* UserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfo.swift; sourceTree = "<group>"; };
+		4560E3BC2D539893008B09AA /* AuthenticatedUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedUser.swift; sourceTree = "<group>"; };
 		4560E3C22D539B7D008B09AA /* UploadProviderType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadProviderType.swift; sourceTree = "<group>"; };
 		4560E3C42D539BAF008B09AA /* TodoStreamProviderType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoStreamProviderType.swift; sourceTree = "<group>"; };
 		4560E3C62D539C17008B09AA /* ChatStreamProviderType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStreamProviderType.swift; sourceTree = "<group>"; };
@@ -563,7 +563,7 @@
 		45E10BA12C69FA0E00FC31CD /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				4560E3BC2D539893008B09AA /* UserInfo.swift */,
+				4560E3BC2D539893008B09AA /* AuthenticatedUser.swift */,
 				45962CF82D491D0B00089A48 /* UserGroup.swift */,
 				4541C9912D2D4071006A9C60 /* User.swift */,
 				453D37502C7C8450003835CE /* TodoTransferData.swift */,
@@ -795,7 +795,7 @@
 				4560E3B92D539737008B09AA /* DIContainer.swift in Sources */,
 				4560E3CA2D539C60008B09AA /* UploadProviderType.swift in Sources */,
 				4560E39F2D53912A008B09AA /* Const.swift in Sources */,
-				4560E3BE2D539897008B09AA /* UserInfo.swift in Sources */,
+				4560E3BE2D539897008B09AA /* AuthenticatedUser.swift in Sources */,
 				4560E3BA2D539746008B09AA /* ModelContainer+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -867,7 +867,7 @@
 				4526B0AD2D41E58700DC90F5 /* FStorageReference.swift in Sources */,
 				45ED09042C6ADDA7005A8096 /* TodoDTO.swift in Sources */,
 				45CE6CBC2C71825B0053835E /* ChatService.swift in Sources */,
-				4560E3BD2D539897008B09AA /* UserInfo.swift in Sources */,
+				4560E3BD2D539897008B09AA /* AuthenticatedUser.swift in Sources */,
 				451DEDBC2D3CF3D700A20417 /* SignInButton.swift in Sources */,
 				4526B0CF2D48A1C400DC90F5 /* GroupDashboardViewModel.swift in Sources */,
 				45962D082D49EB0E00089A48 /* JoinGroupView.swift in Sources */,
@@ -896,7 +896,6 @@
 /* Begin PBXTargetDependency section */
 		451DEDE92D3EA11300A20417 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilter = ios;
 			target = 45B655E82CAFDF2C008F6443 /* TodoMateWidgetExtension */;
 			targetProxy = 451DEDE82D3EA11300A20417 /* PBXContainerItemProxy */;
 		};

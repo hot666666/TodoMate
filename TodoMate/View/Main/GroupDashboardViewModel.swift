@@ -11,11 +11,11 @@ import SwiftUI
 class GroupDashboardViewModel {
     private let userService: UserServiceType
     
-    @ObservationIgnored let userInfo: UserInfo
+    @ObservationIgnored let userInfo: AuthenticatedUser
     
     var users: [User] = []
     
-    init(container: DIContainer, userInfo: UserInfo) {
+    init(container: DIContainer, userInfo: AuthenticatedUser) {
         self.userService = container.userService
         self.userInfo = userInfo
     }

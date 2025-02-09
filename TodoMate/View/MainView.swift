@@ -14,11 +14,11 @@ struct MainView: View {
     
     var body: some View {
         ZStack {
-            if authManager.userInfo.gid.isEmpty {
+            if authManager.authenticatedUser.gid.isEmpty {
                 JoinGroupView()
             } else {
                 GroupDashboardView(viewModel: .init(container: container,
-                                                    userInfo: authManager.userInfo))
+                                                    userInfo: authManager.authenticatedUser))
                 .disabled(!overlayManager.stack.isEmpty)
                 .onDisappear {
                     overlayManager.reset()

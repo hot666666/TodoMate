@@ -15,10 +15,10 @@ class TodoBoardViewModel {
     private let modelContainer: ModelContainer
     private var observers: [String: [WeakTodoObserver]] = [:]
     
-    @ObservationIgnored let userInfo: UserInfo
+    @ObservationIgnored let userInfo: AuthenticatedUser
     var users: [User] = []
     
-    init(container: DIContainer, userInfo: UserInfo) {
+    init(container: DIContainer, userInfo: AuthenticatedUser) {
         self.todoStreamProvider = container.todoStreamProvider
         self.userService = container.userService
         self.modelContainer = container.modelContainer

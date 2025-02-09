@@ -126,7 +126,7 @@ fileprivate struct ProfileButton: View {
 #Preview {
     ScrollView {
         VStack{
-            TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: UserInfo.stub))
+            TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: AuthenticatedUser.stub))
             Spacer()
         }
     }
