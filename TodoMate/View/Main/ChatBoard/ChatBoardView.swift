@@ -83,17 +83,20 @@ fileprivate struct ChatListContent: View {
         }
     }
     
+    // TODO: - Image onDrop 위치
     @ViewBuilder
     private var addButton: some View {
-        Button(action: {
-            createChat(nil)
-        }) {
-            Image(systemName: "plus")
+        HStack{
+            Button(action: {
+                createChat(nil)
+            }) {
+                Image(systemName: "plus")
+            }
+            .hoverButtonStyle()
+            .padding(.leading, 25)
+            
+            Spacer()
         }
-        .hoverButtonStyle()
-        .padding(.leading, 25)
-        
-        Spacer()
     }
     
     @ViewBuilder
@@ -116,7 +119,9 @@ fileprivate struct ChatRow: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            // TODO: - 채팅 이동 처리
+            // TODO: - Chat모델에 최근 수정시간 추가하고 해당 값 표시
+            // TODO: - Image냐 아니냐 구분해서 표시
+            // TODO: - 이미지 드래그 기반 크기 조절
             ellipsis
                 .opacity(isHovered ? 1 : 0)
   
