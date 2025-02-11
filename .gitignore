@@ -66,3 +66,5 @@ GoogleService-Info.plist
 
 # Secret
 Config.xcconfig
+
+private/
