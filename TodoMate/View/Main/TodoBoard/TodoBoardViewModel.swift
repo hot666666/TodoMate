@@ -61,13 +61,13 @@ extension TodoBoardViewModel {
                 observer.value?.todoAdded(todo)
             }
         case .modified(let todo):
-            /// 위젯 데이터 - 본인 것만 진행 중이면 추가, 아니면 삭제, 이미 존재하는 Todo의 업데이트라면 무시
-            guard todo.uid == userInfo.id else { break }
-            
-            if todo.status == .inProgress {
-                await saveToModelContainer(todo)
-            } else {
-                await deleteFromModelContainer(todo.fid)
+            /// 위젯 데이터 - 본인 것만 진행 중이면 추가, 아니면 삭제
+            if todo.uid == userInfo.id {
+                if todo.status == .inProgress {
+                    await saveToModelContainer(todo)
+                } else {
+                    await deleteFromModelContainer(todo.fid)
+                }
             }
             
             for observer in observers {
@@ -134,6 +134,6 @@ extension TodoBoardViewModel {
         if observers[userId, default: []].contains(where: { $0.value === observer }) {
             print("[Remove Observer - \(ObjectIdentifier(observer))]")
         }
-        observers[userId, default: []].removeAll(where: { $0.value === observer || $0.value == nil })
+        observers[userId, default: []].removeAll(where: { $0.value === observer })
     }
 }
