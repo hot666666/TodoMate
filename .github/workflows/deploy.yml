@@ -14,12 +14,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set VERSION, RUN_NUMBER, APP_NAME, BUNDLE_ID, TEAM_ID
+      - name: Set VERSION, RUN_NUMBER, APP_NAME, TEAM_ID
         run: |
           echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           echo "RUN_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
           echo "APP_NAME=TodoMate" >> $GITHUB_ENV
-          echo "BUNDLE_ID=io.hotcs6.TodoMate" >> $GITHUB_ENV
           echo "TEAM_ID=8PRWAG4355" >> $GITHUB_ENV
 
       - name: Decode GoogleService-Info.plist
@@ -63,20 +62,6 @@ jobs:
       - name: Set Up Xcode 16.2
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
-      - name: Update Info.plist(Add version, short version)
-        run: |
-          INFO_PLIST_PATH="./$APP_NAME/Info.plist"
-          if [ -f "$INFO_PLIST_PATH" ]; then
-            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $RUN_NUMBER" "$INFO_PLIST_PATH"
-            /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$INFO_PLIST_PATH"
-            
-            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $RUN_NUMBER" "$INFO_PLIST_PATH"
-            /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$INFO_PLIST_PATH"
-          else
-            echo "Info.plist not found at $INFO_PLIST_PATH"
-            exit 1
-          fi
-
       - name: Build App
         run: |
           xcodebuild -project $APP_NAME.xcodeproj \
@@ -87,6 +72,8 @@ jobs:
             -archivePath build/$APP_NAME.xcarchive \
             OTHER_CODE_SIGN_FLAGS="--entitlements $GITHUB_WORKSPACE/$APP_NAME/$APP_NAME.entitlements" \
             ENABLE_HARDENED_RUNTIME=YES \
+            MARKETING_VERSION=$VERSION \
+            CURRENT_PROJECT_VERSION=$RUN_NUMBER \
             archive
 
       - name: Sign Sparkle.framework
