@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:TodoMate}/script/swift-firebase-migrate",
+            "name": "Debug swift-migration (script/swift-firebase-migrate)",
+            "program": "${workspaceFolder:TodoMate}/script/swift-firebase-migrate/.build/debug/swift-migration",
+            "preLaunchTask": "swift: Build Debug swift-migration (script/swift-firebase-migrate)"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:TodoMate}/script/swift-firebase-migrate",
+            "name": "Release swift-migration (script/swift-firebase-migrate)",
+            "program": "${workspaceFolder:TodoMate}/script/swift-firebase-migrate/.build/release/swift-migration",
+            "preLaunchTask": "swift: Build Release swift-migration (script/swift-firebase-migrate)"
+        }
+    ]
+}
