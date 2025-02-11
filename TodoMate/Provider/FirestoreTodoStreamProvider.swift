@@ -24,11 +24,12 @@ final class FirestoreTodoStreamProvider: TodoStreamProviderType {
 #endif
 }
 extension FirestoreTodoStreamProvider {
+#if !PREVIEW
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
         AsyncStream { continuation in
             let listener = reference.todoCollection()
 #if DEBUG
-                /// Debug 모드일 때는 Todo 전체를 가져올 필요 없음
+            /// Debug 모드일 때는 Todo 전체를 가져올 필요 없음
                 .whereField("date", isGreaterThanOrEqualTo: startDateForDebug)
                 .whereField("date", isLessThanOrEqualTo: endDateForDebug)
 #endif
@@ -63,4 +64,15 @@ extension FirestoreTodoStreamProvider {
             }
         }
     }
+#else
+    func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
+        AsyncStream { continuation in
+            for todo in Todo.stub {
+                continuation.yield(.added(todo))
+            }
+            print("[FirestoreTodoStreamProvider] - Stream Terminated")
+            continuation.finish()
+        }
+    }
+#endif
 }

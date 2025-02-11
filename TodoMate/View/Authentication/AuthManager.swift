@@ -69,21 +69,11 @@ class AuthManager: AuthManagerType {
             let configuration = GIDConfiguration(clientID: clientId)
             GIDSignIn.sharedInstance.configuration = configuration
             
-#if os(macOS)
             guard let windowScene = NSApplication.shared.windows.first else {
                 print("Error: No active window scene found")
                 throw AuthError.noActiveWindowScene
             }
             let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: windowScene)
-#elseif os(iOS)
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  let window = windowScene.windows.first,
-                  let rootVC = window.rootViewController else {
-                print("Error: No active window scene found")
-                throw AuthError.noActiveWindowScene
-            }
-            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
-#endif
             
             guard let idToken = result.user.idToken?.tokenString else {
                 print("Error: Failed to get authentication token")
@@ -157,12 +147,12 @@ extension AuthManager {
 @Observable
 class AuthManager: AuthManagerType {
     var authState: AuthManager.AuthState = .signedOut
-    var authenticatedUser: AuthManager.UserInfo = .empty
+    var authenticatedUser: AuthenticatedUser = .empty
     
     init(container: DIContainer) {}
     
     func updateUserInfo(_ gid: String) {
-        userInfo = .init(id: userInfo.id, token: userInfo.token, gid: gid)
+        authenticatedUser = .init(id: authenticatedUser.id, token: authenticatedUser.token, gid: gid)
     }
     
     @MainActor
@@ -170,7 +160,7 @@ class AuthManager: AuthManagerType {
         authState = .loading
         
         try? await Task.sleep(nanoseconds: 1_000_000_000)
-        userInfo = .init(id: User.stub[0].uid, token: UUID().uuidString, gid: "")
+        authenticatedUser = .init(id: User.stub[0].uid, token: UUID().uuidString, gid: "")
         print("User signed in")
         
         authState = .signedIn
@@ -181,10 +171,14 @@ class AuthManager: AuthManagerType {
         authState = .loading
         
         try? await Task.sleep(nanoseconds: 1_000_000_000)
-        userInfo = .empty
+        authenticatedUser = .empty
         print("User signed out")
         
         authState = .signedOut
+    }
+    
+    func updateUserGroup(_ gid: String) {
+        authenticatedUser = .init(id: authenticatedUser.id, token: authenticatedUser.token, gid: gid)
     }
 }
 #endif

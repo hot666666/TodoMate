@@ -13,6 +13,7 @@ final class FirestoreChatStreamProvider: ChatStreamProviderType {
     }
 }
 extension FirestoreChatStreamProvider {
+    #if !PREVIEW
     func createChatStream() -> AsyncStream<DatabaseChange<Chat>> {
         AsyncStream { continuation in
             let listener = reference.chatCollection()
@@ -49,4 +50,15 @@ extension FirestoreChatStreamProvider {
             }
         }
     }
+    #else
+    func createChatStream() -> AsyncStream<DatabaseChange<Chat>> {
+        AsyncStream { continuation in
+            for chat in Chat.stub {
+                continuation.yield(.added(chat))
+            }
+            print("[FirestoreChatStreamProvider] - Stream Terminated")
+            continuation.finish()
+        }
+    }
+    #endif
 }
