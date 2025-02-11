@@ -6,10 +6,8 @@
 //
 
 import SwiftUI
-
-#if os(macOS)
 import Sparkle
-import AppKit
+
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
     var updater: SPUUpdater?
     
@@ -63,24 +61,3 @@ extension AppDelegate {
         updater?.checkForUpdates()
     }
 }
-#elseif os(iOS)
-import UIKit
-class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool {
-#if !PREVIEW
-        /// Firebase 초기화
-        FirebaseApp.configure()
-#endif
-        return true
-    }
-}
-extension AppDelegate {
-    func checkForUpdates() {
-    }
-}
-#endif
-    
-

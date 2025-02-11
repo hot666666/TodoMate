@@ -45,9 +45,6 @@ fileprivate struct ButtonView: View {
             HStack {
                 Spacer()
                 Text(status.rawValue)
-#if os(iOS)
-                    .foregroundColor(.white)
-#endif
                 Spacer()
             }
         }

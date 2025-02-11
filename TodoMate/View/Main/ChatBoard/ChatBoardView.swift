@@ -183,9 +183,6 @@ fileprivate struct ChatInput: View {
             .opacity(chat.content.isEmpty ? 0.5 : 0)
             .foregroundColor(.gray.opacity(0.5))
             .padding(.leading, 5)
-#if os(iOS)
-            .padding(.top, 10)
-#endif
     }
     
     private func scheduleDebouncedSubmit(isDelete: Bool = false) {

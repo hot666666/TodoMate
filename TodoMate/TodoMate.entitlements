@@ -6,12 +6,17 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.io.hotcs6.TodoMate</string>
+		<string>$(TeamIdentifierPrefix)io.hotcs6.TodoMate</string>
 	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>
 	<key>com.apple.security.network.server</key>
 	<true/>
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)-spks</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)-spki</string>
+	</array>
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)io.hotcs6.TodoMate</string>

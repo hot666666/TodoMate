@@ -7,16 +7,11 @@
 
 import SwiftUI
 import SwiftData
-import WidgetKit
 import FirebaseCore
 
 @main
 struct TodoMateApp: App {
-#if os(macOS)
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-#elseif os(iOS)
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-#endif
     @Environment(\.scenePhase) private var scenePhase
     
     init() {
@@ -42,13 +37,6 @@ struct TodoMateApp: App {
     var body: some Scene {
         WindowGroup {
             _TodoMateApp(modelContainer: sharedModelContainer)
-                .onChange(of: scenePhase) {
-                    /// 화면 상태 비활성화 시, 현재 context 저장 및 위젯 갱신
-                    if $1 != .active {
-                        try? sharedModelContainer.mainContext.save()
-                        WidgetCenter.shared.reloadAllTimelines()
-                    }
-                }
         }
         .modelContainer(sharedModelContainer)
         .commands {
