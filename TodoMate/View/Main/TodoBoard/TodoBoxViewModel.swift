@@ -82,8 +82,8 @@ extension TodoBoxViewModel {
 #if PREVIEW
         todo.fid = UUID().uuidString
         todos.append(todo)
-#endif
         saveTodoOrder()
+#endif
     }
     
     func removeTodo(_ todo: Todo) {
@@ -92,8 +92,8 @@ extension TodoBoxViewModel {
         
 #if PREVIEW
         todos.removeAll { $0.id == todo.id }
-#endif
         saveTodoOrder()
+#endif
     }
 }
 extension TodoBoxViewModel {
@@ -117,6 +117,9 @@ extension TodoBoxViewModel: TodoObserverType {
         guard !todos.contains(where: { $0.fid == todo.fid }) else { return }
             
         todos.append(todo)
+        if isMine {
+            saveTodoOrder()
+        }
     }
     
     func todoModified(_ todo: Todo) {
@@ -129,16 +132,28 @@ extension TodoBoxViewModel: TodoObserverType {
                 }
             } else {
                 todos.remove(at: index)
+                
+                if isMine {
+                    saveTodoOrder()
+                }
             }
         /// 다른 날짜->오늘로 수정된 경우, 추가
         } else {
             guard calendar.isDateInToday(todo.date) else { return }
             todos.append(todo)
+            
+            if isMine {
+                saveTodoOrder()
+            }
         }
     }
     
     func todoRemoved(_ todo: Todo) {
         guard calendar.isDateInToday(todo.date) else { return }
         todos.removeAll { $0.fid == todo.fid }
+        
+        if isMine {
+            saveTodoOrder()
+        }
     }
 }
