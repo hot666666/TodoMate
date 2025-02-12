@@ -28,6 +28,9 @@ struct TodoSheetView: View {
             }
             .padding(60)
         }
+        .onAppear {
+            focusedField = .content
+        }
     }
     
     @ViewBuilder
