@@ -135,6 +135,7 @@ fileprivate struct TodoCalendarDay: View {
             calendarDate
                 .padding(3)
             addButton
+                .opacity(isMine ? 1 : 0)
         }
     }
     

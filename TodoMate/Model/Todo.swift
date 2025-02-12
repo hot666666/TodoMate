@@ -39,7 +39,7 @@ class Todo: Identifiable, Codable {
     
     init(id: String = UUID().uuidString,
          date: Date = .now,
-         content: String = "이름없음",
+         content: String = "",
          detail: String = "",
          status: TodoStatus = .todo,
          uid: String = "",

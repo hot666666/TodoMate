@@ -133,6 +133,7 @@ fileprivate struct ChatRow: View {
             )
         }
         .onHover { isHovered = $0 }
+        .padding(.top, 3)
     }
     
     @ViewBuilder

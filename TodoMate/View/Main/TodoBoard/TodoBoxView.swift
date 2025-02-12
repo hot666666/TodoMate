@@ -108,10 +108,11 @@ fileprivate struct TodoList: View {
     private func todoRow(_ todo: Todo) -> some View {
         BaseTodoRow(todo: todo) {
             TodoStatusButton(status: todo.status) { newStatus in
-                todo.status = newStatus
-                updateTodo(todo)
+                if isMine {
+                    todo.status = newStatus
+                    updateTodo(todo)
+                }
             }
-            .disabled(!isMine)
         }
     }
     
@@ -156,7 +157,7 @@ struct BaseTodoRow<Button: View>: View {
             statusButton()
             
             HStack {
-                Text(todo.content)
+                Text(todo.content.isEmpty ? "이름없음" : todo.content)
                     .font(.title3)
                 
                 Spacer()
