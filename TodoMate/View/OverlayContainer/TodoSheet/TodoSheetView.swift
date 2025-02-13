@@ -29,7 +29,9 @@ struct TodoSheetView: View {
             .padding(60)
         }
         .onAppear {
-            focusedField = .content
+            if todo.content.isEmpty {
+                focusedField = .content
+            }
         }
     }
     
@@ -159,23 +161,25 @@ fileprivate struct TodoSheetDetail: View {
 #Preview("Todo-Mine Sheet") {
     let authManager = AuthManager.stub
     
-    return TodoSheetView(todo: Todo.stub.first!)
-        .frame(width: 400, height: 400)
-        .environment(OverlayManager.stub)
-        .environment(authManager)
-        .task {
-            await authManager.signIn()
-        }
+    return OverlayContainer {
+        TodoSheetView(todo: Todo.stub.first!)
+            .frame(width: 400, height: 400)
+            .environment(authManager)
+            .task {
+                await authManager.signIn()
+            }
+    }
 }
 
 #Preview("Todo-Not Mine Sheet") {
     let authManager = AuthManager.stub
     
-    return TodoSheetView(todo: Todo.stub.last!)
-        .frame(width: 400, height: 400)
-        .environment(OverlayManager.stub)
-        .environment(authManager)
-        .task {
-            await authManager.signIn()
-        }
+    return OverlayContainer {
+        TodoSheetView(todo: Todo.stub.last!)
+            .frame(width: 400, height: 400)
+            .environment(authManager)
+            .task {
+                await authManager.signIn()
+            }
+    }
 }

@@ -16,16 +16,23 @@ struct TodoCalendarView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                backButton
-                header
-                weekdayHeaders
-                calendarDayGrid
-                Spacer()
+        VStack(alignment: .leading) {
+            Spacer()
+            backButton
+            header
+            
+            ScrollView {
+                VStack {
+                    weekdayHeaders
+                    calendarDayGrid
+                }
+                .padding(.horizontal)
             }
             .padding()
+            
+            Spacer()
         }
+        .padding(.horizontal)
         .task {
             await viewModel.fetch()
         }
@@ -98,9 +105,10 @@ struct TodoCalendarView: View {
                 .dropDestination(for: TodoTransferData.self,
                                  action: { data, _ in viewModel.onDrop(data: data, to: calendarDay.date) },
                                  isTargeted: viewModel.setDropTarget)
-                .frame(minHeight: 50)
+                .frame(minHeight: 60)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -123,8 +131,7 @@ fileprivate struct TodoCalendarDay: View {
             todoList
             Spacer()
         }
-        .contentShape(.rect)
-        .background(RoundedRectangle(cornerRadius: 3).fill(Color.customGrayBg.opacity(0.2)))
+        .background(Color.customGrayBg.opacity(0.2), in: .rect)
         .padding(1)
         .onHover { isHovering = $0 }
     }
@@ -134,8 +141,9 @@ fileprivate struct TodoCalendarDay: View {
         ZStack(alignment: .topLeading) {
             calendarDate
                 .padding(3)
-            addButton
-                .opacity(isMine ? 1 : 0)
+            if isMine {
+                addButton
+            }
         }
     }
     
@@ -235,13 +243,14 @@ fileprivate struct HoverStyledButton: View {
 
 
 #Preview {
-    TodoCalendarView(viewModel: .init(container: .stub,
-                                      user: User.stub[0],
-                                      isMine: true,
-                                      onDismiss: {}))
+    OverlayContainer {
+        TodoCalendarView(viewModel: .init(container: .stub,
+                                          user: User.stub[0],
+                                          isMine: true,
+                                          onDismiss: {}))
         .frame(width: 500, height: 800)
-        .environment(OverlayManager.stub)
         .environment(AuthManager.stub)
         .environment(DIContainer.stub)
         .background(Color.customBlack)
+    }
 }

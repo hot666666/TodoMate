@@ -7,20 +7,25 @@
 
 import SwiftUI
 
-struct OverlayContainerView: View {
-    @Environment(OverlayManager.self) private var overlayManager
+struct OverlayContainer<Content: View>: View {
+    @State private var overlayManager: OverlayManager = .init()
+    let content: () -> Content
     
     var body: some View {
-        ForEach(overlayManager.stack) { overlay in
-            if overlay == overlayManager.stack.last {
-                popOverlayBackground
-                    .onTapGesture {
-                        overlayManager.pop()
-                    }
+        ZStack {
+            content()
+                .disabled(!overlayManager.stack.isEmpty)
+            
+            ForEach(overlayManager.stack) { overlay in
+                if overlayManager.isLastOverlay(overlay) {
+                    popOverlayBackground
+                }
+                
+                overlayView(for: overlay)
+                    .disabled(!overlayManager.isLastOverlay(overlay))
             }
-            overlayView(for: overlay)
-                .disabled(overlay != overlayManager.stack.last)
         }
+        .environment(overlayManager)
     }
     
     @ViewBuilder
@@ -30,8 +35,6 @@ struct OverlayContainerView: View {
             TodoSheet(todo: todo, isMine: isMine, update: update)
         case .todoDate(let anchor, let todo):
             TodoDatePopover(anchor: anchor, todo: todo)
-        case .profile(let user, let updateGroup):
-            ProfileSheet(user: user, updateGroup: updateGroup)
         case .calendar(let user, let isMine):
             TodoCalendar(user: user, isMine: isMine, onDismiss: overlayManager.pop)
         }
@@ -42,23 +45,9 @@ struct OverlayContainerView: View {
         // 오버레이 뷰를 닫는 뷰
         Color.black.opacity(0.3)
             .edgesIgnoringSafeArea(.all)
-    }
-}
-
-// MARK: - ProfileSheet
-fileprivate struct ProfileSheet: View {
-    let user: User
-    let updateGroup: () async -> Void
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ProfileSheetView(user: user, updateGroup: updateGroup)
-                .frame(width: geometry.size.width * 0.5,
-                       height: geometry.size.height * 0.5)
-                .background(.regularMaterial)
-                .cornerRadius(10)
-                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
-        }
+            .onTapGesture {
+                overlayManager.pop()
+            }
     }
 }
 

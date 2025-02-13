@@ -27,16 +27,18 @@ struct TodoBoxView: View {
                         await viewModel.fetchTodos()
                     }
                 
-                addButton
+                if viewModel.isMine {
+                    addButton
+                }
             }
         }
-        .padding(.horizontal, 20)
         .onAppear {
             viewModel.onAppear()
         }
         .onDisappear {
             viewModel.onDisappear()
         }
+        .padding(.horizontal, 30)
     }
     
     @ViewBuilder
@@ -66,6 +68,9 @@ struct TodoBoxView: View {
             updateTodo: viewModel.updateTodo,
             removeTodo: viewModel.removeTodo
         )
+        .contextMenu {
+            addButton
+        }
     }
     
     @ViewBuilder
@@ -78,7 +83,6 @@ struct TodoBoxView: View {
         .hoverButtonStyle()
         .padding(.leading, 5)
         .padding(.bottom, 5)
-        .opacity(viewModel.isMine ? 1 : 0)
     }
 }
 
@@ -181,11 +185,12 @@ struct BaseTodoRow<Button: View>: View {
 
 
 #Preview {
-    TodoBoxView(viewModel: .init(container: .stub,
-                                 user: User.stub[0],
-                                 isMine: true,
-                                 onAppear: {_,_ in },
-                                 onDisappear: {_,_ in }))
-    .frame(width: 400, height: 400)
-    .environment(OverlayManager.stub)
+    OverlayContainer {
+        TodoBoxView(viewModel: .init(container: .stub,
+                                     user: User.stub[0],
+                                     isMine: true,
+                                     onAppear: {_,_ in },
+                                     onDisappear: {_,_ in }))
+        .frame(width: 700, height: 400)
+    }
 }

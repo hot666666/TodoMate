@@ -46,13 +46,13 @@ struct TodoMateApp: App {
                 }
             }
         }
+        .windowStyle(.hiddenTitleBar)
     }
 }
 
 fileprivate struct _TodoMateApp: View {
     @State private var container: DIContainer
     @State private var authManager: AuthManager
-    @State private var overlayManager: OverlayManager = .init()
     
     init(modelContainer: ModelContainer) {
 #if PREVIEW
@@ -84,7 +84,6 @@ fileprivate struct _TodoMateApp: View {
             AuthView()
         case .signedIn:
             MainView()
-                .environment(overlayManager)
                 .environment(container)
         case .loading:
             ProgressView()
