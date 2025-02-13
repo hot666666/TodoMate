@@ -67,11 +67,28 @@ extension FirestoreTodoStreamProvider {
 #else
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
         AsyncStream { continuation in
+            print("[FirestoreTodoStreamProvider] - Stream Created")
+            
             for todo in Todo.stub {
                 continuation.yield(.added(todo))
             }
-            print("[FirestoreTodoStreamProvider] - Stream Terminated")
-            continuation.finish()
+            
+            let task = Task {
+                while !Task.isCancelled {
+                    do {
+                        try await Task.sleep(nanoseconds: 10_000_000_000)
+                        print("[FirestoreTodoStreamProvider] - Listening...")
+                    } catch {
+                        // 취소 에러 발생 시 루프 종료
+                        break
+                    }
+                }
+            }
+            
+            continuation.onTermination = { @Sendable _ in
+                print("[FirestoreTodoStreamProvider] - Stream Terminated")
+                task.cancel()
+            }
         }
     }
 #endif
