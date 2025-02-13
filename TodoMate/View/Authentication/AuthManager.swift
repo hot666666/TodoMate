@@ -53,7 +53,7 @@ class AuthManager: AuthManagerType {
         
         /// 로컬에 저장된 유저 정보 불러오기
         self._authenticatedUser = userInfoService.loadUserInfo()
-        self.authState = _authenticatedUser.id.isEmpty ? .signedOut : .signedIn
+        self.authState = _authenticatedUser.uid.isEmpty ? .signedOut : .signedIn
     }
     
     @MainActor
@@ -95,8 +95,8 @@ class AuthManager: AuthManagerType {
             
             let fUser = await handleUserAuthentication(uid: user.uid, name: user.displayName ?? "Unknown")
             await removeAllTodoEntity()
-            authenticatedUser = .init(id: fUser.uid, token: idToken, gid: fUser.gid)
-            print("Sign in successful for user: \(authenticatedUser.id)")
+            authenticatedUser = .init(uid: fUser.uid, token: idToken, gid: fUser.gid)
+            print("Sign in successful for user: \(authenticatedUser.uid)")
         } catch {
             authState = .signedOut
             print("Authentication failed: \(error.localizedDescription)")
@@ -120,7 +120,7 @@ class AuthManager: AuthManagerType {
     
     // TODO: - 다른 요소에 대해서도 업데이트가 필요한 경우 추가
     func updateUserGroup(_ gid: String) {
-        authenticatedUser = .init(id: authenticatedUser.id, token: authenticatedUser.token, gid: gid)
+        authenticatedUser = .init(uid: authenticatedUser.uid, token: authenticatedUser.token, gid: gid)
     }
 }
 extension AuthManager {
@@ -152,7 +152,7 @@ class AuthManager: AuthManagerType {
     init(container: DIContainer) {}
     
     func updateUserInfo(_ gid: String) {
-        authenticatedUser = .init(id: authenticatedUser.id, token: authenticatedUser.token, gid: gid)
+        authenticatedUser = .init(uid: authenticatedUser.uid, token: authenticatedUser.token, gid: gid)
     }
     
     @MainActor
@@ -178,7 +178,7 @@ class AuthManager: AuthManagerType {
     }
     
     func updateUserGroup(_ gid: String) {
-        authenticatedUser = .init(id: authenticatedUser.id, token: authenticatedUser.token, gid: gid)
+        authenticatedUser = .init(uid: authenticatedUser.uid, token: authenticatedUser.token, gid: gid)
     }
 }
 #endif
