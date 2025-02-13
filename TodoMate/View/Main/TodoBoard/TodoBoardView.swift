@@ -17,12 +17,11 @@ struct TodoBoardView: View {
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             ForEach(viewModel.users) { user in
                 UserTodoSection(
                     user: user,
                     isMe: viewModel.isMe(user),
-                    onUpdateGroup: viewModel.fetchGroupUser,
                     addObserver: viewModel.addObserver,
                     removeObserver: viewModel.removeObserver
                 )
@@ -61,7 +60,6 @@ fileprivate  struct UserTodoSection: View {
     
     let user: User
     let isMe: Bool
-    let onUpdateGroup: () async -> Void
     let addObserver: (TodoObserverType, String) -> Void
     let removeObserver: (TodoObserverType, String) -> Void
     
@@ -84,10 +82,6 @@ fileprivate  struct UserTodoSection: View {
     @ViewBuilder
     private var sectionHeader: some View {
         header
-            .overlay(alignment: .topTrailing) {
-                ProfileButton(user: user, updateGroup: onUpdateGroup)
-                    .opacity(isMe ? 1 : 0)
-            }
     }
     
     @ViewBuilder
@@ -104,34 +98,17 @@ fileprivate  struct UserTodoSection: View {
     }
 }
 
-// MARK: - ProfileButton
-fileprivate struct ProfileButton: View {
-    @Environment(OverlayManager.self) private var overlayManager
-    
-    let user: User
-    let updateGroup: () async -> Void
-    
-    var body: some View {
-        Button(action: {
-            overlayManager.push(.profile(user, updateGroup: updateGroup))
-        }) {
-            Image(systemName: "gearshape.fill")
-        }
-        .hoverButtonStyle2()
-        .padding(.trailing, 20)
-    }
-}
-
-
 #Preview {
-    ScrollView {
-        VStack{
-            TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: AuthenticatedUser.stub))
-            Spacer()
+    OverlayContainer {
+        
+        ScrollView {
+            VStack{
+                TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: AuthenticatedUser.stub))
+                Spacer()
+            }
         }
+        .environment(DIContainer.stub)
+        .environment(AuthManager.stub)
+        .frame(width: 400, height: 600)
     }
-    .environment(DIContainer.stub)
-    .environment(AuthManager.stub)
-    .environment(OverlayManager.stub)
-    .frame(width: 400, height: 600)
 }
