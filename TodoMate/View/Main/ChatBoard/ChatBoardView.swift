@@ -18,9 +18,7 @@ struct ChatBoardView: View {
     var body: some View {
         ExpandableView(
             storageKey: "chatlist",
-            header: {
-                Text("채팅")
-            },
+            header: { header },
             content: {
                 chatListContent
                     .task {
@@ -29,6 +27,12 @@ struct ChatBoardView: View {
             }
         )
         .padding(.bottom)
+    }
+    
+    @ViewBuilder
+    private var header: some View {
+        Text("채팅")
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     @ViewBuilder
@@ -123,7 +127,7 @@ fileprivate struct ChatRow: View {
             // TODO: - Image냐 아니냐 구분해서 표시
             // TODO: - 이미지 드래그 기반 크기 조절
             ellipsis
-                .opacity(isHovered ? 1 : 0)
+                .opacity(isHovered ? 0.5 : 0)
   
             
             ChatInput(
@@ -131,6 +135,7 @@ fileprivate struct ChatRow: View {
                 onSubmit: updateChat,
                 onDelete: removeChat
             )
+            .onHover { isHovered = $0 }
         }
         .onHover { isHovered = $0 }
         .padding(.top, 3)
@@ -255,9 +260,9 @@ fileprivate struct ChatList: View {
     VStack {
         ChatBoardView(viewModel: .init(container: .stub, userInfo: .stub))
             .environment(DIContainer.stub)
-            .environment(OverlayManager.stub)
-            .frame(width: 400, height: 600)
         
         Spacer()
     }
+    .frame(width: 300, height: 400)
+    .padding()
 }
