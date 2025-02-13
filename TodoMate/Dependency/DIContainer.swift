@@ -39,6 +39,26 @@ final class DIContainer {
         self.userInfoService = userInfoService
         self.todoOrderService = todoOrderService
     }
+    
+    convenience init(testModelContainer: ModelContainer = .forPreview(),
+                     testUserService: StubUserService = .init(),
+                     testTodoService: StubTodoService = .init(),
+                     testChatService: StubChatService = .init(),
+                     testGroupService: StubGroupService = .init(),
+                     testChatStreamProvider: StubChatStreamProvider = .init(),
+                     testTodoStreamProvider: StubTodoStreamProvider = .init(),
+                     testUserInfoService: StubUserInfoService = .init(),
+                     testTodoOrderService: StubTodoOrderService = .init()) {
+        self.init(modelContainer: testModelContainer,
+                  userService: testUserService,
+                  todoService: testTodoService,
+                  chatService: testChatService,
+                  groupService: testGroupService,
+                  chatStreamProvider: testChatStreamProvider,
+                  todoStreamProvider: testTodoStreamProvider,
+                  userInfoService: testUserInfoService,
+                  todoOrderService: testTodoOrderService)
+    }
 }
 
 extension DIContainer {
