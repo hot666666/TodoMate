@@ -18,7 +18,7 @@ struct TodoBoardView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            ForEach(viewModel.users) { user in
+            ForEach(viewModel.users, id: \.uid) { user in
                 UserTodoSection(
                     user: user,
                     isMe: viewModel.isMe(user),

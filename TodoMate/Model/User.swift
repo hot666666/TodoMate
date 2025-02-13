@@ -7,9 +7,7 @@
 
 import Foundation
 
-@Observable
-class User: Identifiable {
-    let id: String = UUID().uuidString
+struct User {
     var uid: String
     var nickname: String
     var gid: String
@@ -19,6 +17,7 @@ class User: Identifiable {
         self.nickname = nickname
         self.gid = gid
     }
+    
 }
 
 extension User {
