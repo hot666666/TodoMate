@@ -17,7 +17,8 @@ class TodoBoxViewModelTests {
     func testMoveTodoAndFetchPreservesOrder() async throws {
         // Given
         let user = User.stub[0]
-        let viewModel = TodoBoxViewModel(container: .stub,
+        let todoOrderService = StubTodoOrderService()
+        let viewModel = TodoBoxViewModel(container: .init(testTodoOrderService: todoOrderService),
                                          user: user,
                                          isMine: true,
                                          onAppear: {_,_ in},
@@ -26,6 +27,7 @@ class TodoBoxViewModelTests {
         // When - 최초 fetchTodos() 호출
         await viewModel.fetchTodos()
         let fetchedOrder = viewModel.todos.map { $0.fid ?? "" }
+        let savedOrder = todoOrderService.loadOrder()
         
         guard viewModel.todos.count > 1 else {
             /// User.stub[0]의 Todo.stub 확인
@@ -40,6 +42,7 @@ class TodoBoxViewModelTests {
         let fetchedOrderAfterMove = viewModel.todos.map { $0.fid ?? "" }
         
         // Then
+        #expect(!savedOrder.isEmpty, "Todo order saved.")
         #expect(fetchedOrder != fetchedOrderAfterMove, "Order has changed after move operation.")
         #expect(movedOrder == fetchedOrderAfterMove, "Order has saved correctly.")
     }
