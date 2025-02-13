@@ -26,7 +26,7 @@ class TodoBoardViewModel {
     }
     
     func isMe(_ user: User) -> Bool {
-        user.uid == userInfo.id
+        user.uid == userInfo.uid
     }
 }
 extension TodoBoardViewModel {
@@ -44,7 +44,6 @@ extension TodoBoardViewModel {
             }
         }
         
-        print("[Stopped observing Todo changes]")
         observers.removeAll()
     }
     
@@ -62,7 +61,7 @@ extension TodoBoardViewModel {
             }
         case .modified(let todo):
             /// 위젯 데이터 - 본인 것만 진행 중이면 추가, 아니면 삭제
-            if todo.uid == userInfo.id {
+            if todo.uid == userInfo.uid {
                 if todo.status == .inProgress {
                     await saveToModelContainer(todo)
                 } else {
@@ -75,7 +74,7 @@ extension TodoBoardViewModel {
             }
         case .removed(let todo):
             /// 위젯 데이터 - 존재하면 삭제
-            guard todo.uid == userInfo.id else { break }
+            guard todo.uid == userInfo.uid else { break }
 
             await deleteFromModelContainer(todo.fid)
             

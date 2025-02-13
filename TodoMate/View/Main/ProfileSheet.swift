@@ -27,7 +27,7 @@ class ProfileViewModel {
         self.isLoading = true
         defer { self.isLoading = false }
         
-        self.user = await userService.fetch(uid: userInfo.id)
+        self.user = await userService.fetch(uid: userInfo.uid)
     }
     
     func updateGroup() async {
