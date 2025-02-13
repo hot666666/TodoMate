@@ -20,7 +20,6 @@
 		451DEDD12D3E4E0600A20417 /* TodoBoxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDD02D3E4E0600A20417 /* TodoBoxViewModel.swift */; };
 		451DEDD32D3E4E1B00A20417 /* TodoBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDD22D3E4E1B00A20417 /* TodoBoardViewModel.swift */; };
 		451DEDE32D3E8D2F00A20417 /* ChatBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDE22D3E8D2B00A20417 /* ChatBoardView.swift */; };
-		451DEDE62D3E9BD000A20417 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 451DEDE52D3E9BD000A20417 /* FirebaseFirestore */; };
 		451DEDF92D40BF2800A20417 /* ChatBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDF82D40BF2800A20417 /* ChatBoardViewModel.swift */; };
 		451DEDFD2D40CC7100A20417 /* FirestoreChatStreamProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDFC2D40CC6B00A20417 /* FirestoreChatStreamProvider.swift */; };
 		4526B0AD2D41E58700DC90F5 /* FStorageReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4526B0AC2D41E58700DC90F5 /* FStorageReference.swift */; };
@@ -42,7 +41,7 @@
 		4541C9982D2D46B1006A9C60 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C9972D2D46B1006A9C60 /* UserService.swift */; };
 		4541C99A2D2D472C006A9C60 /* TodoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C9992D2D4728006A9C60 /* TodoService.swift */; };
 		4541C9A42D2D4953006A9C60 /* TodoSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C99F2D2D4953006A9C60 /* TodoSheetView.swift */; };
-		4541C9A52D2D4953006A9C60 /* OverlayContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C9A12D2D4953006A9C60 /* OverlayContainerView.swift */; };
+		4541C9A52D2D4953006A9C60 /* OverlayContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C9A12D2D4953006A9C60 /* OverlayContainer.swift */; };
 		4541C9A62D2D4953006A9C60 /* OverlayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C9A22D2D4953006A9C60 /* OverlayManager.swift */; };
 		4541C9A72D2D4953006A9C60 /* TodoDatePopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C99D2D2D4953006A9C60 /* TodoDatePopoverView.swift */; };
 		4541C9AE2D2D499A006A9C60 /* TodoBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4541C9AC2D2D499A006A9C60 /* TodoBoxView.swift */; };
@@ -91,6 +90,7 @@
 		457B43C42C6DFFBA0049334A /* FirestoreUserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43C32C6DFFB20049334A /* FirestoreUserRepository.swift */; };
 		457B43C62C6DFFD00049334A /* FirestoreReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43C52C6DFFCA0049334A /* FirestoreReference.swift */; };
 		457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
+		458ADC4B2D5D8F0C00BE769B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 458ADC4A2D5D8F0C00BE769B /* FirebaseFirestore */; };
 		459325312CA0F1F000A95193 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 459325302CA0F1F000A95193 /* Assets.xcassets */; };
 		45962CF32D491ABE00089A48 /* GroupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF22D491ABB00089A48 /* GroupService.swift */; };
 		45962CF52D491BF300089A48 /* FirestoreGroupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF42D491BEA00089A48 /* FirestoreGroupRepository.swift */; };
@@ -180,7 +180,7 @@
 		4541C9992D2D4728006A9C60 /* TodoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoService.swift; sourceTree = "<group>"; };
 		4541C99D2D2D4953006A9C60 /* TodoDatePopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoDatePopoverView.swift; sourceTree = "<group>"; };
 		4541C99F2D2D4953006A9C60 /* TodoSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoSheetView.swift; sourceTree = "<group>"; };
-		4541C9A12D2D4953006A9C60 /* OverlayContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContainerView.swift; sourceTree = "<group>"; };
+		4541C9A12D2D4953006A9C60 /* OverlayContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContainer.swift; sourceTree = "<group>"; };
 		4541C9A22D2D4953006A9C60 /* OverlayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayManager.swift; sourceTree = "<group>"; };
 		4541C9A82D2D499A006A9C60 /* ExpandableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandableView.swift; sourceTree = "<group>"; };
 		4541C9A92D2D499A006A9C60 /* TodoStatusButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoStatusButton.swift; sourceTree = "<group>"; };
@@ -260,7 +260,7 @@
 				451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */,
 				451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */,
 				451DEDAB2D3CDDA400A20417 /* FirebaseAuth in Frameworks */,
-				451DEDE62D3E9BD000A20417 /* FirebaseFirestore in Frameworks */,
+				458ADC4B2D5D8F0C00BE769B /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,6 +311,7 @@
 				4526B0CC2D48A1B200DC90F5 /* GroupDashboardView.swift */,
 				4526B0CE2D48A1C400DC90F5 /* GroupDashboardViewModel.swift */,
 				45962D072D49EB0E00089A48 /* JoinGroupView.swift */,
+				45962D0E2D4A5DD400089A48 /* ProfileSheet.swift */,
 				4541C9AD2D2D499A006A9C60 /* TodoBoard */,
 				451DEDD62D3E8BC500A20417 /* ChatBoard */,
 			);
@@ -379,9 +380,8 @@
 		4541C9A32D2D4953006A9C60 /* OverlayContainer */ = {
 			isa = PBXGroup;
 			children = (
-				4541C9A12D2D4953006A9C60 /* OverlayContainerView.swift */,
+				4541C9A12D2D4953006A9C60 /* OverlayContainer.swift */,
 				4541C9A22D2D4953006A9C60 /* OverlayManager.swift */,
-				45962D0D2D4A5DC300089A48 /* ProfileSheet */,
 				4541C9A02D2D4953006A9C60 /* TodoSheet */,
 				4541C99E2D2D4953006A9C60 /* TodoDatePopover */,
 				4538446F2D4F612A002B8721 /* TodoCalendar */,
@@ -442,14 +442,6 @@
 				4560E3C22D539B7D008B09AA /* UploadProviderType.swift */,
 			);
 			path = Type;
-			sourceTree = "<group>";
-		};
-		45962D0D2D4A5DC300089A48 /* ProfileSheet */ = {
-			isa = PBXGroup;
-			children = (
-				45962D0E2D4A5DD400089A48 /* ProfileSheet.swift */,
-			);
-			path = ProfileSheet;
 			sourceTree = "<group>";
 		};
 		459AA3F62C75CA2000CA43F2 /* Dependency */ = {
@@ -621,8 +613,8 @@
 				451DEDB02D3CDDA400A20417 /* FirebaseStorage */,
 				451DEDB22D3CDE0D00A20417 /* FirebaseCore */,
 				451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */,
-				451DEDE52D3E9BD000A20417 /* FirebaseFirestore */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
+				458ADC4A2D5D8F0C00BE769B /* FirebaseFirestore */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -758,7 +750,7 @@
 				45ED09082C6AEC0B005A8096 /* Date+Extension.swift in Sources */,
 				4526B0B22D422B1700DC90F5 /* WeakTodoObserver.swift in Sources */,
 				4541C9A42D2D4953006A9C60 /* TodoSheetView.swift in Sources */,
-				4541C9A52D2D4953006A9C60 /* OverlayContainerView.swift in Sources */,
+				4541C9A52D2D4953006A9C60 /* OverlayContainer.swift in Sources */,
 				4541C9A62D2D4953006A9C60 /* OverlayManager.swift in Sources */,
 				4560E3B12D5396D9008B09AA /* ImageUploadServiceType.swift in Sources */,
 				4541C9A72D2D4953006A9C60 /* TodoDatePopoverView.swift in Sources */,
@@ -1305,7 +1297,7 @@
 			package = 451DEDA62D3CDCEF00A20417 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
 		};
-		451DEDE52D3E9BD000A20417 /* FirebaseFirestore */ = {
+		458ADC4A2D5D8F0C00BE769B /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 451DEDA92D3CDDA400A20417 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
