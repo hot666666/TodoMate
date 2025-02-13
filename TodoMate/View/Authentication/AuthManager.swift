@@ -159,8 +159,8 @@ class AuthManager: AuthManagerType {
     func signIn() async {
         authState = .loading
         
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
-        authenticatedUser = .init(id: User.stub[0].uid, token: UUID().uuidString, gid: "")
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        authenticatedUser = .hasGroupStub
         print("User signed in")
         
         authState = .signedIn
@@ -170,7 +170,7 @@ class AuthManager: AuthManagerType {
     func signOut() async {
         authState = .loading
         
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        try? await Task.sleep(nanoseconds: 500_000_000)
         authenticatedUser = .empty
         print("User signed out")
         
