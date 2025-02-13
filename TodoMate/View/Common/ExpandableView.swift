@@ -22,23 +22,39 @@ struct ExpandableView<Header: View, Content: View>: View {
     }
     
     var body: some View {
-        VStack {
-            Button(action: {
-                isExpanded.toggle()
-            }, label: {
-                HStack {
-                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .frame(width: 20)
-                    header()
-                    Spacer()
-                }
-                .font(.title3)
-            })
-            .hoverButtonStyle()
+        VStack(spacing: 15) {
+            HStack(alignment: .center, spacing: 5) {
+                expandableButton
+                header()
+            }
+            .font(.title)
             
             if isExpanded {
                 content()
+                    .padding(.leading, 5)
             }
         }
     }
+    
+    @ViewBuilder
+    private var expandableButton: some View {
+        Button(action: {
+            isExpanded.toggle()
+        }, label: {
+            expandableImage
+        })
+        .hoverButtonStyle()
+    }
+    
+    @ViewBuilder
+    private var expandableImage: some View {
+        if isExpanded {
+            expanededImage
+        } else {
+            collapsedImage
+        }
+    }
+    
+    private let expanededImage: some View = Image(systemName: "chevron.down")
+    private let collapsedImage: some View = Image(systemName: "chevron.down").rotationEffect(.degrees(-90))
 }
