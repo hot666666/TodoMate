@@ -10,7 +10,6 @@ import SwiftUI
 enum OverlayType: Identifiable, Equatable {
     case todo(Todo, isMine: Bool, update: (Todo) -> Void)
     case todoDate(anchor: CGPoint, selectedTodo: Todo)
-    case profile(User, updateGroup: () async -> Void)
     case calendar(User, isMine: Bool)
 
     var id: String {
@@ -19,8 +18,6 @@ enum OverlayType: Identifiable, Equatable {
             return "todoSheet-\(todo.id)"
         case .todoDate(let anchor, let todo):
             return "todoSheetDate-\(todo.id)-(\(anchor.x),\(anchor.y))"
-        case .profile(let user, _):
-            return "profile-\(user.id)"
         case .calendar(let user, _):
             return "calendar-\(user.id)"
         }
@@ -49,6 +46,10 @@ class OverlayManager {
     
     func reset() {
         stack.removeAll()
+    }
+    
+    func isLastOverlay(_ overlayType: OverlayType) -> Bool {
+        return stack.last == overlayType
     }
 }
 
