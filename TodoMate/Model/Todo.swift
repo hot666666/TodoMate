@@ -23,28 +23,20 @@ enum TodoStatus: String, CaseIterable, Codable {
     }
 }
 
-@Observable
-class Todo: Identifiable, Codable {
-    let id: String
+struct Todo {
     var date: Date
     var content: String
     var status: TodoStatus
     var detail: String
     var uid: String
-    var fid: String?
-    
-    enum CodingKeys: String, CodingKey {
-         case id, date
-     }
-    
-    init(id: String = UUID().uuidString,
-         date: Date = .now,
+    var fid: String
+        
+    init(date: Date = .now,
          content: String = "",
          detail: String = "",
          status: TodoStatus = .todo,
          uid: String = "",
-         fid: String? = nil) {
-        self.id = id
+         fid: String = "") {
         self.date = date
         self.content = content
         self.detail = detail
@@ -53,34 +45,54 @@ class Todo: Identifiable, Codable {
         self.fid = fid
     }
     
+    enum CodingKeys: String, CodingKey {
+        case fid
+        case date
+    }
+    
     /// Decode : T -> Todo
-    required init(from decoder: Decoder) throws {
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
+        fid = try container.decode(String.self, forKey: .fid)
         date = try container.decode(Date.self, forKey: .date)
         /// Initialize other properties with default values
         content = ""
         status = .todo
         detail = ""
         uid = ""
-        fid = nil
     }
     
     /// Encode : Todo -> T
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
+        try container.encode(fid, forKey: .fid)
         try container.encode(date, forKey: .date)
     }
 }
-
-extension Todo: Equatable {
+extension Todo: Equatable, Identifiable {
     static func == (lhs: Todo, rhs: Todo) -> Bool {
-        return lhs.id == rhs.id
+        lhs.date == rhs.date
+        && lhs.content == rhs.content
+        && lhs.status == rhs.status
+        && lhs.detail == rhs.detail
+        && lhs.uid == rhs.uid
+        && lhs.fid == rhs.fid
     }
+    
+    var id: String { fid }
 }
 
 extension Todo {
+    static func copy(from todo: Todo) -> Todo {
+        /// 상태만 제외하고, 전체 복사
+        Todo(date: todo.date,
+             content: todo.content,
+             detail: todo.detail,
+             status: .todo,
+             uid: todo.uid,
+             fid: todo.fid)
+    }
+    
     func toEntity() -> TodoEntity {
         TodoEntity(date: self.date, content: self.content, uid: self.uid, fid: self.fid)
     }
