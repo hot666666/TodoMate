@@ -42,18 +42,20 @@ extension FirestoreTodoStreamProvider {
                     }
                     
                     snapshot.documentChanges.forEach { diff in
-                        guard let todoDTO = try? diff.document.data(as: TodoDTO.self) else { return }
-                        
-                        let todo = todoDTO.toModel()
-                        
-                        switch diff.type {
-                        case .added:
-                            continuation.yield(.added(todo))
-                        case .modified:
-                            continuation.yield(.modified(todo))
-                        case .removed:
-                            continuation.yield(.removed(todo))
+                        if let todoDTO = try? diff.document.data(as: TodoDTO.self),
+                           let todo = try? todoDTO.toModel() {
+                            switch diff.type {
+                            case .added:
+                                continuation.yield(.added(todo))
+                            case .modified:
+                                continuation.yield(.modified(todo))
+                            case .removed:
+                                continuation.yield(.removed(todo))
+                            }
+                        } else {
+                            print("Error decoding and converting todo: \(diff.document.data())")
                         }
+                        
                     }
                 }
             
