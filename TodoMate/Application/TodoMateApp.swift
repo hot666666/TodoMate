@@ -21,7 +21,7 @@ struct TodoMateApp: App {
     
     private var sharedModelContainer: ModelContainer = {
         let schema = Schema([TodoEntity.self])
-#if PREVIEW
+#if DEBUG || PREVIEW
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
 #else
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
