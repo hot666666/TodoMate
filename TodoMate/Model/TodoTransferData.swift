@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TodoTransferData: Codable, Transferable {
-    let id: String
+    let fid: String
     let date: Date
     
     static var transferRepresentation: some TransferRepresentation {
@@ -19,7 +19,7 @@ struct TodoTransferData: Codable, Transferable {
 extension Todo: Transferable {
     static var transferRepresentation: some TransferRepresentation {
         ProxyRepresentation(exporting: { todo in
-            TodoTransferData(id: todo.id, date: todo.date)
+            TodoTransferData(fid: todo.fid, date: todo.date)
         })
     }
 }
