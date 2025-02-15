@@ -90,8 +90,8 @@
 		457B43C42C6DFFBA0049334A /* FirestoreUserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43C32C6DFFB20049334A /* FirestoreUserRepository.swift */; };
 		457B43C62C6DFFD00049334A /* FirestoreReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43C52C6DFFCA0049334A /* FirestoreReference.swift */; };
 		457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
-		458ADC662D5DC9FA00BE769B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 458ADC652D5DC9FA00BE769B /* FirebaseFirestore */; };
 		458ADC672D5DCC0100BE769B /* GroupDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4526B0CE2D48A1C400DC90F5 /* GroupDashboardViewModel.swift */; };
+		458ADC752D5DDD8C00BE769B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 458ADC742D5DDD8C00BE769B /* FirebaseFirestore */; };
 		459325312CA0F1F000A95193 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 459325302CA0F1F000A95193 /* Assets.xcassets */; };
 		45962CF32D491ABE00089A48 /* GroupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF22D491ABB00089A48 /* GroupService.swift */; };
 		45962CF52D491BF300089A48 /* FirestoreGroupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF42D491BEA00089A48 /* FirestoreGroupRepository.swift */; };
@@ -261,7 +261,7 @@
 				451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */,
 				451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */,
 				451DEDAB2D3CDDA400A20417 /* FirebaseAuth in Frameworks */,
-				458ADC662D5DC9FA00BE769B /* FirebaseFirestore in Frameworks */,
+				458ADC752D5DDD8C00BE769B /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,17 +306,16 @@
 			path = Common;
 			sourceTree = "<group>";
 		};
-		4526B0CB2D48A18A00DC90F5 /* Main */ = {
+		4526B0CB2D48A18A00DC90F5 /* GroupDashboard */ = {
 			isa = PBXGroup;
 			children = (
 				4526B0CC2D48A1B200DC90F5 /* GroupDashboardView.swift */,
 				4526B0CE2D48A1C400DC90F5 /* GroupDashboardViewModel.swift */,
-				45962D072D49EB0E00089A48 /* JoinGroupView.swift */,
-				45962D0E2D4A5DD400089A48 /* ProfileSheet.swift */,
 				4541C9AD2D2D499A006A9C60 /* TodoBoard */,
 				451DEDD62D3E8BC500A20417 /* ChatBoard */,
+				45962D0E2D4A5DD400089A48 /* ProfileSheet.swift */,
 			);
-			path = Main;
+			path = GroupDashboard;
 			sourceTree = "<group>";
 		};
 		45322B482C84493A0097D530 /* Provider */ = {
@@ -403,7 +402,7 @@
 		4541C9AD2D2D499A006A9C60 /* TodoBoard */ = {
 			isa = PBXGroup;
 			children = (
-				4526B0B12D422B0900DC90F5 /* WeakTodoObserver.swift */,
+				458ADC772D60C0B200BE769B /* Type */,
 				4541C9AB2D2D499A006A9C60 /* TodoBoardView.swift */,
 				451DEDD22D3E4E1B00A20417 /* TodoBoardViewModel.swift */,
 				4541C9AC2D2D499A006A9C60 /* TodoBoxView.swift */,
@@ -441,6 +440,14 @@
 				4560E3C62D539C17008B09AA /* ChatStreamProviderType.swift */,
 				4560E3C42D539BAF008B09AA /* TodoStreamProviderType.swift */,
 				4560E3C22D539B7D008B09AA /* UploadProviderType.swift */,
+			);
+			path = Type;
+			sourceTree = "<group>";
+		};
+		458ADC772D60C0B200BE769B /* Type */ = {
+			isa = PBXGroup;
+			children = (
+				4526B0B12D422B0900DC90F5 /* WeakTodoObserver.swift */,
 			);
 			path = Type;
 			sourceTree = "<group>";
@@ -511,13 +518,13 @@
 		45E10BA12C69FA0E00FC31CD /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				4560E3BC2D539893008B09AA /* AuthenticatedUser.swift */,
-				45962CF82D491D0B00089A48 /* UserGroup.swift */,
-				4541C9912D2D4071006A9C60 /* User.swift */,
-				453D37502C7C8450003835CE /* TodoTransferData.swift */,
-				45CE6CB42C7178600053835E /* Chat.swift */,
 				45E10BA22C69FA2B00FC31CD /* Todo.swift */,
+				4541C9912D2D4071006A9C60 /* User.swift */,
+				4560E3BC2D539893008B09AA /* AuthenticatedUser.swift */,
+				45CE6CB42C7178600053835E /* Chat.swift */,
+				45962CF82D491D0B00089A48 /* UserGroup.swift */,
 				45ACB00D2C6B929F005F4B17 /* CalendarDay.swift */,
+				453D37502C7C8450003835CE /* TodoTransferData.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -540,7 +547,8 @@
 			isa = PBXGroup;
 			children = (
 				45E10B942C69B77300FC31CD /* MainView.swift */,
-				4526B0CB2D48A18A00DC90F5 /* Main */,
+				45962D072D49EB0E00089A48 /* JoinGroupView.swift */,
+				4526B0CB2D48A18A00DC90F5 /* GroupDashboard */,
 				4541C9A32D2D4953006A9C60 /* OverlayContainer */,
 				451DEDB82D3CF15800A20417 /* Authentication */,
 				4541C9AA2D2D499A006A9C60 /* Common */,
@@ -559,10 +567,10 @@
 		45ED09022C6ADD80005A8096 /* DTO */ = {
 			isa = PBXGroup;
 			children = (
-				45962CF62D491CB100089A48 /* GroupDTO.swift */,
-				45CE6CBD2C7190D20053835E /* ChatDTO.swift */,
 				457B43BD2C6DF56A0049334A /* UserDTO.swift */,
 				45ED09032C6ADDA2005A8096 /* TodoDTO.swift */,
+				45962CF62D491CB100089A48 /* GroupDTO.swift */,
+				45CE6CBD2C7190D20053835E /* ChatDTO.swift */,
 			);
 			path = DTO;
 			sourceTree = "<group>";
@@ -615,7 +623,7 @@
 				451DEDB22D3CDE0D00A20417 /* FirebaseCore */,
 				451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
-				458ADC652D5DC9FA00BE769B /* FirebaseFirestore */,
+				458ADC742D5DDD8C00BE769B /* FirebaseFirestore */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -1296,7 +1304,7 @@
 			package = 451DEDA62D3CDCEF00A20417 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
 		};
-		458ADC652D5DC9FA00BE769B /* FirebaseFirestore */ = {
+		458ADC742D5DDD8C00BE769B /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 451DEDA92D3CDDA400A20417 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
