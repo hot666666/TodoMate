@@ -62,23 +62,27 @@ extension FirestoreTodoRepository {
 extension FirestoreTodoRepository {
     func createTodo(_ todo: TodoDTO) async throws -> TodoDTO {
         print("[Creating Todo] - \(todo)")
-        return todo
-    }
-    
-    func createTodo(todo: TodoDTO) async throws {
-        print("[Creating Todo] - \(todo)")
+        
+        return try reference.db.create(todo: todo)
     }
     
     func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO] {
-        return TodoDTO.stub
+        print("[Fetcing Todo] - \(userId)")
+        
+        let todos: [TodoDTO] = reference.db.read()
+        return todos.filter { $0.uid == userId && startDate...endDate ~= $0.date }
     }
     
     func updateTodo(todo: TodoDTO) async throws {
         print("[Updating Todo] - \(todo)")
+        
+        try reference.db.update(todo: todo)
     }
     
     func deleteTodo(todoId: String) async throws {
         print("[Deleting Todo] - \(todoId)")
+        
+        try reference.db.delete(todoId: todoId)
     }
 }
 #endif
