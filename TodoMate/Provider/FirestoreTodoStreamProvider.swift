@@ -5,9 +5,7 @@
 //  Created by hs on 1/23/25.
 //
 
-#if DEBUG
 import Foundation
-#endif
 
 final class FirestoreTodoStreamProvider: TodoStreamProviderType {
     private let reference: FirestoreReference
@@ -15,24 +13,15 @@ final class FirestoreTodoStreamProvider: TodoStreamProviderType {
     init(reference: FirestoreReference = .shared) {
         self.reference = reference
     }
-    
-#if DEBUG
-    private let calendar = Calendar.current
-    private let today = Calendar.current.startOfDay(for: .now)
-    private var startDateForDebug: Date { calendar.date(byAdding: .day, value: -2, to: today)! }
-    private var endDateForDebug: Date { calendar.date(byAdding: .day, value: 1, to: today)! }
-#endif
 }
 extension FirestoreTodoStreamProvider {
 #if !PREVIEW
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
         AsyncStream { continuation in
+            let streamCreatedTime: Date = .now
+            
             let listener = reference.todoCollection()
-#if DEBUG
-            /// Debug 모드일 때는 Todo 전체를 가져올 필요 없음
-                .whereField("date", isGreaterThanOrEqualTo: startDateForDebug)
-                .whereField("date", isLessThanOrEqualTo: endDateForDebug)
-#endif
+                .whereField("lastModifiedAt", isGreaterThanOrEqualTo: streamCreatedTime)
                 .addSnapshotListener { querySnapshot, error in
                     guard let snapshot = querySnapshot else {
                         if let error = error {
