@@ -9,6 +9,7 @@ struct TodoDTO: Codable {
     var detail: String
     var date: Date
     var uid: String
+    var lastModifiedAt: Date?
 }
 
 // GoogleService-Info.plist 로드 함수
@@ -71,12 +72,48 @@ func migrateTodoUID() async {
     print("Migration completed!")
 }
 
+func addLastModifiedAtTodo() async {
+    let db = Firestore.firestore()
+    let batchLimit = 500 // Firestore 배치 작업 제한
+
+    print("Task started...")
+    do {
+        let snapshot = try await db.collection("todos").getDocuments()
+        let todos: [TodoDTO] = snapshot.documents.compactMap { try? $0.data(as: TodoDTO.self) }
+        print("총 \(todos.count)개의 Todo 존재")
+        
+        for batchStart in stride(from: 0, to: todos.count, by: batchLimit) {
+            // 배치 작업 시작
+            let batch = db.batch()
+            let batchEnd = min(batchStart + batchLimit, todos.count)
+            let currentBatch = Array(todos[batchStart..<batchEnd])
+            
+            print("Processing batch \(batchStart)-\(batchEnd) of \(todos.count)")
+            
+            for var todo in currentBatch {               
+                todo.lastModifiedAt = todo.date
+                
+                if let id = todo.id {
+                    try batch.setData(from: todo, forDocument: db.collection("todos").document(id))
+                }
+            }
+            
+            // 현재 배치 커밋
+            try await batch.commit()
+            print("Batch \(batchStart)-\(batchEnd) completed")
+        }
+    } catch {
+        print("Error during task: \(error)")
+    }
+    print("Task completed!")
+}
+
 @main
 struct Main {
     static func main() async {
         loadFirebaseConfig()
 
-        await migrateTodoUID()
+        await addLastModifiedAtTodo()
 
         exit(0) 
     }
