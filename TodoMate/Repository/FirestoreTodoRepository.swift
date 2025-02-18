@@ -55,6 +55,8 @@ extension FirestoreTodoRepository {
     
     func deleteTodo(todoId: String) async throws {
         let todoDocRef = reference.todoCollection().document(todoId)
+        /// 삭제 전에 실시간 업데이트를 위해 마지막 수정 시간을 업데이트하고 삭제
+        try await todoDocRef.updateData(["lastModifiedAt": Date.now])
         try await todoDocRef.delete()
     }
 }
