@@ -90,10 +90,11 @@ extension TodoBoxViewModel {
             print("Failed to create todo")
             return
         }
-        
+  
+        // MARK: - Observer에서 동일한 작업을 수행하기에 두 번 추가도 가능하게 된다(update, remove는 새로 만드는게 아니라 괜찮음)
         // Observer에서 동일한 작업을 수행하지만 일단 추가
-        self.todos.append(todo)
-        saveTodoOrder()
+//        self.todos.append(todo)
+//        saveTodoOrder()
     }
     
     func removeTodo(_ todo: Todo) {
