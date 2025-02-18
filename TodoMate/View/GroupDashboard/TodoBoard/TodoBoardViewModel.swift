@@ -11,28 +11,19 @@ import SwiftData
 @Observable
 class TodoBoardViewModel {
     private let todoStreamProvider: TodoStreamProviderType
-    private let userService: UserServiceType
     private let modelContainer: ModelContainer
     private var observers: [String: [WeakTodoObserver]] = [:]
     
     @ObservationIgnored let userInfo: AuthenticatedUser
-    var users: [User] = []
     
     init(container: DIContainer, userInfo: AuthenticatedUser) {
         self.todoStreamProvider = container.todoStreamProvider
-        self.userService = container.userService
         self.modelContainer = container.modelContainer
         self.userInfo = userInfo
     }
     
     func isMe(_ user: User) -> Bool {
         user.uid == userInfo.uid
-    }
-}
-extension TodoBoardViewModel {
-    @MainActor
-    func fetchGroupUser() async {
-        users = await userService.fetch()
     }
 }
 extension TodoBoardViewModel {
@@ -130,9 +121,7 @@ extension TodoBoardViewModel {
     }
     
     func removeObserver(_ observer: TodoObserverType, for userId: String) {
-        if observers[userId, default: []].contains(where: { $0.value === observer }) {
-            print("[Remove Observer - \(ObjectIdentifier(observer))]")
-        }
+        print("[Remove Observer - \(ObjectIdentifier(observer))]")
         observers[userId, default: []].removeAll(where: { $0.value === observer })
     }
 }

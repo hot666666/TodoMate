@@ -8,7 +8,6 @@
 import Foundation
 
 protocol TodoRepositoryType {
-    func createTodo(todo: TodoDTO) async throws
     func createTodo(_ todo: TodoDTO) async throws -> TodoDTO
     func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO]
     func updateTodo(todo: TodoDTO) async throws
@@ -25,18 +24,10 @@ final class FirestoreTodoRepository: TodoRepositoryType {
 #if !PREVIEW
 extension FirestoreTodoRepository {
     func createTodo(_ todo: TodoDTO) async throws -> TodoDTO {
-        let todoDocRef = reference.todoCollection().document()
-        var newTodo = todo
-        newTodo.id = todoDocRef.documentID
-        try todoDocRef.setData(from: newTodo)
-        return newTodo
-    }
-    
-    func createTodo(todo: TodoDTO) async throws {
-        let todoDocRef = reference.todoCollection().document()
-        var newTodo = todo
-        newTodo.id = todoDocRef.documentID
-        try todoDocRef.setData(from: newTodo)
+        let collectionRef = reference.todoCollection()
+        let newDocReference = try collectionRef.addDocument(from: todo)
+        let document = try await newDocReference.getDocument()
+        return try document.data(as: TodoDTO.self)
     }
     
     func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO] {
@@ -71,23 +62,27 @@ extension FirestoreTodoRepository {
 extension FirestoreTodoRepository {
     func createTodo(_ todo: TodoDTO) async throws -> TodoDTO {
         print("[Creating Todo] - \(todo)")
-        return todo
-    }
-    
-    func createTodo(todo: TodoDTO) async throws {
-        print("[Creating Todo] - \(todo)")
+        
+        return try reference.db.create(todo: todo)
     }
     
     func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO] {
-        return TodoDTO.stub
+        print("[Fetcing Todo] - \(userId)")
+        
+        let todos: [TodoDTO] = reference.db.read()
+        return todos.filter { $0.uid == userId && startDate...endDate ~= $0.date }
     }
     
     func updateTodo(todo: TodoDTO) async throws {
         print("[Updating Todo] - \(todo)")
+        
+        try reference.db.update(todo: todo)
     }
     
     func deleteTodo(todoId: String) async throws {
         print("[Deleting Todo] - \(todoId)")
+        
+        try reference.db.delete(todoId: todoId)
     }
 }
 #endif

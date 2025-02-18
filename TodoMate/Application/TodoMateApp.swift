@@ -21,7 +21,7 @@ struct TodoMateApp: App {
     
     private var sharedModelContainer: ModelContainer = {
         let schema = Schema([TodoEntity.self])
-#if PREVIEW
+#if DEBUG || PREVIEW
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
 #else
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
@@ -56,7 +56,16 @@ fileprivate struct _TodoMateApp: View {
     
     init(modelContainer: ModelContainer) {
 #if PREVIEW
-        let container: DIContainer = .stub
+//        let container: DIContainer = .stub
+        let container: DIContainer = .init(modelContainer: modelContainer,  /// 외부에서 테스트용 저장위치(in-memory) 설정
+                                           userService: StubUserService(),
+                                           todoService: TodoService(),  /// 테스트용 reference 구현
+                                           chatService: StubChatService(),
+                                           groupService: StubGroupService(),
+                                           chatStreamProvider: FirestoreChatStreamProvider(),
+                                           todoStreamProvider: FirestoreTodoStreamProvider(),  /// 테스트용 reference 구현
+                                           userInfoService: UserInfoService(),  /// 외부에서 저장위치(UserDefualt key) 설정
+                                           todoOrderService: TodoOrderService())  /// 외부에서 저장위치(UserDefualt key) 설정
 #else
         let container: DIContainer = .init(modelContainer: modelContainer,
                                            userService: UserService(),

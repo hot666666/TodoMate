@@ -42,18 +42,20 @@ extension FirestoreTodoStreamProvider {
                     }
                     
                     snapshot.documentChanges.forEach { diff in
-                        guard let todoDTO = try? diff.document.data(as: TodoDTO.self) else { return }
-                        
-                        let todo = todoDTO.toModel()
-                        
-                        switch diff.type {
-                        case .added:
-                            continuation.yield(.added(todo))
-                        case .modified:
-                            continuation.yield(.modified(todo))
-                        case .removed:
-                            continuation.yield(.removed(todo))
+                        if let todoDTO = try? diff.document.data(as: TodoDTO.self),
+                           let todo = try? todoDTO.toModel() {
+                            switch diff.type {
+                            case .added:
+                                continuation.yield(.added(todo))
+                            case .modified:
+                                continuation.yield(.modified(todo))
+                            case .removed:
+                                continuation.yield(.removed(todo))
+                            }
+                        } else {
+                            print("Error decoding and converting todo: \(diff.document.data())")
                         }
+                        
                     }
                 }
             
@@ -67,20 +69,20 @@ extension FirestoreTodoStreamProvider {
 #else
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
         AsyncStream { continuation in
-            print("[FirestoreTodoStreamProvider] - Stream Created")
-            
-            for todo in Todo.stub {
-                continuation.yield(.added(todo))
-            }
-            
+            let stream = self.reference.db.todoStream()
             let task = Task {
-                while !Task.isCancelled {
-                    do {
-                        try await Task.sleep(nanoseconds: 10_000_000_000)
-                        print("[FirestoreTodoStreamProvider] - Listening...")
-                    } catch {
-                        // 취소 에러 발생 시 루프 종료
-                        break
+                for await change in stream {
+                    if let todo = try? change.data.toModel() {
+                        switch change {
+                        case .added:
+                            continuation.yield(.added(todo))
+                        case .modified:
+                            continuation.yield(.modified(todo))
+                        case .removed:
+                            continuation.yield(.removed(todo))
+                        }
+                    } else {
+                        print("Error decoding and converting todo: \(change.data)")
                     }
                 }
             }
@@ -88,6 +90,7 @@ extension FirestoreTodoStreamProvider {
             continuation.onTermination = { @Sendable _ in
                 print("[FirestoreTodoStreamProvider] - Stream Terminated")
                 task.cancel()
+                self.reference.db.todoStreamTermination()
             }
         }
     }

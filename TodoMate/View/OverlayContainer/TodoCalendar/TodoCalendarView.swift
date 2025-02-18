@@ -36,6 +36,7 @@ struct TodoCalendarView: View {
         .task {
             await viewModel.fetch()
         }
+        .disabled(viewModel.isLoading)
     }
     
     @ViewBuilder
@@ -61,15 +62,15 @@ struct TodoCalendarView: View {
             
             HStack(alignment: .center) {
                 HoverStyledButton(action: {
-                    viewModel.moveMonth(by: -1)
+                    Task { await viewModel.moveMonth(by: -1) }
                 }, systemName: "chevron.left")
                 
                 HoverStyledButton(action: {
-                    viewModel.currentMonth()
+                    Task { await viewModel.currentMonth() }
                 }, systemName: "circle.fill")
                 
                 HoverStyledButton(action: {
-                    viewModel.moveMonth(by: 1)
+                    Task { await viewModel.moveMonth(by: 1) }
                 }, systemName: "chevron.right")
             }
         }
@@ -91,9 +92,11 @@ struct TodoCalendarView: View {
     
     @ViewBuilder
     private var calendarDayGrid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0),
-                                 count: 7),
+        LazyVGrid(columns:
+                    Array(repeating: GridItem(.flexible(), spacing: 0),
+                          count: 7),
                   spacing: 0) {
+            
             ForEach(viewModel.calendarDays, id: \.self) { calendarDay in
                 TodoCalendarDay(calendarDay: calendarDay,
                                 isMine: viewModel.isMine,
@@ -155,11 +158,12 @@ fileprivate struct TodoCalendarDay: View {
                     TodoCalendarDayRow(todo: todo)
                 }
                 .onTapGesture {
-                    overlayManager.push(.todo(todo,
-                                              isMine: isMine ,
+                    overlayManager.push(.todo(todo, isMine: isMine,
                                               update: { updatedTodo in onUpdate(calendarDay.date, updatedTodo)}))
                 }
-                .contextMenu { contextMenu(for: todo) }
+                .contextMenu {
+                    contextMenu(for: todo)
+                }
                 .padding(.bottom, 1)
         }
         .padding(.horizontal, 5)
@@ -168,9 +172,7 @@ fileprivate struct TodoCalendarDay: View {
     @ViewBuilder
     private var addButton: some View {
         HoverStyledButton(action: {
-            Task {
-                await onCreate(calendarDay.date)
-            }
+            Task { await onCreate(calendarDay.date) }
         }, systemName: "plus")
         .opacity(isHovering ? 1 : 0)
     }

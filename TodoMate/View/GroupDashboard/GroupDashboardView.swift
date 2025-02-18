@@ -34,6 +34,9 @@ struct GroupDashboardView: View {
                     profile
                 }
             })
+        .task {
+            await viewModel.fetchGroupUser()
+        }
     }
     
     @ViewBuilder
@@ -53,10 +56,9 @@ struct GroupDashboardView: View {
         
         ScrollView {
             VStack {
-                ChatBoardView(viewModel: .init(container: container,
-                                               userInfo: viewModel.userInfo))
-                TodoBoardView(viewModel: .init(container: container,
-                                               userInfo: viewModel.userInfo))
+                ChatBoardView(viewModel: .init(container: container, userInfo: viewModel.userInfo))
+                TodoBoardView(viewModel: .init(container: container, userInfo: viewModel.userInfo),
+                              users: viewModel.users)
             }
             .padding(.horizontal)
         }

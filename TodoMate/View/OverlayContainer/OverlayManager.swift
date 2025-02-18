@@ -9,15 +9,15 @@ import SwiftUI
 
 enum OverlayType: Identifiable, Equatable {
     case todo(Todo, isMine: Bool, update: (Todo) -> Void)
-    case todoDate(anchor: CGPoint, selectedTodo: Todo)
+    case todoDate(anchor: CGPoint, date: Binding<Date>)
     case calendar(User, isMine: Bool)
 
     var id: String {
         switch self {
         case .todo(let todo, _, _):
-            return "todoSheet-\(todo.id)"
-        case .todoDate(let anchor, let todo):
-            return "todoSheetDate-\(todo.id)-(\(anchor.x),\(anchor.y))"
+            return "todoSheet-\(todo.fid)"
+        case .todoDate(let anchor, _):
+            return "todoSheetDate-(\(anchor.x),\(anchor.y))"
         case .calendar(let user, _):
             return "calendar-\(user.uid)"
         }

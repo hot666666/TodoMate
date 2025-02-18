@@ -10,7 +10,7 @@ import SwiftUI
 struct TodoSheetView: View {
     @FocusState private var focusedField: Field?
     
-    var todo: Todo
+    @Binding var todo: Todo
     
     var body: some View {
         ZStack {
@@ -37,23 +37,24 @@ struct TodoSheetView: View {
     
     @ViewBuilder
     private var todoContent: some View {
-        TodoSheetContent(content: Bindable(todo).content)
+        TodoSheetContent(content: $todo.content)
             .focused($focusedField, equals: .content)
     }
     
     @ViewBuilder
     private var todoDate: some View {
-        TodoSheetDate(todo: todo)
+        TodoSheetDate(date: $todo.date)
+            .disabled(todo.status == .inProgress)
     }
     
     @ViewBuilder
     private var todoStatus: some View {
-        TodoSheetStatus(todo: todo)
+        TodoSheetStatus(status: $todo.status)
     }
     
     @ViewBuilder
     private var todoDetail: some View {
-        TodoSheetDetail(detail: Bindable(todo).detail)
+        TodoSheetDetail(detail: $todo.detail)
             .focused($focusedField, equals: .detail)
     }
     
@@ -70,7 +71,6 @@ extension TodoSheetView {
     }
 }
 
-
 // MARK: - TodoSheetContent
 fileprivate struct TodoSheetContent: View {
     @Binding var content: String
@@ -86,13 +86,14 @@ fileprivate struct TodoSheetContent: View {
 // MARK: - TodoSheetDate
 fileprivate struct TodoSheetDate: View {
     @Environment(OverlayManager.self) private var overlayManager
-    var todo: Todo
+    @Binding var date: Date
     
     var body: some View {
         HStack(spacing: 20) {
             Text(Image(systemName: "calendar")) + Text(" 날짜")
             
-            Text(todo.date.toYYYYMMDDString())
+            // TODO: - hover effect
+            Text(date.toYYYYMMDDString())
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
                 .background(Color.black.opacity(0.25))
@@ -107,7 +108,6 @@ fileprivate struct TodoSheetDate: View {
                             }
                     }
                 )
-                .disabled(todo.status == .inProgress)
         }
     }
     
@@ -116,20 +116,20 @@ fileprivate struct TodoSheetDate: View {
             x: Const.TodoDatePopoverFrame.WIDTH / 2 + x,
             y: Const.TodoDatePopoverFrame.HEIGHT / 2 + y
         )
-        overlayManager.push(.todoDate(anchor: anchor, selectedTodo: todo))
+        overlayManager.push(.todoDate(anchor: anchor, date: $date))
     }
 }
 
 // MARK: - TodoSheetStatus
 fileprivate struct TodoSheetStatus: View {
-    var todo: Todo
+    @Binding var status: TodoStatus
     
     var body: some View {
         HStack(spacing: 20) {
             Text(Image(systemName: "circle.dotted")).bold() + Text(" 상태")
             
-            TodoStatusButton(status: todo.status) { newStatus in
-                todo.status = newStatus
+            TodoStatusButton(status: status) { newStatus in
+                status = newStatus
             }
         }
     }
@@ -159,10 +159,11 @@ fileprivate struct TodoSheetDetail: View {
 }
 
 #Preview("Todo-Mine Sheet") {
+    @Previewable @State var todo: Todo = .stub[0]
     let authManager = AuthManager.stub
     
     return OverlayContainer {
-        TodoSheetView(todo: Todo.stub.first!)
+        TodoSheetView(todo: $todo)
             .frame(width: 400, height: 400)
             .environment(authManager)
             .task {
@@ -172,10 +173,11 @@ fileprivate struct TodoSheetDetail: View {
 }
 
 #Preview("Todo-Not Mine Sheet") {
+    @Previewable @State var todo: Todo = .stub[1]
     let authManager = AuthManager.stub
     
     return OverlayContainer {
-        TodoSheetView(todo: Todo.stub.last!)
+        TodoSheetView(todo: $todo)
             .frame(width: 400, height: 400)
             .environment(authManager)
             .task {

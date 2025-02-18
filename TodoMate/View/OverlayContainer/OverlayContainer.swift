@@ -33,8 +33,8 @@ struct OverlayContainer<Content: View>: View {
         switch overlay {
         case .todo(let todo, let isMine, let update):
             TodoSheet(todo: todo, isMine: isMine, update: update)
-        case .todoDate(let anchor, let todo):
-            TodoDatePopover(anchor: anchor, todo: todo)
+        case .todoDate(let anchor, let date):
+            TodoDatePopover(anchor: anchor, date: date)
         case .calendar(let user, let isMine):
             TodoCalendar(user: user, isMine: isMine, onDismiss: overlayManager.pop)
         }
@@ -42,7 +42,7 @@ struct OverlayContainer<Content: View>: View {
     
     @ViewBuilder
     private var popOverlayBackground: some View {
-        // 오버레이 뷰를 닫는 뷰
+        /// 오버레이 뷰를 닫는 뷰
         Color.black.opacity(0.3)
             .edgesIgnoringSafeArea(.all)
             .onTapGesture {
@@ -53,23 +53,33 @@ struct OverlayContainer<Content: View>: View {
 
 // MARK: - TodoSheet
 fileprivate struct TodoSheet: View {
-    var todo: Todo
-    let isMine: Bool
-    let update: (Todo) -> Void
+    @State private var todo: Todo
+    private let isMine: Bool
+    private let update: (Todo) -> Void
+    
+    private let originalTodo: Todo
+    
+    init(todo: Todo, isMine: Bool, update: @escaping (Todo) -> Void) {
+        self.originalTodo = todo
+        self.todo = todo
+        self.isMine = isMine
+        self.update = update
+    }
     
     var body: some View {
         GeometryReader { geometry in
-            TodoSheetView(todo: todo)
+            TodoSheetView(todo: $todo)
+                .disabled(!isMine)
                 .frame(width: geometry.size.width * 0.8,
                        height: geometry.size.height * 0.8)
                 .background(.regularMaterial)
                 .cornerRadius(10)
                 .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
         }
-        .disabled(!isMine)
         .onDisappear {
-            guard isMine else { return }
-            update(todo)
+            if isMine && todo != originalTodo {
+                update(todo)
+            }
         }
     }
 }
@@ -77,10 +87,10 @@ fileprivate struct TodoSheet: View {
 // MARK: - TodoDatePopover
 fileprivate struct TodoDatePopover: View {
     var anchor: CGPoint
-    var todo: Todo
+    @Binding var date: Date
     
     var body: some View {
-        TodoDatePopoverView(todo: todo)
+        TodoDatePopoverView(date: $date)
             .frame(width: 250, height: 350)
             .background(.regularMaterial)
             .cornerRadius(10)

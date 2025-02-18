@@ -11,14 +11,16 @@ import SwiftUI
 struct TodoBoardView: View {
     @Environment(DIContainer.self) private var container
     @State private var viewModel: TodoBoardViewModel
+    private let users: [User]
     
-    init(viewModel: TodoBoardViewModel) {
+    init(viewModel: TodoBoardViewModel, users : [User]) {
         self._viewModel = State(initialValue: viewModel)
+        self.users = users
     }
     
     var body: some View {
         VStack(spacing: 20) {
-            ForEach(viewModel.users, id: \.uid) { user in
+            ForEach(users, id: \.uid) { user in
                 UserTodoSection(
                     user: user,
                     isMe: viewModel.isMe(user),
@@ -27,14 +29,13 @@ struct TodoBoardView: View {
                 )
             }
             
-            if viewModel.users.isEmpty {
+            if users.isEmpty {
                 placeholder
             }
             
             Spacer(minLength: 50)
         }
         .task {
-            await viewModel.fetchGroupUser()
             await viewModel.observeChanges()
         }
     }
@@ -103,7 +104,8 @@ fileprivate  struct UserTodoSection: View {
         
         ScrollView {
             VStack{
-                TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: AuthenticatedUser.stub))
+                TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: AuthenticatedUser.stub),
+                              users: User.stub)
                 Spacer()
             }
         }
