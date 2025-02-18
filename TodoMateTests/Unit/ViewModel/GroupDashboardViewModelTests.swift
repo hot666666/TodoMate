@@ -7,9 +7,10 @@
 
 import Testing
 
-class GroupDashboardViewModelTests {
+@Suite("GroupDashboardViewModel 테스트")
+struct GroupDashboardViewModelFetchTests {
     @Test
-    func testFetchGroupUser() async {
+    func test_fetchGroupUser() async {
         // Given
         let userInfo: AuthenticatedUser = .hasGroupStub
         let viewModel: GroupDashboardViewModel = .init(container: .stub, userInfo: userInfo)
