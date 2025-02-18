@@ -5,9 +5,7 @@
 //  Created by hs on 1/23/25.
 //
 
-#if DEBUG
 import Foundation
-#endif
 
 final class FirestoreTodoStreamProvider: TodoStreamProviderType {
     private let reference: FirestoreReference
@@ -15,24 +13,15 @@ final class FirestoreTodoStreamProvider: TodoStreamProviderType {
     init(reference: FirestoreReference = .shared) {
         self.reference = reference
     }
-    
-#if DEBUG
-    private let calendar = Calendar.current
-    private let today = Calendar.current.startOfDay(for: .now)
-    private var startDateForDebug: Date { calendar.date(byAdding: .day, value: -2, to: today)! }
-    private var endDateForDebug: Date { calendar.date(byAdding: .day, value: 1, to: today)! }
-#endif
 }
 extension FirestoreTodoStreamProvider {
 #if !PREVIEW
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
         AsyncStream { continuation in
+            let streamCreatedTime: Date = .now
+            
             let listener = reference.todoCollection()
-#if DEBUG
-            /// Debug 모드일 때는 Todo 전체를 가져올 필요 없음
-                .whereField("date", isGreaterThanOrEqualTo: startDateForDebug)
-                .whereField("date", isLessThanOrEqualTo: endDateForDebug)
-#endif
+                .whereField("lastModifiedAt", isGreaterThanOrEqualTo: streamCreatedTime)
                 .addSnapshotListener { querySnapshot, error in
                     guard let snapshot = querySnapshot else {
                         if let error = error {
@@ -42,18 +31,20 @@ extension FirestoreTodoStreamProvider {
                     }
                     
                     snapshot.documentChanges.forEach { diff in
-                        guard let todoDTO = try? diff.document.data(as: TodoDTO.self) else { return }
-                        
-                        let todo = todoDTO.toModel()
-                        
-                        switch diff.type {
-                        case .added:
-                            continuation.yield(.added(todo))
-                        case .modified:
-                            continuation.yield(.modified(todo))
-                        case .removed:
-                            continuation.yield(.removed(todo))
+                        if let todoDTO = try? diff.document.data(as: TodoDTO.self),
+                           let todo = try? todoDTO.toModel() {
+                            switch diff.type {
+                            case .added:
+                                continuation.yield(.added(todo))
+                            case .modified:
+                                continuation.yield(.modified(todo))
+                            case .removed:
+                                continuation.yield(.removed(todo))
+                            }
+                        } else {
+                            print("Error decoding and converting todo: \(diff.document.data())")
                         }
+                        
                     }
                 }
             
@@ -67,11 +58,29 @@ extension FirestoreTodoStreamProvider {
 #else
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
         AsyncStream { continuation in
-            for todo in Todo.stub {
-                continuation.yield(.added(todo))
+            let stream = self.reference.db.todoStream()
+            let task = Task {
+                for await change in stream {
+                    if let todo = try? change.data.toModel() {
+                        switch change {
+                        case .added:
+                            continuation.yield(.added(todo))
+                        case .modified:
+                            continuation.yield(.modified(todo))
+                        case .removed:
+                            continuation.yield(.removed(todo))
+                        }
+                    } else {
+                        print("Error decoding and converting todo: \(change.data)")
+                    }
+                }
             }
-            print("[FirestoreTodoStreamProvider] - Stream Terminated")
-            continuation.finish()
+            
+            continuation.onTermination = { @Sendable _ in
+                print("[FirestoreTodoStreamProvider] - Stream Terminated")
+                task.cancel()
+                self.reference.db.todoStreamTermination()
+            }
         }
     }
 #endif

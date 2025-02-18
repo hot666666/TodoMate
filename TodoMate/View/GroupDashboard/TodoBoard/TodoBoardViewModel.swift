@@ -11,28 +11,19 @@ import SwiftData
 @Observable
 class TodoBoardViewModel {
     private let todoStreamProvider: TodoStreamProviderType
-    private let userService: UserServiceType
     private let modelContainer: ModelContainer
     private var observers: [String: [WeakTodoObserver]] = [:]
     
     @ObservationIgnored let userInfo: AuthenticatedUser
-    var users: [User] = []
     
     init(container: DIContainer, userInfo: AuthenticatedUser) {
         self.todoStreamProvider = container.todoStreamProvider
-        self.userService = container.userService
         self.modelContainer = container.modelContainer
         self.userInfo = userInfo
     }
     
     func isMe(_ user: User) -> Bool {
-        user.uid == userInfo.id
-    }
-}
-extension TodoBoardViewModel {
-    @MainActor
-    func fetchGroupUser() async {
-        users = await userService.fetch()
+        user.uid == userInfo.uid
     }
 }
 extension TodoBoardViewModel {
@@ -44,7 +35,6 @@ extension TodoBoardViewModel {
             }
         }
         
-        print("[Stopped observing Todo changes]")
         observers.removeAll()
     }
     
@@ -62,7 +52,7 @@ extension TodoBoardViewModel {
             }
         case .modified(let todo):
             /// 위젯 데이터 - 본인 것만 진행 중이면 추가, 아니면 삭제
-            if todo.uid == userInfo.id {
+            if todo.uid == userInfo.uid {
                 if todo.status == .inProgress {
                     await saveToModelContainer(todo)
                 } else {
@@ -75,7 +65,7 @@ extension TodoBoardViewModel {
             }
         case .removed(let todo):
             /// 위젯 데이터 - 존재하면 삭제
-            guard todo.uid == userInfo.id else { break }
+            guard todo.uid == userInfo.uid else { break }
 
             await deleteFromModelContainer(todo.fid)
             
@@ -131,9 +121,7 @@ extension TodoBoardViewModel {
     }
     
     func removeObserver(_ observer: TodoObserverType, for userId: String) {
-        if observers[userId, default: []].contains(where: { $0.value === observer }) {
-            print("[Remove Observer - \(ObjectIdentifier(observer))]")
-        }
+        print("[Remove Observer - \(ObjectIdentifier(observer))]")
         observers[userId, default: []].removeAll(where: { $0.value === observer })
     }
 }

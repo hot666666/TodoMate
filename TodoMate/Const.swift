@@ -29,9 +29,15 @@ extension Const {
     }
 }
 extension Const {
+#if DEBUG || PREVIEW
+    static let UserInfoKey = "test-userInfo"
+    static let TodoOrderDateKey = "test-todoOrderDate"
+    static let TodoOrderKey = "test-todoOrder"
+#else
     static let UserInfoKey = "userInfo"
     static let TodoOrderDateKey = "todoOrderDate"
     static let TodoOrderKey = "todoOrder"
+#endif
 }
 
 typealias FireStore = Const.FireStore

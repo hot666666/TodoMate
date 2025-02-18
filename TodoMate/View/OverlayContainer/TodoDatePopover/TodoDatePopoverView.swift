@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct TodoDatePopoverView: View {
-    var todo: Todo
+    @Binding var date: Date
     
     var body: some View {
-        CalendarView(todo: todo)
+        CalendarView(date: $date)
             .padding()
     }
 }
@@ -21,7 +21,8 @@ fileprivate struct CalendarView: View {
     @State private var calendarDays: [CalendarDay] = []
     @State private var currentDate: Date = .now
     @State private var selectedIndex: Int?
-    var todo: Todo
+    
+    @Binding var date: Date
     
     var body: some View {
         VStack {
@@ -33,7 +34,7 @@ fileprivate struct CalendarView: View {
             }
         }
         .onAppear {
-            updateCalendarDays(todoDate: todo.date)
+            updateCalendarDays(todoDate: date)
         }
     }
     
@@ -95,7 +96,7 @@ extension CalendarView {
         selectedIndex = index
         
         /// Binding 값 업데이트
-        todo.date = calendarDays[index].date
+        date = calendarDays[index].date
     }
     
     private func updateMonthIfNeeded(for calendarDay: CalendarDay) {
@@ -114,7 +115,7 @@ extension CalendarView {
     private func updateMonth(by value: Int) {
         if let newDate = calendar.date(byAdding: .month, value: value, to: currentDate) {
             currentDate = newDate
-            updateCalendarDays(todoDate: todo.date)
+            updateCalendarDays(todoDate: date)
         }
     }
     
@@ -179,8 +180,10 @@ fileprivate struct CalendarDayView: View {
 }
 
 #Preview {
+    @Previewable @State var todo: Todo = .stub[0]
+    
     VStack {
-        TodoDatePopoverView(todo: Todo.stub[0])
+        TodoDatePopoverView(date: $todo.date)
             .frame(width: 200, height: 200)
     }
     .frame(width: 300, height: 300)

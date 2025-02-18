@@ -8,7 +8,6 @@
 import Foundation
 
 protocol TodoServiceType {
-    func create(_ todo: Todo)
     func create(from todo: Todo) async -> Todo?
     func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]]
     func fetchToday(userId: String) async -> [Todo]
@@ -20,8 +19,9 @@ class StubTodoService: TodoServiceType {
     private let calendar = Calendar.current
     
     func create(from todo: Todo) async -> Todo? {
-        todo.fid = UUID().uuidString
-        return todo
+        var _todo = todo
+        _todo.fid = UUID().uuidString
+        return _todo
     }
     
     func create(_ todo: Todo) {

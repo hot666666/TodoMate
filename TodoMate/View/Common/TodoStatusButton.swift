@@ -60,7 +60,7 @@ fileprivate struct ButtonView: View {
 
 
 #Preview {
-    @Previewable var todo: Todo = .init(status: .todo)
+    @Previewable @State var todo: Todo = .init(status: .todo)
     
     return VStack {
         TodoStatusButton(status: todo.status) { newStatus in

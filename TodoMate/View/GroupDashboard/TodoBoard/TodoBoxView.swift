@@ -62,7 +62,7 @@ struct TodoBoxView: View {
     @ViewBuilder
     private var todoList: some View {
         TodoList(
-            todos: viewModel.todos,
+            todos: Bindable(viewModel).todos,
             isMine: viewModel.isMine,
             moveTodo: viewModel.moveTodo,
             updateTodo: viewModel.updateTodo,
@@ -76,7 +76,7 @@ struct TodoBoxView: View {
     @ViewBuilder
     private var addButton: some View {
         Button(action: {
-            viewModel.createTodo()
+            Task { await viewModel.createTodo() }
         }) {
             Image(systemName: "plus")
         }
@@ -90,14 +90,14 @@ struct TodoBoxView: View {
 fileprivate struct TodoList: View {
     @Environment(OverlayManager.self) private var overlayManager
     
-    let todos: [Todo]
+    @Binding var todos: [Todo]
     let isMine: Bool
     let moveTodo: (IndexSet, Int) -> Void
     let updateTodo: (Todo) -> Void
     let removeTodo: (Todo) -> Void
     
     var body: some View {
-        CustomList(items: todos, onMove: moveTodo) { todo in
+        CustomList(items: $todos, onMove: moveTodo) { todo in
             todoRow(todo)
                 .contextMenu {
                     removeButton(todo)
@@ -112,10 +112,9 @@ fileprivate struct TodoList: View {
     private func todoRow(_ todo: Todo) -> some View {
         BaseTodoRow(todo: todo) {
             TodoStatusButton(status: todo.status) { newStatus in
-                if isMine {
-                    todo.status = newStatus
-                    updateTodo(todo)
-                }
+                var newTodo = todo
+                newTodo.status = newStatus
+                updateTodo(newTodo)
             }
         }
     }

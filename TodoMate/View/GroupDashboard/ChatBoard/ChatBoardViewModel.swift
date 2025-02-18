@@ -38,7 +38,7 @@ extension ChatBoardViewModel {
             }
         case .modified(let chat):
             /// 내가 입력 중이던 요소는 업데이트 무시
-            guard (chat.lastModifiedUser != userInfo.id) else { return }
+            guard (chat.lastModifiedUser != userInfo.uid) else { return }
             if let index = chats.firstIndex(where: { $0.fid == chat.fid }) {
                 chats[index] = chat
             }
@@ -57,7 +57,7 @@ extension ChatBoardViewModel {
     }
     
     func createChat(with url: String? = nil) {
-        let chat: Chat = .init(lastModifiedUser: userInfo.id)
+        let chat: Chat = .init(lastModifiedUser: userInfo.uid)
         
         /// 이미지 업로드 시
         if let url = url {
@@ -73,7 +73,7 @@ extension ChatBoardViewModel {
     }
     
     func updateChat(_ chat: Chat) {
-        chat.lastModifiedUser = userInfo.id
+        chat.lastModifiedUser = userInfo.uid
         chatService.update(chat)
     }
     

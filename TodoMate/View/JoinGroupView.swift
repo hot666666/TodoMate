@@ -82,13 +82,13 @@ extension JoinGroupView {
             throw NSError(domain: "GroupNotFound", code: 404)
         }
         
-        guard let user = await container.userService.fetch(uid: authManager.authenticatedUser.id) else {
+        guard var user = await container.userService.fetch(uid: authManager.authenticatedUser.uid) else {
             throw NSError(domain: "UserNotFound", code: 404)
         }
         
         // TODO: - 업데이트 성공에 대한 순차성 보장
-        if !group.uids.contains(authManager.authenticatedUser.id) {
-            group.uids.append(authManager.authenticatedUser.id)
+        if !group.uids.contains(authManager.authenticatedUser.uid) {
+            group.uids.append(authManager.authenticatedUser.uid)
             await container.groupService.update(group)
         }
         
