@@ -58,15 +58,18 @@ extension TodoBoxViewModel {
         }
             
         let today: Date = .now
+        /// 마지막 저장 날짜가 없는 경우
         guard let lastSavedDate = todoOrderService.loadDate() else {
             saveTodoOrder(date: today, fetchedTodos: fetchedTodos)
             self.todos = fetchedTodos
             return
         }
         
+        /// 마지막 저장 날짜가 오늘인 경우
         if calendar.isDate(lastSavedDate, inSameDayAs: today) {
             let savedOrder = todoOrderService.loadOrder()
             fetchedTodos.sort { savedOrder.firstIndex(of: $0.fid) ?? Int.max < savedOrder.firstIndex(of: $1.fid) ?? Int.max }
+        /// 마지막 저장 날짜가 오늘이 아닌 경우
         } else {
             saveTodoOrder(date: today, fetchedTodos: fetchedTodos)
         }
@@ -88,12 +91,9 @@ extension TodoBoxViewModel {
             return
         }
         
-#if PREVIEW
-        // TODO: - 동일 계정, 다른 디바이스에서 추가 처리 필요
+        // Observer에서 동일한 작업을 수행하지만 일단 추가
         self.todos.append(todo)
-
         saveTodoOrder()
-#endif
     }
     
     func removeTodo(_ todo: Todo) {
@@ -105,13 +105,10 @@ extension TodoBoxViewModel {
         }
 
         todoService.remove(todo)
-#if PREVIEW
-        // TODO: - 동일 계정, 다른 디바이스에서 추가 처리 필요
-        
+
+        // Observer에서 동일한 작업을 수행하지만 일단 추가
         self.todos.remove(at: index)
-        
         saveTodoOrder()
-#endif
     }
     
     func updateTodo(_ todo: Todo) {
@@ -124,15 +121,12 @@ extension TodoBoxViewModel {
         
         todoService.update(todo)
         
-#if PREVIEW
-        // TODO: - 동일 계정, 다른 디바이스에서 추가 처리 필요
-        // TODO: - lastModifiedAt 처리 업데이트
+        // Observer에서 동일한 작업을 수행하지만 일단 추가
         if calendar.isDateInToday(todo.date) {
             self.todos[index] = todo
         } else {
             self.todos.remove(at: index)
         }
-#endif
     }
 }
 extension TodoBoxViewModel {
@@ -184,8 +178,12 @@ extension TodoBoxViewModel: TodoObserverType {
         }
     
         func todoRemoved(_ todo: Todo) {
-            guard calendar.isDateInToday(todo.date) else { return }
-            todos.removeAll { $0.fid == todo.fid }
+            guard
+                calendar.isDateInToday(todo.date),
+                let index = todos.firstIndex(where: { $0.fid == todo.fid })
+            else { return }
+            
+            todos.remove(at: index)
             
             if isMine {
                 saveTodoOrder()

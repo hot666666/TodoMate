@@ -121,9 +121,7 @@ extension TodoBoardViewModel {
     }
     
     func removeObserver(_ observer: TodoObserverType, for userId: String) {
-        if observers[userId, default: []].contains(where: { $0.value === observer }) {
-            print("[Remove Observer - \(ObjectIdentifier(observer))]")
-        }
+        print("[Remove Observer - \(ObjectIdentifier(observer))]")
         observers[userId, default: []].removeAll(where: { $0.value === observer })
     }
 }
