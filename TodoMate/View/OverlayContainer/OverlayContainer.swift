@@ -53,11 +53,11 @@ struct OverlayContainer<Content: View>: View {
 
 // MARK: - TodoSheet
 fileprivate struct TodoSheet: View {
-    private let originalTodo: Todo
+    @State private var todo: Todo
+    private let isMine: Bool
+    private let update: (Todo) -> Void
     
-    @State var todo: Todo
-    let isMine: Bool
-    let update: (Todo) -> Void
+    private let originalTodo: Todo
     
     init(todo: Todo, isMine: Bool, update: @escaping (Todo) -> Void) {
         self.originalTodo = todo

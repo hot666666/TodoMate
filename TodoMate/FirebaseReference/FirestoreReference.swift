@@ -5,9 +5,9 @@
 //  Created by hs on 8/15/24.
 //
 
-import Firebase
 
 #if !PREVIEW
+import Firebase
 import FirebaseFirestore
 final class FirestoreReference {
     static let shared = FirestoreReference()
@@ -32,11 +32,17 @@ final class FirestoreReference {
     }
 }
 #else
+import Foundation
 final class FirestoreReference {
     static let shared = FirestoreReference()
     let db = StubFirestore()
     
+#if PREVIEW
+    init() {}
+#else
     private init() {}
+#endif
+    
 }
 
 final class StubFirestore {
@@ -70,11 +76,9 @@ final class StubFirestore {
         newTodo.id = UUID().uuidString
         
         todos.append(newTodo)
-        guard let continuation = continuation else {
-            throw NSError(domain: "Continuation is nil", code: 0)
-        }
         
-        continuation.yield(.added(newTodo))
+        continuation?.yield(.added(newTodo))
+        
         return newTodo
     }
     
@@ -86,11 +90,7 @@ final class StubFirestore {
         guard let index = todos.firstIndex(where: { $0.id == todo.id }) else { return }
         todos[index] = todo
         
-        guard let continuation = continuation else {
-            throw NSError(domain: "Continuation is nil", code: 0)
-        }
-        
-        continuation.yield(.modified(todo))
+        continuation?.yield(.modified(todo))
     }
     
     func delete(todoId: String) throws {
@@ -98,11 +98,7 @@ final class StubFirestore {
         
         let todo = todos.remove(at: index)
         
-        guard let continuation = continuation else {
-            throw NSError(domain: "Continuation is nil", code: 0)
-        }
-        
-        continuation.yield(.removed(todo))
+        continuation?.yield(.removed(todo))
     }
 }
 #endif
