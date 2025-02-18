@@ -15,6 +15,7 @@ struct TodoDTO: Codable {
     var detail: String
     var date: Date
     var uid: String
+    var lastModifiedAt: Date
 }
 #else
 import FirebaseFirestore
@@ -26,12 +27,15 @@ struct TodoDTO: Codable {
     var detail: String
     var date: Date
     var uid: String
+    var lastModifiedAt: Date
 }
 #endif
 
 extension TodoDTO {
-    static let stub: [TodoDTO] = [.init(id: UUID().uuidString, content: "할일1", status: "진행 중", detail: "할일1", date: .now, uid: "test"),
-                                    .init(id: UUID().uuidString, content: "할일2", status: "진행 중", detail: "할일2", date: .now, uid: UUID().uuidString)]
+    static let stub: [TodoDTO] = [
+        .init(id: UUID().uuidString, content: "할일1", status: "진행 중", detail: "할일1", date: .now, uid: "test", lastModifiedAt: .now),
+        .init(id: UUID().uuidString, content: "할일2", status: "진행 중", detail: "할일2", date: .now, uid: UUID().uuidString, lastModifiedAt: .now),
+    ]
     
     func toModel() throws -> Todo {
         guard let id = self.id, !id.isEmpty else {
@@ -44,6 +48,6 @@ extension TodoDTO {
 
 extension Todo {
     func toDTO() -> TodoDTO {
-        TodoDTO(id: self.fid, content: self.content, status: self.status.rawValue,  detail: self.detail, date: self.date, uid: self.uid)
+        TodoDTO(id: self.fid, content: self.content, status: self.status.rawValue,  detail: self.detail, date: self.date, uid: self.uid, lastModifiedAt: .now)
     }
 }
