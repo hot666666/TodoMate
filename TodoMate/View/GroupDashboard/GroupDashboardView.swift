@@ -91,7 +91,6 @@ extension GroupDashboardView {
     OverlayContainer {
         GroupDashboardView(viewModel: .init(container: .stub, userInfo: .hasGroupStub))
             .environment(DIContainer.stub)
-            .environment(AuthManager.signedInAndHasGroupStub)
             .frame(width: 450, height: 400)
     }
 }

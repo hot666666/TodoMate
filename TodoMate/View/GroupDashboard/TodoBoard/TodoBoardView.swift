@@ -110,7 +110,6 @@ fileprivate  struct UserTodoSection: View {
             }
         }
         .environment(DIContainer.stub)
-        .environment(AuthManager.stub)
         .frame(width: 400, height: 600)
     }
 }
