@@ -14,7 +14,7 @@
 		451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 451DEDB02D3CDDA400A20417 /* FirebaseStorage */; };
 		451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 451DEDB22D3CDE0D00A20417 /* FirebaseCore */; };
 		451DEDB52D3CDE5300A20417 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */; };
-		451DEDBA2D3CF19800A20417 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDB92D3CF19800A20417 /* AuthManager.swift */; };
+		451DEDBA2D3CF19800A20417 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDB92D3CF19800A20417 /* AuthService.swift */; };
 		451DEDBC2D3CF3D700A20417 /* SignInButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDBB2D3CF3D700A20417 /* SignInButton.swift */; };
 		451DEDBE2D3CF4DA00A20417 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDBD2D3CF4D800A20417 /* AuthView.swift */; };
 		451DEDD12D3E4E0600A20417 /* TodoBoxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDD02D3E4E0600A20417 /* TodoBoxViewModel.swift */; };
@@ -54,7 +54,10 @@
 		45486EBE2D63982C0038973C /* FirestoreChatStreamProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451DEDFC2D40CC6B00A20417 /* FirestoreChatStreamProvider.swift */; };
 		45486EBF2D63983E0038973C /* FirestoreTodoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43BF2C6DF9600049334A /* FirestoreTodoRepository.swift */; };
 		45486EC02D6398750038973C /* TodoDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ED09032C6ADDA2005A8096 /* TodoDTO.swift */; };
-		45486F2F2D64A9950038973C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 45486F2E2D64A9950038973C /* FirebaseFirestore */; };
+		454870A02D72B92D0038973C /* GoogleSignInService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4548709F2D72B9140038973C /* GoogleSignInService.swift */; };
+		454870A62D72CA340038973C /* LocalDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454870A52D72CA2C0038973C /* LocalDataManager.swift */; };
+		454870A82D72E6DC0038973C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 454870A72D72E6DC0038973C /* FirebaseFirestore */; };
+		454870B52D72E7E00038973C /* CurrentUserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454870A42D72C2CE0038973C /* CurrentUserStore.swift */; };
 		455C9B962C6F8CBA004A1519 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B952C6F8CB4004A1519 /* AppDelegate.swift */; };
 		455C9B982C6F8DC2004A1519 /* Button+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B972C6F8DBC004A1519 /* Button+Extension.swift */; };
 		4560E39B2D539106008B09AA /* UserGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF82D491D0B00089A48 /* UserGroup.swift */; };
@@ -158,7 +161,7 @@
 		451525532D509496006F6847 /* InfoDebug.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = InfoDebug.plist; sourceTree = "<group>"; };
 		4515257F2D510CFE006F6847 /* CustomList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomList.swift; sourceTree = "<group>"; };
 		451DEDA42D3CDB5D00A20417 /* SignOutButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignOutButton.swift; sourceTree = "<group>"; };
-		451DEDB92D3CF19800A20417 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		451DEDB92D3CF19800A20417 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		451DEDBB2D3CF3D700A20417 /* SignInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInButton.swift; sourceTree = "<group>"; };
 		451DEDBD2D3CF4D800A20417 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		451DEDD02D3E4E0600A20417 /* TodoBoxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoBoxViewModel.swift; sourceTree = "<group>"; };
@@ -193,6 +196,9 @@
 		4541C9A92D2D499A006A9C60 /* TodoStatusButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoStatusButton.swift; sourceTree = "<group>"; };
 		4541C9AB2D2D499A006A9C60 /* TodoBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoBoardView.swift; sourceTree = "<group>"; };
 		4541C9AC2D2D499A006A9C60 /* TodoBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoBoxView.swift; sourceTree = "<group>"; };
+		4548709F2D72B9140038973C /* GoogleSignInService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInService.swift; sourceTree = "<group>"; };
+		454870A42D72C2CE0038973C /* CurrentUserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentUserStore.swift; sourceTree = "<group>"; };
+		454870A52D72CA2C0038973C /* LocalDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalDataManager.swift; sourceTree = "<group>"; };
 		455C9B952C6F8CB4004A1519 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		455C9B972C6F8DBC004A1519 /* Button+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Button+Extension.swift"; sourceTree = "<group>"; };
 		4560E38E2D538DB5008B09AA /* TodoMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -267,7 +273,7 @@
 				451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */,
 				451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */,
 				451DEDAB2D3CDDA400A20417 /* FirebaseAuth in Frameworks */,
-				45486F2F2D64A9950038973C /* FirebaseFirestore in Frameworks */,
+				454870A82D72E6DC0038973C /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,7 +284,6 @@
 			isa = PBXGroup;
 			children = (
 				451DEDBD2D3CF4D800A20417 /* AuthView.swift */,
-				451DEDB92D3CF19800A20417 /* AuthManager.swift */,
 				451DEDA42D3CDB5D00A20417 /* SignOutButton.swift */,
 				451DEDBB2D3CF3D700A20417 /* SignInButton.swift */,
 			);
@@ -355,6 +360,9 @@
 		4541C9962D2D46AA006A9C60 /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				451DEDB92D3CF19800A20417 /* AuthService.swift */,
+				454870A52D72CA2C0038973C /* LocalDataManager.swift */,
+				4548709F2D72B9140038973C /* GoogleSignInService.swift */,
 				4560E3A32D539696008B09AA /* Type */,
 				45D444D72D53371F00378324 /* TodoOrderService.swift */,
 				4526B0D02D48C6E300DC90F5 /* UserInfoService.swift */,
@@ -424,6 +432,14 @@
 				455C9B952C6F8CB4004A1519 /* AppDelegate.swift */,
 			);
 			path = Application;
+			sourceTree = "<group>";
+		};
+		454870A32D72C2C10038973C /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				454870A42D72C2CE0038973C /* CurrentUserStore.swift */,
+			);
+			path = Store;
 			sourceTree = "<group>";
 		};
 		4560E3A32D539696008B09AA /* Type */ = {
@@ -501,6 +517,7 @@
 		45E10B912C69B77300FC31CD /* TodoMate */ = {
 			isa = PBXGroup;
 			children = (
+				454870A32D72C2C10038973C /* Store */,
 				459AA4362C795D4700CA43F2 /* Info.plist */,
 				451525532D509496006F6847 /* InfoDebug.plist */,
 				45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */,
@@ -629,7 +646,7 @@
 				451DEDB22D3CDE0D00A20417 /* FirebaseCore */,
 				451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
-				45486F2E2D64A9950038973C /* FirebaseFirestore */,
+				454870A72D72E6DC0038973C /* FirebaseFirestore */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -741,11 +758,14 @@
 			files = (
 				45D444D82D53371F00378324 /* TodoOrderService.swift in Sources */,
 				455C9B962C6F8CBA004A1519 /* AppDelegate.swift in Sources */,
+				454870A02D72B92D0038973C /* GoogleSignInService.swift in Sources */,
 				4538446A2D4F3E3B002B8721 /* TodoCalendarView.swift in Sources */,
 				451525802D510CFE006F6847 /* CustomList.swift in Sources */,
+				454870A62D72CA340038973C /* LocalDataManager.swift in Sources */,
 				4560E3C32D539B7D008B09AA /* UploadProviderType.swift in Sources */,
 				45962D0F2D4A5DD600089A48 /* ProfileSheet.swift in Sources */,
 				457B43C42C6DFFBA0049334A /* FirestoreUserRepository.swift in Sources */,
+				454870B52D72E7E00038973C /* CurrentUserStore.swift in Sources */,
 				4541C99A2D2D472C006A9C60 /* TodoService.swift in Sources */,
 				457B43BE2C6DF56E0049334A /* UserDTO.swift in Sources */,
 				45E10B952C69B77300FC31CD /* MainView.swift in Sources */,
@@ -808,7 +828,7 @@
 				4560E3C72D539C17008B09AA /* ChatStreamProviderType.swift in Sources */,
 				451DEDD12D3E4E0600A20417 /* TodoBoxViewModel.swift in Sources */,
 				45CE6CBE2C7190D40053835E /* ChatDTO.swift in Sources */,
-				451DEDBA2D3CF19800A20417 /* AuthManager.swift in Sources */,
+				451DEDBA2D3CF19800A20417 /* AuthService.swift in Sources */,
 				4538446C2D4F3E88002B8721 /* TodoCalendarViewModel.swift in Sources */,
 				45ACB00C2C6B65E1005F4B17 /* Const.swift in Sources */,
 				45962CF72D491CB500089A48 /* GroupDTO.swift in Sources */,
@@ -1317,7 +1337,7 @@
 			package = 451DEDA62D3CDCEF00A20417 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
 		};
-		45486F2E2D64A9950038973C /* FirebaseFirestore */ = {
+		454870A72D72E6DC0038973C /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 451DEDA92D3CDDA400A20417 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
