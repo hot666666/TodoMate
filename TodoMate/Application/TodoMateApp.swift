@@ -52,47 +52,56 @@ struct TodoMateApp: App {
 
 fileprivate struct _TodoMateApp: View {
     @State private var container: DIContainer
-    @State private var authManager: AuthManager
+    @State private var currentUserStore: CurrentUserStore
     
     init(modelContainer: ModelContainer) {
 #if PREVIEW
-//        let container: DIContainer = .stub
-        let container: DIContainer = .init(modelContainer: modelContainer,  /// 외부에서 테스트용 저장위치(in-memory) 설정
-                                           userService: StubUserService(),
-                                           todoService: TodoService(),  /// 테스트용 reference 구현
-                                           chatService: StubChatService(),
-                                           groupService: StubGroupService(),
-                                           chatStreamProvider: FirestoreChatStreamProvider(),
-                                           todoStreamProvider: FirestoreTodoStreamProvider(),  /// 테스트용 reference 구현
-                                           userInfoService: UserInfoService(),  /// 외부에서 저장위치(UserDefualt key) 설정
-                                           todoOrderService: TodoOrderService())  /// 외부에서 저장위치(UserDefualt key) 설정
+        let container: DIContainer = .init(
+            authService: StubAuthService(),
+            googleSignInService: StubGoogleSignInService(),
+            localDataManager: LocalDataManager(modelContainer: modelContainer),
+            userService: StubUserService(),
+            todoService: TodoService(),  /// 테스트용 reference 구현
+            chatService: StubChatService(),
+            groupService: StubGroupService(),
+            chatStreamProvider: FirestoreChatStreamProvider(),
+            todoStreamProvider: FirestoreTodoStreamProvider(),  /// 테스트용 reference 구현
+            userInfoService: UserInfoService(),  /// 외부에서 저장위치(UserDefualt key) 설정
+            todoOrderService: TodoOrderService())  /// 외부에서 저장위치(UserDefualt key) 설정
 #else
-        let container: DIContainer = .init(modelContainer: modelContainer,
-                                           userService: UserService(),
-                                           todoService: TodoService(),
-                                           chatService: ChatService(),
-                                           groupService: GroupService(),
-                                           chatStreamProvider: FirestoreChatStreamProvider(),
-                                           todoStreamProvider: FirestoreTodoStreamProvider(),
-                                           userInfoService: UserInfoService(),
-                                           todoOrderService: TodoOrderService())
+        // TODO: - 의존성 순서 리팩토링
+        let userService: UserService = UserService()
+        let googleSignInService: GoogleSignInService = GoogleSignInService()
+        
+        let container: DIContainer = .init(
+            authService: AuthService(userService: userService, googleSignInService: googleSignInService),
+            googleSignInService: googleSignInService,
+            localDataManager: LocalDataManager(modelContainer: modelContainer),
+            userService: userService,
+            todoService: TodoService(),
+            chatService: ChatService(),
+            groupService: GroupService(),
+            chatStreamProvider: FirestoreChatStreamProvider(),
+            todoStreamProvider: FirestoreTodoStreamProvider(),
+            userInfoService: UserInfoService(),
+            todoOrderService: TodoOrderService())
 #endif
         self._container = State(initialValue: container)
-        self._authManager = State(initialValue: AuthManager(container: container))
+        self._currentUserStore = State(initialValue: CurrentUserStore(container: container))
     }
     
     var body: some View {
         content
-            .environment(authManager)
+            .environment(currentUserStore)
     }
     
     @ViewBuilder
     private var content: some View {
-        switch authManager.authState {
+        switch currentUserStore.state {
         case .signedOut:
             AuthView()
-        case .signedIn:
-            MainView()
+        case .signedIn(let signedInUser):
+            MainView(signedInUser: signedInUser)
                 .environment(container)
         case .loading:
             ProgressView()
