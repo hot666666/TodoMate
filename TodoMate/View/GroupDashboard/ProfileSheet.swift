@@ -73,6 +73,5 @@ struct ProfileSheetView: View {
 
 #Preview {
     ProfileSheetView(viewModel: .init(container: .stub, userInfo: AuthenticatedUser.stub, updateGroup: {}))
-        .environment(AuthManager.signedInAndHasGroupStub)
         .frame(width: 400, height: 400)
 }

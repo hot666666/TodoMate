@@ -251,7 +251,6 @@ fileprivate struct HoverStyledButton: View {
                                           isMine: true,
                                           onDismiss: {}))
         .frame(width: 500, height: 800)
-        .environment(AuthManager.stub)
         .environment(DIContainer.stub)
         .background(Color.customBlack)
     }

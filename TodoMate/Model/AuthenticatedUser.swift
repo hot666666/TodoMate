@@ -7,12 +7,12 @@
 
 import Foundation
 
+// TODO: - name add
 struct AuthenticatedUser: Codable {
     let uid: String
-    let token: String
     let gid: String
     
-    static let empty = AuthenticatedUser(uid: "", token: "", gid: "")
-    static let stub = AuthenticatedUser(uid: User.stub[0].uid, token: UUID().uuidString, gid: "")
-    static let hasGroupStub = AuthenticatedUser(uid: User.stub[0].uid, token: UUID().uuidString, gid: UserGroup.stub.id)
+    static let empty = AuthenticatedUser(uid: "", gid: "")
+    static let stub = AuthenticatedUser(uid: User.stub[0].uid, gid: "")
+    static let hasGroupStub = AuthenticatedUser(uid: User.stub[0].uid, gid: UserGroup.stub.id)
 }

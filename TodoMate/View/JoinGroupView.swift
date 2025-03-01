@@ -9,7 +9,7 @@ import SwiftUI
 
 struct JoinGroupView: View {
     @Environment(DIContainer.self) private var container
-    @Environment(AuthManager.self) private var authManager
+    @Environment(CurrentUserStore.self) private var authManager
     
     @State private var gid: String = ""
     @State private var isJoinButtonEnabled = true
@@ -82,13 +82,16 @@ extension JoinGroupView {
             throw NSError(domain: "GroupNotFound", code: 404)
         }
         
-        guard var user = await container.userService.fetch(uid: authManager.authenticatedUser.uid) else {
+        guard
+            let _user = authManager.user,
+            var user = await container.userService.fetch(uid: _user.uid)
+        else {
             throw NSError(domain: "UserNotFound", code: 404)
         }
         
         // TODO: - 업데이트 성공에 대한 순차성 보장
-        if !group.uids.contains(authManager.authenticatedUser.uid) {
-            group.uids.append(authManager.authenticatedUser.uid)
+        if !group.uids.contains(_user.uid) {
+            group.uids.append(_user.uid)
             await container.groupService.update(group)
         }
         
@@ -104,6 +107,5 @@ extension JoinGroupView {
 #Preview {
     JoinGroupView()
         .environment(DIContainer.stub)
-        .environment(AuthManager.stub)
         .frame(width: 400, height: 400)
 }

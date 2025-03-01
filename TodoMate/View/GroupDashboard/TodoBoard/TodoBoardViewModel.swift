@@ -6,19 +6,18 @@
 //
 
 import SwiftUI
-import SwiftData
 
 @Observable
 class TodoBoardViewModel {
     private let todoStreamProvider: TodoStreamProviderType
-    private let modelContainer: ModelContainer
+    private let localDataManager: LocalDataManagerType
     private var observers: [String: [WeakTodoObserver]] = [:]
     
     @ObservationIgnored let userInfo: AuthenticatedUser
     
     init(container: DIContainer, userInfo: AuthenticatedUser) {
         self.todoStreamProvider = container.todoStreamProvider
-        self.modelContainer = container.modelContainer
+        self.localDataManager = container.localDataManager
         self.userInfo = userInfo
     }
     
@@ -54,9 +53,9 @@ extension TodoBoardViewModel {
             /// 위젯 데이터 - 본인 것만 진행 중이면 추가, 아니면 삭제
             if todo.uid == userInfo.uid {
                 if todo.status == .inProgress {
-                    await saveToModelContainer(todo)
+                    await localDataManager.saveTodoEntity(todo.toEntity())
                 } else {
-                    await deleteFromModelContainer(todo.fid)
+                    await localDataManager.removeTodoEntity(todo.fid)
                 }
             }
             
@@ -67,49 +66,11 @@ extension TodoBoardViewModel {
             /// 위젯 데이터 - 존재하면 삭제
             guard todo.uid == userInfo.uid else { break }
 
-            await deleteFromModelContainer(todo.fid)
+            await localDataManager.removeTodoEntity(todo.fid)
             
             for observer in observers {
                 observer.value?.todoRemoved(todo)
             }
-        }
-    }
-}
-extension TodoBoardViewModel {
-    @MainActor
-    private func saveToModelContainer(_ todo: Todo) async {
-        let entity = todo.toEntity()
-        guard let fid = entity.fid else {
-            print("TodoEntity has no fid")
-            return
-        }
-        
-        let context = modelContainer.mainContext
-        
-        let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == fid })
-        do {
-            if let existingEntity = try context.fetch(fetchDescriptor).first {
-                existingEntity.date = entity.date
-                existingEntity.content = entity.content
-                return
-            }
-            context.insert(entity)
-            print("New TodoEntity inserted with fid \(fid)")
-        } catch {
-            print("Error checking for existing TodoEntity: \(error.localizedDescription)")
-        }
-    }
-    
-    @MainActor
-    private func deleteFromModelContainer(_ todoFid: String?) async {
-        guard let todoFid else { return }
-        
-        let context = modelContainer.mainContext
-        
-        let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == todoFid })
-        if let existingEntity = try? context.fetch(fetchDescriptor).first {
-            context.delete(existingEntity)
-            print("TodoEntity deleted")
         }
     }
 }

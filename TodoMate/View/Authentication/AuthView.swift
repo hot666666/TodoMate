@@ -27,5 +27,5 @@ struct AuthView: View {
 
 #Preview {
     AuthView()
-        .environment(AuthManager.stub)
+        .environment(CurrentUserStore())
 }

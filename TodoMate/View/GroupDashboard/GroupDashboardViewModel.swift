@@ -24,6 +24,6 @@ extension GroupDashboardViewModel {
     @MainActor
     func fetchGroupUser() async {
         self.users = await userService.fetch().filter { $0.gid == userInfo.gid }
-        print("[Fetched Users] - \(users.count)")
+        print("[Fetched GroupUsers] - \(users.count)")
     }
 }
