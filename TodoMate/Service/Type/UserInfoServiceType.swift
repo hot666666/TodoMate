@@ -6,13 +6,13 @@
 //
 
 protocol UserInfoServiceType {
-    func saveUserInfo(_ userInfo: AuthenticatedUser)
-    func loadUserInfo() -> AuthenticatedUser
+    func saveUserInfo(_ userInfo: AuthenticatedUser?)
+    func loadUserInfo() -> AuthenticatedUser?
 }
 
 class StubUserInfoService: UserInfoServiceType {
-    func saveUserInfo(_ userInfo: AuthenticatedUser) { }
+    func saveUserInfo(_ userInfo: AuthenticatedUser?) { }
 
-    func loadUserInfo() -> AuthenticatedUser { .stub }
+    func loadUserInfo() -> AuthenticatedUser? { .stub }
 }
 
