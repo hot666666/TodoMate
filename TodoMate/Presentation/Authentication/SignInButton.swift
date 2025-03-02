@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct SignInButton: View {
-    @Environment(CurrentUserStore.self) private var currentUserStore
+    @Environment(AuthManager.self) private var authManager
     
     var body: some View {
         Button {
             Task {
-                await currentUserStore.signIn()
+                await authManager.signIn()
             }
         } label: {
             HStack(spacing: 4) {
@@ -30,7 +30,7 @@ struct SignInButton: View {
 #Preview {
     VStack {
         SignInButton()
-            .environment(CurrentUserStore())
+            .environment(AuthManager())
     }
     .frame(width: 300, height: 300)
 }

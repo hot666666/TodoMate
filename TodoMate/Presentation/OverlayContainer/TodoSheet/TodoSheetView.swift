@@ -160,7 +160,7 @@ fileprivate struct TodoSheetDetail: View {
 
 #Preview("Todo-Mine Sheet") {
     @Previewable @State var todo: Todo = .stub[0]
-    let currentUserStore = CurrentUserStore()
+    let currentUserStore = AuthManager()
     
     return OverlayContainer {
         TodoSheetView(todo: $todo)
@@ -174,7 +174,7 @@ fileprivate struct TodoSheetDetail: View {
 
 #Preview("Todo-Not Mine Sheet") {
     @Previewable @State var todo: Todo = .stub[1]
-    let currentUserStore = CurrentUserStore()
+    let currentUserStore = AuthManager()
     
     return OverlayContainer {
         TodoSheetView(todo: $todo)

@@ -8,7 +8,7 @@
 import Observation
 
 @Observable
-final class CurrentUserStore {
+final class AuthManager {
     private let localDataManager: LocalDataManagerType
     private let authService: AuthServiceType
     private let userInfoService: UserInfoServiceType
@@ -56,15 +56,8 @@ final class CurrentUserStore {
         await authService.signOut()
         await localDataManager.removeAllTodoEntity()
     }
-    
-    func updateUserGroup(_ gid: String) {
-        if let user = user {
-            self.user = AuthenticatedUser(uid: user.uid, gid: gid)
-        }
-    }
-    
 }
-extension CurrentUserStore {
+extension AuthManager {
     enum State {
         case signedOut
         case signedIn(AuthenticatedUser)
