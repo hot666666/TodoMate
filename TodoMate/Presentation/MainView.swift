@@ -10,10 +10,10 @@ import SwiftUI
 struct MainView: View {
     @Environment(DIContainer.self) private var container
     
-    let signedInUser: AuthenticatedUser
+    let userInfo: AuthenticatedUser
     
     var body: some View {
-        if signedInUser.gid.isEmpty {
+        if userInfo.gid.isEmpty {
             JoinGroupView()
         } else {
             groupDashboardView
@@ -23,13 +23,13 @@ struct MainView: View {
     @ViewBuilder
     private var groupDashboardView: some View {
         OverlayContainer {
-            GroupDashboardView(viewModel: .init(container: container, userInfo: signedInUser))
+            GroupDashboardView(viewModel: .init(container: container, userInfo: userInfo))
         }
     }
 }
 
 #Preview {
-    MainView(signedInUser: .stub)
+    MainView(userInfo: .stub)
         .environment(DIContainer.stub)
         .frame(width: 400, height: 400)
 }

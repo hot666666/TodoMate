@@ -101,7 +101,7 @@ fileprivate struct _TodoMateApp: View {
         case .signedOut:
             AuthView()
         case .signedIn(let signedInUser):
-            MainView(signedInUser: signedInUser)
+            MainView(userInfo: signedInUser)
                 .environment(container)
         case .loading:
             ProgressView()
