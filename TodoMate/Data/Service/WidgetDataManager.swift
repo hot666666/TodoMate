@@ -20,10 +20,10 @@ final class WidgetDataManager: WidgetDataManagerType {
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
     }
-    
+
+    // Save(or Update) WidgetTodo
     @MainActor
     func save(_ todo: WidgetTodo) async {
-        // Save(Update) TodoEntity
         
         guard let fid = todo.fid else {
             print("TodoEntity has no fid")

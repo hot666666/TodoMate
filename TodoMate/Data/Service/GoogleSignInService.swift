@@ -17,12 +17,6 @@ enum GoogleAuthError: Error {
     case failedToGetUserID
 }
 
-struct GoogleUser {
-    let uid: String
-    let name: String?
-    let token: String
-}
-
 protocol GoogleSignInServiceType {
     func signIn() async throws -> GoogleUser
     func signOut()
