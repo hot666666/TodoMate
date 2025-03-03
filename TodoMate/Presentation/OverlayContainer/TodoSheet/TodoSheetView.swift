@@ -160,28 +160,28 @@ fileprivate struct TodoSheetDetail: View {
 
 #Preview("Todo-Mine Sheet") {
     @Previewable @State var todo: Todo = .stub[0]
-    let currentUserStore = CurrentUserStore()
+    let authManager = AuthManager()
     
     return OverlayContainer {
         TodoSheetView(todo: $todo)
             .frame(width: 400, height: 400)
-            .environment(currentUserStore)
+            .environment(authManager)
             .task {
-                await currentUserStore.signIn()
+                await authManager.signIn()
             }
     }
 }
 
 #Preview("Todo-Not Mine Sheet") {
     @Previewable @State var todo: Todo = .stub[1]
-    let currentUserStore = CurrentUserStore()
+    let authManager = AuthManager()
     
     return OverlayContainer {
         TodoSheetView(todo: $todo)
             .frame(width: 400, height: 400)
-            .environment(currentUserStore)
+            .environment(authManager)
             .task {
-                await currentUserStore.signIn()
+                await authManager.signIn()
             }
     }
 }

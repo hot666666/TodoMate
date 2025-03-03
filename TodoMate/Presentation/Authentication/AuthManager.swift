@@ -1,5 +1,5 @@
 //
-//  CurrentUserStore.swift
+//  AuthManager.swift
 //  TodoMate
 //
 //  Created by hs on 3/1/25.
@@ -8,7 +8,7 @@
 import Observation
 
 @Observable
-final class CurrentUserStore {
+final class AuthManager {
     private let localDataManager: LocalDataManagerType
     private let authService: AuthServiceType
     private let userInfoService: UserInfoServiceType
@@ -64,7 +64,7 @@ final class CurrentUserStore {
     }
     
 }
-extension CurrentUserStore {
+extension AuthManager {
     enum State {
         case signedOut
         case signedIn(AuthenticatedUser)

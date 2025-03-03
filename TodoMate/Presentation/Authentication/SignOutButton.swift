@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct SignOutButton: View {
-    @Environment(CurrentUserStore.self) private var currentUserStore
+    @Environment(AuthManager.self) private var authManager
     
     var body: some View {
         Button("로그아웃", role: .destructive) {
             Task {
-                await currentUserStore.signOut()
+                await authManager.signOut()
             }
         }
         .buttonStyle(.borderedProminent)
@@ -22,6 +22,6 @@ struct SignOutButton: View {
 
 #Preview {
     SignOutButton()
-        .environment(CurrentUserStore())
+        .environment(AuthManager())
 }
 

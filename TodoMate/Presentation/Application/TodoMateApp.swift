@@ -52,7 +52,7 @@ struct TodoMateApp: App {
 
 fileprivate struct _TodoMateApp: View {
     @State private var container: DIContainer
-    @State private var currentUserStore: CurrentUserStore
+    @State private var authManager: AuthManager
     
     init(modelContainer: ModelContainer) {
 #if PREVIEW
@@ -87,17 +87,17 @@ fileprivate struct _TodoMateApp: View {
             todoOrderService: TodoOrderService())
 #endif
         self._container = State(initialValue: container)
-        self._currentUserStore = State(initialValue: CurrentUserStore(container: container))
+        self._authManager = State(initialValue: AuthManager(container: container))
     }
     
     var body: some View {
         content
-            .environment(currentUserStore)
+            .environment(authManager)
     }
     
     @ViewBuilder
     private var content: some View {
-        switch currentUserStore.state {
+        switch authManager.state {
         case .signedOut:
             AuthView()
         case .signedIn(let signedInUser):
