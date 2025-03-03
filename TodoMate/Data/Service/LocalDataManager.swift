@@ -9,7 +9,7 @@ import SwiftData
 import Foundation
 
 protocol LocalDataManagerType {
-    func saveTodoEntity(_ todo: TodoEntity) async
+    func saveTodoEntity(_ todo: WidgetTodo) async
     func removeTodoEntity(_ todoFid: String?) async
     func removeAllTodoEntity () async
 }
@@ -22,7 +22,7 @@ final class LocalDataManager: LocalDataManagerType {
     }
     
     @MainActor
-    func saveTodoEntity(_ todo: TodoEntity) async {
+    func saveTodoEntity(_ todo: WidgetTodo) async {
         // Save(Update) TodoEntity
         
         guard let fid = todo.fid else {
@@ -32,7 +32,7 @@ final class LocalDataManager: LocalDataManagerType {
         
         let context = modelContainer.mainContext
         
-        let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == fid })
+        let fetchDescriptor = FetchDescriptor<WidgetTodo>(predicate: #Predicate { $0.fid == fid })
         do {
             if let existingEntity = try context.fetch(fetchDescriptor).first {
                 existingEntity.date = todo.date
@@ -52,7 +52,7 @@ final class LocalDataManager: LocalDataManagerType {
         
         let context = modelContainer.mainContext
         
-        let fetchDescriptor = FetchDescriptor<TodoEntity>(predicate: #Predicate { $0.fid == todoFid })
+        let fetchDescriptor = FetchDescriptor<WidgetTodo>(predicate: #Predicate { $0.fid == todoFid })
         if let existingEntity = try? context.fetch(fetchDescriptor).first {
             context.delete(existingEntity)
             print("TodoEntity removed")

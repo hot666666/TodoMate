@@ -93,8 +93,8 @@ extension Todo {
              fid: todo.fid)
     }
     
-    func toEntity() -> TodoEntity {
-        TodoEntity(date: self.date, content: self.content, uid: self.uid, fid: self.fid)
+    func toEntity() -> WidgetTodo {
+        WidgetTodo(date: self.date, content: self.content, uid: self.uid, fid: self.fid)
     }
 }
 
