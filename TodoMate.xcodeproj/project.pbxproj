@@ -57,7 +57,7 @@
 		454870A02D72B92D0038973C /* GoogleSignInService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4548709F2D72B9140038973C /* GoogleSignInService.swift */; };
 		454870A62D72CA340038973C /* LocalDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454870A52D72CA2C0038973C /* LocalDataManager.swift */; };
 		454870A82D72E6DC0038973C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 454870A72D72E6DC0038973C /* FirebaseFirestore */; };
-		454870B52D72E7E00038973C /* CurrentUserStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454870A42D72C2CE0038973C /* CurrentUserStore.swift */; };
+		454870B52D72E7E00038973C /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454870A42D72C2CE0038973C /* AuthManager.swift */; };
 		455C9B962C6F8CBA004A1519 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B952C6F8CB4004A1519 /* AppDelegate.swift */; };
 		455C9B982C6F8DC2004A1519 /* Button+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455C9B972C6F8DBC004A1519 /* Button+Extension.swift */; };
 		4560E39B2D539106008B09AA /* UserGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF82D491D0B00089A48 /* UserGroup.swift */; };
@@ -197,7 +197,7 @@
 		4541C9AB2D2D499A006A9C60 /* TodoBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoBoardView.swift; sourceTree = "<group>"; };
 		4541C9AC2D2D499A006A9C60 /* TodoBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoBoxView.swift; sourceTree = "<group>"; };
 		4548709F2D72B9140038973C /* GoogleSignInService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInService.swift; sourceTree = "<group>"; };
-		454870A42D72C2CE0038973C /* CurrentUserStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentUserStore.swift; sourceTree = "<group>"; };
+		454870A42D72C2CE0038973C /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		454870A52D72CA2C0038973C /* LocalDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalDataManager.swift; sourceTree = "<group>"; };
 		455C9B952C6F8CB4004A1519 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		455C9B972C6F8DBC004A1519 /* Button+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Button+Extension.swift"; sourceTree = "<group>"; };
@@ -283,6 +283,7 @@
 		451DEDB82D3CF15800A20417 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
+				454870A42D72C2CE0038973C /* AuthManager.swift */,
 				451DEDBD2D3CF4D800A20417 /* AuthView.swift */,
 				451DEDA42D3CDB5D00A20417 /* SignOutButton.swift */,
 				451DEDBB2D3CF3D700A20417 /* SignInButton.swift */,
@@ -434,14 +435,6 @@
 			path = Application;
 			sourceTree = "<group>";
 		};
-		454870A32D72C2C10038973C /* Store */ = {
-			isa = PBXGroup;
-			children = (
-				454870A42D72C2CE0038973C /* CurrentUserStore.swift */,
-			);
-			path = Store;
-			sourceTree = "<group>";
-		};
 		4560E3A32D539696008B09AA /* Type */ = {
 			isa = PBXGroup;
 			children = (
@@ -517,7 +510,6 @@
 		45E10B912C69B77300FC31CD /* TodoMate */ = {
 			isa = PBXGroup;
 			children = (
-				454870A32D72C2C10038973C /* Store */,
 				459AA4362C795D4700CA43F2 /* Info.plist */,
 				451525532D509496006F6847 /* InfoDebug.plist */,
 				45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */,
@@ -765,7 +757,7 @@
 				4560E3C32D539B7D008B09AA /* UploadProviderType.swift in Sources */,
 				45962D0F2D4A5DD600089A48 /* ProfileSheet.swift in Sources */,
 				457B43C42C6DFFBA0049334A /* FirestoreUserRepository.swift in Sources */,
-				454870B52D72E7E00038973C /* CurrentUserStore.swift in Sources */,
+				454870B52D72E7E00038973C /* AuthManager.swift in Sources */,
 				4541C99A2D2D472C006A9C60 /* TodoService.swift in Sources */,
 				457B43BE2C6DF56E0049334A /* UserDTO.swift in Sources */,
 				45E10B952C69B77300FC31CD /* MainView.swift in Sources */,
