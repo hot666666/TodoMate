@@ -1,5 +1,5 @@
 //
-//  LocalDataManager.swift
+//  WidgetDataManager.swift
 //  TodoMate
 //
 //  Created by hs on 3/1/25.

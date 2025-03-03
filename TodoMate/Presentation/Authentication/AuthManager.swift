@@ -9,7 +9,7 @@ import Observation
 
 @Observable
 final class AuthManager {
-    private let localDataManager: WidgetDataManager
+    private let widgetDataManager: WidgetDataManager
     private let authService: AuthServiceType
     private let userInfoService: UserInfoServiceType
     /// Cached user information
@@ -26,7 +26,7 @@ final class AuthManager {
     
     init(container: DIContainer = .stub) {
         self.authService = container.authService
-        self.localDataManager = container.localDataManager
+        self.widgetDataManager = container.widgetDataManager
         self.userInfoService = container.userInfoService
         
         self._authenticatedUser = self.userInfoService.loadUserInfo()
@@ -54,7 +54,7 @@ final class AuthManager {
         state = .loading
         
         await authService.signOut()
-        await localDataManager.removeAll()
+        await widgetDataManager.removeAll()
     }
     
     func updateUserGroup(_ gid: String) {

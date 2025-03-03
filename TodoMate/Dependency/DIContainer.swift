@@ -11,7 +11,7 @@ import Observation
 final class DIContainer {
     @ObservationIgnored let authService: AuthServiceType
     @ObservationIgnored let googleSignInService: GoogleSignInServiceType
-    @ObservationIgnored let localDataManager: WidgetDataManager
+    @ObservationIgnored let widgetDataManager: WidgetDataManager
     @ObservationIgnored let userService: UserServiceType
     @ObservationIgnored let todoService: TodoServiceType
     @ObservationIgnored let chatService: ChatServiceType
@@ -24,7 +24,7 @@ final class DIContainer {
     init(
         authService: AuthServiceType,
         googleSignInService: GoogleSignInServiceType,
-        localDataManager: WidgetDataManager,
+        widgetDataManager: WidgetDataManager,
         userService: UserServiceType,
         todoService: TodoServiceType,
         chatService: ChatServiceType,
@@ -35,7 +35,7 @@ final class DIContainer {
         todoOrderService: TodoOrderServiceType
     ) {
         self.googleSignInService = googleSignInService
-        self.localDataManager = localDataManager
+        self.widgetDataManager = widgetDataManager
         self.userService = userService
         self.todoService = todoService
         self.chatService = chatService
@@ -50,7 +50,7 @@ final class DIContainer {
     convenience init(
         testAuthService: StubAuthService = .init(),
         testGoogleSignInService: StubGoogleSignInService = .init(),
-        testLocalDataManager: WidgetDataManager = .init(modelContainer: .forPreview()),
+        testwidgetDataManager: WidgetDataManager = .init(modelContainer: .forPreview()),
         testUserService: StubUserService = .init(),
         testTodoService: StubTodoService = .init(),
         testChatService: StubChatService = .init(),
@@ -63,7 +63,7 @@ final class DIContainer {
         self.init(
             authService: testAuthService,
             googleSignInService: testGoogleSignInService,
-            localDataManager: testLocalDataManager,
+            widgetDataManager: testwidgetDataManager,
             userService: testUserService,
             todoService: testTodoService,
             chatService: testChatService,
@@ -78,7 +78,7 @@ extension DIContainer {
     static let stub = DIContainer(
         authService: StubAuthService(),
         googleSignInService: StubGoogleSignInService(),
-        localDataManager: WidgetDataManager(modelContainer: .forPreview()),
+        widgetDataManager: WidgetDataManager(modelContainer: .forPreview()),
         userService: StubUserService(),
         todoService: StubTodoService(),
         chatService: StubChatService(),
