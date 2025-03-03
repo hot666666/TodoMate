@@ -11,6 +11,7 @@ protocol TodoServiceType {
     func create(from todo: Todo) async -> Todo?
     func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]]
     func fetchToday(userId: String) async -> [Todo]
+    func fetchToday(groupId: String) async -> [Todo]
     func update(_ todo: Todo)
     func remove(_ todo: Todo)
 }
@@ -37,6 +38,10 @@ class StubTodoService: TodoServiceType {
     
     func fetchToday(userId: String) async -> [Todo] {
         Todo.stub.filter { calendar.isDateInToday($0.date) && $0.uid == userId }
+    }
+    
+    func fetchToday(groupId: String) async -> [Todo] {
+        Todo.stub.filter { calendar.isDateInToday($0.date) }
     }
     
     func update(_ todo: Todo) {

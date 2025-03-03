@@ -54,6 +54,20 @@ extension TodoService {
             return []
         }
     }
+    
+    func fetchToday(groupId: String) async -> [Todo] {
+        print("[Fetching Today for \(groupId)] - ")
+        do {
+            let today = Date.now
+            let startDate = calendar.startOfDay(for: today)
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: startDate)!
+            let endDate = calendar.date(byAdding: .second, value: -1, to: tomorrow)!
+            return try await todoRepository.fetchTodos(groupId: groupId, startDate: startDate, endDate: endDate).map { try $0.toModel() }
+        } catch {
+            print("Error fetching today todos: \(error)")
+            return []
+        }
+    }
 
     func update(_ todo: Todo) {
         print("[Updating Todo - \(todo)]")
