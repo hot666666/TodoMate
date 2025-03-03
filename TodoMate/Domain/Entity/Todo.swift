@@ -30,19 +30,22 @@ struct Todo {
     var detail: String
     var uid: String
     var fid: String
+    let lastModifiedAt: Date
         
     init(date: Date = .now,
          content: String = "",
          detail: String = "",
          status: TodoStatus = .todo,
          uid: String = "",
-         fid: String = "") {
+         fid: String = "",
+         lastModifiedAt: Date = .now) {
         self.date = date
         self.content = content
         self.detail = detail
         self.status = status
         self.uid = uid
         self.fid = fid
+        self.lastModifiedAt = lastModifiedAt
     }
     
     enum CodingKeys: String, CodingKey {
@@ -60,6 +63,7 @@ struct Todo {
         status = .todo
         detail = ""
         uid = ""
+        lastModifiedAt = .now
     }
     
     /// Encode : Todo -> T

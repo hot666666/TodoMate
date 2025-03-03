@@ -42,7 +42,7 @@ extension TodoDTO {
             throw NSError(domain: "firestore id is empty", code: 0)
         }
         
-        return Todo(date: self.date, content: self.content, detail: self.detail, status: .init(rawValue: self.status) ?? .todo, uid: self.uid, fid: id)
+        return Todo(date: self.date, content: self.content, detail: self.detail, status: .init(rawValue: self.status) ?? .todo, uid: self.uid, fid: id, lastModifiedAt: self.lastModifiedAt)
     }
 }
 
