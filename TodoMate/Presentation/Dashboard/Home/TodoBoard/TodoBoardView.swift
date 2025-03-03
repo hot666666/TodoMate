@@ -21,11 +21,10 @@ struct TodoBoardView: View {
     var body: some View {
         VStack(spacing: 20) {
             ForEach(users, id: \.uid) { user in
-                UserTodoSection(
-                    user: user,
-                    isMe: viewModel.isMe(user),
-                    addObserver: viewModel.addObserver,
-                    removeObserver: viewModel.removeObserver
+                ExpandableView(
+                    storageKey: user.uid,
+                    header: { header(for: user) },
+                    content: { content(for: user) }
                 )
             }
             
@@ -38,6 +37,26 @@ struct TodoBoardView: View {
         .task {
             await viewModel.observeChanges()
         }
+    }
+    
+    @ViewBuilder
+    private func header(for user: User) -> some View {
+        HStack {
+            Text(user.nickname)
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    private func content(for user: User) -> some View {
+        TodoBoxView(
+            user: user,
+            isMine: viewModel.isMe(user),
+            todos: viewModel.todosBinding(for: user),
+            createTodo: viewModel.createTodo,
+            deleteTodo: viewModel.deleteTodo,
+            updateTodo: viewModel.updateTodo
+        )
     }
     
     @ViewBuilder
@@ -55,61 +74,18 @@ struct TodoBoardView: View {
     }
 }
 
-// MARK: - UserTodoSection
-fileprivate  struct UserTodoSection: View {
-    @Environment(DIContainer.self) private var container
-    
-    let user: User
-    let isMe: Bool
-    let addObserver: (TodoObserverType, String) -> Void
-    let removeObserver: (TodoObserverType, String) -> Void
-    
-    var body: some View {
-        ExpandableView(
-            storageKey: user.uid,
-            header: { sectionHeader },
-            content: { todoBoxContent }
-        )
-    }
-    
-    @ViewBuilder
-    private var header: some View {
-        HStack {
-            Text(user.nickname)
-            Spacer()
-        }
-    }
-    
-    @ViewBuilder
-    private var sectionHeader: some View {
-        header
-    }
-    
-    @ViewBuilder
-    private var todoBoxContent: some View {
-        TodoBoxView(
-            viewModel: .init(
-                container: container,
-                user: user,
-                isMine: isMe,
-                onAppear: addObserver,
-                onDisappear: removeObserver
-            )
-        )
-    }
-}
 
 #Preview {
     OverlayContainer {
-        
         ScrollView {
             VStack{
-                TodoBoardView(viewModel: .init(container: DIContainer.stub, userInfo: AuthenticatedUser.stub),
+                TodoBoardView(viewModel: .init(container: .stub, userInfo: .stub),
                               users: User.stub)
                 Spacer()
             }
         }
         .environment(DIContainer.stub)
         .frame(width: 400, height: 600)
+        .padding()
     }
 }
