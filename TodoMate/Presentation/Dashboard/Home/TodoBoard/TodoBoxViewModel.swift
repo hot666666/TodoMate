@@ -156,8 +156,7 @@ extension TodoBoxViewModel: TodoObserverType {
         /// 오늘->다른 날짜로 수정된 경우, 삭제
         if let index = todos.firstIndex(where: { $0.fid == todo.fid }) {
             if calendar.isDateInToday(todo.date) {
-                // TODO: - lastModifiedAt으로 처리
-                if todos[index] != todo {
+                if todos[index].lastModifiedAt < todo.lastModifiedAt {
                     todos[index] = todo
                 }
             } else {

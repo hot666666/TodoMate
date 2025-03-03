@@ -10,7 +10,7 @@ import SwiftUI
 @Observable
 class TodoBoardViewModel {
     private let todoStreamProvider: TodoStreamProviderType
-    private let localDataManager: LocalDataManagerType
+    private let localDataManager: WidgetDataManager
     private var observers: [String: [WeakTodoObserver]] = [:]
     
     @ObservationIgnored let userInfo: AuthenticatedUser
@@ -53,9 +53,9 @@ extension TodoBoardViewModel {
             /// 위젯 데이터 - 본인 것만 진행 중이면 추가, 아니면 삭제
             if todo.uid == userInfo.uid {
                 if todo.status == .inProgress {
-                    await localDataManager.saveTodoEntity(todo.toEntity())
+                    await localDataManager.save(todo.toEntity())
                 } else {
-                    await localDataManager.removeTodoEntity(todo.fid)
+                    await localDataManager.remove(todo.fid)
                 }
             }
             
@@ -66,7 +66,7 @@ extension TodoBoardViewModel {
             /// 위젯 데이터 - 존재하면 삭제
             guard todo.uid == userInfo.uid else { break }
 
-            await localDataManager.removeTodoEntity(todo.fid)
+            await localDataManager.remove(todo.fid)
             
             for observer in observers {
                 observer.value?.todoRemoved(todo)

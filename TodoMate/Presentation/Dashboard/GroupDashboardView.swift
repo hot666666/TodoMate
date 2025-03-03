@@ -54,21 +54,12 @@ struct GroupDashboardView: View {
         /// .windowStyle(.hiddenTitleBar) 버그로 인해 추가
         Color.clear.frame(height: 0)
         
-        ScrollView {
-            VStack {
-                ChatBoardView(viewModel: .init(container: container, userInfo: viewModel.userInfo))
-                TodoBoardView(viewModel: .init(container: container, userInfo: viewModel.userInfo),
-                              users: viewModel.users)
-            }
-            .padding(.horizontal)
-        }
+        HomeView(userInfo: viewModel.userInfo, groupUsers: viewModel.users)
     }
     
     @ViewBuilder
     private var profile: some View {
-        ProfileSheetView(viewModel: .init(container: container,
-                                          userInfo: viewModel.userInfo,
-                                          updateGroup: viewModel.fetchGroupUser))
+        ProfileView(viewModel: .init(container: container, userInfo: viewModel.userInfo, updateGroup: viewModel.fetchGroupUser))
     }
 }
 extension GroupDashboardView {

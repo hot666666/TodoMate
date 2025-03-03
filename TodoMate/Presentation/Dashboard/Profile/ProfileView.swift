@@ -35,7 +35,7 @@ class ProfileViewModel {
     }
 }
 
-struct ProfileSheetView: View {
+struct ProfileView: View {
     @State private var viewModel: ProfileViewModel
     
     init(viewModel: ProfileViewModel) {
@@ -72,6 +72,6 @@ struct ProfileSheetView: View {
 }
 
 #Preview {
-    ProfileSheetView(viewModel: .init(container: .stub, userInfo: AuthenticatedUser.stub, updateGroup: {}))
+    ProfileView(viewModel: .init(container: .stub, userInfo: AuthenticatedUser.stub, updateGroup: {}))
         .frame(width: 400, height: 400)
 }
