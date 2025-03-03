@@ -9,7 +9,7 @@ import Observation
 
 @Observable
 final class AuthManager {
-    private let localDataManager: LocalDataManagerType
+    private let localDataManager: WidgetDataManager
     private let authService: AuthServiceType
     private let userInfoService: UserInfoServiceType
     /// Cached user information
@@ -54,7 +54,7 @@ final class AuthManager {
         state = .loading
         
         await authService.signOut()
-        await localDataManager.removeAllTodoEntity()
+        await localDataManager.removeAll()
     }
     
     func updateUserGroup(_ gid: String) {

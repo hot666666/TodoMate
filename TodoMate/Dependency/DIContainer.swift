@@ -11,7 +11,7 @@ import Observation
 final class DIContainer {
     @ObservationIgnored let authService: AuthServiceType
     @ObservationIgnored let googleSignInService: GoogleSignInServiceType
-    @ObservationIgnored let localDataManager: LocalDataManager
+    @ObservationIgnored let localDataManager: WidgetDataManager
     @ObservationIgnored let userService: UserServiceType
     @ObservationIgnored let todoService: TodoServiceType
     @ObservationIgnored let chatService: ChatServiceType
@@ -24,7 +24,7 @@ final class DIContainer {
     init(
         authService: AuthServiceType,
         googleSignInService: GoogleSignInServiceType,
-        localDataManager: LocalDataManager,
+        localDataManager: WidgetDataManager,
         userService: UserServiceType,
         todoService: TodoServiceType,
         chatService: ChatServiceType,
@@ -50,7 +50,7 @@ final class DIContainer {
     convenience init(
         testAuthService: StubAuthService = .init(),
         testGoogleSignInService: StubGoogleSignInService = .init(),
-        testLocalDataManager: LocalDataManager = .init(modelContainer: .forPreview()),
+        testLocalDataManager: WidgetDataManager = .init(modelContainer: .forPreview()),
         testUserService: StubUserService = .init(),
         testTodoService: StubTodoService = .init(),
         testChatService: StubChatService = .init(),
@@ -78,7 +78,7 @@ extension DIContainer {
     static let stub = DIContainer(
         authService: StubAuthService(),
         googleSignInService: StubGoogleSignInService(),
-        localDataManager: LocalDataManager(modelContainer: .forPreview()),
+        localDataManager: WidgetDataManager(modelContainer: .forPreview()),
         userService: StubUserService(),
         todoService: StubTodoService(),
         chatService: StubChatService(),

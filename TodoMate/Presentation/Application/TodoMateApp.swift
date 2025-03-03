@@ -59,7 +59,7 @@ fileprivate struct _TodoMateApp: View {
         let container: DIContainer = .init(
             authService: StubAuthService(),
             googleSignInService: StubGoogleSignInService(),
-            localDataManager: LocalDataManager(modelContainer: modelContainer),
+            localDataManager: WidgetDataManager(modelContainer: modelContainer),
             userService: StubUserService(),
             todoService: TodoService(),  /// 테스트용 reference 구현
             chatService: StubChatService(),
@@ -76,7 +76,7 @@ fileprivate struct _TodoMateApp: View {
         let container: DIContainer = .init(
             authService: AuthService(userService: userService, googleSignInService: googleSignInService),
             googleSignInService: googleSignInService,
-            localDataManager: LocalDataManager(modelContainer: modelContainer),
+            localDataManager: WidgetDataManager(modelContainer: modelContainer),
             userService: userService,
             todoService: TodoService(),
             chatService: ChatService(),
