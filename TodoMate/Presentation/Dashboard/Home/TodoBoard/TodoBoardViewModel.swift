@@ -8,13 +8,13 @@
 import SwiftUI
 import Foundation
 
-// TODO: - ViewStatus
 @Observable
 class TodoBoardViewModel {
     private let calendar = Calendar.current
     private let todoStreamProvider: TodoStreamProviderType
     private let widgetDataManager: WidgetDataManager
     private let todoService: TodoServiceType
+    private let todoOrderService: TodoOrderServiceType
     
     @ObservationIgnored let userInfo: AuthenticatedUser
     
@@ -25,10 +25,12 @@ class TodoBoardViewModel {
         self.todoStreamProvider = container.todoStreamProvider
         self.widgetDataManager = container.widgetDataManager
         self.todoService = container.todoService
+        self.todoOrderService = container.todoOrderService
         
         self.userInfo = userInfo
     }
-    
+}
+extension TodoBoardViewModel {
     func todosBinding(for user: User) -> Binding<[Todo]> {
         Binding(
             get: { self.todosByUser[user.uid] ?? [] },
@@ -40,11 +42,6 @@ class TodoBoardViewModel {
         user.uid == userInfo.uid
     }
     
-    func isMine(_ todo: Todo) -> Bool {
-        todo.uid == userInfo.uid
-    }
-}
-extension TodoBoardViewModel {
     func observeChanges() async {
         for await change in todoStreamProvider.createTodoStream() {
             await handleDatabaseChange(change)
@@ -53,9 +50,32 @@ extension TodoBoardViewModel {
     
     @MainActor
     func fetchTodos() async {
-        todosByUser = await getTodosByUser()
+        var todosByUser = await getTodosByUser()
+        var todoList = todosByUser[userInfo.uid] ?? []
+        
+        let today: Date = .now
+        /// 마지막 저장 날짜가 없는 경우
+        guard let lastSavedDate = todoOrderService.loadDate() else {
+            todoOrderService.saveOrder(todoList.map { $0.fid })
+            todoOrderService.saveDate(today)
+            return
+        }
+        
+        /// 마지막 저장 날짜가 오늘인 경우
+        if calendar.isDateInToday(lastSavedDate) {
+            let orderedFids = todoOrderService.loadOrder()
+            todoList.sort { orderedFids.firstIndex(of: $0.fid) ?? Int.max < orderedFids.firstIndex(of: $1.fid) ?? Int.max }
+            todosByUser[userInfo.uid] = todoList
+        /// 마지막 저장 날짜가 오늘이 아닌 경우
+        } else {
+            todoOrderService.saveOrder(todoList.map { $0.fid })
+            todoOrderService.saveDate(today)
+        }
+        
+        self.todosByUser = await getTodosByUser()
     }
-    
+}
+extension TodoBoardViewModel {
     @MainActor
     func createTodo() async {
         if let createdTodo = await getCreatedTodo() {
@@ -81,9 +101,21 @@ extension TodoBoardViewModel {
         todoService.remove(todo)
         
         todosByUser[userInfo.uid]?.removeAll(where: { $0.fid == todo.fid })
+        
+    }
+    
+    func moveTodo(from source: IndexSet, to destination: Int) {
+        // TODO: - isMine인 요소에 대해서만 수행하지만 다른 방식으로 이를 수행하도록 수정하면 좋을 듯
+        guard var todoList = todosByUser[userInfo.uid] else { return }
+        
+        /// 특히 다른 배열로 수행된다면 다음코드는 크래시발생할 수 있음
+        todoList.move(fromOffsets: source, toOffset: destination)
+        
+        todosByUser[userInfo.uid, default: []] = todoList
+        
+        saveFidOrder()
     }
 }
-
 extension TodoBoardViewModel {
     private func getCreatedTodo() async -> Todo? {
         let todo = Todo(uid: userInfo.uid)
@@ -113,6 +145,11 @@ extension TodoBoardViewModel {
                 return
             }
             todosByUser[todo.uid, default: []].append(todo)
+            
+            if isMine(todo) {
+                saveFidOrder()
+            }
+            
         case .modified(let todo):
             /// 오늘 Todo에 추가되어있는 경우
             if let index = todosByUser[todo.uid]?.firstIndex(where: { $0.fid == todo.fid }) {
@@ -139,6 +176,20 @@ extension TodoBoardViewModel {
             guard calendar.isDateInToday(todo.date) else { return }
             
             todosByUser[todo.uid]?.removeAll(where: { $0.fid == todo.fid })
+            
+            if isMine(todo) {
+                saveFidOrder()
+            }
         }
+    }
+    
+    private func saveFidOrder() {
+        let todoList = todosByUser[userInfo.uid] ?? []
+        todoOrderService.saveOrder(todoList.map { $0.fid })
+    }
+}
+extension TodoBoardViewModel {
+    private func isMine(_ todo: Todo) -> Bool {
+        todo.uid == userInfo.uid
     }
 }

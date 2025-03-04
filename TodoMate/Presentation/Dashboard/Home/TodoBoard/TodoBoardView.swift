@@ -35,6 +35,7 @@ struct TodoBoardView: View {
             Spacer(minLength: 50)
         }
         .task {
+            await viewModel.fetchTodos()
             await viewModel.observeChanges()
         }
     }
@@ -55,7 +56,8 @@ struct TodoBoardView: View {
             todos: viewModel.todosBinding(for: user),
             createTodo: viewModel.createTodo,
             deleteTodo: viewModel.deleteTodo,
-            updateTodo: viewModel.updateTodo
+            updateTodo: viewModel.updateTodo,
+            moveTodo: viewModel.moveTodo
         )
     }
     

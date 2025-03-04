@@ -17,6 +17,7 @@ struct TodoBoxView: View {
     let createTodo: () async -> Void
     let deleteTodo: (Todo) -> Void
     let updateTodo: (Todo) -> Void
+    let moveTodo: (IndexSet, Int) -> Void
     
     var body: some View {
         GroupBox {
@@ -30,8 +31,7 @@ struct TodoBoxView: View {
                 
                 Divider()
                 
-                // TODO: - onmove 구현
-                CustomList(items: $todos, onMove: { _, _ in }) { todo in
+                CustomList(items: $todos, onMove: isMine ? moveTodo : { _, _ in }) { todo in
                     todoRow(todo)
                         .contextMenu {
                             removeButton(todo)
