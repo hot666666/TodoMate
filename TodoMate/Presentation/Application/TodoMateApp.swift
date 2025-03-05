@@ -67,7 +67,7 @@ fileprivate struct _TodoMateApp: View {
             chatStreamProvider: FirestoreChatStreamProvider(),
             todoStreamProvider: FirestoreTodoStreamProvider(),  /// 테스트용 reference 구현
             userInfoService: UserInfoService(),  /// 외부에서 저장위치(UserDefualt key) 설정
-            todoOrderService: TodoOrderService())  /// 외부에서 저장위치(UserDefualt key) 설정
+            todoOrderService: StubTodoOrderService())  /// 외부에서 저장위치(UserDefualt key) 설정
 #else
         // TODO: - 의존성 순서 리팩토링
         let userService: UserService = UserService()

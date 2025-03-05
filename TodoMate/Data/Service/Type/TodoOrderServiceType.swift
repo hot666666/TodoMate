@@ -1,33 +1,35 @@
 //
-//  StubTodoOrderService.swift
+//  TodoOrderServiceType.swift
 //  TodoMate
 //
-//  Created by hs on 2/5/25.
+//  Created by hs on 3/5/25.
 //
 
 import Foundation
 
 protocol TodoOrderServiceType {
-    func saveDate(_ date: Date)
-    func loadDate() -> Date?
-    func saveOrder(_ order: [String])
-    func loadOrder() -> [String]
+    func saveOrder(_ order: [String], for date: Date)
+    func loadOrder(for date: Date) -> [String]?
 }
 
 class StubTodoOrderService: TodoOrderServiceType {
-    private var date: Date?
-    private var order: [String] = []
+    private let todoRepository: TodoOrderRepositoryType
+    private let calendar = Calendar.current
     
-    func saveDate(_ date: Date) {
-        self.date = date
+    init(todoRepository: TodoOrderRepositoryType = StubTodoOrderRepository()) {
+        self.todoRepository = todoRepository
     }
-    func loadDate() -> Date? {
-        date
+    
+    func saveOrder(_ order: [String], for date: Date) {
+        todoRepository.saveOrder(order)
+        todoRepository.saveDate(date)
     }
-    func saveOrder(_ order: [String]) {
-        self.order = order
-    }
-    func loadOrder() -> [String] {
-        order
+    
+    func loadOrder(for date: Date) -> [String]? {
+        guard let lastSavedDate = todoRepository.loadDate(),
+              calendar.isDate(date, inSameDayAs: lastSavedDate) else {
+            return nil
+        }
+        return todoRepository.loadOrder()
     }
 }
