@@ -9,7 +9,7 @@ import Observation
 
 @Observable
 final class AuthManager {
-    private let widgetDataManager: WidgetDataManager
+    private let widgetDataManager: WidgetDataManagerType
     private let authService: AuthServiceType
     private let userInfoService: UserInfoServiceType
     /// Cached user information

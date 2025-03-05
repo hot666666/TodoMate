@@ -11,7 +11,7 @@ import Observation
 final class DIContainer {
     @ObservationIgnored let authService: AuthServiceType
     @ObservationIgnored let googleSignInService: GoogleSignInServiceType
-    @ObservationIgnored let widgetDataManager: WidgetDataManager
+    @ObservationIgnored let widgetDataManager: WidgetDataManagerType
     @ObservationIgnored let userService: UserServiceType
     @ObservationIgnored let todoService: TodoServiceType
     @ObservationIgnored let chatService: ChatServiceType
@@ -24,7 +24,7 @@ final class DIContainer {
     init(
         authService: AuthServiceType,
         googleSignInService: GoogleSignInServiceType,
-        widgetDataManager: WidgetDataManager,
+        widgetDataManager: WidgetDataManagerType,
         userService: UserServiceType,
         todoService: TodoServiceType,
         chatService: ChatServiceType,
@@ -48,22 +48,22 @@ final class DIContainer {
     }
     
     convenience init(
-        testAuthService: StubAuthService = .init(),
-        testGoogleSignInService: StubGoogleSignInService = .init(),
-        testwidgetDataManager: WidgetDataManager = .init(modelContainer: .forPreview()),
-        testUserService: StubUserService = .init(),
-        testTodoService: StubTodoService = .init(),
-        testChatService: StubChatService = .init(),
-        testGroupService: StubGroupService = .init(),
-        testChatStreamProvider: StubChatStreamProvider = .init(),
-        testTodoStreamProvider: StubTodoStreamProvider = .init(),
-        testUserInfoService: StubUserInfoService = .init(),
-        testTodoOrderService: StubTodoOrderService = .init()
+        testAuthService: AuthServiceType = StubAuthService(),
+        testGoogleSignInService: GoogleSignInServiceType = StubGoogleSignInService(),
+        testWidgetDataManager: WidgetDataManagerType = WidgetDataManager(modelContainer: .forPreview()),
+        testUserService: UserServiceType = StubUserService(),
+        testTodoService: TodoServiceType = StubTodoService(),
+        testChatService: ChatServiceType = StubChatService(),
+        testGroupService: GroupServiceType = StubGroupService(),
+        testChatStreamProvider: ChatStreamProviderType = StubChatStreamProvider(),
+        testTodoStreamProvider: TodoStreamProviderType = StubTodoStreamProvider(),
+        testUserInfoService: UserInfoServiceType = StubUserInfoService(),
+        testTodoOrderService: TodoOrderServiceType = StubTodoOrderService()
     ) {
         self.init(
             authService: testAuthService,
             googleSignInService: testGoogleSignInService,
-            widgetDataManager: testwidgetDataManager,
+            widgetDataManager: testWidgetDataManager,
             userService: testUserService,
             todoService: testTodoService,
             chatService: testChatService,
