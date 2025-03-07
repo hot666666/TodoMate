@@ -47,6 +47,6 @@ struct MainView: View {
 #Preview {
     MainView(userInfo: .stub)
         .environment(DIContainer.stub)
-        .environment(AuthManager())
+        .environment(AuthManager.stub)
         .frame(width: 400, height: 400)
 }

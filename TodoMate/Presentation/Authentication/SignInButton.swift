@@ -30,7 +30,7 @@ struct SignInButton: View {
 #Preview {
     VStack {
         SignInButton()
-            .environment(AuthManager())
+            .environment(AuthManager.stub)
     }
     .frame(width: 300, height: 300)
 }

@@ -22,6 +22,6 @@ struct SignOutButton: View {
 
 #Preview {
     SignOutButton()
-        .environment(AuthManager())
+        .environment(AuthManager.stub)
 }
 
