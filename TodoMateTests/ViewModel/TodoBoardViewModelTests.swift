@@ -1,5 +1,5 @@
 //
-//  TodoBoardViewModelTests.swift
+//  TodoBoardViewModelTests1.swift
 //  TodoMate
 //
 //  Created by hs on 3/5/25.
@@ -9,8 +9,8 @@ import Testing
 import Foundation
 @testable import TodoMate
 
-@Suite("TodoBoardViewModel Tests")
-struct TodoBoardViewModelTests {
+@Suite("_TodoBoardViewModel Tests")
+struct TodoBoardViewModelTests1 {
     private static let userInfo: AuthenticatedUser = .init(uid: "user1", gid: "1")
     private static func makeTodo(date: Date, fid: String, status: TodoStatus = .todo) -> Todo {
         Todo(date: date, content: "Task", detail: "", status: status, uid: userInfo.uid, fid: fid, lastModifiedAt: date)
@@ -175,8 +175,8 @@ struct TodoBoardViewModelTests {
         // MockTodoService 정의
         private struct MockTodoService: TodoServiceType {
             
-            let todoFetchResult: [Todo] = [TodoBoardViewModelTests.makeTodo(date: .now, fid: "fid1"),
-                                           TodoBoardViewModelTests.makeTodo(date: .now, fid: "fid2")]
+            let todoFetchResult: [Todo] = [TodoBoardViewModelTests1.makeTodo(date: .now, fid: "fid1"),
+                                           TodoBoardViewModelTests1.makeTodo(date: .now, fid: "fid2")]
             
             func create(from todo: Todo) async -> Todo? { nil }
             func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]] { [:] }
@@ -206,14 +206,14 @@ struct TodoBoardViewModelTests {
             // Given
             let todoOrderService = StubTodoOrderService()
             let container = FetchTodosMethodTests.makeContainer(todoOrderService: todoOrderService)
-            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests.userInfo)
+            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests1.userInfo)
             
             // When
             todoOrderService.saveOrder(savedOrder, for: today)
             await viewModel.fetchTodos()
             
             // Then
-            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests.userInfo.uid] ?? []
+            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests1.userInfo.uid] ?? []
             #expect(orderedTodos.map { $0.fid } == expectedOrderedFids)
         }
         
@@ -225,13 +225,13 @@ struct TodoBoardViewModelTests {
             // Given
             let todoOrderService = StubTodoOrderService()
             let container = FetchTodosMethodTests.makeContainer(todoOrderService: todoOrderService)
-            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests.userInfo)
+            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests1.userInfo)
             
             // When
             await viewModel.fetchTodos()
             
             // Then
-            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests.userInfo.uid] ?? []
+            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests1.userInfo.uid] ?? []
             #expect(orderedTodos.map { $0.fid } == expectedOrderedFids)
         }
         
@@ -247,14 +247,14 @@ struct TodoBoardViewModelTests {
             // Given
             let todoOrderService = StubTodoOrderService()
             let container = FetchTodosMethodTests.makeContainer(todoOrderService: todoOrderService)
-            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests.userInfo)
+            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests1.userInfo)
             
             // When
             todoOrderService.saveOrder(inputOutdatedOrder, for: yesterday)
             await viewModel.fetchTodos()
             
             // Then
-            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests.userInfo.uid] ?? []
+            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests1.userInfo.uid] ?? []
             #expect(orderedTodos.map { $0.fid } == expectedOrderedFids)
         }
     }
