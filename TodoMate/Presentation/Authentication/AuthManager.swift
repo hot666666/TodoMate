@@ -9,60 +9,47 @@ import Observation
 
 @Observable
 final class AuthManager {
-    private let widgetDataManager: WidgetDataManagerType
-    private let authService: AuthServiceType
-    private let userInfoService: UserInfoServiceType
-    /// Cached user information
-    private var _authenticatedUser: AuthenticatedUser?
+    private let authUseCase: AuthenticationUseCaseType
+    private let fetchAUserUseCase: FetchAuthenticatedUserUseCaseType
     
-    private(set) var user: AuthenticatedUser? {
-        get { _authenticatedUser }
-        set {
-            _authenticatedUser = newValue
-            userInfoService.saveUserInfo(newValue)
-        }
-    }
+    private(set) var authenticatedUser: AuthenticatedUser?
     private(set) var state: State = .signedOut
     
-    init(container: DIContainer = .stub) {
-        self.authService = container.authService
-        self.widgetDataManager = container.widgetDataManager
-        self.userInfoService = container.userInfoService
+    init(authenticationUseCase: AuthenticationUseCaseType, fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType) {
+        self.authUseCase = authenticationUseCase
+        self.fetchAUserUseCase = fetchAuthenticatedUserUseCase
         
-        self._authenticatedUser = self.userInfoService.loadUserInfo()
+        fetchAUser()
+    }
+    
+    func fetchAUser() {
+        if let aUser = fetchAUserUseCase.execute() {
+            authenticatedUser = aUser
+            state = .signedIn(aUser)
+        }
     }
     
     @MainActor
     func signIn() async {
         state = .loading
         
-        if let signedInUser = await authService.signIn() {
-            let aUser = AuthenticatedUser(uid: signedInUser.uid, gid: signedInUser.gid)
-            user = aUser
+        switch await authUseCase.signIn() {
+        case .success(let aUser):
+            authenticatedUser = aUser
             state = .signedIn(aUser)
-        } else {
+        case .failure:
             state = .signedOut
         }
     }
     
     @MainActor
     func signOut() async {
-        defer {
-            user = nil
-            state = .signedOut
-        }
         state = .loading
         
-        await authService.signOut()
-        await widgetDataManager.removeAll()
+        await authUseCase.signOut()
+        authenticatedUser = nil
+        state = .signedOut
     }
-    
-    func updateUserGroup(_ gid: String) {
-        if let user = user {
-            self.user = AuthenticatedUser(uid: user.uid, gid: gid)
-        }
-    }
-    
 }
 extension AuthManager {
     enum State {
@@ -70,4 +57,7 @@ extension AuthManager {
         case signedIn(AuthenticatedUser)
         case loading
     }
+}
+extension AuthManager {
+    static let stub = AuthManager(authenticationUseCase: StubAuthenticationUseCase(), fetchAuthenticatedUserUseCase: StubFetchAuthenticatedUserUseCase())
 }
