@@ -7,19 +7,33 @@
 
 import Foundation
 
-class UserInfoService: UserInfoServiceType {
-    private let userDefaults = UserDefaults.standard
-    private let userInfoKey = Const.UserInfoKey
+enum UserInfoServiceError: Error {
+    case failedToDecode
+    case failedToEncode
+    case failedToLoad
+}
 
-    func saveUserInfo(_ userInfo: AuthenticatedUser?) {
-        if let encoded = try? JSONEncoder().encode(userInfo) {
+class UserInfoService: UserInfoServiceType {
+    private let userDefaults: UserDefaults
+    private let userInfoKey: String
+    
+    init(userDefaults: UserDefaults = .standard, userInfoKey: String = Const.UserInfoKey) {
+        self.userDefaults = userDefaults
+        self.userInfoKey = userInfoKey
+    }
+
+    func saveUserInfo(_ userInfo: AuthenticatedUser) throws {
+        do {
+            let encoded = try JSONEncoder().encode(userInfo)
             userDefaults.set(encoded, forKey: userInfoKey)
+        } catch {
+            throw UserInfoServiceError.failedToEncode
         }
     }
 
-    func loadUserInfo() -> AuthenticatedUser? {
+    func loadUserInfo() throws -> AuthenticatedUser {
         guard let savedData = userDefaults.data(forKey: userInfoKey) else {
-            return nil
+            throw UserInfoServiceError.failedToLoad
         }
         
         do {
@@ -27,14 +41,13 @@ class UserInfoService: UserInfoServiceType {
             return decoded
         }
         catch {
-            print("Failed to decode data")
-            resetUserInfo()
-            return nil
+            clearUserInfo()
+            throw UserInfoServiceError.failedToDecode
         }
     }
-}
-extension UserInfoService {
-    private func resetUserInfo() {
+    
+    func clearUserInfo() {
         userDefaults.removeObject(forKey: userInfoKey)
     }
+
 }

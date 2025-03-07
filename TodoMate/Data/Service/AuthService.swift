@@ -7,11 +7,6 @@
 
 import SwiftUI
 
-protocol AuthServiceType {
-    func signIn() async -> User?
-    func signOut() async
-}
-
 final class AuthService: AuthServiceType {
     private let userService: UserServiceType
     private let googleSignInService: GoogleSignInServiceType
@@ -21,11 +16,8 @@ final class AuthService: AuthServiceType {
         self.googleSignInService = googleSignInService
     }
     
-    func signIn() async -> User? {
-        guard let gUser = try? await googleSignInService.signIn() else {
-            print("[AuthService] Failed to sign in")
-            return nil
-        }
+    func signIn() async throws -> User {
+        let gUser = try await googleSignInService.signIn()
         
         guard let existingUser = await userService.fetch(uid: gUser.uid) else {
             let newUser = User(uid: gUser.uid, nickname: gUser.name ?? "Unknown")
@@ -42,14 +34,6 @@ final class AuthService: AuthServiceType {
     func signOut() async {
         googleSignInService.signOut()
     }
-}
-
-final class StubAuthService: AuthServiceType {
-    func signIn() async -> User? {
-        return User.stub[0]
-    }
-    
-    func signOut() async {}
 }
     
 

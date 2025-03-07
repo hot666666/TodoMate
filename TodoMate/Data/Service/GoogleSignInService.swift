@@ -10,16 +10,11 @@ import FirebaseCore
 import FirebaseAuth
 import GoogleSignIn
 
-enum GoogleAuthError: Error {
+enum GoogleSignInServiceError: Error {
     case invalidAppConfiguration
     case noActiveWindowScene
     case failedToGetToken
     case failedToGetUserID
-}
-
-protocol GoogleSignInServiceType {
-    func signIn() async throws -> GoogleUser
-    func signOut()
 }
 
 class GoogleSignInService: GoogleSignInServiceType {
@@ -28,7 +23,7 @@ class GoogleSignInService: GoogleSignInServiceType {
         do {
             guard let clientId = FirebaseApp.app()?.options.clientID else {
                 print("Error: Invalid app configuration")
-                throw GoogleAuthError.invalidAppConfiguration
+                throw GoogleSignInServiceError.invalidAppConfiguration
             }
             
             let configuration = GIDConfiguration(clientID: clientId)
@@ -36,13 +31,13 @@ class GoogleSignInService: GoogleSignInServiceType {
             
             guard let windowScene = NSApplication.shared.windows.first else {
                 print("Error: No active window scene found")
-                throw GoogleAuthError.noActiveWindowScene
+                throw GoogleSignInServiceError.noActiveWindowScene
             }
             let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: windowScene)
             
             guard let idToken = result.user.idToken?.tokenString else {
                 print("Error: Failed to get authentication token")
-                throw GoogleAuthError.failedToGetToken
+                throw GoogleSignInServiceError.failedToGetToken
             }
             
             let credential = GoogleAuthProvider.credential(
@@ -55,7 +50,7 @@ class GoogleSignInService: GoogleSignInServiceType {
             
             guard !user.uid.isEmpty else {
                 print("Error: Failed to get user ID")
-                throw GoogleAuthError.failedToGetUserID
+                throw GoogleSignInServiceError.failedToGetUserID
             }
             
             
@@ -66,18 +61,5 @@ class GoogleSignInService: GoogleSignInServiceType {
     
     func signOut() {
         GIDSignIn.sharedInstance.signOut()
-    }
-}
-
-class StubGoogleSignInService: GoogleSignInServiceType {
-    func signIn() async throws -> GoogleUser {
-        print("Sign in in StubGoogleSignInService")
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        
-        return GoogleUser(uid: "stub", name: "Stub User", token: "stub")
-    }
-    
-    func signOut() {
-        print("Sign out in StubGoogleSignInService")
     }
 }
