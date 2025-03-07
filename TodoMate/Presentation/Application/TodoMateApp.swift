@@ -87,7 +87,7 @@ fileprivate struct _TodoMateApp: View {
             todoOrderService: TodoOrderService())
 #endif
         self._container = State(initialValue: container)
-        self._authManager = State(initialValue: AuthManager(container: container))
+        self._authManager = State(initialValue: AuthManager(authenticationUseCase: container.authenticationUseCase, fetchAuthenticatedUserUseCase: container.fetchAuthenticatedUserUseCase))
     }
     
     var body: some View {

@@ -20,6 +20,9 @@ final class DIContainer {
     @ObservationIgnored let todoStreamProvider: TodoStreamProviderType
     @ObservationIgnored let userInfoService: UserInfoServiceType
     @ObservationIgnored let todoOrderService: TodoOrderServiceType
+    // UseCases
+    @ObservationIgnored let authenticationUseCase: AuthenticationUseCaseType
+    @ObservationIgnored let fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType
     
     init(
         authService: AuthServiceType,
@@ -45,6 +48,13 @@ final class DIContainer {
         self.userInfoService = userInfoService
         self.todoOrderService = todoOrderService
         self.authService = authService
+        
+        // UseCases
+        
+        self.authenticationUseCase = AuthenticationUseCase(authService: authService,
+                                                           userInfoService: userInfoService,
+                                                           widgetDataManager: widgetDataManager)
+        self.fetchAuthenticatedUserUseCase = FetchAuthenticatedUserUseCase(userInfoService: userInfoService)
     }
     
     convenience init(
