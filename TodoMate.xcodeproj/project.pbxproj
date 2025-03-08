@@ -79,6 +79,8 @@
 		459AA4062C76023D00CA43F2 /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459AA4052C76023600CA43F2 /* String+Extension.swift */; };
 		45ACB00C2C6B65E1005F4B17 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ACB00B2C6B65DE005F4B17 /* Const.swift */; };
 		45ACB00E2C6B92A3005F4B17 /* CalendarDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45ACB00D2C6B929F005F4B17 /* CalendarDay.swift */; };
+		45C1A4922D7D08C0005293BD /* FetchUserGroupTodosWithOrderUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C1A4912D7D08C0005293BD /* FetchUserGroupTodosWithOrderUseCase.swift */; };
+		45C1A4942D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C1A4932D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift */; };
 		45CE6CB52C7178620053835E /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB42C7178600053835E /* Chat.swift */; };
 		45CE6CBA2C7181DB0053835E /* FirestoreChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB92C7181DB0053835E /* FirestoreChatRepository.swift */; };
 		45CE6CBC2C71825B0053835E /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBB2C71825B0053835E /* ChatService.swift */; };
@@ -93,7 +95,9 @@
 		45E0A1112D798094000FDC24 /* GoogleSignInServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A1102D798094000FDC24 /* GoogleSignInServiceType.swift */; };
 		45E0A1132D7980FB000FDC24 /* AuthServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A1122D7980FB000FDC24 /* AuthServiceType.swift */; };
 		45E0A1162D7984DB000FDC24 /* AuthenticationUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A1152D7984C6000FDC24 /* AuthenticationUseCase.swift */; };
-		45E0A1182D799B07000FDC24 /* AuthenticatedUserUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A1172D799B00000FDC24 /* AuthenticatedUserUseCase.swift */; };
+		45E0A1182D799B07000FDC24 /* FetchAuthenticatedUserUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A1172D799B00000FDC24 /* FetchAuthenticatedUserUseCase.swift */; };
+		45E0A1862D7AE153000FDC24 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 45E0A1852D7AE14E000FDC24 /* README */; };
+		45E0A1882D7AE9D5000FDC24 /* UseCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A1872D7AE9D1000FDC24 /* UseCases.swift */; };
 		45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10B922C69B77300FC31CD /* TodoMateApp.swift */; };
 		45E10B952C69B77300FC31CD /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10B942C69B77300FC31CD /* MainView.swift */; };
 		45E10BA32C69FA2F00FC31CD /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E10BA22C69FA2B00FC31CD /* Todo.swift */; };
@@ -202,6 +206,9 @@
 		459AA4362C795D4700CA43F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		45ACB00B2C6B65DE005F4B17 /* Const.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Const.swift; sourceTree = "<group>"; };
 		45ACB00D2C6B929F005F4B17 /* CalendarDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDay.swift; sourceTree = "<group>"; };
+		45C1A4902D7D089E005293BD /* TodoMate.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TodoMate.xctestplan; sourceTree = "<group>"; };
+		45C1A4912D7D08C0005293BD /* FetchUserGroupTodosWithOrderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchUserGroupTodosWithOrderUseCase.swift; sourceTree = "<group>"; };
+		45C1A4932D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveUserTodosOrderUseCase.swift; sourceTree = "<group>"; };
 		45CA5CF62C9C398E00285EB4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		45CA5CF82C9C398E00285EB4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		45CE6CB42C7178600053835E /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
@@ -218,7 +225,9 @@
 		45E0A1102D798094000FDC24 /* GoogleSignInServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInServiceType.swift; sourceTree = "<group>"; };
 		45E0A1122D7980FB000FDC24 /* AuthServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthServiceType.swift; sourceTree = "<group>"; };
 		45E0A1152D7984C6000FDC24 /* AuthenticationUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationUseCase.swift; sourceTree = "<group>"; };
-		45E0A1172D799B00000FDC24 /* AuthenticatedUserUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedUserUseCase.swift; sourceTree = "<group>"; };
+		45E0A1172D799B00000FDC24 /* FetchAuthenticatedUserUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchAuthenticatedUserUseCase.swift; sourceTree = "<group>"; };
+		45E0A1852D7AE14E000FDC24 /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		45E0A1872D7AE9D1000FDC24 /* UseCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCases.swift; sourceTree = "<group>"; };
 		45E10B922C69B77300FC31CD /* TodoMateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoMateApp.swift; sourceTree = "<group>"; };
 		45E10B942C69B77300FC31CD /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		45E10B9B2C69B77400FC31CD /* TodoMate.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TodoMate.entitlements; sourceTree = "<group>"; };
@@ -561,8 +570,12 @@
 		45E0A1142D798147000FDC24 /* UseCase */ = {
 			isa = PBXGroup;
 			children = (
-				45E0A1172D799B00000FDC24 /* AuthenticatedUserUseCase.swift */,
+				45E0A1852D7AE14E000FDC24 /* README */,
+				45E0A1872D7AE9D1000FDC24 /* UseCases.swift */,
+				45E0A1172D799B00000FDC24 /* FetchAuthenticatedUserUseCase.swift */,
 				45E0A1152D7984C6000FDC24 /* AuthenticationUseCase.swift */,
+				45C1A4912D7D08C0005293BD /* FetchUserGroupTodosWithOrderUseCase.swift */,
+				45C1A4932D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -570,6 +583,7 @@
 		45E10B862C69B77300FC31CD = {
 			isa = PBXGroup;
 			children = (
+				45C1A4902D7D089E005293BD /* TodoMate.xctestplan */,
 				453FC0D92CAE803D00574437 /* Shared */,
 				45E10B912C69B77300FC31CD /* TodoMate */,
 				45E0A0E42D78497C000FDC24 /* TodoMateTests */,
@@ -750,6 +764,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				45E0A1862D7AE153000FDC24 /* README in Resources */,
 				459325312CA0F1F000A95193 /* Assets.xcassets in Resources */,
 				45EE13772D5AF2980067647F /* GoogleService-Info.plist in Resources */,
 			);
@@ -771,9 +786,11 @@
 			files = (
 				45D444D82D53371F00378324 /* TodoOrderRepository.swift in Sources */,
 				455C9B962C6F8CBA004A1519 /* AppDelegate.swift in Sources */,
+				45E0A1882D7AE9D5000FDC24 /* UseCases.swift in Sources */,
 				454870A02D72B92D0038973C /* GoogleSignInService.swift in Sources */,
 				4538446A2D4F3E3B002B8721 /* TodoCalendarView.swift in Sources */,
 				45E0A0B52D78190B000FDC24 /* TodoOrderService.swift in Sources */,
+				45C1A4942D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift in Sources */,
 				451525802D510CFE006F6847 /* CustomList.swift in Sources */,
 				454870A62D72CA340038973C /* WidgetDataManager.swift in Sources */,
 				4560E3C32D539B7D008B09AA /* UploadProviderType.swift in Sources */,
@@ -813,6 +830,7 @@
 				4541C9A52D2D4953006A9C60 /* OverlayContainer.swift in Sources */,
 				4541C9A62D2D4953006A9C60 /* OverlayManager.swift in Sources */,
 				4560E3B12D5396D9008B09AA /* ImageUploadServiceType.swift in Sources */,
+				45C1A4922D7D08C0005293BD /* FetchUserGroupTodosWithOrderUseCase.swift in Sources */,
 				4541C9A72D2D4953006A9C60 /* TodoDatePopoverView.swift in Sources */,
 				45322B4C2C845F650097D530 /* ImageUploadService.swift in Sources */,
 				451DEDBE2D3CF4DA00A20417 /* AuthView.swift in Sources */,
@@ -845,7 +863,7 @@
 				45E10B932C69B77300FC31CD /* TodoMateApp.swift in Sources */,
 				4538446E2D4F40C6002B8721 /* Calendar+Extension.swift in Sources */,
 				4560E3C72D539C17008B09AA /* ChatStreamProviderType.swift in Sources */,
-				45E0A1182D799B07000FDC24 /* AuthenticatedUserUseCase.swift in Sources */,
+				45E0A1182D799B07000FDC24 /* FetchAuthenticatedUserUseCase.swift in Sources */,
 				45CE6CBE2C7190D40053835E /* ChatDTO.swift in Sources */,
 				451DEDBA2D3CF19800A20417 /* AuthService.swift in Sources */,
 				4538446C2D4F3E88002B8721 /* TodoCalendarViewModel.swift in Sources */,
@@ -955,7 +973,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMate/Info.plist;
+				INFOPLIST_FILE = TodoMate/InfoDebug.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
