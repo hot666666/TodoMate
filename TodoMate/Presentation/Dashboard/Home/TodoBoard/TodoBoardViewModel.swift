@@ -16,6 +16,9 @@ class TodoBoardViewModel {
     private let todoService: TodoServiceType
     private let todoOrderService: TodoOrderServiceType
     
+    private let fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType
+    private let saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
+    
     @ObservationIgnored let userInfo: AuthenticatedUser
     
     /// '오늘' 할 일
@@ -23,9 +26,13 @@ class TodoBoardViewModel {
     
     init(container: DIContainer, userInfo: AuthenticatedUser) {
         self.todoStreamProvider = container.todoStreamProvider
+        
         self.widgetDataManager = container.widgetDataManager
         self.todoService = container.todoService
         self.todoOrderService = container.todoOrderService
+        
+        self.fetchTodosByUserUseCase = container.fetchTodosByUserUseCase
+        self.saveUserTodosOrderUseCase = container.saveUserTodosOrderUseCase
         
         self.userInfo = userInfo
     }
@@ -62,33 +69,18 @@ class TodoBoardViewModel {
 extension TodoBoardViewModel {
     func observeChanges() async {
         for await change in todoStreamProvider.createTodoStream() {
-            switch change {
-                case .added(let todo):
-                    await handleAddedTodo(todo)
-                case .modified(let todo):
-                    await handleModifiedTodo(todo)
-                case .removed(let todo):
-                    await handleRemovedTodo(todo)
-            }
+            await handleTodoChange(change)
+        
+            guard isMine(change.data) else { continue }
+            saveUserTodosOrderUseCase.execute(with: myTodoList ?? [], for: .now)
         }
     }
     
     @MainActor
     func fetchTodos() async {
-        var todosByUser = await getTodosByUser()
-        var todoList = todosByUser[userInfo.uid, default: []]
-        
-        let today: Date = .now
-        if let orderedFids = todoOrderService.loadOrder(for: today) {
-            // 저장된 순서가 오늘 날짜와 일치하면 해당 순서 적용
-            todoList.sort { orderedFids.firstIndex(of: $0.fid) ?? Int.max < orderedFids.firstIndex(of: $1.fid) ?? Int.max }
-            todosByUser[userInfo.uid] = todoList
-        } else {
-            // 저장된 순서가 없거나 날짜가 다르면 새로 저장
-            todoOrderService.saveOrder(todoList.map { $0.fid }, for: today)
+        if let todosByUser = try? await fetchTodosByUserUseCase.execute(for: userInfo){
+            setAllTodoStates(with: todosByUser)
         }
-        
-        setAllTodoStates(with: todosByUser)
     }
     
     @MainActor
@@ -115,14 +107,12 @@ extension TodoBoardViewModel {
     }
     
     func moveTodo(from source: IndexSet, to destination: Int) {
-        // TODO: - isMine인 요소에 대해서만 수행하지만 다른 방식으로 이를 수행하도록 수정하면 좋을 듯
-        guard var todoList = todosByUser[userInfo.uid] else { return }
-        /// 특히 다른 배열로 수행된다면 다음코드는 크래시발생할 수 있음
-        todoList.move(fromOffsets: source, toOffset: destination)
+        guard var myTodoList = myTodoList else { return }
+        myTodoList.move(fromOffsets: source, toOffset: destination)
         
-        setUserTodoStates(with: todoList)
+        saveUserTodosOrderUseCase.execute(with: myTodoList, for: .now)
         
-//        saveFidOrder()
+        setUserTodoStates(with: myTodoList)
     }
     
     func todosBinding(for user: User) -> Binding<[Todo]> {
@@ -138,15 +128,26 @@ extension TodoBoardViewModel {
 }
 
 extension TodoBoardViewModel {
+    func handleTodoChange(_ change: DatabaseChange<Todo>) async {
+        switch change {
+        case .added(let todo):
+            await handleAddedTodo(todo)
+        case .modified(let todo):
+            await handleModifiedTodo(todo)
+        case .removed(let todo):
+            await handleRemovedTodo(todo)
+        }
+    }
+    
     @MainActor
-    func handleAddedTodo(_ todo: Todo) async {
+    private func handleAddedTodo(_ todo: Todo) async {
         guard isToday(todo.date) && !isTodoAlreadyAdded(todo) else { return }
         
         addTodoState(with: todo)
     }
     
     @MainActor
-    func handleModifiedTodo(_ todo: Todo) async {
+    private func handleModifiedTodo(_ todo: Todo) async {
         let isTodayTodo = isToday(todo.date)
         let isAlreadyAdded = isTodoAlreadyAdded(todo)
         
@@ -162,19 +163,10 @@ extension TodoBoardViewModel {
     }
     
     @MainActor
-    func handleRemovedTodo(_ todo: Todo) async {
+    private func handleRemovedTodo(_ todo: Todo) async {
         guard isToday(todo.date) else { return }
         
         removeTodoState(for: todo)
-    }
-    
-    private func getTodosByUser() async -> [String: [Todo]] {
-        // TODO: - todos에 전부 group에 존재하는 uid라 가정
-        var todosByUser = [String: [Todo]]()
-        await todoService.fetchToday(groupId: userInfo.gid).forEach { todo in
-            todosByUser[todo.uid, default: []].append(todo)
-        }
-        return todosByUser
     }
     
     private func isMine(_ todo: Todo) -> Bool {
@@ -187,5 +179,9 @@ extension TodoBoardViewModel {
 
     private func isTodoAlreadyAdded(_ todo: Todo) -> Bool {
         todosByUser[todo.uid]?.contains { $0.fid == todo.fid } ?? false
+    }
+    
+    private var myTodoList: [Todo]? {
+        todosByUser[userInfo.uid]
     }
 }
