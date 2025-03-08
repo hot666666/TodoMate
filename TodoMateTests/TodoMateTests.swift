@@ -17,33 +17,8 @@ struct TodoMateTests {
 
 /*
  - 인터페이스 정의하기
- - 하위 계층부터 테스트를 진행 -> 상위 계층에선 Mock으로 대체
+ - 하위 계층부터 테스트를 진행 -> 상위 계층에선 Mock 또는 Dummy로 대체
  - TestFixtures를 통해 사용되는 Mock 관리
-    - 이때, 공통요소는 Suite안에 정의하고 다른 요소는 TestFixtures로 직접 사용
-
-
-# 향후 테스트
-
-/*
- private let todoStreamProvider: TodoStreamProviderType
- private let widgetDataManager: WidgetDataManagerType
- private let todoService: TodoServiceType
- private let todoOrderService: TodoOrderServiceType
- */
-
-@Suite("TodoService Tests")
-struct TodoServiceTests {
-}
-
-
-@Suite("todoOrderService Tests")
-struct TodoOrderServiceTests {
-    
-}
-
-@Suite("TodoBoardViewModel Tests")
-struct TodoBoardViewModelTests {
-    
-}
-
- */
+    - 공통요소는 Suite안에 정의하고 다른 요소는 TestFixtures로 직접 사용
+    - Mock이 여러 동작을 수행할 때는 Behavior를 지정하여 구현
+*/
