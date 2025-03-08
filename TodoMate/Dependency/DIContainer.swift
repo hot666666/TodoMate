@@ -23,6 +23,8 @@ final class DIContainer {
     // UseCases
     @ObservationIgnored let authenticationUseCase: AuthenticationUseCaseType
     @ObservationIgnored let fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType
+    @ObservationIgnored let fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType
+    @ObservationIgnored let saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
     
     init(
         authService: AuthServiceType,
@@ -50,11 +52,47 @@ final class DIContainer {
         self.authService = authService
         
         // UseCases
-        
         self.authenticationUseCase = AuthenticationUseCase(authService: authService,
                                                            userInfoService: userInfoService,
                                                            widgetDataManager: widgetDataManager)
         self.fetchAuthenticatedUserUseCase = FetchAuthenticatedUserUseCase(userInfoService: userInfoService)
+        self.fetchTodosByUserUseCase = FetchUserGroupTodosWithOrderUseCase(todoService: todoService,
+                                                                            todoOrderService: todoOrderService)
+        self.saveUserTodosOrderUseCase = SaveUserTodosOrderUseCase(todoOrderService: todoOrderService)
+    }
+    
+    init(
+        authService: AuthServiceType,
+        googleSignInService: GoogleSignInServiceType,
+        widgetDataManager: WidgetDataManagerType,
+        userService: UserServiceType,
+        todoService: TodoServiceType,
+        chatService: ChatServiceType,
+        groupService: GroupServiceType,
+        chatStreamProvider: ChatStreamProviderType,
+        todoStreamProvider: TodoStreamProviderType,
+        userInfoService: UserInfoServiceType,
+        todoOrderService: TodoOrderServiceType,
+        authenticationUseCase: AuthenticationUseCaseType,
+        fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType,
+        fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType,
+        saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
+    ) {
+        self.googleSignInService = googleSignInService
+        self.widgetDataManager = widgetDataManager
+        self.userService = userService
+        self.todoService = todoService
+        self.chatService = chatService
+        self.groupService = groupService
+        self.chatStreamProvider = chatStreamProvider
+        self.todoStreamProvider = todoStreamProvider
+        self.userInfoService = userInfoService
+        self.todoOrderService = todoOrderService
+        self.authService = authService
+        self.authenticationUseCase = authenticationUseCase
+        self.fetchAuthenticatedUserUseCase = fetchAuthenticatedUserUseCase
+        self.fetchTodosByUserUseCase = fetchTodosByUserUseCase
+        self.saveUserTodosOrderUseCase = saveUserTodosOrderUseCase
     }
     
     convenience init(
@@ -68,7 +106,11 @@ final class DIContainer {
         testChatStreamProvider: ChatStreamProviderType = StubChatStreamProvider(),
         testTodoStreamProvider: TodoStreamProviderType = StubTodoStreamProvider(),
         testUserInfoService: UserInfoServiceType = StubUserInfoService(),
-        testTodoOrderService: TodoOrderServiceType = StubTodoOrderService()
+        testTodoOrderService: TodoOrderServiceType = StubTodoOrderService(),
+        testAuthenticationUseCase: AuthenticationUseCaseType = StubAuthenticationUseCase(),
+        testFetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType = StubFetchAuthenticatedUserUseCase(),
+        testFetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType = StubFetchUserGroupTodosWithOrderUseCase(),
+        testSaveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType = StubSaveUserTodosOrderUseCase()
     ) {
         self.init(
             authService: testAuthService,
@@ -81,7 +123,12 @@ final class DIContainer {
             chatStreamProvider: testChatStreamProvider,
             todoStreamProvider: testTodoStreamProvider,
             userInfoService: testUserInfoService,
-            todoOrderService: testTodoOrderService)
+            todoOrderService: testTodoOrderService,
+            authenticationUseCase: testAuthenticationUseCase,
+            fetchAuthenticatedUserUseCase: testFetchAuthenticatedUserUseCase,
+            fetchTodosByUserUseCase: testFetchTodosByUserUseCase,
+            saveUserTodosOrderUseCase: testSaveUserTodosOrderUseCase
+        )
     }
 }
 extension DIContainer {
