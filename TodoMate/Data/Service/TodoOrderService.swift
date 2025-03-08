@@ -8,23 +8,23 @@
 import Foundation
 
 class TodoOrderService: TodoOrderServiceType {
-    private let todoRepository: TodoOrderRepositoryType
+    private let todoOrderRepository: TodoOrderRepositoryType
     private let calendar = Calendar.current
     
-    init(todoRepository: TodoOrderRepositoryType = TodoOrderRepository()) {
-        self.todoRepository = todoRepository
+    init(todoOrderRepository: TodoOrderRepositoryType = TodoOrderRepository()) {
+        self.todoOrderRepository = todoOrderRepository
     }
     
     func saveOrder(_ order: [String], for date: Date) {
-        todoRepository.saveOrder(order)
-        todoRepository.saveDate(date)
+        todoOrderRepository.saveOrder(order)
+        todoOrderRepository.saveDate(date)
     }
     
     func loadOrder(for date: Date) -> [String]? {
-        guard let lastSavedDate = todoRepository.loadDate(),
+        guard let lastSavedDate = todoOrderRepository.loadDate(),
               calendar.isDate(date, inSameDayAs: lastSavedDate) else {
             return nil
         }
-        return todoRepository.loadOrder()
+        return todoOrderRepository.loadOrder()
     }
 }
