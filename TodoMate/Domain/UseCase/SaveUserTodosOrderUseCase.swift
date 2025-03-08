@@ -25,3 +25,9 @@ final class SaveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType {
         todoOrderService.saveOrder(orders, for: today)
     }
 }
+
+class StubSaveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType {
+    func execute(with todos: [Todo], for date: Date) {
+        print("[Stub] - SaveUserTodosOrderUseCase")
+    }
+}
