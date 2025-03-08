@@ -1,261 +1,230 @@
-//
-//  TodoBoardViewModelTests1.swift
-//  TodoMate
-//
-//  Created by hs on 3/5/25.
-//
+////
+////  TodoBoardViewModelTests.swift
+////  TodoMate
+////
+////  Created by hs on 3/5/25.
+////
 
 import Testing
 import Foundation
 @testable import TodoMate
 
-@Suite("_TodoBoardViewModel Tests")
-struct TodoBoardViewModelTests1 {
-    private static let userInfo: AuthenticatedUser = .init(uid: "user1", gid: "1")
-    private static func makeTodo(date: Date, fid: String, status: TodoStatus = .todo) -> Todo {
-        Todo(date: date, content: "Task", detail: "", status: status, uid: userInfo.uid, fid: fid, lastModifiedAt: date)
+fileprivate struct TestFixtures {
+    static let userInfo = AuthenticatedUser(uid: "user1", gid: "group1")
+    static let todo1 = Todo(uid: "user1", fid: "todo1")
+    static let todo2 = Todo(uid: "user1", fid: "todo2")
+    static let todo3 = Todo(uid: "user1", fid: "todo3")
+    static let otherUserTodo = Todo(uid: "user2", fid: "todo4")
+    static let allTodos = ["user1": [todo1, todo2], "user2": [otherUserTodo]]
+}
+
+struct DummyTodoStreamProvider: TodoStreamProviderType {
+    func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
+        AsyncStream { continuation in
+            continuation.finish()
+        }
     }
+}
+
+struct DummyTodoService: TodoServiceType {
+    func fetchTodos() async throws -> [Todo] { [] }
     
-    @Suite("ObserveChanges Method Tests")
-    struct ObserveChangesMethodTests {
-        private static let container: DIContainer = .stub
-        
-        private static func makeViewModel(todosByUser: [String: [Todo]] = [:]) -> TodoBoardViewModel {
+    func create(from todo: Todo) async -> Todo? { nil }
+    func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]] { [:] }
+    func fetchToday(groupId: String) async -> [Todo] { [] }
+    func update(_ todo: Todo) { }
+    func remove(_ todo: Todo) { }
+}
+
+struct DummyTodoOrderService: TodoOrderServiceType {
+    func loadOrder(for date: Date) -> [String]? { nil }
+    func saveOrder(_ order: [String], for date: Date) { }
+}
+
+
+@Suite("TodoBoardViewModel Tests")
+struct TodoBoardViewModelTests {
+    static let container = DIContainer(
+        testTodoService: DummyTodoService(),
+        testTodoStreamProvider: DummyTodoStreamProvider(),
+        testTodoOrderService: DummyTodoOrderService()
+    )
+    static let userInfo = TestFixtures.userInfo
+    
+    @Suite("상태 관리 메서드 테스트")
+    struct StateManagementTests {
+        @Test("setAllTodoStates가 todosByUser를 올바르게 업데이트")
+        func testSetAllTodoStates() {
+            // Given
             let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
-            viewModel.todosByUser = todosByUser
-            return viewModel
+            
+            // When
+            viewModel.setAllTodoStates(with: TestFixtures.allTodos)
+            
+            // Then
+            #expect(viewModel.todosByUser == TestFixtures.allTodos, "todosByUser가 입력된 전체 todos로 설정되어야 함")
         }
         
-        @Suite("Handle Added Todo Tests")
-        struct HandleAddedTodoTests {
-            @Test("오늘 추가")
-            func todayAndNotAdded() async {
-                // Given
-                let today = Date()
-                let todo = makeTodo(date: today, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: []])
-                
-                // When
-                await viewModel.handleAddedTodo(todo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.count == 1)
-                #expect(viewModel.todosByUser[userInfo.uid]?.first?.fid == "1")
-            }
+        @Test("setUserTodoStates가 현재 유저의 todos를 올바르게 업데이트")
+        func testSetUserTodoStates() {
+            // Given
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
+            let userTodos = [TestFixtures.todo1, TestFixtures.todo2]
             
-            @Test("오늘이 아닌 날 추가")
-            func notToday() async {
-                // Given
-                let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
-                let todo = makeTodo(date: yesterday, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: []])
-                
-                // When
-                await viewModel.handleAddedTodo(todo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.isEmpty ?? true)
-            }
+            // When
+            viewModel.setUserTodoStates(with: userTodos)
             
-            @Test("오늘 이미 존재")
-            func alreadyAdded() async {
-                // Given
-                let today = Date()
-                let todo = makeTodo(date: today, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: [todo]])
-                
-                // When
-                await viewModel.handleAddedTodo(todo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.count == 1)
-            }
+            // Then
+            #expect(viewModel.todosByUser[userInfo.uid] == userTodos, "현재 유저의 todos가 올바르게 설정되어야 함")
+            #expect(viewModel.todosByUser.count == 1, "다른 유저의 데이터는 추가되지 않아야 함")
         }
         
-        @Suite("Handle Modified Todo Tests")
-        struct HandleModifiedTodoTests {
-            @Test("오늘->오늘")
-            func alreadyAddedAndToday() async {
-                // Given
-                let today = Date()
-                let originalTodo = makeTodo(date: today, fid: "1")
-                let modifiedTodo = makeTodo(date: today, fid: "1", status: .complete)
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: [originalTodo]])
-                
-                // When
-                await viewModel.handleModifiedTodo(modifiedTodo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.count == 1)
-                #expect(viewModel.todosByUser[userInfo.uid]?.first?.status == .complete)
-            }
+        @Test("addTodoState가 새로운 todo를 추가")
+        func testAddTodoState() {
+            // Given
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
+            viewModel.setUserTodoStates(with: [TestFixtures.todo1])
             
-            @Test("오늘->어제")
-            func alreadyAddedButNotToday() async {
-                // Given
-                let today = Date()
-                let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
-                let originalTodo = makeTodo(date: today, fid: "1")
-                let modifiedTodo = makeTodo(date: yesterday, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: [originalTodo]])
-                
-                // When
-                await viewModel.handleModifiedTodo(modifiedTodo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.isEmpty ?? true)
-            }
+            // When
+            viewModel.addTodoState(with: TestFixtures.todo2)
             
-            @Test("오늘이 아닌 날->오늘")
-            func notAddedButToday() async {
-                // Given
-                let today = Date()
-                let todo = makeTodo(date: today, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: []])
-                
-                // When
-                await viewModel.handleModifiedTodo(todo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.count == 1)
-                #expect(viewModel.todosByUser[userInfo.uid]?.first?.fid == "1")
-            }
-            
-            @Test("오늘이 아닌 날->어제")
-            func notAddedAndNotToday() async {
-                // Given
-                let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
-                let todo = makeTodo(date: yesterday, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: []])
-                
-                // When
-                await viewModel.handleModifiedTodo(todo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.isEmpty ?? true)
-            }
+            // Then
+            #expect(viewModel.todosByUser[userInfo.uid]?.count == 2, "todo가 추가되어야 함")
+            #expect(viewModel.todosByUser[userInfo.uid]?.contains { $0.fid == "todo2" } == true, "추가된 todo가 포함되어야 함")
         }
         
-        @Suite("Handle Removed Todo Tests")
-        struct HandleRemovedTodoTests {
-            @Test("오늘")
-            func today() async {
-                // Given
-                let today = Date()
-                let todo = makeTodo(date: today, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: [todo]])
-                
-                // When
-                await viewModel.handleRemovedTodo(todo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.isEmpty ?? true)
-            }
+        @Test("updateTodoState가 기존 todo를 업데이트")
+        func testUpdateTodoState() {
+            // Given
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
+            viewModel.setUserTodoStates(with: [TestFixtures.todo1])
+            let updatedTodo = Todo(uid: "user1", fid: "todo1") // 다른 속성이 변경되었다고 가정
             
-            @Test("오늘이 아닌 날")
-            func notToday() async {
-                // Given
-                let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
-                let todo = makeTodo(date: yesterday, fid: "1")
-                let viewModel = makeViewModel(todosByUser: [userInfo.uid: [todo]])
-                
-                // When
-                await viewModel.handleRemovedTodo(todo)
-                
-                // Then
-                #expect(viewModel.todosByUser[userInfo.uid]?.count == 1)
-            }
+            // When
+            viewModel.updateTodoState(with: updatedTodo)
+            
+            // Then
+            #expect(viewModel.todosByUser[userInfo.uid]?.first == updatedTodo, "todo가 업데이트되어야 함")
+        }
+        
+        @Test("removeTodoState가 todo를 제거")
+        func testRemoveTodoState() {
+            // Given
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
+            viewModel.setUserTodoStates(with: [TestFixtures.todo1, TestFixtures.todo2])
+            
+            // When
+            viewModel.removeTodoState(for: TestFixtures.todo1)
+            
+            // Then
+            #expect(viewModel.todosByUser[userInfo.uid]?.count == 1, "todo가 제거되어야 함")
+            #expect(viewModel.todosByUser[userInfo.uid]?.contains { $0.fid == "todo1" } == false, "제거된 todo가 없어야 함")
         }
     }
     
-    @Suite("FetchTodos with Order Tests")
-    struct FetchTodosMethodTests {
-        private let today = Date.now
-        
-        // MockTodoService 정의
-        private struct MockTodoService: TodoServiceType {
-            
-            let todoFetchResult: [Todo] = [TodoBoardViewModelTests1.makeTodo(date: .now, fid: "fid1"),
-                                           TodoBoardViewModelTests1.makeTodo(date: .now, fid: "fid2")]
-            
-            func create(from todo: Todo) async -> Todo? { nil }
-            func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]] { [:] }
-            func fetchToday(userId: String) async -> [Todo] { [] }
-            func update(_ todo: Todo) { }
-            func remove(_ todo: Todo) { }
-            func fetchToday(groupId: String) async -> [Todo] {
-                todoFetchResult
-            }
-        }
-        
-        // 공통 컨테이너 및 서비스 설정
-        private static let todoService = MockTodoService()
-        
-        private static func makeContainer(todoOrderService: TodoOrderServiceType) -> DIContainer {
-            DIContainer(testTodoService: todoService, testTodoOrderService: todoOrderService)
-        }
-        
-        @Test("오늘 Todo 순서 존재")
-        func withExistingOrder() async {
-            // 존재하는 설정 순서
-            let savedOrder = ["fid2", "fid1"]
-            
-            // 출력 순서
-            let expectedOrderedFids = ["fid2", "fid1"]
-            
+    @Suite("handleTodoChange 메서드 테스트")
+    struct HandleTodoChangeTests {
+        @Test("handleTodoChange가 추가된 todo를 처리")
+        func testHandleTodoChangeAdded() async {
             // Given
-            let todoOrderService = StubTodoOrderService()
-            let container = FetchTodosMethodTests.makeContainer(todoOrderService: todoOrderService)
-            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests1.userInfo)
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
             
             // When
-            todoOrderService.saveOrder(savedOrder, for: today)
-            await viewModel.fetchTodos()
+            await viewModel.handleTodoChange(.added(TestFixtures.todo1))
             
             // Then
-            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests1.userInfo.uid] ?? []
-            #expect(orderedTodos.map { $0.fid } == expectedOrderedFids)
+            #expect(viewModel.todosByUser[userInfo.uid]?.contains { $0.fid == "todo1" } == true, "새로운 todo가 추가되어야 함")
         }
         
-        @Test("오늘 Todo 순서 미존재")
-        func withNoOrder() async {
-            // 출력 변수
-            let expectedOrderedFids = ["fid1", "fid2"]
-            
+        @Test("handleTodoChange가 수정된 todo를 처리")
+        func testHandleTodoChangeModified() async {
             // Given
-            let todoOrderService = StubTodoOrderService()
-            let container = FetchTodosMethodTests.makeContainer(todoOrderService: todoOrderService)
-            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests1.userInfo)
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
+            viewModel.setUserTodoStates(with: [TestFixtures.todo1])
+            let updatedTodo = Todo(uid: "user1", fid: "todo1") // 다른 속성이 변경되었다고 가정
             
             // When
-            await viewModel.fetchTodos()
+            await viewModel.handleTodoChange(.modified(updatedTodo))
             
             // Then
-            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests1.userInfo.uid] ?? []
-            #expect(orderedTodos.map { $0.fid } == expectedOrderedFids)
+            #expect(viewModel.todosByUser[userInfo.uid]?.first == updatedTodo, "todo가 수정되어야 함")
         }
         
-        @Test("오늘 이전 날짜 Todo 순서 존재")
-        func withOutdatedOrder() async {
-            // 입력 변수
-            let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
-            let inputOutdatedOrder = ["yesterday-fid2", "yesterday-fid1"]
-            
-            // 출력 변수
-            let expectedOrderedFids = ["fid1", "fid2"]
-            
+        @Test("handleTodoChange가 제거된 todo를 처리")
+        func testHandleTodoChangeRemoved() async {
             // Given
-            let todoOrderService = StubTodoOrderService()
-            let container = FetchTodosMethodTests.makeContainer(todoOrderService: todoOrderService)
-            let viewModel = TodoBoardViewModel(container: container, userInfo: TodoBoardViewModelTests1.userInfo)
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
+            viewModel.setUserTodoStates(with: [TestFixtures.todo1])
             
             // When
-            todoOrderService.saveOrder(inputOutdatedOrder, for: yesterday)
-            await viewModel.fetchTodos()
+            await viewModel.handleTodoChange(.removed(TestFixtures.todo1))
             
             // Then
-            let orderedTodos = viewModel.todosByUser[TodoBoardViewModelTests1.userInfo.uid] ?? []
-            #expect(orderedTodos.map { $0.fid } == expectedOrderedFids)
+            #expect(viewModel.todosByUser[userInfo.uid]?.isEmpty == true, "todo가 제거되어야 함")
         }
     }
+    
+    @Suite("moveTodo 메서드 테스트")
+    struct MoveTodoTests {
+        @Test("moveTodo가 todos를 재정렬하고 저장")
+        func testMoveTodo() {
+            // Given
+            let viewModel = TodoBoardViewModel(container: container, userInfo: userInfo)
+            viewModel.setUserTodoStates(with: [TestFixtures.todo1, TestFixtures.todo2, TestFixtures.todo3])
+            
+            // When
+            let source = IndexSet(integer: 1) // todo2를 이동
+            viewModel.moveTodo(from: source, to: 3) // 맨 끝으로 이동
+            
+            // Then
+            let expectedTodos = [TestFixtures.todo1, TestFixtures.todo3, TestFixtures.todo2]
+            #expect(viewModel.todosByUser[userInfo.uid] == expectedTodos, "todos가 재정렬되어야 함")
+        }
+    }
+    
+    @Suite("fetchTodos 메서드 테스트")
+    struct FetchTodosTests {
+        @Test("fetchTodos가 성공 시 todosByUser를 업데이트")
+        func testFetchTodosSuccess() async {
+            // Given
+            let mockFetchUseCase = MockFetchTodosByUserUseCase()
+            mockFetchUseCase.result = TestFixtures.allTodos
+            let container = DIContainer(
+                testTodoService: DummyTodoService(),
+                testTodoStreamProvider: DummyTodoStreamProvider(),
+                testTodoOrderService: DummyTodoOrderService(),
+                testFetchTodosByUserUseCase: mockFetchUseCase
+            )
+            let viewModel = TodoBoardViewModel(container: container, userInfo: TestFixtures.userInfo)
+            
+            // When
+            await viewModel.fetchTodos()
+            
+            // Then
+            #expect(viewModel.todosByUser == TestFixtures.allTodos, "fetchTodos 성공 시 todosByUser가 업데이트되어야 함")
+        }
+        
+        @Test("fetchTodos가 실패 시 todosByUser를 변경하지 않음")
+        func testFetchTodosFailure() async {
+            // Given
+            let mockFetchUseCase = MockFetchTodosByUserUseCase()
+            mockFetchUseCase.shouldThrowError = true
+            let container = DIContainer(
+                testTodoService: DummyTodoService(),
+                testTodoStreamProvider: DummyTodoStreamProvider(),
+                testTodoOrderService: DummyTodoOrderService(),
+                testFetchTodosByUserUseCase: mockFetchUseCase
+            )
+            let viewModel = TodoBoardViewModel(container: container, userInfo: TestFixtures.userInfo)
+            let initialTodos = ["user1": [TestFixtures.todo1]]
+            viewModel.setAllTodoStates(with: initialTodos)
+            
+            // When
+            await viewModel.fetchTodos()
+            
+            // Then
+            #expect(viewModel.todosByUser == initialTodos, "fetchTodos 실패 시 todosByUser가 변경되지 않아야 함")
+        }
+    }
+    
 }
