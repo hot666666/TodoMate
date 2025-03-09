@@ -7,73 +7,85 @@
 
 import WidgetKit
 import SwiftUI
+import SwiftData
 
-struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), emoji: "😀")
-    }
-
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), emoji: "😀")
-        completion(entry)
-    }
-
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, emoji: "😀")
-            entries.append(entry)
-        }
-
-        let timeline = Timeline(entries: entries, policy: .atEnd)
-        completion(timeline)
-    }
-
-//    func relevances() async -> WidgetRelevances<Void> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
-}
-
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let emoji: String
-}
-
-struct TodoMateWidgetEntryView : View {
-    var entry: Provider.Entry
-
-    var body: some View {
-        VStack {
-            HStack {
-                Text("Time:")
-                Text(entry.date, style: .time)
-            }
-
-            Text("Emoji:")
-            Text(entry.emoji)
-        }
-    }
-}
-
+// MARK: - TodoMateWidget
 struct TodoMateWidget: Widget {
     let kind: String = "TodoMateWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if #available(macOS 14.0, *) {
-                TodoMateWidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                TodoMateWidgetEntryView(entry: entry)
-                    .padding()
-                    .background()
+            TodoMateWidgetEntryView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("TodoMate Widget")
+        .description("TodoMate Widget의 예시")
+    }
+}
+
+// MARK: - TodoEntity
+struct TodoEntry: TimelineEntry {
+    let date: Date
+    let todos: [WidgetTodo]
+}
+
+// MARK: - TodoMateWidgetEntryView
+struct TodoMateWidgetEntryView : View {
+    var entry: TodoEntry
+
+    var body: some View {
+        VStack {
+            ForEach(entry.todos) { todo in
+                TodoRow(todo: todo)
             }
         }
-        .configurationDisplayName("My Widget")
-        .description("This is an example widget.")
+        if entry.todos.isEmpty {
+            Text("진행 중인 나의 Todo가 없습니다.")
+        } else {
+            Spacer()
+        }
     }
+}
+
+// MARK: - Provider
+struct Provider: TimelineProvider {
+    private let modelContext = ModelContext(Self.container)
+    
+    func placeholder(in context: Context) -> TodoEntry {
+        TodoEntry(date: .now, todos: WidgetTodo.stub)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (TodoEntry) -> ()) {
+        let entry = TodoEntry(date: .now, todos: WidgetTodo.stub)
+        completion(entry)
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<TodoEntry>) -> ()) {
+        // 엔트리 생성
+        let todos = fetch()
+        let entries: TodoEntry = .init(date: .now, todos: todos)
+        // 타임라인 생성(with 엔트리)
+        let timeline = Timeline(entries: [entries], policy: .never)
+        // completion에 타임라인 전달
+        completion(timeline)
+    }
+
+    private func fetch() -> [WidgetTodo] {
+        do {
+            let WidgetTodo = try modelContext.fetch(FetchDescriptor<WidgetTodo>())
+            return WidgetTodo
+        } catch {
+            return []
+        }
+    }
+}
+extension Provider {
+    private static let container: ModelContainer = {
+        do {
+            return try ModelContainer(for: WidgetTodo.self)
+        } catch {
+            print("Failed to create ModelContainer: \(error)")
+            fatalError("\(error)")
+        }
+    }()
 }
