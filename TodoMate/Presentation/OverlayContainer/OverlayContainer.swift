@@ -55,11 +55,11 @@ struct OverlayContainer<Content: View>: View {
 fileprivate struct TodoSheet: View {
     @State private var todo: Todo
     private let isMine: Bool
-    private let update: (Todo) -> Void
+    private let update: (Todo, Todo) -> Void
     
     private let originalTodo: Todo
     
-    init(todo: Todo, isMine: Bool, update: @escaping (Todo) -> Void) {
+    init(todo: Todo, isMine: Bool, update: @escaping (Todo, Todo) -> Void) {
         self.originalTodo = todo
         self.todo = todo
         self.isMine = isMine
@@ -78,7 +78,7 @@ fileprivate struct TodoSheet: View {
         }
         .onDisappear {
             if isMine && todo != originalTodo {
-                update(todo)
+                update(originalTodo, todo)
             }
         }
     }
