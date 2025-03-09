@@ -1,8 +1,6 @@
 name: Deploy message test
-on:
-  push:
-    branches:
-      - build-workflow
+on: push
+
 jobs:
   release:
     runs-on: ubuntu-latest
