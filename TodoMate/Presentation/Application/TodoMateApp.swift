@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 import FirebaseCore
 
 @main
@@ -47,6 +48,11 @@ struct TodoMateApp: App {
             }
         }
         .windowStyle(.hiddenTitleBar)
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            try? sharedModelContainer.mainContext.save()
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 }
 
