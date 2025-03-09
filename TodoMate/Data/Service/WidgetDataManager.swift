@@ -10,7 +10,7 @@ import Foundation
 
 protocol WidgetDataManagerType {
     func save(_ todo: WidgetTodo) async
-    func remove(_ todoFid: String?) async
+    func remove(_ todoFid: String) async
     func removeAll () async
 }
 
@@ -24,32 +24,24 @@ final class WidgetDataManager: WidgetDataManagerType {
     // Save(or Update) WidgetTodo
     @MainActor
     func save(_ todo: WidgetTodo) async {
-        
-        guard let fid = todo.fid else {
-            print("TodoEntity has no fid")
-            return
-        }
-        
-        let context = modelContainer.mainContext
-        
-        let fetchDescriptor = FetchDescriptor<WidgetTodo>(predicate: #Predicate { $0.fid == fid })
+        let todoFid = todo.fid
+        let fetchDescriptor = FetchDescriptor<WidgetTodo>(predicate: #Predicate { $0.fid == todoFid })
         do {
+            let context = modelContainer.mainContext
             if let existingEntity = try context.fetch(fetchDescriptor).first {
                 existingEntity.date = todo.date
                 existingEntity.content = todo.content
                 return
             }
             context.insert(todo)
-            print("New TodoEntity inserted with fid \(fid)")
+            print("New TodoEntity inserted with fid \(todo.fid)")
         } catch {
             print("Error checking for existing TodoEntity: \(error.localizedDescription)")
         }
     }
     
     @MainActor
-    func remove(_ todoFid: String?) async {
-        guard let todoFid else { return }
-        
+    func remove(_ todoFid: String) async {
         let context = modelContainer.mainContext
         
         let fetchDescriptor = FetchDescriptor<WidgetTodo>(predicate: #Predicate { $0.fid == todoFid })

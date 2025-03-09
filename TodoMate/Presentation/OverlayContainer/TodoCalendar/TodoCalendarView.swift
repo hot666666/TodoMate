@@ -159,7 +159,7 @@ fileprivate struct TodoCalendarDay: View {
                 }
                 .onTapGesture {
                     overlayManager.push(.todo(todo, isMine: isMine,
-                                              update: { updatedTodo in onUpdate(calendarDay.date, updatedTodo)}))
+                                              update: { todo, updatedTodo in onUpdate(calendarDay.date, updatedTodo)}))
                 }
                 .contextMenu {
                     contextMenu(for: todo)

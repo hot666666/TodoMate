@@ -8,8 +8,6 @@
 import SwiftUI
 import Foundation
 
-// TODO: - Todo 중복생성 문제
-
 @Observable
 class TodoBoardViewModel {
     private let calendar = Calendar.current
@@ -20,6 +18,7 @@ class TodoBoardViewModel {
     
     private let fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType
     private let saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
+    private let syncWidgetDataWithUserTodoUseCase: SyncWidgetDataWithUserTodoUseCaseType
     
     @ObservationIgnored let userInfo: AuthenticatedUser
     
@@ -35,6 +34,7 @@ class TodoBoardViewModel {
         
         self.fetchTodosByUserUseCase = container.fetchTodosByUserUseCase
         self.saveUserTodosOrderUseCase = container.saveUserTodosOrderUseCase
+        self.syncWidgetDataWithUserTodoUseCase = container.syncWidgetDataWithUserTodoUseCase
         
         self.userInfo = userInfo
     }
@@ -74,7 +74,7 @@ extension TodoBoardViewModel {
         for await change in todoStreamProvider.createTodoStream() {
             await handleTodoChange(change)
         
-            guard isMine(change.data) else { continue }
+            guard isMine(change.data), isToday(change.data.date) else { continue }
             saveUserTodosOrderUseCase.execute(with: myTodoList ?? [], for: .now)
         }
     }
@@ -93,12 +93,17 @@ extension TodoBoardViewModel {
         addTodoState(with: createdTodo)
     }
     
-    func updateTodo(_ todo: Todo) {
-        guard isMine(todo) else { return }
+    func updateTodo(from currentTodo: Todo, to updatedTodo: Todo) {
+        guard isMine(currentTodo), isValidUpdate(from: currentTodo, to: updatedTodo) else { return }
         
-        todoService.update(todo)
+        todoService.update(updatedTodo)
+            
+        updateTodoState(with: updatedTodo)
         
-        updateTodoState(with: todo)
+        // 내가 현재 앱에서 status를 변경하는 경우에만 위젯 업데이트
+        Task {
+            await syncWidgetDataWithUserTodoUseCase.sync(for: currentTodo, updatedTodo: updatedTodo)
+        }
     }
     
     func deleteTodo(_ todo: Todo) {
@@ -171,7 +176,9 @@ extension TodoBoardViewModel {
         
         removeTodoState(for: todo)
     }
-    
+}
+ 
+extension TodoBoardViewModel {
     private func isMine(_ todo: Todo) -> Bool {
         todo.uid == userInfo.uid
     }
@@ -186,5 +193,12 @@ extension TodoBoardViewModel {
     
     private var myTodoList: [Todo]? {
         todosByUser[userInfo.uid]
+    }
+    
+    private func isValidUpdate(from currentTodo: Todo, to updatedTodo: Todo) -> Bool {
+        if currentTodo.status == .inProgress {
+            return updatedTodo.status != .inProgress
+        }
+        return true
     }
 }

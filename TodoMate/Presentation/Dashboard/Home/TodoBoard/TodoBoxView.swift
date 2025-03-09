@@ -16,7 +16,7 @@ struct TodoBoxView: View {
     @Binding var todos: [Todo]
     let createTodo: () async -> Void
     let deleteTodo: (Todo) -> Void
-    let updateTodo: (Todo) -> Void
+    let updateTodo: (Todo, Todo) -> Void
     let moveTodo: (IndexSet, Int) -> Void
     
     var body: some View {
@@ -64,7 +64,7 @@ struct TodoBoxView: View {
             TodoStatusButton(status: todo.status) { newStatus in
                 var newTodo = todo
                 newTodo.status = newStatus
-                updateTodo(newTodo)
+                updateTodo(todo, newTodo)
             }
         }
     }

@@ -162,8 +162,19 @@ struct MockAuthService: AuthServiceType {
     func signOut() async {}
 }
 
-struct MockWidgetDataManager: WidgetDataManagerType {
-    func save(_ todo: WidgetTodo) async {}
-    func remove(_ todoFid: String?) async {}
-    func removeAll () async {}
+final class MockWidgetDataManager: WidgetDataManagerType {
+    var savedTodo: WidgetTodo?
+    var removedFid: String?
+    
+    func save(_ todo: WidgetTodo) async {
+        savedTodo = todo
+    }
+    
+    func remove(_ fid: String) async {
+        removedFid = fid
+    }
+    
+    func removeAll() async {
+        savedTodo = nil
+    }
 }

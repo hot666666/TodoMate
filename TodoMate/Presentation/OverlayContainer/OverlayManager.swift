@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum OverlayType: Identifiable, Equatable {
-    case todo(Todo, isMine: Bool, update: (Todo) -> Void)
+    case todo(Todo, isMine: Bool, update: (Todo, Todo) -> Void)
     case todoDate(anchor: CGPoint, date: Binding<Date>)
     case calendar(User, isMine: Bool)
 

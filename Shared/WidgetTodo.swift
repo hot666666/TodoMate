@@ -14,9 +14,9 @@ class WidgetTodo {
     var date: Date
     var content: String
     var uid: String
-    var fid: String?
+    var fid: String
     
-    init(date: Date, content: String, uid: String, fid: String? = nil) {
+    init(date: Date, content: String, uid: String, fid: String) {
         self.date = date
         self.content = content
         self.uid = uid
