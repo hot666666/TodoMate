@@ -8,6 +8,8 @@
 import SwiftUI
 import Foundation
 
+// TODO: - Todo 중복생성 문제
+
 @Observable
 class TodoBoardViewModel {
     private let calendar = Calendar.current
@@ -48,6 +50,7 @@ class TodoBoardViewModel {
     }
     
     func addTodoState(with todo: Todo) {
+        guard !isTodoAlreadyAdded(todo) else { return }
         todosByUser[todo.uid, default: []].append(todo)
     }
     
