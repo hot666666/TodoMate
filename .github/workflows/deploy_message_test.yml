@@ -1,0 +1,31 @@
+name: Create GitHub Release
+on:
+  push:
+    tags:
+      - "test*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get commit message from tagged commit
+        id: get_commit_message
+        run: |
+          TAG_NAME=${{ github.ref_name }}
+          COMMIT_SHA=$(git rev-list -1 "$TAG_NAME")
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B "$COMMIT_SHA")
+          # base64로 인코딩하여 안전하게 전달
+          SAFE_MESSAGE=$(echo "$COMMIT_MESSAGE" | base64)
+          echo "message=$SAFE_MESSAGE" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Decode commit message for release
+        id: decode_message
+        run: |
+          DECODED_MESSAGE=$(echo "${{ steps.get_commit_message.outputs.message }}" | base64 -d)
+          echo "decoded_message=$DECODED_MESSAGE" >> "$GITHUB_OUTPUT"
