@@ -12,7 +12,7 @@
 		<dict>
 			<key>io.hotcs6.TodoMate</key>
 			<string>TodoMate</string>
-			<key>io.hotcs6.TodoMate.TodoMateWidgetExtension</key>
+			<key>io.hotcs6.TodoMate.TodoMateWidget</key>
 			<string>TodoMateWidget</string>
 		</dict>
 	</dict>
