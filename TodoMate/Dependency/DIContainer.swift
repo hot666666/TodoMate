@@ -25,6 +25,7 @@ final class DIContainer {
     @ObservationIgnored let fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType
     @ObservationIgnored let fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType
     @ObservationIgnored let saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
+    @ObservationIgnored let syncWidgetDataWithUserTodoUseCase: SyncWidgetDataWithUserTodoUseCaseType
     
     init(
         authService: AuthServiceType,
@@ -59,6 +60,7 @@ final class DIContainer {
         self.fetchTodosByUserUseCase = FetchUserGroupTodosWithOrderUseCase(todoService: todoService,
                                                                             todoOrderService: todoOrderService)
         self.saveUserTodosOrderUseCase = SaveUserTodosOrderUseCase(todoOrderService: todoOrderService)
+        self.syncWidgetDataWithUserTodoUseCase = SyncWidgetDataWithUserTodoUseCase(widgetDataManager: widgetDataManager)
     }
     
     init(
@@ -76,7 +78,8 @@ final class DIContainer {
         authenticationUseCase: AuthenticationUseCaseType,
         fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType,
         fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType,
-        saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
+        saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType,
+        manageWidgetDataUseCase: SyncWidgetDataWithUserTodoUseCaseType
     ) {
         self.googleSignInService = googleSignInService
         self.widgetDataManager = widgetDataManager
@@ -93,6 +96,7 @@ final class DIContainer {
         self.fetchAuthenticatedUserUseCase = fetchAuthenticatedUserUseCase
         self.fetchTodosByUserUseCase = fetchTodosByUserUseCase
         self.saveUserTodosOrderUseCase = saveUserTodosOrderUseCase
+        self.syncWidgetDataWithUserTodoUseCase = manageWidgetDataUseCase
     }
     
     convenience init(
@@ -110,7 +114,8 @@ final class DIContainer {
         testAuthenticationUseCase: AuthenticationUseCaseType = StubAuthenticationUseCase(),
         testFetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType = StubFetchAuthenticatedUserUseCase(),
         testFetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType = StubFetchUserGroupTodosWithOrderUseCase(),
-        testSaveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType = StubSaveUserTodosOrderUseCase()
+        testSaveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType = StubSaveUserTodosOrderUseCase(),
+        testManageWidgetDataUseCase: SyncWidgetDataWithUserTodoUseCaseType = StubSyncWidgetDataWithUserTodoUseCase()
     ) {
         self.init(
             authService: testAuthService,
@@ -127,7 +132,8 @@ final class DIContainer {
             authenticationUseCase: testAuthenticationUseCase,
             fetchAuthenticatedUserUseCase: testFetchAuthenticatedUserUseCase,
             fetchTodosByUserUseCase: testFetchTodosByUserUseCase,
-            saveUserTodosOrderUseCase: testSaveUserTodosOrderUseCase
+            saveUserTodosOrderUseCase: testSaveUserTodosOrderUseCase,
+            manageWidgetDataUseCase: testManageWidgetDataUseCase
         )
     }
 }
