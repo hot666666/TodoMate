@@ -1,9 +1,8 @@
 name: Deploy message test
 on:
   push:
-    tags:
-      - "test*"
-
+    branches:
+      - build-workflow
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -13,19 +12,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get commit message from tagged commit
+      - name: Get commit message from latest commit
         id: get_commit_message
         run: |
-          TAG_NAME=${{ github.ref_name }}
-          COMMIT_SHA=$(git rev-list -1 "$TAG_NAME")
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B "$COMMIT_SHA")
-          # base64로 인코딩하여 안전하게 전달
-          SAFE_MESSAGE=$(echo "$COMMIT_MESSAGE" | base64)
+          # 최신 커밋의 메시지를 가져옴
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B "${{ github.sha }}")
+          # 줄바꿈을 제거하고 단일 줄로 변환
+          SAFE_MESSAGE=$(echo "$COMMIT_MESSAGE" | tr '\n' ' ' | sed 's/  */ /g')
           echo "message=$SAFE_MESSAGE" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: Decode commit message for release
-        id: decode_message
+      - name: Debug commit message
         run: |
-          DECODED_MESSAGE=$(echo "${{ steps.get_commit_message.outputs.message }}" | base64 -d)
-          echo "decoded_message=$DECODED_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "Processed message: ${{ steps.get_commit_message.outputs.message }}"
