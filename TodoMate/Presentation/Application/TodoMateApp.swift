@@ -49,7 +49,7 @@ struct TodoMateApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .onChange(of: scenePhase) { _, newPhase in
-            guard newPhase == .active else { return }
+            guard newPhase != .active else { return }
             try? sharedModelContainer.mainContext.save()
             WidgetCenter.shared.reloadAllTimelines()
         }
