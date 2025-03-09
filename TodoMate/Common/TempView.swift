@@ -1,6 +1,15 @@
+//
+//  TempWidgetTestView.swift
+//  TodoMate
+//
+//  Created by hs on 3/9/25.
+//
+
+import SwiftUI
+import SwiftData
 import WidgetKit
 
-struct TempView: View {
+struct TempWidgetTestView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [WidgetTodo]
 
