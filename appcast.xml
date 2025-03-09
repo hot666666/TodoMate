@@ -5,10 +5,10 @@
     <description>MacOS용 최신 업데이트</description>
     <link>https://github.com/hot666666/TodoMate/releases</link>
     <item>
-      <title>Version 2.2.2</title>
-      <description>새로운 업데이트 가능: TodoMate 버전 2.2.2.</description>
-      <pubDate>Sun, 09 Mar 2025 08:24:07 +0000</pubDate>
-      <enclosure sparkle:shortVersionString="2.2.2" sparkle:version="80" sparkle:sha256="a342db8f093bbb5609f31ca727f0c48343dc79d60769bdac37c040928940cde4" sparkle:edSignature="C8I33Lboj8o02EZQ6LtLwxXzSiHeYfsBKAci6S7a/GkvzEWMW7DmrbZjqffgglBaFdczaV6K5/9+bCgjxq8WDQ==" url="https://github.com/hot666666/TodoMate/releases/download/2.2.2/TodoMate.app.zip" length="12035531" type="application/zip"/>
+      <title>Version 2.2.3</title>
+      <description>새로운 업데이트 가능: TodoMate 버전 2.2.3.</description>
+      <pubDate>Sun, 09 Mar 2025 11:29:05 +0000</pubDate>
+      <enclosure sparkle:shortVersionString="2.2.3" sparkle:version="81" sparkle:sha256="bdcd3ae3ae096bace2d84cb518fcbbaf9bdf9235616270959749b871a5dff718" sparkle:edSignature="oPheYdPG6XoWylYZItZoggG+3EkrklZpNNKrWR5GAR5PPNk3vDHhZ5tnMPootwnwc8EDOhTIPaoBc1Bzvzg6AA==" url="https://github.com/hot666666/TodoMate/releases/download/2.2.3/TodoMate.app.zip" length="12047027" type="application/zip"/>
     </item>
   </channel>
 </rss>
