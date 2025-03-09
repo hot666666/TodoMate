@@ -1,4 +1,4 @@
-name: Create GitHub Release
+name: Deploy message test
 on:
   push:
     tags:
