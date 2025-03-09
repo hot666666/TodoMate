@@ -87,6 +87,7 @@
 		45C1A58E2D7D707E005293BD /* WidgetTodo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453FC0DA2CAE805400574437 /* WidgetTodo.swift */; };
 		45C1A5912D7D70C7005293BD /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		45C1A59B2D7D7D6E005293BD /* TempView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C1A59A2D7D7D6E005293BD /* TempView.swift */; };
+		45C1A59D2D7DA3E6005293BD /* SyncWidgetDataWithUserTodoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C1A59C2D7DA3E6005293BD /* SyncWidgetDataWithUserTodoUseCase.swift */; };
 		45CE6CB52C7178620053835E /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB42C7178600053835E /* Chat.swift */; };
 		45CE6CBA2C7181DB0053835E /* FirestoreChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB92C7181DB0053835E /* FirestoreChatRepository.swift */; };
 		45CE6CBC2C71825B0053835E /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBB2C71825B0053835E /* ChatService.swift */; };
@@ -225,6 +226,7 @@
 		45C1A4932D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveUserTodosOrderUseCase.swift; sourceTree = "<group>"; };
 		45C1A57A2D7D704A005293BD /* TodoMateWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TodoMateWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		45C1A59A2D7D7D6E005293BD /* TempView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempView.swift; sourceTree = "<group>"; };
+		45C1A59C2D7DA3E6005293BD /* SyncWidgetDataWithUserTodoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncWidgetDataWithUserTodoUseCase.swift; sourceTree = "<group>"; };
 		45CA5CF62C9C398E00285EB4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		45CA5CF82C9C398E00285EB4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		45CE6CB42C7178600053835E /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
@@ -620,6 +622,7 @@
 				45E0A1152D7984C6000FDC24 /* AuthenticationUseCase.swift */,
 				45C1A4912D7D08C0005293BD /* FetchUserGroupTodosWithOrderUseCase.swift */,
 				45C1A4932D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift */,
+				45C1A59C2D7DA3E6005293BD /* SyncWidgetDataWithUserTodoUseCase.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -880,6 +883,7 @@
 				4538446A2D4F3E3B002B8721 /* TodoCalendarView.swift in Sources */,
 				45E0A0B52D78190B000FDC24 /* TodoOrderService.swift in Sources */,
 				45C1A4942D7D08DC005293BD /* SaveUserTodosOrderUseCase.swift in Sources */,
+				45C1A59D2D7DA3E6005293BD /* SyncWidgetDataWithUserTodoUseCase.swift in Sources */,
 				451525802D510CFE006F6847 /* CustomList.swift in Sources */,
 				454870A62D72CA340038973C /* WidgetDataManager.swift in Sources */,
 				4560E3C32D539B7D008B09AA /* UploadProviderType.swift in Sources */,
