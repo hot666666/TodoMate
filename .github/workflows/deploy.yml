@@ -11,8 +11,16 @@ jobs:
     runs-on: macos-15
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get commit message from tagged commit
+        id: get_commit_message
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B ${{ github.sha }})
+          echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
       - name: Set VERSION, RUN_NUMBER, APP_NAME, TEAM_ID
         run: |
@@ -141,6 +149,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ env.APP_ZIP }}
+          body: ${{ steps.get_commit_message.outputs.message }}
 
       - name: Generate appcast.xml
         run: |
