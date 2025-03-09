@@ -19,8 +19,12 @@ jobs:
       - name: Get commit message from tagged commit
         id: get_commit_message
         run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B ${{ github.sha }})
-          echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          # 최신 커밋의 메시지를 가져옴
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B "${{ github.sha }}")
+          # 줄바꿈을 제거하고 단일 줄로 변환
+          SAFE_MESSAGE=$(echo "$COMMIT_MESSAGE" | tr '\n' ' ' | sed 's/  */ /g')
+          echo "message=$SAFE_MESSAGE" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - name: Set VERSION, RUN_NUMBER, APP_NAME, TEAM_ID
         run: |
