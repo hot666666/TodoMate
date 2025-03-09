@@ -59,6 +59,7 @@ struct TodoBoardView: View {
             updateTodo: viewModel.updateTodo,
             moveTodo: viewModel.moveTodo
         )
+        .padding(.horizontal)
     }
     
     @ViewBuilder
