@@ -32,10 +32,8 @@ struct GroupDashboardView: View {
                     home
                 case .profile:
                     profile
-//#if DEBUG || PREVIEW
                 case .appManagement:
                     appManagement
-//#endif
                 }
             })
         .task {
@@ -66,19 +64,15 @@ struct GroupDashboardView: View {
         ProfileView(viewModel: .init(container: container, userInfo: viewModel.userInfo, updateGroup: viewModel.fetchGroupUser))
     }
     
-//#if DEBUG || PREVIEW
     private var appManagement: some View {
         AppManagementView()
     }
-//#endif
 }
 extension GroupDashboardView {
     private enum TabNaviType: String, CaseIterable {
         case home = "홈"
         case profile = "계정"
-//#if DEBUG || PREVIEW
         case appManagement = "앱 관리"
-//#endif
         
         var label: Label<Text, Image> {
             switch self {
@@ -86,10 +80,8 @@ extension GroupDashboardView {
                 return Label(self.rawValue, systemImage: "house")
             case .profile:
                 return Label(self.rawValue, systemImage: "person.crop.circle")
-//#if DEBUG || PREVIEW
             case .appManagement:
                 return Label(self.rawValue, systemImage: "gearshape")
-//#endif
             }
         }
     }
