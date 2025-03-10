@@ -10,39 +10,22 @@ import SwiftData
 import WidgetKit
 import FirebaseCore
 
-extension Notification.Name {
-    static let shortcutAction = Notification.Name("todoMateShortcutAction")
-}
-
-enum ShortcutAction: String {
-    case createUserTodo
-    case closeOverlay
-}
-
 @main
 struct TodoMateApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     
-    init() {
-        /// 앱 시작 시 가장 처음 Firebase 초기화 진행 보장
-        FirebaseApp.configure()
-    }
+    private let windowDimensions: WindowDimensions
+    private let sharedModelContainer: ModelContainer
     
-    private var sharedModelContainer: ModelContainer = {
-        let schema = Schema([WidgetTodo.self])
-#if DEBUG || PREVIEW
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-#else
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-#endif
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    init() {
+        /// Firebase 초기화 - AppDelegate로 초기화 시, 가장 우선 초기화 보장 x
+        FirebaseApp.configure()
+        
+        self.windowDimensions = WindowDimensions()
+        
+        self.sharedModelContainer = Self.createModelContainer()
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -57,28 +40,57 @@ struct TodoMateApp: App {
             }
             CommandMenu("단축키") {
                 Button("Todo 생성") {
-                    print("Posting createUserTodo")
-                    NotificationCenter.default.post(name: .shortcutAction,
-                                                    object: nil,
-                                                    userInfo: ["action": ShortcutAction.createUserTodo.rawValue])
+                    postNotification(action: .createUserTodo)
                 }
                 .keyboardShortcut("n")
                 
                 Button("오버레이 닫기") {
-                    print("Posting closeOverlay")
-                    NotificationCenter.default.post(name: .shortcutAction,
-                                                    object: nil,
-                                                    userInfo: ["action": ShortcutAction.closeOverlay.rawValue])
+                    postNotification(action: .closeOverlay)
                 }
                 .keyboardShortcut(.escape)
             }
         }
-        .windowStyle(.hiddenTitleBar)
         .onChange(of: scenePhase) { _, newPhase in
-            guard newPhase != .active else { return }
-            try? sharedModelContainer.mainContext.save()
-            WidgetCenter.shared.reloadAllTimelines()
+            handleScenePhaseChange(newPhase)
         }
+        .defaultSize(width: windowDimensions.width, height: windowDimensions.height)
+        .defaultPosition(.center)
+        .windowStyle(.hiddenTitleBar)
+    }
+    
+    // MARK: - Static Helpers
+    
+    private static func createModelContainer() -> ModelContainer {
+        let schema = Schema([WidgetTodo.self])
+        
+        #if DEBUG || PREVIEW
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        #else
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        #endif
+        
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func postNotification(action: ShortcutAction) {
+        print("Posting \(action)")
+        NotificationCenter.default.post(
+            name: .shortcutAction,
+            object: nil,
+            userInfo: ["action": action.rawValue]
+        )
+    }
+    
+    private func handleScenePhaseChange(_ newPhase: ScenePhase) {
+        guard newPhase != .active else { return }
+        try? sharedModelContainer.mainContext.save()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 
