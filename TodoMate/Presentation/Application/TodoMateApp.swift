@@ -10,6 +10,15 @@ import SwiftData
 import WidgetKit
 import FirebaseCore
 
+extension Notification.Name {
+    static let shortcutAction = Notification.Name("todoMateShortcutAction")
+}
+
+enum ShortcutAction: String {
+    case createUserTodo
+    case closeOverlay
+}
+
 @main
 struct TodoMateApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -45,6 +54,23 @@ struct TodoMateApp: App {
                 Button("업데이트") {
                     appDelegate.checkForUpdates()
                 }
+            }
+            CommandMenu("단축키") {
+                Button("Todo 생성") {
+                    print("Posting createUserTodo")
+                    NotificationCenter.default.post(name: .shortcutAction,
+                                                    object: nil,
+                                                    userInfo: ["action": ShortcutAction.createUserTodo.rawValue])
+                }
+                .keyboardShortcut("n")
+                
+                Button("오버레이 닫기") {
+                    print("Posting closeOverlay")
+                    NotificationCenter.default.post(name: .shortcutAction,
+                                                    object: nil,
+                                                    userInfo: ["action": ShortcutAction.closeOverlay.rawValue])
+                }
+                .keyboardShortcut(.escape)
             }
         }
         .windowStyle(.hiddenTitleBar)

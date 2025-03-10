@@ -40,13 +40,14 @@ struct MainView: View {
             }
             .padding(.top)
         }
-
     }
 }
 
 #Preview {
-    MainView(userInfo: .stub)
-        .environment(DIContainer.stub)
-        .environment(AuthManager.stub)
-        .frame(width: 400, height: 400)
+    OverlayContainer {
+        MainView(userInfo: .stub)
+            .environment(DIContainer.stub)
+            .environment(AuthManager.stub)
+            .frame(width: 400, height: 400)
+    }
 }

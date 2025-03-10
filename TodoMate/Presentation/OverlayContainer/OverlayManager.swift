@@ -11,15 +11,21 @@ enum OverlayType: Identifiable, Equatable {
     case todo(Todo, isMine: Bool, update: (Todo, Todo) -> Void)
     case todoDate(anchor: CGPoint, date: Binding<Date>)
     case calendar(User, isMine: Bool)
-
-    var id: String {
+    
+    enum TypeIdentifier {
+        case todo
+        case todoDate
+        case calendar
+    }
+    
+    var id: TypeIdentifier {
         switch self {
-        case .todo(let todo, _, _):
-            return "todoSheet-\(todo.fid)"
-        case .todoDate(let anchor, _):
-            return "todoSheetDate-(\(anchor.x),\(anchor.y))"
-        case .calendar(let user, _):
-            return "calendar-\(user.uid)"
+        case .todo(_, _, _):
+            return .todo
+        case .todoDate(_, _):
+            return .todoDate
+        case .calendar(_, _):
+            return .calendar
         }
     }
     
@@ -31,6 +37,13 @@ enum OverlayType: Identifiable, Equatable {
 @Observable
 class OverlayManager {
     var stack: [OverlayType] = []
+    
+    @ObservationIgnored var isPushable: Bool {
+        if let lastOverlay = stack.last, lastOverlay.id != .calendar {
+            return false
+        }
+        return true
+    }
 
     func push(_ overlay: OverlayType) {
         /// TextEditor는 disabled 상태에서도 포커스를 받아서 키보드 입력을 받아들이는 문제가 있어서, 직접 포커스를 해제
