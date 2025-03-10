@@ -42,12 +42,17 @@ final class WidgetDataManager: WidgetDataManagerType {
     
     @MainActor
     func remove(_ todoFid: String) async {
-        let context = modelContainer.mainContext
-        
         let fetchDescriptor = FetchDescriptor<WidgetTodo>(predicate: #Predicate { $0.fid == todoFid })
-        if let existingEntity = try? context.fetch(fetchDescriptor).first {
+        do {
+            let context = modelContainer.mainContext
+            guard let existingEntity = try context.fetch(fetchDescriptor).first else {
+                print("No TodoEntity found with fid \(todoFid)")
+                return
+            }
             context.delete(existingEntity)
             print("TodoEntity removed")
+        } catch {
+            print("Error removing TodoEntity: \(error.localizedDescription)")
         }
     }
     
