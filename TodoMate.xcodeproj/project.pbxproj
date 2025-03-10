@@ -68,6 +68,7 @@
 		457B43C62C6DFFD00049334A /* FirestoreReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43C52C6DFFCA0049334A /* FirestoreReference.swift */; };
 		457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		459198732D7ED0E100A4C6CA /* AppManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459198722D7ED0E100A4C6CA /* AppManagementView.swift */; };
+		459198752D7EE1FA00A4C6CA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 459198742D7EE1FA00A4C6CA /* FirebaseFirestore */; };
 		459325312CA0F1F000A95193 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 459325302CA0F1F000A95193 /* Assets.xcassets */; };
 		45962CF32D491ABE00089A48 /* GroupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF22D491ABB00089A48 /* GroupService.swift */; };
 		45962CF52D491BF300089A48 /* FirestoreGroupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF42D491BEA00089A48 /* FirestoreGroupRepository.swift */; };
@@ -314,6 +315,7 @@
 				451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */,
 				451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */,
 				451DEDAB2D3CDDA400A20417 /* FirebaseAuth in Frameworks */,
+				459198752D7EE1FA00A4C6CA /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -784,6 +786,7 @@
 				451DEDB22D3CDE0D00A20417 /* FirebaseCore */,
 				451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
+				459198742D7EE1FA00A4C6CA /* FirebaseFirestore */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -1584,6 +1587,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 451DEDA62D3CDCEF00A20417 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		459198742D7EE1FA00A4C6CA /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 451DEDA92D3CDDA400A20417 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 		45962D2B2D4B128300089A48 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
