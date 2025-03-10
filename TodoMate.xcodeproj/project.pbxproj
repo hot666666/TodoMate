@@ -88,6 +88,7 @@
 		45C1A5912D7D70C7005293BD /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		45C1A59B2D7D7D6E005293BD /* TempView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C1A59A2D7D7D6E005293BD /* TempView.swift */; };
 		45C1A59D2D7DA3E6005293BD /* SyncWidgetDataWithUserTodoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C1A59C2D7DA3E6005293BD /* SyncWidgetDataWithUserTodoUseCase.swift */; };
+		45C9DDA92D7EAC3F00836CFF /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 45C9DDA82D7EAC3F00836CFF /* FirebaseFirestore */; };
 		45CE6CB52C7178620053835E /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB42C7178600053835E /* Chat.swift */; };
 		45CE6CBA2C7181DB0053835E /* FirestoreChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CB92C7181DB0053835E /* FirestoreChatRepository.swift */; };
 		45CE6CBC2C71825B0053835E /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBB2C71825B0053835E /* ChatService.swift */; };
@@ -96,7 +97,6 @@
 		45E09FF72D75696F000FDC24 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E09FF62D75696C000FDC24 /* HomeView.swift */; };
 		45E0A0072D7574AE000FDC24 /* GoogleUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A0062D7574AE000FDC24 /* GoogleUser.swift */; };
 		45E0A0092D75897C000FDC24 /* TodoBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A0082D75897C000FDC24 /* TodoBoxView.swift */; };
-		45E0A00B2D75EACA000FDC24 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 45E0A00A2D75EACA000FDC24 /* FirebaseFirestore */; };
 		45E0A0B32D7818E2000FDC24 /* TodoOrderServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A0B22D7818E2000FDC24 /* TodoOrderServiceType.swift */; };
 		45E0A0B52D78190B000FDC24 /* TodoOrderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A0B42D78190B000FDC24 /* TodoOrderService.swift */; };
 		45E0A1112D798094000FDC24 /* GoogleSignInServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A1102D798094000FDC24 /* GoogleSignInServiceType.swift */; };
@@ -309,7 +309,7 @@
 				451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */,
 				451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */,
 				451DEDAB2D3CDDA400A20417 /* FirebaseAuth in Frameworks */,
-				45E0A00B2D75EACA000FDC24 /* FirebaseFirestore in Frameworks */,
+				45C9DDA92D7EAC3F00836CFF /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -777,7 +777,7 @@
 				451DEDB22D3CDE0D00A20417 /* FirebaseCore */,
 				451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
-				45E0A00A2D75EACA000FDC24 /* FirebaseFirestore */,
+				45C9DDA82D7EAC3F00836CFF /* FirebaseFirestore */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -1581,7 +1581,7 @@
 			package = 45962D2A2D4B128300089A48 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
 		};
-		45E0A00A2D75EACA000FDC24 /* FirebaseFirestore */ = {
+		45C9DDA82D7EAC3F00836CFF /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 451DEDA92D3CDDA400A20417 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
