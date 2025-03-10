@@ -6,13 +6,10 @@
 //
 
 import SwiftUI
-import Combine
 
 struct HomeView: View {
     @Environment(DIContainer.self) private var container
     @Environment(OverlayManager.self) private var overlayManager
-    /// debounce를 위한 cancellable
-    @State private var cancellable: AnyCancellable?
     
     // TODO: - GroupDashboard에서 그룹 유저를 패치하는 문제
     let userInfo: AuthenticatedUser
@@ -38,9 +35,6 @@ struct HomeView: View {
                 await self.handleShortcutAction(action)
             }
             
-        }
-        .onAppear {
-            cancellable = nil
         }
     }
     
