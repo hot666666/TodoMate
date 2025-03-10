@@ -53,6 +53,13 @@ final class DIContainer {
         self.authService = authService
         
         // UseCases
+#if PREVIEW
+        self.authenticationUseCase = StubAuthenticationUseCase()
+        self.fetchAuthenticatedUserUseCase = StubFetchAuthenticatedUserUseCase()
+        self.fetchTodosByUserUseCase = StubFetchUserGroupTodosWithOrderUseCase()
+        self.saveUserTodosOrderUseCase = StubSaveUserTodosOrderUseCase()
+        self.syncWidgetDataWithUserTodoUseCase = StubSyncWidgetDataWithUserTodoUseCase()
+#else
         self.authenticationUseCase = AuthenticationUseCase(authService: authService,
                                                            userInfoService: userInfoService,
                                                            widgetDataManager: widgetDataManager)
@@ -61,6 +68,7 @@ final class DIContainer {
                                                                             todoOrderService: todoOrderService)
         self.saveUserTodosOrderUseCase = SaveUserTodosOrderUseCase(todoOrderService: todoOrderService)
         self.syncWidgetDataWithUserTodoUseCase = SyncWidgetDataWithUserTodoUseCase(widgetDataManager: widgetDataManager)
+#endif
     }
     
     init(

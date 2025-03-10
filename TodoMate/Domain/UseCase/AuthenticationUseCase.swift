@@ -51,6 +51,6 @@ class StubAuthenticationUseCase: AuthenticationUseCaseType {
     
     func signIn() async -> Result<AuthenticatedUser, AuthenticationUseCaseError> {
         print("StubAuthenticationUseCase: signIn")
-        return .success(.stub)
+        return .success(.hasGroupStub)
     }
 }
