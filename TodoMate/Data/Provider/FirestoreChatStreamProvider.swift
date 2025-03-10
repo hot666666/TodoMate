@@ -64,9 +64,9 @@ extension FirestoreChatStreamProvider {
                 while !Task.isCancelled {
                     do {
                         try await Task.sleep(nanoseconds: 10_000_000_000)
-                        print("[FirestoreChatStreamProvider] - Listening...")
                     } catch {
                         // 취소 에러 발생 시 루프 종료
+                        print("[FirestoreChatStreamProvider] - Listening error")
                         break
                     }
                 }

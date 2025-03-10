@@ -67,6 +67,6 @@ final class FetchUserGroupTodosWithOrderUseCase: FetchUserGroupTodosWithOrderUse
 class StubFetchUserGroupTodosWithOrderUseCase: FetchUserGroupTodosWithOrderUseCaseType {
     func execute(for userInfo: AuthenticatedUser) async throws -> [String : [Todo]] {
         let todos = Todo.stub
-        return ["uid": todos]
+        return Dictionary(grouping: todos, by: { $0.uid })
     }
 }
