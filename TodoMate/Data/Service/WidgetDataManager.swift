@@ -34,6 +34,7 @@ final class WidgetDataManager: WidgetDataManagerType {
                 return
             }
             context.insert(todo)
+            try context.save()
             print("New TodoEntity inserted with fid \(todo.fid)")
         } catch {
             print("Error checking for existing TodoEntity: \(error.localizedDescription)")
@@ -50,6 +51,7 @@ final class WidgetDataManager: WidgetDataManagerType {
                 return
             }
             context.delete(existingEntity)
+            try context.save()
             print("TodoEntity removed")
         } catch {
             print("Error removing TodoEntity: \(error.localizedDescription)")
