@@ -11,6 +11,7 @@ import Combine
 struct HomeView: View {
     @Environment(DIContainer.self) private var container
     @Environment(OverlayManager.self) private var overlayManager
+    /// debounce를 위한 cancellable
     @State private var cancellable: AnyCancellable?
     
     // TODO: - GroupDashboard에서 그룹 유저를 패치하는 문제
@@ -26,16 +27,17 @@ struct HomeView: View {
             }
             .padding(.horizontal)
         }
-        .onReceive(NotificationCenter.default.publisher(for: .createUserTodoTriggered)) { _ in
-            /// Debounce 적용 (0.5초 내 중복 호출 무시)
-            cancellable?.cancel()
-            cancellable = Just(())
-                .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
-                .sink { _ in
-                    Task {
-                        await createUserTodo()
-                    }
-                }
+        .onReceive(NotificationCenter.default.publisher(for: .shortcutAction)) { notification in
+            guard let userInfo = notification.userInfo,
+                  let actionRaw = userInfo["action"] as? String,
+                  let action = ShortcutAction(rawValue: actionRaw) else {
+                return
+            }
+            
+            Task {
+                await self.handleShortcutAction(action)
+            }
+            
         }
         .onAppear {
             cancellable = nil
@@ -43,10 +45,23 @@ struct HomeView: View {
     }
     
     @MainActor
-    private func createUserTodo() async {
-        guard let craetedTodo = await container.todoService.create(from: .init(uid: userInfo.uid)) else { return }
-        overlayManager.push(.todo(craetedTodo, isMine: true, update: { _, updatedTodo in
-            container.todoService.update(updatedTodo)
-        }))
+    private func handleShortcutAction(_ action: ShortcutAction) async {
+        switch action {
+        case .createUserTodo:
+            print("Handling createUserTodo")
+            guard
+                overlayManager.isPushable,
+                let createdTodo = await container.todoService.create(from: .init(uid: userInfo.uid))
+            else {
+                print("Could not create todo")
+                return
+            }
+            overlayManager.push(.todo(createdTodo, isMine: true, update: { _, updatedTodo in
+                container.todoService.update(updatedTodo)
+            }))
+        case .closeOverlay:
+            print("Handling closeOverlay")
+            overlayManager.pop()
+        }
     }
 }
