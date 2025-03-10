@@ -10,6 +10,10 @@ import SwiftData
 import WidgetKit
 import FirebaseCore
 
+extension NSNotification.Name {
+    static let createUserTodoTriggered = Notification.Name("createUserTodoTriggered")
+}
+
 @main
 struct TodoMateApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -45,6 +49,12 @@ struct TodoMateApp: App {
                 Button("업데이트") {
                     appDelegate.checkForUpdates()
                 }
+            }
+            CommandMenu("Todo") {
+                Button("Todo 생성") {
+                    NotificationCenter.default.post(name: .createUserTodoTriggered, object: nil)
+                }
+                .keyboardShortcut("n")
             }
         }
         .windowStyle(.hiddenTitleBar)
