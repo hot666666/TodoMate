@@ -89,6 +89,7 @@ struct TodoMateApp: App {
     
     private func handleScenePhaseChange(_ newPhase: ScenePhase) {
         guard newPhase != .active else { return }
+        print("Save ModelContainer and Reload widget timeline")
         try? sharedModelContainer.mainContext.save()
         WidgetCenter.shared.reloadAllTimelines()
     }
