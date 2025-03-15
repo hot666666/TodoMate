@@ -30,6 +30,8 @@ struct GroupDashboardView: View {
         switch selectedItem {
         case .home:
           home
+        case .message:
+          message
         case .profile:
           profile
         case .appManagement:
@@ -59,8 +61,15 @@ struct GroupDashboardView: View {
 
     HomeView(userInfo: viewModel.userInfo, groupUsers: viewModel.users)
   }
-
+  
   @ViewBuilder
+  private var message: some View {
+    /// .windowStyle(.hiddenTitleBar) 버그로 인해 추가
+    Color.clear.frame(height: 0)
+    
+    MessageView(messageStore: MessageStore.stub, userInfo: viewModel.userInfo)
+  }
+
   private var profile: some View {
     ProfileView(viewModel: .init(
       container: container,
@@ -77,6 +86,7 @@ struct GroupDashboardView: View {
 extension GroupDashboardView {
   private enum TabNaviType: String, CaseIterable {
     case home = "홈"
+    case message = "메모"
     case profile = "계정"
     case appManagement = "앱 관리"
 
@@ -88,6 +98,8 @@ extension GroupDashboardView {
         return Label(rawValue, systemImage: "person.crop.circle")
       case .appManagement:
         return Label(rawValue, systemImage: "gearshape")
+      case .message:
+        return Label(rawValue, systemImage: "note")
       }
     }
   }
