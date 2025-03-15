@@ -69,6 +69,13 @@
 		457B43CD2C6F3DA10049334A /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457B43CC2C6F3D9C0049334A /* Color+Extension.swift */; };
 		457C68622D85926F00E91E3D /* StubFirestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68612D85926F00E91E3D /* StubFirestore.swift */; };
 		457C68652D8594BF00E91E3D /* SharedModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68642D8594BF00E91E3D /* SharedModelContainer.swift */; };
+		457C68672D859AFC00E91E3D /* MessageStreamProviderType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68662D859AFC00E91E3D /* MessageStreamProviderType.swift */; };
+		457C68692D859B1400E91E3D /* FirestoreMessageStreamProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68682D859B1400E91E3D /* FirestoreMessageStreamProvider.swift */; };
+		457C686B2D859B3000E91E3D /* MessageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C686A2D859B3000E91E3D /* MessageRepository.swift */; };
+		457C686F2D859B7900E91E3D /* MessageDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C686E2D859B7900E91E3D /* MessageDTO.swift */; };
+		457C68712D859B9400E91E3D /* MessageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68702D859B9400E91E3D /* MessageModel.swift */; };
+		457C68742D859BAF00E91E3D /* MessageStoreType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68732D859BAF00E91E3D /* MessageStoreType.swift */; };
+		457C68762D859C9C00E91E3D /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68752D859C9C00E91E3D /* MessageView.swift */; };
 		459198732D7ED0E100A4C6CA /* AppManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459198722D7ED0E100A4C6CA /* AppManagementView.swift */; };
 		459198752D7EE1FA00A4C6CA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 459198742D7EE1FA00A4C6CA /* FirebaseFirestore */; };
 		459325312CA0F1F000A95193 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 459325302CA0F1F000A95193 /* Assets.xcassets */; };
@@ -99,6 +106,7 @@
 		45CE6CBC2C71825B0053835E /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBB2C71825B0053835E /* ChatService.swift */; };
 		45CE6CBE2C7190D40053835E /* ChatDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CE6CBD2C7190D20053835E /* ChatDTO.swift */; };
 		45D444D82D53371F00378324 /* TodoOrderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D444D72D53371F00378324 /* TodoOrderRepository.swift */; };
+		45DE54702D859DA700E08637 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 45DE546F2D859DA700E08637 /* MarkdownUI */; };
 		45E09FF72D75696F000FDC24 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E09FF62D75696C000FDC24 /* HomeView.swift */; };
 		45E0A0072D7574AE000FDC24 /* GoogleUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A0062D7574AE000FDC24 /* GoogleUser.swift */; };
 		45E0A0092D75897C000FDC24 /* TodoBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45E0A0082D75897C000FDC24 /* TodoBoxView.swift */; };
@@ -218,6 +226,13 @@
 		457C68602D8578C800E91E3D /* .swiftformat */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
 		457C68612D85926F00E91E3D /* StubFirestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubFirestore.swift; sourceTree = "<group>"; };
 		457C68642D8594BF00E91E3D /* SharedModelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedModelContainer.swift; sourceTree = "<group>"; };
+		457C68662D859AFC00E91E3D /* MessageStreamProviderType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageStreamProviderType.swift; sourceTree = "<group>"; };
+		457C68682D859B1400E91E3D /* FirestoreMessageStreamProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreMessageStreamProvider.swift; sourceTree = "<group>"; };
+		457C686A2D859B3000E91E3D /* MessageRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageRepository.swift; sourceTree = "<group>"; };
+		457C686E2D859B7900E91E3D /* MessageDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDTO.swift; sourceTree = "<group>"; };
+		457C68702D859B9400E91E3D /* MessageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageModel.swift; sourceTree = "<group>"; };
+		457C68732D859BAF00E91E3D /* MessageStoreType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageStoreType.swift; sourceTree = "<group>"; };
+		457C68752D859C9C00E91E3D /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
 		459198722D7ED0E100A4C6CA /* AppManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppManagementView.swift; sourceTree = "<group>"; };
 		459325302CA0F1F000A95193 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		45962CF22D491ABB00089A48 /* GroupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupService.swift; sourceTree = "<group>"; };
@@ -318,6 +333,7 @@
 				45962D2C2D4B128300089A48 /* Sparkle in Frameworks */,
 				451DEDB52D3CDE5300A20417 /* GoogleSignInSwift in Frameworks */,
 				451DEDA82D3CDD2300A20417 /* GoogleSignIn in Frameworks */,
+				45DE54702D859DA700E08637 /* MarkdownUI in Frameworks */,
 				451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */,
 				451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */,
 				451DEDAB2D3CDDA400A20417 /* FirebaseAuth in Frameworks */,
@@ -361,6 +377,7 @@
 		4526B0CB2D48A18A00DC90F5 /* Dashboard */ = {
 			isa = PBXGroup;
 			children = (
+				457C68752D859C9C00E91E3D /* MessageView.swift */,
 				459198722D7ED0E100A4C6CA /* AppManagementView.swift */,
 				4526B0CC2D48A1B200DC90F5 /* GroupDashboardView.swift */,
 				4526B0CE2D48A1C400DC90F5 /* GroupDashboardViewModel.swift */,
@@ -372,6 +389,7 @@
 			isa = PBXGroup;
 			children = (
 				4560E3C12D539ABE008B09AA /* Type */,
+				457C68682D859B1400E91E3D /* FirestoreMessageStreamProvider.swift */,
 				4526B0AF2D420F0F00DC90F5 /* FirestoreTodoStreamProvider.swift */,
 				451DEDFC2D40CC6B00A20417 /* FirestoreChatStreamProvider.swift */,
 				45322B492C8449520097D530 /* StorageUploadProvider.swift */,
@@ -498,6 +516,7 @@
 		454871912D755C740038973C /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
+				457C68722D859BAD00E91E3D /* Store */,
 				454871952D755D960038973C /* Model */,
 				4541C9B22D2D5033006A9C60 /* Application */,
 				45E09FF32D756378000FDC24 /* Main */,
@@ -524,6 +543,7 @@
 		454871942D755D400038973C /* DTO */ = {
 			isa = PBXGroup;
 			children = (
+				457C686E2D859B7900E91E3D /* MessageDTO.swift */,
 				45E0A0062D7574AE000FDC24 /* GoogleUser.swift */,
 				457B43BD2C6DF56A0049334A /* UserDTO.swift */,
 				45ED09032C6ADDA2005A8096 /* TodoDTO.swift */,
@@ -537,6 +557,7 @@
 		454871952D755D960038973C /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				457C68702D859B9400E91E3D /* MessageModel.swift */,
 				45ACB00D2C6B929F005F4B17 /* CalendarDay.swift */,
 				453D37502C7C8450003835CE /* TodoTransferData.swift */,
 			);
@@ -566,6 +587,7 @@
 				4560E3C62D539C17008B09AA /* ChatStreamProviderType.swift */,
 				4560E3C42D539BAF008B09AA /* TodoStreamProviderType.swift */,
 				4560E3C22D539B7D008B09AA /* UploadProviderType.swift */,
+				457C68662D859AFC00E91E3D /* MessageStreamProviderType.swift */,
 			);
 			path = Type;
 			sourceTree = "<group>";
@@ -576,6 +598,14 @@
 				457C68642D8594BF00E91E3D /* SharedModelContainer.swift */,
 			);
 			path = SwiftData;
+			sourceTree = "<group>";
+		};
+		457C68722D859BAD00E91E3D /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				457C68732D859BAF00E91E3D /* MessageStoreType.swift */,
+			);
+			path = Store;
 			sourceTree = "<group>";
 		};
 		458ADC772D60C0B200BE769B /* Type */ = {
@@ -606,6 +636,7 @@
 		45ACAFFD2C6AFD57005F4B17 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
+				457C686A2D859B3000E91E3D /* MessageRepository.swift */,
 				45D444D72D53371F00378324 /* TodoOrderRepository.swift */,
 				45962CF42D491BEA00089A48 /* FirestoreGroupRepository.swift */,
 				457B43C32C6DFFB20049334A /* FirestoreUserRepository.swift */,
@@ -805,6 +836,7 @@
 				451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
 				459198742D7EE1FA00A4C6CA /* FirebaseFirestore */,
+				45DE546F2D859DA700E08637 /* MarkdownUI */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -844,6 +876,7 @@
 				451DEDA62D3CDCEF00A20417 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				451DEDA92D3CDDA400A20417 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				45962D2A2D4B128300089A48 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				45DE546E2D859DA700E08637 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 45E10B862C69B77300FC31CD;
@@ -926,6 +959,7 @@
 				45E10B952C69B77300FC31CD /* MainView.swift in Sources */,
 				45E10BA32C69FA2F00FC31CD /* Todo.swift in Sources */,
 				45962CF92D491D0B00089A48 /* UserGroup.swift in Sources */,
+				457C68742D859BAF00E91E3D /* MessageStoreType.swift in Sources */,
 				45E09FF72D75696F000FDC24 /* HomeView.swift in Sources */,
 				451DEDF92D40BF2800A20417 /* ChatBoardViewModel.swift in Sources */,
 				457B43C02C6DF9610049334A /* FirestoreTodoRepository.swift in Sources */,
@@ -935,6 +969,7 @@
 				459AA3F82C75CA2B00CA43F2 /* DIContainer.swift in Sources */,
 				4560E3AB2D5396C0008B09AA /* TodoServiceType.swift in Sources */,
 				457B43C62C6DFFD00049334A /* FirestoreReference.swift in Sources */,
+				457C68762D859C9C00E91E3D /* MessageView.swift in Sources */,
 				459198732D7ED0E100A4C6CA /* AppManagementView.swift in Sources */,
 				4560E3AF2D5396CD008B09AA /* GroupServiceType.swift in Sources */,
 				4526B0B02D420F1800DC90F5 /* FirestoreTodoStreamProvider.swift in Sources */,
@@ -946,18 +981,22 @@
 				4526B0B42D42394E00DC90F5 /* ModelContainer+Extension.swift in Sources */,
 				45CE6CB52C7178620053835E /* Chat.swift in Sources */,
 				4560E3C52D539BAF008B09AA /* TodoStreamProviderType.swift in Sources */,
+				457C686F2D859B7900E91E3D /* MessageDTO.swift in Sources */,
 				4541C9982D2D46B1006A9C60 /* UserService.swift in Sources */,
 				45C9DE6B2D7EC56800836CFF /* WindowDimensions.swift in Sources */,
 				45E0A1112D798094000FDC24 /* GoogleSignInServiceType.swift in Sources */,
 				45ED09082C6AEC0B005A8096 /* Date+Extension.swift in Sources */,
 				4526B0B22D422B1700DC90F5 /* WeakTodoObserver.swift in Sources */,
+				457C68692D859B1400E91E3D /* FirestoreMessageStreamProvider.swift in Sources */,
 				45C1A59B2D7D7D6E005293BD /* TempView.swift in Sources */,
 				4541C9A42D2D4953006A9C60 /* TodoSheetView.swift in Sources */,
 				4541C9A52D2D4953006A9C60 /* OverlayContainer.swift in Sources */,
 				4541C9A62D2D4953006A9C60 /* OverlayManager.swift in Sources */,
+				457C68712D859B9400E91E3D /* MessageModel.swift in Sources */,
 				4560E3B12D5396D9008B09AA /* ImageUploadServiceType.swift in Sources */,
 				45C1A4922D7D08C0005293BD /* FetchUserGroupTodosWithOrderUseCase.swift in Sources */,
 				4541C9A72D2D4953006A9C60 /* TodoDatePopoverView.swift in Sources */,
+				457C686B2D859B3000E91E3D /* MessageRepository.swift in Sources */,
 				45322B4C2C845F650097D530 /* ImageUploadService.swift in Sources */,
 				451DEDBE2D3CF4DA00A20417 /* AuthView.swift in Sources */,
 				451DEDFD2D40CC7100A20417 /* FirestoreChatStreamProvider.swift in Sources */,
@@ -984,6 +1023,7 @@
 				45E0A1162D7984DB000FDC24 /* AuthenticationUseCase.swift in Sources */,
 				45322B4A2C8449550097D530 /* StorageUploadProvider.swift in Sources */,
 				455C9B982C6F8DC2004A1519 /* Button+Extension.swift in Sources */,
+				457C68672D859AFC00E91E3D /* MessageStreamProviderType.swift in Sources */,
 				4541C9922D2D4071006A9C60 /* User.swift in Sources */,
 				45E0A0072D7574AE000FDC24 /* GoogleUser.swift in Sources */,
 				4526B0D12D48C6E900DC90F5 /* UserInfoService.swift in Sources */,
@@ -1580,6 +1620,14 @@
 				minimumVersion = 2.6.4;
 			};
 		};
+		45DE546E2D859DA700E08637 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1617,6 +1665,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 45962D2A2D4B128300089A48 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		45DE546F2D859DA700E08637 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45DE546E2D859DA700E08637 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
