@@ -8,6 +8,7 @@
 import SwiftData
 import SwiftUI
 import WidgetKit
+import FirebaseCore
 
 @main
 struct TodoMateApp: App {
@@ -18,7 +19,7 @@ struct TodoMateApp: App {
   private let sharedModelContainer: ModelContainer
 
   init() {
-    FirebaseConfigurator.configure()
+		FirebaseApp.configure()
 
     windowDimensions = WindowDimensions()
 
