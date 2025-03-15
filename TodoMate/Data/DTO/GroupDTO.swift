@@ -8,29 +8,29 @@
 import Foundation
 
 #if PREVIEW
-struct GroupDTO {
+  struct GroupDTO {
     var id: String?
     var uids: [String]
-}
+  }
 #else
-import FirebaseFirestore
+  import FirebaseFirestore
 
-struct GroupDTO: Codable {
+  struct GroupDTO: Codable {
     @DocumentID var id: String?
     var uids: [String]
-}
+  }
 #endif
 
 extension GroupDTO {
-    static let stub = GroupDTO(id: "1", uids: [User.stub[0].uid, User.stub[1].uid])
-    
-    func toModel() -> UserGroup {
-        return UserGroup(id: self.id ?? "", uids: self.uids)
-    }
+  static let stub = GroupDTO(id: "1", uids: [User.stub[0].uid, User.stub[1].uid])
+
+  func toModel() -> UserGroup {
+    return UserGroup(id: id ?? "", uids: uids)
+  }
 }
 
 extension UserGroup {
-    func toDTO() -> GroupDTO {
-        return GroupDTO(id: self.id, uids: self.uids)
-    }
+  func toDTO() -> GroupDTO {
+    return GroupDTO(id: id, uids: uids)
+  }
 }

@@ -6,16 +6,15 @@
 //
 
 protocol TodoObserverType: AnyObject {
-    func todoAdded(_ todo: Todo)
-    func todoModified(_ todo: Todo)
-    func todoRemoved(_ todo: Todo)
+  func todoAdded(_ todo: Todo)
+  func todoModified(_ todo: Todo)
+  func todoRemoved(_ todo: Todo)
 }
 
 class WeakTodoObserver {
-    weak var value: TodoObserverType?
-    
-    init(_ observer: TodoObserverType) {
-        self.value = observer
-    }
-}
+  weak var value: TodoObserverType?
 
+  init(_ observer: TodoObserverType) {
+    value = observer
+  }
+}

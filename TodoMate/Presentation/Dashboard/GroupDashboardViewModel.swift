@@ -9,21 +9,22 @@ import SwiftUI
 
 @Observable
 class GroupDashboardViewModel {
-    private let userService: UserServiceType
-    
-    @ObservationIgnored let userInfo: AuthenticatedUser
-    
-    var users: [User] = []
-    
-    init(container: DIContainer, userInfo: AuthenticatedUser) {
-        self.userService = container.userService
-        self.userInfo = userInfo
-    }
+  private let userService: UserServiceType
+
+  @ObservationIgnored let userInfo: AuthenticatedUser
+
+  var users: [User] = []
+
+  init(container: DIContainer, userInfo: AuthenticatedUser) {
+    userService = container.userService
+    self.userInfo = userInfo
+  }
 }
+
 extension GroupDashboardViewModel {
-    @MainActor
-    func fetchGroupUser() async {
-        self.users = await userService.fetch().filter { $0.gid == userInfo.gid }
-        print("[Fetched GroupUsers] - \(users.count)")
-    }
+  @MainActor
+  func fetchGroupUser() async {
+    users = await userService.fetch().filter { $0.gid == userInfo.gid }
+    print("[Fetched GroupUsers] - \(users.count)")
+  }
 }

@@ -5,59 +5,60 @@
 //  Created by hs on 12/27/24.
 //
 
-import SwiftUI
 import Sparkle
+import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
-    var updater: SPUUpdater?
-    
-    func applicationWillFinishLaunching(_ notification: Notification) {
-        /// 새 윈도우 생성 메뉴 삭제
-        if let mainMenu = NSApplication.shared.mainMenu {
-            for item in mainMenu.items {
-                if item.title == "File", let submenu = item.submenu {
-                    for (index, subItem) in submenu.items.enumerated() {
-                        if subItem.title == "New Window" {
-                            submenu.removeItem(at: index)
-                            break
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        
-#if !PREVIEW        
-        /// Sparkle Controller 설정
-        let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
-        updater = updaterController.updater
+  var updater: SPUUpdater?
 
-        /// 업데이트를 자동으로 확인
-        updater?.checkForUpdatesInBackground()
-#endif
-        
-        /// WindowDelegate 설정
-        if let window = NSApplication.shared.windows.first {
-            window.delegate = self
+  func applicationWillFinishLaunching(_ notification: Notification) {
+    /// 새 윈도우 생성 메뉴 삭제
+    if let mainMenu = NSApplication.shared.mainMenu {
+      for item in mainMenu.items {
+        if item.title == "File", let submenu = item.submenu {
+          for (index, subItem) in submenu.items.enumerated() {
+            if subItem.title == "New Window" {
+              submenu.removeItem(at: index)
+              break
+            }
+          }
         }
-        
-        
-        
+      }
     }
-    
-    func windowWillClose(_ notification: Notification) {
-        /// x 버튼 누르면 앱 종료
-        NSApplication.shared.terminate(nil)
+  }
+
+  func applicationDidFinishLaunching(_ notification: Notification) {
+    #if !PREVIEW
+      /// Sparkle Controller 설정
+      let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: self,
+        userDriverDelegate: nil
+      )
+      updater = updaterController.updater
+
+      /// 업데이트를 자동으로 확인
+      updater?.checkForUpdatesInBackground()
+    #endif
+
+    /// WindowDelegate 설정
+    if let window = NSApplication.shared.windows.first {
+      window.delegate = self
     }
-    
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true
-    }
+  }
+
+  func windowWillClose(_ notification: Notification) {
+    /// x 버튼 누르면 앱 종료
+    NSApplication.shared.terminate(nil)
+  }
+
+  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
 }
+
 extension AppDelegate {
-    func checkForUpdates() {
-        updater?.checkForUpdates()
-    }
+  func checkForUpdates() {
+    updater?.checkForUpdates()
+  }
 }

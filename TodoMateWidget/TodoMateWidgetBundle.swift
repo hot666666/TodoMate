@@ -5,12 +5,12 @@
 //  Created by hs on 3/9/25.
 //
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 @main
 struct TodoMateWidgetBundle: WidgetBundle {
-    var body: some Widget {
-        TodoMateWidget()
-    }
+  var body: some Widget {
+    TodoMateWidget()
+  }
 }

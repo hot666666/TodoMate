@@ -8,7 +8,7 @@
 import UniformTypeIdentifiers
 
 extension UTType {
-    static var todo: UTType {
-        UTType(exportedAs: "io.hotcs6.TodoMate")
-    }
+  static var todo: UTType {
+    UTType(exportedAs: "io.hotcs6.TodoMate")
+  }
 }

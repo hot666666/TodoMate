@@ -8,11 +8,11 @@
 import Foundation
 
 protocol UploadProviderType {
-    func upload(path: String, data: Data, fileName: String) async throws -> String
+  func upload(path: String, data: Data, fileName: String) async throws -> String
 }
 
 class StubUploadProvider: UploadProviderType {
-    func upload(path: String, data: Data, fileName: String) async throws -> String {
-        "some-url"
-    }
+  func upload(path: String, data: Data, fileName: String) async throws -> String {
+    "some-url"
+  }
 }

@@ -8,8 +8,8 @@
 @testable import TodoMate
 
 struct MockFetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType {
-    private let excuteReturn: AuthenticatedUser?
-    init(excuteReturn: AuthenticatedUser? = nil) { self.excuteReturn = excuteReturn }
+  private let excuteReturn: AuthenticatedUser?
+  init(excuteReturn: AuthenticatedUser? = nil) { self.excuteReturn = excuteReturn }
 
-    func execute() -> AuthenticatedUser? { excuteReturn }
+  func execute() -> AuthenticatedUser? { excuteReturn }
 }

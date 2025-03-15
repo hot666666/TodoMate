@@ -7,37 +7,40 @@
 
 import Foundation
 
-enum Const { }
+enum Const {}
 
 extension Const {
-    enum TodoDatePopoverFrame {
-        static let WIDTH: CGFloat = 250
-        static let HEIGHT: CGFloat = 350
-    }
+  enum TodoDatePopoverFrame {
+    static let WIDTH: CGFloat = 250
+    static let HEIGHT: CGFloat = 350
+  }
 }
+
 extension Const {
-    enum CalendarView {
-        static let WEEKDAYS: [String] = ["일", "월", "화", "수", "목", "금", "토"]
-    }
+  enum CalendarView {
+    static let WEEKDAYS: [String] = ["일", "월", "화", "수", "목", "금", "토"]
+  }
 }
+
 extension Const {
-    enum FireStore {
-        static let USER = "users"
-        static let TODO = "todos"
-        static let CHAT = "chats"
-        static let GROUP = "groups"
-    }
+  enum FireStore {
+    static let USER = "users"
+    static let TODO = "todos"
+    static let CHAT = "chats"
+    static let GROUP = "groups"
+  }
 }
+
 extension Const {
-#if DEBUG || PREVIEW
+  #if DEBUG || PREVIEW
     static let UserInfoKey = "test-userInfo"
     static let TodoOrderDateKey = "test-todoOrderDate"
     static let TodoOrderKey = "test-todoOrder"
-#else
+  #else
     static let UserInfoKey = "userInfo"
     static let TodoOrderDateKey = "todoOrderDate"
     static let TodoOrderKey = "todoOrder"
-#endif
+  #endif
 }
 
 typealias FireStore = Const.FireStore

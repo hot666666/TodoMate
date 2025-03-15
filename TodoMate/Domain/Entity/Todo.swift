@@ -8,114 +8,184 @@
 import SwiftUI
 
 enum TodoStatus: String, CaseIterable, Codable {
-    case inComplete = "미완료"
-    case todo = "시작 전"
-    case inProgress = "진행 중"
-    case complete = "완료"
-    
-    var color: Color {
-        switch self {
-        case .todo: return .customGray
-        case .inProgress: return .customBlue
-        case .complete: return .customGreen
-        case .inComplete: return .customRed
-        }
+  case inComplete = "미완료"
+  case todo = "시작 전"
+  case inProgress = "진행 중"
+  case complete = "완료"
+
+  var color: Color {
+    switch self {
+    case .todo: return .customGray
+    case .inProgress: return .customBlue
+    case .complete: return .customGreen
+    case .inComplete: return .customRed
     }
+  }
 }
 
 struct Todo {
-    var date: Date
-    var content: String
-    var status: TodoStatus
-    var detail: String
-    var uid: String
-    var fid: String
-    let lastModifiedAt: Date
-        
-    init(date: Date = .now,
-         content: String = "",
-         detail: String = "",
-         status: TodoStatus = .todo,
-         uid: String = "",
-         fid: String = "",
-         lastModifiedAt: Date = .now) {
-        self.date = date
-        self.content = content
-        self.detail = detail
-        self.status = status
-        self.uid = uid
-        self.fid = fid
-        self.lastModifiedAt = lastModifiedAt
-    }
-    
-    enum CodingKeys: String, CodingKey {
-        case fid
-        case date
-    }
-    
-    /// Decode : T -> Todo
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        fid = try container.decode(String.self, forKey: .fid)
-        date = try container.decode(Date.self, forKey: .date)
-        /// Initialize other properties with default values
-        content = ""
-        status = .todo
-        detail = ""
-        uid = ""
-        lastModifiedAt = .now
-    }
-    
-    /// Encode : Todo -> T
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(fid, forKey: .fid)
-        try container.encode(date, forKey: .date)
-    }
+  var date: Date
+  var content: String
+  var status: TodoStatus
+  var detail: String
+  var uid: String
+  var fid: String
+  let lastModifiedAt: Date
+
+  init(date: Date = .now,
+       content: String = "",
+       detail: String = "",
+       status: TodoStatus = .todo,
+       uid: String = "",
+       fid: String = "",
+       lastModifiedAt: Date = .now) {
+    self.date = date
+    self.content = content
+    self.detail = detail
+    self.status = status
+    self.uid = uid
+    self.fid = fid
+    self.lastModifiedAt = lastModifiedAt
+  }
+
+  enum CodingKeys: String, CodingKey {
+    case fid
+    case date
+  }
+
+  /// Decode : T -> Todo
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    fid = try container.decode(String.self, forKey: .fid)
+    date = try container.decode(Date.self, forKey: .date)
+    /// Initialize other properties with default values
+    content = ""
+    status = .todo
+    detail = ""
+    uid = ""
+    lastModifiedAt = .now
+  }
+
+  /// Encode : Todo -> T
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(fid, forKey: .fid)
+    try container.encode(date, forKey: .date)
+  }
 }
+
 extension Todo: Equatable, Identifiable {
-    static func == (lhs: Todo, rhs: Todo) -> Bool {
-        lhs.date == rhs.date
-        && lhs.content == rhs.content
-        && lhs.status == rhs.status
-        && lhs.detail == rhs.detail
-        && lhs.uid == rhs.uid
-        && lhs.fid == rhs.fid
-    }
-    
-    var id: String { fid }
+  static func == (lhs: Todo, rhs: Todo) -> Bool {
+    lhs.date == rhs.date
+      && lhs.content == rhs.content
+      && lhs.status == rhs.status
+      && lhs.detail == rhs.detail
+      && lhs.uid == rhs.uid
+      && lhs.fid == rhs.fid
+  }
+
+  var id: String { fid }
 }
 
 extension Todo {
-    static func copy(from todo: Todo) -> Todo {
-        /// 상태만 제외하고, 전체 복사
-        Todo(date: todo.date,
-             content: todo.content,
-             detail: todo.detail,
-             status: .todo,
-             uid: todo.uid,
-             fid: todo.fid)
-    }
-    
-    func toWidgetTodo() -> WidgetTodo {
-        WidgetTodo(date: self.date, content: self.content, uid: self.uid, fid: self.fid)
-    }
+  static func copy(from todo: Todo) -> Todo {
+    /// 상태만 제외하고, 전체 복사
+    Todo(date: todo.date,
+         content: todo.content,
+         detail: todo.detail,
+         status: .todo,
+         uid: todo.uid,
+         fid: todo.fid)
+  }
+
+  func toWidgetTodo() -> WidgetTodo {
+    WidgetTodo(date: date, content: content, uid: uid, fid: fid)
+  }
 }
 
 extension Todo {
-    static var stub: [Todo] {
-        [.init(date: .now, content: "할일1-hs", detail: "할일입니다", status: .todo, uid: User.stub[0].uid, fid: "firebase-id"),
-         .init(date: .now, content: "할일2-hs", detail: "할일입니다", status: .todo, uid: User.stub[0].uid, fid: "firebase-id2"),
-         .init(date: .now, content: "할일1-jy", detail: "할일입니다", status: .todo, uid: User.stub[1].uid, fid: "firebase-id3"),
-         .init(date: .now, content: "할일2-jy", detail: "할일입니다", status: .todo, uid: User.stub[1].uid, fid: "firebase-id4"),
-         .init(date: .now, content: "할일3-jy", detail: "할일입니다", status: .todo, uid: User.stub[1].uid, fid: "firebase-id5")]
-    }
-    
-    static var widgetStub: [Todo] {
-        [.init(date: .now, content: "할일1", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
-         .init(date: .now, content: "할일2", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
-         .init(date: .now, content: "할일3", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
-         .init(date: .now, content: "할일4", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString),
-         .init(date: .now, content: "할일5", detail: "할일입니다", status: .inProgress, fid: UUID().uuidString)]
-    }
+  static var stub: [Todo] {
+    [
+      .init(
+        date: .now,
+        content: "할일1-hs",
+        detail: "할일입니다",
+        status: .todo,
+        uid: User.stub[0].uid,
+        fid: "firebase-id"
+      ),
+      .init(
+        date: .now,
+        content: "할일2-hs",
+        detail: "할일입니다",
+        status: .todo,
+        uid: User.stub[0].uid,
+        fid: "firebase-id2"
+      ),
+      .init(
+        date: .now,
+        content: "할일1-jy",
+        detail: "할일입니다",
+        status: .todo,
+        uid: User.stub[1].uid,
+        fid: "firebase-id3"
+      ),
+      .init(
+        date: .now,
+        content: "할일2-jy",
+        detail: "할일입니다",
+        status: .todo,
+        uid: User.stub[1].uid,
+        fid: "firebase-id4"
+      ),
+      .init(
+        date: .now,
+        content: "할일3-jy",
+        detail: "할일입니다",
+        status: .todo,
+        uid: User.stub[1].uid,
+        fid: "firebase-id5"
+      ),
+    ]
+  }
+
+  static var widgetStub: [Todo] {
+    [
+      .init(
+        date: .now,
+        content: "할일1",
+        detail: "할일입니다",
+        status: .inProgress,
+        fid: UUID().uuidString
+      ),
+      .init(
+        date: .now,
+        content: "할일2",
+        detail: "할일입니다",
+        status: .inProgress,
+        fid: UUID().uuidString
+      ),
+      .init(
+        date: .now,
+        content: "할일3",
+        detail: "할일입니다",
+        status: .inProgress,
+        fid: UUID().uuidString
+      ),
+      .init(
+        date: .now,
+        content: "할일4",
+        detail: "할일입니다",
+        status: .inProgress,
+        fid: UUID().uuidString
+      ),
+      .init(
+        date: .now,
+        content: "할일5",
+        detail: "할일입니다",
+        status: .inProgress,
+        fid: UUID().uuidString
+      ),
+    ]
+  }
 }

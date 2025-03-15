@@ -8,10 +8,10 @@
 import SwiftUI
 
 enum ShortcutAction: String {
-    case createUserTodo
-    case closeOverlay
+  case createUserTodo
+  case closeOverlay
 }
 
 extension Notification.Name {
-    static let shortcutAction = Notification.Name("todoMateShortcutAction")
+  static let shortcutAction = Notification.Name("todoMateShortcutAction")
 }

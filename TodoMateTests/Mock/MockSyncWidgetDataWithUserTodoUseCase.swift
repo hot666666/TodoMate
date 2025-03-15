@@ -8,7 +8,7 @@
 @testable import TodoMate
 
 final class MockSyncWidgetDataWithUserTodoUseCase: SyncWidgetDataWithUserTodoUseCaseType {
-    func sync(for currentTodo: Todo, updatedTodo: Todo) async {
-        // no-op
-    }
+  func sync(for currentTodo: Todo, updatedTodo: Todo) async {
+    // no-op
+  }
 }

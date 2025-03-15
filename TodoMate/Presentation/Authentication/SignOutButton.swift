@@ -8,20 +8,19 @@
 import SwiftUI
 
 struct SignOutButton: View {
-    @Environment(AuthManager.self) private var authManager
-    
-    var body: some View {
-        Button("로그아웃", role: .destructive) {
-            Task {
-                await authManager.signOut()
-            }
-        }
-        .buttonStyle(.borderedProminent)
+  @Environment(AuthManager.self) private var authManager
+
+  var body: some View {
+    Button("로그아웃", role: .destructive) {
+      Task {
+        await authManager.signOut()
+      }
     }
+    .buttonStyle(.borderedProminent)
+  }
 }
 
 #Preview {
-    SignOutButton()
-        .environment(AuthManager.stub)
+  SignOutButton()
+    .environment(AuthManager.stub)
 }
-
