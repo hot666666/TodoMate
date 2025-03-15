@@ -64,7 +64,9 @@ fastlane/test_output
 # Firebase
 GoogleService-Info.plist
 
-# Secret
-Config.xcconfig
+# Firebase emulator
+Firestore/firebase-debug.log
+Firestore/firestore-debug.log
 
+# Certificate & Profile
 private/
