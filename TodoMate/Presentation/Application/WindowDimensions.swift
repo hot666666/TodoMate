@@ -17,6 +17,6 @@ struct WindowDimensions {
     let screenWidth = screen?.frame.width ?? 1700
 
     height = screenHeight * 0.8
-    width = screenWidth * 0.3
+    width = screenWidth * 0.4
   }
 }
