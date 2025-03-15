@@ -27,6 +27,7 @@ extension Const {
     static let USER = "users"
     static let TODO = "todos"
     static let CHAT = "chats"
+    static let MESSAGE = "messages"
     static let GROUP = "groups"
   }
 }

@@ -41,6 +41,10 @@ final class FirestoreReference {
 	func chatCollection() -> CollectionReference {
 		return db.collection(FireStore.CHAT)
 	}
+  
+  func messageCollection() -> CollectionReference {
+    return db.collection(FireStore.MESSAGE)
+  }
 	
 	func groupCollection() -> CollectionReference {
 		return db.collection(FireStore.GROUP)

@@ -23,6 +23,7 @@ struct ChatBoardView: View {
       content: {
         chatListContent
           .task {
+            await viewModel.fetchChat()
             await viewModel.observeChanges()
           }
       }

@@ -32,6 +32,20 @@ struct HoverButtonStyle2: ButtonStyle {
   }
 }
 
+struct HoverButtonStyle3: ButtonStyle {
+	@State private var isHovering = false
+	
+	func makeBody(configuration: Configuration) -> some View {
+		configuration.label
+			.foregroundColor(.secondary)
+			.padding(5)
+			.background(Color.gray.opacity(0.2))
+			.cornerRadius(5)
+			.opacity(isHovering ? 1 : 0)
+			.onHover { isHovering = $0 }
+	}
+}
+
 extension Button {
   func hoverButtonStyle() -> some View {
     buttonStyle(HoverButtonStyle())
@@ -40,4 +54,8 @@ extension Button {
   func hoverButtonStyle2() -> some View {
     buttonStyle(HoverButtonStyle2())
   }
+	
+	func hoverButtonStyle3() -> some View {
+		buttonStyle(HoverButtonStyle3())
+	}
 }
