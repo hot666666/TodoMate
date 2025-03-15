@@ -2,7 +2,7 @@
 //  MessageStore.swift
 //  TodoMate
 //
-//  Created by hs on 3/12/25.
+//  Created by hs on 3/15/25.
 //
 
 import SwiftUI
@@ -35,12 +35,23 @@ class MessageStore: MessageStoreType {
 		self.messageStreamProvider = messageStreamProvider
 	}
 	
-	func observeMessageChanges() async {
-		for await change in messageStreamProvider.createMessageStream() {
-			print("[Observed Chat change in FirebaseFirestore] - ", change)
-			
-		}
-	}
+  func observeMessageChanges() async {
+    for await change in messageStreamProvider.createMessageStream() {
+      switch change {
+      case .added(let message):
+        guard !messages.contains(where: { $0.fid == message.fid }) else { return }
+        messages.append(message)
+      case .modified(let message):
+        guard let index = messages.firstIndex(where: { $0.fid == message.fid }),
+              messages[index].lastModifiedAt < message.lastModifiedAt else {
+          return
+        }
+        messages[index] = message
+      case .removed(let message):
+        messages.removeAll { $0.fid == message.fid }
+      }
+    }
+  }
 		
 	@MainActor
 	func readMessages() async throws {
