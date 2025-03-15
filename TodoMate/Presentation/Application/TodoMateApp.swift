@@ -23,7 +23,7 @@ struct TodoMateApp: App {
 
     windowDimensions = WindowDimensions()
 
-    sharedModelContainer = Self.createModelContainer()
+		sharedModelContainer = SharedModelContainer.create()
   }
 
   var body: some Scene {
@@ -55,24 +55,6 @@ struct TodoMateApp: App {
     .defaultSize(width: windowDimensions.width, height: windowDimensions.height)
     .defaultPosition(.center)
     .windowStyle(.hiddenTitleBar)
-  }
-
-  // MARK: - Static Helpers
-
-  private static func createModelContainer() -> ModelContainer {
-    let schema = Schema([WidgetTodo.self])
-
-    #if DEBUG || PREVIEW
-      let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-    #else
-      let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-    #endif
-
-    do {
-      return try ModelContainer(for: schema, configurations: [modelConfiguration])
-    } catch {
-      fatalError("Could not create ModelContainer: \(error)")
-    }
   }
 
   // MARK: - Helper Methods
