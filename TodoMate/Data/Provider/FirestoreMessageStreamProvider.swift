@@ -1,3 +1,11 @@
+//
+//  FirestoreMessageStreamProvider.swift
+//  TodoMate
+//
+//  Created by hs on 3/15/25.
+//
+
+
 final class FirestoreMessageStreamProvider: MessageStreamProviderType {
 	private let reference: FirestoreReference
 	
@@ -10,7 +18,7 @@ extension FirestoreMessageStreamProvider {
 #if !PREVIEW
 	func createMessageStream() -> AsyncStream<DatabaseChange<MessageModel>> {
 		AsyncStream { continuation in
-			let listener = reference.chatCollection()
+      let listener = reference.messageCollection()
 				.addSnapshotListener { querySnapshot, error in
 					guard let snapshot = querySnapshot else {
 						if let error = error {
