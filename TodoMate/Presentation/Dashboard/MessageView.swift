@@ -9,35 +9,64 @@ import MarkdownUI
 import SwiftUI
 
 struct MessageView: View {
+  @FocusState private var focusedMessageID: String?
+
   @State var messageStore: MessageStore
   let userInfo: AuthenticatedUser
 
+  private func createMessage() {
+    try? messageStore.createMessage(lastModifiedUser: userInfo.uid)
+  }
+
+  private func onAppear() async {
+    try? await messageStore.readMessages()
+    await messageStore.observeMessageChanges()
+  }
+}
+
+extension MessageView {
   var body: some View {
-    ScrollView {
-      ForEach(messageStore.messages) { message in
-        MessageContent(message: message, userInfo: userInfo)
-      }
-      .padding()
-    }
-    .overlay(alignment: .topTrailing, content: {
-      Button {
-        do {
-          try messageStore.createMessage(lastModifiedUser: userInfo.uid)
-        } catch {
-          print(error)
+    content
+      .background(Color.clear)
+      .toolbar {
+        ToolbarItem(placement: .automatic) {
+          addButton
         }
-      } label: {
-        Image(systemName: "plus")
-          .font(.title)
       }
-      .hoverButtonStyle()
-      .padding()
-      .offset(y: -50)
-    })
-    .environment(messageStore)
-    .task {
-      try? await messageStore.readMessages()
-      await messageStore.observeMessageChanges()
+      .onTapGesture {
+        focusedMessageID = nil
+      }
+      .environment(messageStore)
+      .task {
+        await onAppear()
+      }
+  }
+
+  @ViewBuilder
+  private var content: some View {
+    if messageStore.messages.isEmpty {
+      emptyView
+    } else {
+      ScrollView {
+        ForEach(messageStore.messages) { message in
+          MessageContent(message: message, userInfo: userInfo, focusedId: $focusedMessageID)
+            .disabled(message.lastModifiedUser != userInfo.uid)
+        }
+        .padding()
+      }
+    }
+  }
+
+  private var emptyView: some View {
+    Text("메모가 존재하지 않습니다.")
+      .frame(maxHeight: .infinity, alignment: .center)
+  }
+
+  private var addButton: some View {
+    Button {
+      createMessage()
+    } label: {
+      Image(systemName: "plus")
     }
   }
 }
@@ -46,125 +75,82 @@ private struct MessageContent: View {
   @Environment(MessageStore.self) private var messageStore
   private let userInfo: AuthenticatedUser
 
-  @Bindable var message: MessageModel
+  @Bindable private var message: MessageModel
   @State private var localContent: String
 
-  init(message: MessageModel, userInfo: AuthenticatedUser) {
+  @FocusState.Binding private var focusedId: String?
+
+  init(message: MessageModel, userInfo: AuthenticatedUser, focusedId: FocusState<String?>.Binding) {
     self.message = message
     self.userInfo = userInfo
+    _focusedId = focusedId
     _localContent = State(initialValue: message.content)
   }
 
-  private var isMine: Bool {
-    message.lastModifiedUser == userInfo.uid
-  }
+  enum Mode {
+    case edit, preview
 
-  private var messageCaption: String {
-    var caption: String = message.lastModifiedAt.toYYYYMMDDString()
-    if isMine {
-      caption += " (나)"
+    var toggle: Mode {
+      (self == .edit) ? .preview : .edit
     }
-    return caption
-  }
-
-  @FocusState private var isFocused: Bool
-
-  enum Mode: String {
-    case edit = "확인"
-    case preview = "수정"
   }
 
   @State private var mode: Mode = .preview
-  private var toggleButtonTitle: String {
-    if mode == .edit && localContent.isEmpty {
-      return "삭제"
-    }
-    return mode.rawValue
-  }
 
-  @State private var inactivityTask: Task<Void, Never>? = nil
-
-  private func toggleMode() {
-    mode = (mode == .edit) ? .preview : .edit
-    if mode == .edit {
-      startInactivityTask()
-      isFocused = true
-    } else {
-      cancelInactivityTask()
-    }
-  }
-
-  // 입력 감지 시 타이머 리셋
-  private func resetInactivityTask() {
-    cancelInactivityTask()
-    if mode == .edit {
-      startInactivityTask()
-    }
-  }
-
-  // 3초 후 자동으로 preview 모드로 전환
-  private func startInactivityTask() {
-    inactivityTask = Task { @MainActor in
-      do {
-        try await Task.sleep(nanoseconds: 3_000_000_000)
-      } catch {
-        return
+  private var messageCaption: String {
+    switch mode {
+    case .edit:
+      return "수정 중"
+    case .preview:
+      var caption: String = message.lastModifiedAt.toYYYYMMDDString()
+      if message.lastModifiedUser == userInfo.uid {
+        caption += " (나)"
       }
-
-      if mode == .edit {
-        toggleMode()
-      }
+      return caption
     }
   }
 
-  // 타이머 취소
-  private func cancelInactivityTask() {
-    inactivityTask?.cancel()
-    inactivityTask = nil
+  private func updateMessage() {
+    guard localContent != message.content else { return }
+    try? messageStore.updateMessage(
+      message,
+      newContent: localContent,
+      lastModifiedUser: userInfo.uid
+    )
   }
-}
 
-extension MessageContent {
+  private func deleteMessage() {
+    try? messageStore.deleteMessage(message)
+  }
+
   var body: some View {
     VStack {
       contentView
         .padding(10)
     }
-    .contentShape(Rectangle())
+    .contentShape(.rect)
     .onTapGesture {
-      if mode == .preview {
-        toggleMode()
+      mode = mode.toggle
+      focusedId = nil
+      if mode == .edit {
+        focusedId = message.id
       }
     }
-    .overlay(alignment: .topTrailing) {
-      toggleButton
+    .onChange(of: focusedId) { old, new in
+      if new != message.id {
+        mode = .preview
+        if old == message.id {
+          updateMessage()
+        }
+      }
+    }
+    .contextMenu {
+      Button("삭제") {
+        deleteMessage()
+      }
     }
     .background(.ultraThickMaterial)
-    .shadow(color: .black.opacity(0.2), radius: 7, x: 0, y: 0)
-    .onChange(of: isFocused) { old, new in
-      if old == true && new == false {
-        print("변경 발생")
-
-        // 삭제 조건 확인
-        if localContent.isEmpty {
-          try? messageStore.deleteMessage(message)
-          return
-        }
-
-        // 업데이트의 조건 확인
-        if message.content == localContent && message.lastModifiedUser == userInfo.uid {
-          print("no change")
-          return
-        }
-
-        // 업데이트 수행
-        try? messageStore.updateMessage(
-          message,
-          newContent: localContent,
-          lastModifiedUser: userInfo.uid
-        )
-      }
-    }
+    .shadow(color: .black.opacity(0.3), radius: 7, x: 0, y: 0)
   }
 
   @ViewBuilder
@@ -175,57 +161,36 @@ extension MessageContent {
     case .preview:
       markdownView
     }
+    contentFooter
+  }
+
+  private var contentFooter: some View {
+    Text(messageCaption)
+      .frame(maxWidth: .infinity, alignment: .trailing)
+      .font(.caption)
+      .foregroundColor(.white)
+      .opacity(0.4)
   }
 
   private var markdownView: some View {
-    VStack {
-      HStack {
-        Markdown(localContent.isEmpty ? "클릭하여 입력하세요." : localContent)
-          .opacity(localContent.isEmpty ? 0.5 : 1)
-          .padding(.leading, 5)
-          .background(Color.clear)
-        Spacer()
-      }
-      Text(messageCaption)
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .font(.caption)
-        .foregroundColor(.white)
-        .opacity(0.3)
-    }
-    .onTapGesture {
-      toggleMode()
+    HStack {
+      Markdown(localContent.isEmpty ? "클릭하여 입력하세요." : localContent)
+        .opacity(localContent.isEmpty ? 0.5 : 1)
+        .padding(.leading, 5)
+        .background(Color.clear)
+      Spacer()
     }
   }
 
   private var editView: some View {
-    EditView(text: $localContent)
-      .font(.system(size: 13))
-      .focused($isFocused)
-      .padding(.trailing)
-      .onChange(of: localContent) { _, _ in
-        resetInactivityTask()
-      }
-  }
-
-  private var toggleButton: some View {
-    Button(toggleButtonTitle) {
-      if isMine {
-        toggleMode()
-      }
-    }
-    .hoverButtonStyle3()
-  }
-}
-
-private struct EditView: View {
-  @Binding var text: String
-
-  var body: some View {
-    TextEditor(text: $text)
+    TextEditor(text: $localContent)
       .scrollDisabled(true)
       .fixedSize(horizontal: false, vertical: true)
       .scrollIndicators(.never)
       .scrollContentBackground(.hidden)
+      .font(.system(size: 13))
+      .padding(.trailing)
+      .focused($focusedId, equals: message.id)
   }
 }
 
