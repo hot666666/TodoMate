@@ -14,6 +14,8 @@ final class AuthManager {
 
   private(set) var authenticatedUser: AuthenticatedUser?
   private(set) var state: State = .signedOut
+  private(set) var errorLog: String?
+  var showPopup: Bool = false
 
   init(authenticationUseCase: AuthenticationUseCaseType,
        fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType) {
@@ -30,15 +32,23 @@ final class AuthManager {
     }
   }
 
+  func resetErrorLog() {
+    errorLog = nil
+  }
+
   @MainActor
   func signIn() async {
     state = .loading
 
     switch await authUseCase.signIn() {
     case let .success(aUser):
+      errorLog = nil
       authenticatedUser = aUser
       state = .signedIn(aUser)
-    case .failure:
+    case let .failure(.signInFailed(error)):
+      errorLog = error.localizedDescription
+      showPopup = true
+      authenticatedUser = nil
       state = .signedOut
     }
   }

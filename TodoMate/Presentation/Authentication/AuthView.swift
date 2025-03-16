@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct AuthView: View {
+  @Environment(AuthManager.self) private var authManager
+
   var body: some View {
     VStack {
       Spacer()
@@ -22,6 +24,17 @@ struct AuthView: View {
       }
     }
     .frame(width: 400, height: 400)
+    .alert(
+      "Error",
+      isPresented: Bindable(authManager).showPopup,
+      presenting: authManager.errorLog
+    ) { _ in
+      Button("OK") {
+        authManager.showPopup = false
+      }
+    } message: { message in
+      Text(message)
+    }
   }
 }
 
