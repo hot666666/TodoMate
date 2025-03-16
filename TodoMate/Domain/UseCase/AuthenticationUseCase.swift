@@ -6,7 +6,7 @@
 //
 
 enum AuthenticationUseCaseError: Error {
-  case signInFailed(String)
+  case signInFailed(Error)
 }
 
 protocol AuthenticationUseCaseType {
@@ -40,7 +40,7 @@ final class AuthenticationUseCase: AuthenticationUseCaseType {
       try userInfoService.saveUserInfo(authenticatedUser)
       return .success(authenticatedUser)
     } catch {
-      return .failure(.signInFailed(error.localizedDescription))
+      return .failure(.signInFailed(error))
     }
   }
 }
