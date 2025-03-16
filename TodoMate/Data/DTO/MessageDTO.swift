@@ -59,7 +59,7 @@ extension MessageDTO {
                                     .init(
                                       id: "fid3",
                                       content: "Hey",
-                                      lastModifiedUser: "hs",
+                                      lastModifiedUser: "hs1",
                                       createdAt: .now
                                     )]
 }
