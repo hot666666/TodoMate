@@ -5,10 +5,10 @@
 //  Created by hs on 8/12/24.
 //
 
+import FirebaseCore
 import SwiftData
 import SwiftUI
 import WidgetKit
-import FirebaseCore
 
 @main
 struct TodoMateApp: App {
@@ -19,11 +19,11 @@ struct TodoMateApp: App {
   private let sharedModelContainer: ModelContainer
 
   init() {
-		FirebaseApp.configure()
+    FirebaseApp.configure()
 
     windowDimensions = WindowDimensions()
 
-		sharedModelContainer = SharedModelContainer.create()
+    sharedModelContainer = SharedModelContainer.create()
   }
 
   var body: some Scene {

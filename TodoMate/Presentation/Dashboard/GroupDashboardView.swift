@@ -61,12 +61,12 @@ struct GroupDashboardView: View {
 
     HomeView(userInfo: viewModel.userInfo, groupUsers: viewModel.users)
   }
-  
+
   @ViewBuilder
   private var message: some View {
     /// .windowStyle(.hiddenTitleBar) 버그로 인해 추가
     Color.clear.frame(height: 0)
-    
+
     MessageView(messageStore: MessageStore.stub, userInfo: viewModel.userInfo)
   }
 
