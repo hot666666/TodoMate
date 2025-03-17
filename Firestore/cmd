@@ -1,1 +1,2 @@
-firebase emulators:start --only firestore --project [PROJECT_ID]
+firebase emulators:start --only firestore --project [PROJECT_ID] \
+--import=./exported-data --export-on-exit=./exported-data

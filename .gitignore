@@ -67,6 +67,7 @@ GoogleService-Info.plist
 # Firebase emulator
 Firestore/firebase-debug.log
 Firestore/firestore-debug.log
+Firestore/exported-data/*
 
 # Certificate & Profile
 private/
