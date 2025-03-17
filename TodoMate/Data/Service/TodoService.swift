@@ -11,7 +11,7 @@ final class TodoService: TodoServiceType {
   private let todoRepository: TodoRepositoryType
   private let calendar: Calendar = .current
 
-  init(todoRepository: TodoRepositoryType = FirestoreTodoRepository(reference: .shared)) {
+  init(todoRepository: TodoRepositoryType = FirestoreTodoRepository()) {
     self.todoRepository = todoRepository
   }
 }

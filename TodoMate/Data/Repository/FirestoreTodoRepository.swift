@@ -13,18 +13,30 @@ protocol TodoRepositoryType {
   func fetchTodos(groupId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO]
   func updateTodo(todo: TodoDTO) async throws
   func deleteTodo(todoId: String) async throws
+
+  // MARK: - Repository for the Store
+
+  func create(_ todo: TodoDTO) throws -> TodoDTO
+  func readAll() async throws -> [TodoDTO]
+  func update(_ todo: TodoDTO) throws
+  func delete(id: String)
 }
 
-final class FirestoreTodoRepository: TodoRepositoryType {
-  private let reference: FirestoreReference
-
-  init(reference: FirestoreReference = .shared) {
-    self.reference = reference
-  }
+enum TodoRepositoryError: Error {
+  case createError
+  case readError
+  case updateError
+  case deleteError
 }
 
 #if !PREVIEW
-  extension FirestoreTodoRepository {
+  final class FirestoreTodoRepository: TodoRepositoryType {
+    private let reference: FirestoreReference
+
+    init(reference: FirestoreReference = .shared) {
+      self.reference = reference
+    }
+
     func createTodo(_ todo: TodoDTO) async throws -> TodoDTO {
       let collectionRef = reference.todoCollection()
       let newDocReference = try collectionRef.addDocument(from: todo)
@@ -78,39 +90,110 @@ final class FirestoreTodoRepository: TodoRepositoryType {
       try await todoDocRef.updateData(["lastModifiedAt": Date.now])
       try await todoDocRef.delete()
     }
+
+    // MARK: - Repository for the Store
+
+    func create(_ todo: TodoDTO) throws -> TodoDTO {
+      do {
+        let document = try reference.todoCollection().addDocument(from: todo)
+        let fid = document.documentID
+        var todo = todo
+        todo.id = fid
+        return todo
+      } catch {
+        throw TodoRepositoryError.createError
+      }
+    }
+
+    func readAll() async throws -> [TodoDTO] {
+      // 날짜 관련 쿼리 분리, 모든 유저가 같은 그룹인 상황 가정
+      let calendar = Calendar.current
+      let today: Date = .now
+      let startDate = calendar.startOfDay(for: today)
+      let tomorrow = calendar.date(byAdding: .day, value: 1, to: startDate)!
+      let endDate = calendar.date(byAdding: .second, value: -1, to: tomorrow)!
+
+      do {
+        let querySnapshot = try await reference.todoCollection()
+          .whereField("date", isGreaterThanOrEqualTo: startDate)
+          .whereField("date", isLessThanOrEqualTo: endDate)
+          .getDocuments()
+
+        return querySnapshot.documents.compactMap { document -> TodoDTO? in
+          do {
+            return try document.data(as: TodoDTO.self)
+          } catch {
+            print("Error decoding todo: \(error)")
+            return nil
+          }
+        }
+      } catch {
+        throw TodoRepositoryError.readError
+      }
+    }
+
+    func update(_ todo: TodoDTO) throws {
+      guard let todoId = todo.id else {
+        throw TodoRepositoryError.updateError
+      }
+
+      do {
+        try reference
+          .todoCollection()
+          .document(todoId)
+          .setData(from: todo, merge: true)
+      } catch {
+        throw TodoRepositoryError.updateError
+      }
+    }
+
+    func delete(id: String) {
+      reference
+        .todoCollection()
+        .document(id)
+        .delete()
+    }
   }
 #else
-  extension FirestoreTodoRepository {
+  final class FirestoreTodoRepository: TodoRepositoryType {
     func createTodo(_ todo: TodoDTO) async throws -> TodoDTO {
       print("[Creating Todo] - \(todo)")
 
-      return try reference.db.create(todo: todo)
+      return .stub
     }
 
     func fetchTodos(userId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO] {
       print("[Fetcing Todo] - \(userId)")
 
-      let todos: [TodoDTO] = reference.db.read()
-      return todos.filter { $0.uid == userId && startDate ... endDate ~= $0.date }
+      return TodoDTO.stubs.filter { $0.uid == userId && startDate ... endDate ~= $0.date }
     }
 
     func fetchTodos(groupId: String, startDate: Date, endDate: Date) async throws -> [TodoDTO] {
       print("[Fetcing Todo] - \(groupId)")
 
-      let todos: [TodoDTO] = reference.db.read()
-      return todos.filter { startDate ... endDate ~= $0.date }
+      return TodoDTO.stubs.filter { startDate ... endDate ~= $0.date }
     }
 
     func updateTodo(todo: TodoDTO) async throws {
       print("[Updating Todo] - \(todo)")
-
-      try reference.db.update(todo: todo)
     }
 
     func deleteTodo(todoId: String) async throws {
       print("[Deleting Todo] - \(todoId)")
-
-      try reference.db.delete(todoId: todoId)
     }
+
+    // MARK: - Repository for the Store
+
+    func create(_ todo: TodoDTO) throws -> TodoDTO {
+      .stub
+    }
+
+    func readAll() async throws -> [TodoDTO] {
+      TodoDTO.stubs
+    }
+
+    func update(_ todo: TodoDTO) throws {}
+
+    func delete(id: String) {}
   }
 #endif
