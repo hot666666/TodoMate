@@ -32,16 +32,17 @@ import Foundation
 #endif
 
 extension TodoDTO {
-  static let stub: [TodoDTO] = [
-    .init(
-      id: UUID().uuidString,
-      content: "할일1",
-      status: "진행 중",
-      detail: "할일1",
-      date: .now,
-      uid: "test",
-      lastModifiedAt: .now
-    ),
+  static let stub: TodoDTO = .init(
+    id: UUID().uuidString,
+    content: "할일1",
+    status: "진행 중",
+    detail: "할일1",
+    date: .now,
+    uid: "test",
+    lastModifiedAt: .now
+  )
+  static let stubs: [TodoDTO] = [
+    stub,
     .init(
       id: UUID().uuidString,
       content: "할일2",
