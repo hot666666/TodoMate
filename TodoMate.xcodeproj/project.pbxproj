@@ -76,7 +76,7 @@
 		457C68712D859B9400E91E3D /* MessageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68702D859B9400E91E3D /* MessageModel.swift */; };
 		457C68742D859BAF00E91E3D /* MessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68732D859BAF00E91E3D /* MessageStore.swift */; };
 		457C68762D859C9C00E91E3D /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457C68752D859C9C00E91E3D /* MessageView.swift */; };
-		458F0DF22D8709BD00CC32AA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 458F0DF12D8709BD00CC32AA /* FirebaseFirestore */; };
+		458F0E682D8809B200CC32AA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 458F0E672D8809B200CC32AA /* FirebaseFirestore */; };
 		459198732D7ED0E100A4C6CA /* AppManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459198722D7ED0E100A4C6CA /* AppManagementView.swift */; };
 		459325312CA0F1F000A95193 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 459325302CA0F1F000A95193 /* Assets.xcassets */; };
 		45962CF32D491ABE00089A48 /* GroupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45962CF22D491ABB00089A48 /* GroupService.swift */; };
@@ -335,7 +335,7 @@
 				451DEDA82D3CDD2300A20417 /* GoogleSignIn in Frameworks */,
 				45DE54702D859DA700E08637 /* MarkdownUI in Frameworks */,
 				451DEDB12D3CDDA400A20417 /* FirebaseStorage in Frameworks */,
-				458F0DF22D8709BD00CC32AA /* FirebaseFirestore in Frameworks */,
+				458F0E682D8809B200CC32AA /* FirebaseFirestore in Frameworks */,
 				451DEDB32D3CDE0D00A20417 /* FirebaseCore in Frameworks */,
 				451DEDAB2D3CDDA400A20417 /* FirebaseAuth in Frameworks */,
 			);
@@ -836,7 +836,7 @@
 				451DEDB42D3CDE5300A20417 /* GoogleSignInSwift */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
 				45DE546F2D859DA700E08637 /* MarkdownUI */,
-				458F0DF12D8709BD00CC32AA /* FirebaseFirestore */,
+				458F0E672D8809B200CC32AA /* FirebaseFirestore */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -1656,7 +1656,7 @@
 			package = 451DEDA62D3CDCEF00A20417 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
 		};
-		458F0DF12D8709BD00CC32AA /* FirebaseFirestore */ = {
+		458F0E672D8809B200CC32AA /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 451DEDA92D3CDDA400A20417 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
