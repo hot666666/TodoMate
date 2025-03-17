@@ -91,8 +91,8 @@ private struct TodosView: View {
 
       ForEach(store.todos) { todo in
         VStack(alignment: .leading) {
-          Text("\(todo.content.prefix(10))...")
-          Text("\(todo.uid.prefix(5))...")
+          Text(todo.content)
+          Text(todo.uid)
         }
       }
     }
@@ -156,9 +156,9 @@ private struct WidgetView: View {
 
       VStack(alignment: .leading) {
         Text(todo.content)
-        Text("\(todo.uid.prefix(5))...")
+        Text(todo.uid)
         Text(todo.date.toYYYYMMDDString())
-        Text("\(todo.fid.prefix(5))...")
+        Text(todo.fid)
       }
     }
   }
