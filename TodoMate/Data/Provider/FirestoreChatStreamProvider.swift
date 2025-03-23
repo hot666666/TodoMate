@@ -21,7 +21,7 @@ extension FirestoreChatStreamProvider {
           .addSnapshotListener { querySnapshot, error in
             guard let snapshot = querySnapshot else {
               if let error = error {
-                print("Error fetching snapshots: \(error)")
+                print("[FirestoreChatStreamProvider] - Error fetching snapshots: \(error)")
               }
               return
             }
@@ -39,7 +39,9 @@ extension FirestoreChatStreamProvider {
                   continuation.yield(.removed(chat))
                 }
               } else {
-                print("Failed to decode document with ID: \(diff.document.documentID)")
+                print(
+                  "[FirestoreChatStreamProvider] - Failed to decode document with ID: \(diff.document.documentID)"
+                )
               }
             }
           }

@@ -59,8 +59,8 @@ struct TodoMateApp: App {
 
   // MARK: - Helper Methods
 
-  private func postNotification(action: ShortcutAction) {
-    print("Posting \(action)")
+  private func postNotification(action: ShortcutActions) {
+    print("[TodoMateApp] - NotificationCenter를 통한 \(action) 알림 전송")
     NotificationCenter.default.post(
       name: .shortcutAction,
       object: nil,
@@ -70,7 +70,7 @@ struct TodoMateApp: App {
 
   private func handleScenePhaseChange(_ newPhase: ScenePhase) {
     guard newPhase != .active else { return }
-    print("Save ModelContainer and Reload widget timeline")
+    print("[TodoMateApp] - SwiftData 모델 컨테이너 저장 및 위젯 갱신")
     try? sharedModelContainer.mainContext.save()
     WidgetCenter.shared.reloadAllTimelines()
   }
@@ -82,45 +82,74 @@ private struct _TodoMateApp: View {
 
   init(modelContainer: ModelContainer) {
     #if PREVIEW
-      let container: DIContainer = .init(
-        authService: StubAuthService(),
-        googleSignInService: StubGoogleSignInService(),
-        widgetDataManager: WidgetDataManager(modelContainer: modelContainer),
-        userService: StubUserService(),
-        todoService: TodoService(), /// 테스트용 reference 구현
-        chatService: StubChatService(),
-        groupService: StubGroupService(),
-        chatStreamProvider: FirestoreChatStreamProvider(),
-        todoStreamProvider: FirestoreTodoStreamProvider(), /// 테스트용 reference 구현
-        userInfoService: UserInfoService(), /// 외부에서 저장위치(UserDefualt key) 설정
-        todoOrderService: StubTodoOrderService()
-      ) /// 외부에서 저장위치(UserDefualt key) 설정
+      let container: DIContainer = .stub
     #else
       // TODO: - 의존성 순서 리팩토링
-      let userService = UserService()
+      let widgetDataManager = WidgetDataManager(modelContainer: modelContainer)
+      let userRepository = FirestoreUserRepository()
+      let userService = UserService(userRepository: userRepository)
       let googleSignInService = GoogleSignInService()
+      let authService = AuthService(
+        userService: userService,
+        googleSignInService: googleSignInService
+      )
+      let authenticatedUserCacheService = AuthenticatedUserCacheService()
+      let todoService = TodoService()
+      let todoOrderService = TodoOrderService()
+      let userGroupCacheService = UserGroupCacheService()
 
       let container: DIContainer = .init(
-        authService: AuthService(
-          userService: userService,
-          googleSignInService: googleSignInService
-        ),
+        authService: authService,
         googleSignInService: googleSignInService,
-        widgetDataManager: WidgetDataManager(modelContainer: modelContainer),
+        widgetDataManager: widgetDataManager,
         userService: userService,
-        todoService: TodoService(),
+        todoService: todoService,
         chatService: ChatService(),
-        groupService: GroupService(),
         chatStreamProvider: FirestoreChatStreamProvider(),
         todoStreamProvider: FirestoreTodoStreamProvider(),
-        userInfoService: UserInfoService(),
-        todoOrderService: TodoOrderService()
+        todoOrderService: todoOrderService,
+        authenticatedUserCacheService: AuthenticatedUserCacheService(),
+        userGroupCacheService: userGroupCacheService,
+
+        // MARK: - UseCase
+
+        authenticationUseCase: AuthenticationUseCase(
+          authService: authService,
+          userInfoService: authenticatedUserCacheService,
+          widgetDataManager: widgetDataManager
+        ),
+        fetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCase(
+          userInfoService: authenticatedUserCacheService
+        ),
+        fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCase(
+          todoService: todoService,
+          todoOrderService: todoOrderService
+        ),
+        saveUserTodosOrderUseCase: SaveUserTodosOrderUseCase(
+          todoOrderService: todoOrderService
+        ),
+        syncWidgetDataWithUserTodoUseCase: SyncWidgetDataWithUserTodoUseCase(
+          widgetDataManager: widgetDataManager
+        ),
+        signInUseCase: SignInUseCase(
+          authService: authService,
+          authenticatedUserCacheService: authenticatedUserCacheService,
+          userRepoitory: userRepository,
+          userGroupCacheService: userGroupCacheService
+        ),
+        signOutUseCase: SignOutUseCase(
+          authService: authService,
+          authenticatedUserCacheService: authenticatedUserCacheService,
+          userGroupCacheService: userGroupCacheService,
+          widgetDataManager: widgetDataManager
+        )
       )
     #endif
     _container = State(initialValue: container)
     _authManager = State(initialValue: AuthManager(
-      authenticationUseCase: container.authenticationUseCase,
-      fetchAuthenticatedUserUseCase: container.fetchAuthenticatedUserUseCase
+      fetchAuthenticatedUserUseCase: container.fetchAuthenticatedUserUseCase,
+      signInUseCase: container.signInUseCase,
+      signOutUseCase: container.signOutUseCase
     ))
   }
 
@@ -135,7 +164,8 @@ private struct _TodoMateApp: View {
     case .signedOut:
       AuthView()
     case let .signedIn(signedInUser):
-      MainView(userInfo: signedInUser)
+      // TODO: - 상태마다 뷰모델을 중복 생성 중)
+      MainView(viewModel: .init(container: container, authenticatedUser: signedInUser))
         .environment(container)
     case .loading:
       ProgressView()

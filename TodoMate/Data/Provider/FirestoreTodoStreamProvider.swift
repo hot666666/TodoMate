@@ -7,6 +7,11 @@
 
 import Foundation
 
+enum FirestoreTodoStreamProviderError: Error {
+  case decodingFailed(String)
+  case conversionFailed(String)
+}
+
 final class FirestoreTodoStreamProvider: TodoStreamProviderType {
   private let reference: FirestoreReference
 
@@ -16,6 +21,7 @@ final class FirestoreTodoStreamProvider: TodoStreamProviderType {
 }
 
 extension FirestoreTodoStreamProvider {
+  // TODO: - 그룹 유저에 대해 Todo 필터작업 필요
   #if !PREVIEW
     func createTodoStream() -> AsyncStream<DatabaseChange<Todo>> {
       AsyncStream { continuation in
@@ -34,15 +40,30 @@ extension FirestoreTodoStreamProvider {
           .addSnapshotListener { querySnapshot, error in
             guard let snapshot = querySnapshot else {
               if let error = error {
-                print("Error fetching snapshots: \(error)")
+                print("[FirestoreTodoStreamProvider] - Error fetching snapshots: \(error)")
               }
               return
             }
 
             for diff in snapshot.documentChanges {
-              if let todoDTO = try? diff.document.data(as: TodoDTO.self),
-                 todoDTO.lastModifiedAt >= streamCreatedTime,
-                 let todo = try? todoDTO.toModel() {
+              do {
+                // 디코딩
+                guard let todoDTO = try? diff.document.data(as: TodoDTO.self) else {
+                  throw FirestoreTodoStreamProviderError
+                    .decodingFailed("문서 데이터를 TodoDTO로 디코딩 실패: \(diff.document.documentID)")
+                }
+
+                // 타임스탬프 검증
+                guard todoDTO.lastModifiedAt >= streamCreatedTime else {
+                  continue
+                }
+
+                // 모델 변환
+                guard let todo = try? todoDTO.toModel() else {
+                  throw FirestoreTodoStreamProviderError
+                    .conversionFailed("TodoDTO를 Todo 모델로 변환 실패: \(diff.document.documentID)")
+                }
+
                 switch diff.type {
                 case .added:
                   continuation.yield(.added(todo))
@@ -51,8 +72,12 @@ extension FirestoreTodoStreamProvider {
                 case .removed:
                   continuation.yield(.removed(todo))
                 }
-              } else {
-                print("Error decoding and converting todo: \(diff.document.data())")
+              } catch let FirestoreTodoStreamProviderError.decodingFailed(message) {
+                print("[FirestoreTodoStreamProvider] - 디코딩 오류: \(message)")
+              } catch let FirestoreTodoStreamProviderError.conversionFailed(message) {
+                print("[FirestoreTodoStreamProvider] - 변환 오류: \(message)")
+              } catch {
+                print("[FirestoreTodoStreamProvider] - 예상치 못한 오류 발생: \(error.localizedDescription)")
               }
             }
           }
