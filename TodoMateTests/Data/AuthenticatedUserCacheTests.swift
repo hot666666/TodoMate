@@ -9,7 +9,7 @@ import Foundation
 import Testing
 @testable import TodoMate
 
-@Suite("UserInfoService Tests")
+@Suite("AuthenticatedUserCache Tests")
 struct AuthenticatedUserCacheTests {
   let mockUser = AuthenticatedUser(uid: "test-user", gid: "test-gid")
   let userDefaults: UserDefaults
@@ -21,7 +21,7 @@ struct AuthenticatedUserCacheTests {
     userDefaults.removePersistentDomain(forName: "TestUserDefaults")
   }
 
-  @Test("UserInfo 로드 성공")
+  @Test("AuthenticatedUserCache 로드 성공")
   func testLoadUserInfoSuccess() throws {
     // Given
     let service = AuthenticatedUserCacheService(userDefaults: userDefaults, cacheKey: cacheKey)
@@ -35,7 +35,7 @@ struct AuthenticatedUserCacheTests {
     #expect(loadedUser.uid == mockUser.uid, "로드된 유저 정보가 mockUser와 일치해야 함")
   }
 
-  @Test("UserInfo 로드 실패 - 데이터 없음")
+  @Test("AuthenticatedUserCache 로드 실패 - 데이터 없음")
   func testLoadUserInfoFailureNoData() throws {
     // Given
     let service = AuthenticatedUserCacheService(userDefaults: userDefaults, cacheKey: cacheKey)
@@ -51,7 +51,7 @@ struct AuthenticatedUserCacheTests {
     }
   }
 
-  @Test("UserInfo 로드 실패 - 디코딩 오류")
+  @Test("AuthenticatedUserCache 로드 실패 - 디코딩 오류")
   func testLoadUserInfoFailureDecodingError() throws {
     // Given
     let service = AuthenticatedUserCacheService(userDefaults: userDefaults, cacheKey: cacheKey)

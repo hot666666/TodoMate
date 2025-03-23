@@ -16,6 +16,7 @@ final class MockTodoService: TodoServiceType {
   func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]] { [:] }
   func fetchToday(groupId: String) async -> [Todo] { fetchTodayResult }
   func update(_ todo: Todo) {}
+  func update(from todo: Todo, with newTodo: Todo) throws {}
   func remove(_ todo: Todo) {}
 }
 
