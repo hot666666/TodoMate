@@ -71,6 +71,6 @@ final class SignInUseCase: SignInUseCaseType {
 
 class StubSignInUseCase: SignInUseCaseType {
   func execute() async -> Result<AuthenticatedUser, SignInUseCaseError> {
-    return .success(AuthenticatedUser(uid: "test-user", gid: "test-gid"))
+    return .success(AuthenticatedUser(uid: User.stub[0].uid, gid: User.stub[0].gid))
   }
 }
