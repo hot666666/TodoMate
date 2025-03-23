@@ -43,7 +43,7 @@ struct TodoCalendarView: View {
   @ViewBuilder
   private var backButton: some View {
     Button {
-      viewModel.onDismiss()
+      viewModel.dismiss()
     } label: {
       Image(systemName: "arrow.backward")
         .font(.title)
@@ -78,7 +78,6 @@ struct TodoCalendarView: View {
     .padding(.bottom)
   }
 
-  @ViewBuilder
   private var weekdayHeaders: some View {
     HStack {
       ForEach(Const.CalendarView.WEEKDAYS, id: \.self) { day in
@@ -91,7 +90,6 @@ struct TodoCalendarView: View {
     }
   }
 
-  @ViewBuilder
   private var calendarDayGrid: some View {
     LazyVGrid(columns:
       Array(repeating: GridItem(.flexible(), spacing: 0),
@@ -255,9 +253,9 @@ private struct HoverStyledButton: View {
     TodoCalendarView(viewModel: .init(container: .stub,
                                       user: User.stub[0],
                                       isMine: true,
-                                      onDismiss: {}))
-      .frame(width: 500, height: 800)
+                                      dismiss: {}))
       .environment(DIContainer.stub)
       .background(Color.customBlack)
   }
+  .frame(width: 600, height: 600)
 }
