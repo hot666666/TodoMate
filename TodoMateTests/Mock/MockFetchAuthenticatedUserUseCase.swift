@@ -7,7 +7,7 @@
 
 @testable import TodoMate
 
-struct MockFetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType {
+struct MockFetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType {
   private let excuteReturn: AuthenticatedUser?
   init(excuteReturn: AuthenticatedUser? = nil) { self.excuteReturn = excuteReturn }
 

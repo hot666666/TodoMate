@@ -10,11 +10,17 @@ import Testing
 
 private enum TestFixtures {
   static let mockAuthUser = AuthenticatedUser(uid: "test-user", gid: "test-gid")
-  static let authenticationUseCaseForSuccess = MockAuthenticationUseCase(
+  static let signInUseCaseForSuccess = MockSignInUseCase(
     shouldSignInSuccess: true,
     signInReturn: mockAuthUser
   )
-  static let authenticationUseCaseForFailure = MockAuthenticationUseCase(shouldSignInSuccess: false)
+  static let signInUseCaseForFailure = MockSignInUseCase(shouldSignInSuccess: false)
+  static let signOutUseCaseForSuccess = MockSignOutUseCase(
+    shouldSignOutSuccess: true
+  )
+  static let signOutUseCaseForFailure = MockSignOutUseCase(
+    shouldSignOutSuccess: false
+  )
   static let fetchAuthenticatedUserUseCaseWithExistingUser =
     MockFetchAuthenticatedUserUseCase(excuteReturn: mockAuthUser)
   static let fetchAuthenticatedUserUseCaseWithoutExistingUser =
@@ -33,8 +39,9 @@ struct AuthManagerTests {
     func signInSucceedsWithNoInitialUser() async {
       // Given
       let authManager = AuthManager(
-        authenticationUseCase: TestFixtures.authenticationUseCaseForSuccess,
-        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase
+        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase,
+        signInUseCase: TestFixtures.signInUseCaseForSuccess,
+        signOutUseCase: TestFixtures.signOutUseCaseForSuccess
       )
 
       // When
@@ -54,8 +61,9 @@ struct AuthManagerTests {
     func signInFailsWithNoInitialUser() async {
       // Given
       let authManager = AuthManager(
-        authenticationUseCase: TestFixtures.authenticationUseCaseForFailure,
-        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase
+        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase,
+        signInUseCase: TestFixtures.signInUseCaseForFailure,
+        signOutUseCase: TestFixtures.signOutUseCaseForSuccess
       )
 
       // When
@@ -72,16 +80,17 @@ struct AuthManagerTests {
     }
   }
 
-  @Suite("SignOut 테스트")
+  @Suite("SignOut 메서드 테스트")
   struct SignOutTests {
     let mockAuthUser = TestFixtures.mockAuthUser
 
-    @Test("로그아웃")
-    func signOutWithNoInitialUser() async {
+    @Test("로그아웃 성공")
+    func signOutSucceeds() async {
       // Given
       let authManager = AuthManager(
-        authenticationUseCase: TestFixtures.authenticationUseCaseForSuccess,
-        fetchAuthenticatedUserUseCase: TestFixtures.fetchAuthenticatedUserUseCaseWithExistingUser
+        fetchAuthenticatedUserUseCase: TestFixtures.fetchAuthenticatedUserUseCaseWithExistingUser,
+        signInUseCase: TestFixtures.signInUseCaseForSuccess,
+        signOutUseCase: TestFixtures.signOutUseCaseForSuccess
       )
 
       // When
@@ -91,28 +100,27 @@ struct AuthManagerTests {
       #expect(authManager.authenticatedUser == nil, "로그아웃 후 유저가 없어야 함")
       switch authManager.state {
       case .signedOut:
-        #expect(true, "로그아웃 후 signedOut 상태여야 함")
+        #expect(true, "로그아웃 성공 후 signedOut 상태여야 함")
       case let state:
-        #expect(Bool(false), "로그아웃 후 signedOut이어야 하지만 현재: \(state)")
+        #expect(Bool(false), "로그아웃 성공 후 signedOut이어야 하지만 현재: \(state)")
       }
     }
   }
 
   @Suite("fetchAUser 메서드 테스트")
-  struct fetchAUserTests {
+  struct FetchAUserTests {
     let mockAuthUser = TestFixtures.mockAuthUser
-    let authenticationUseCase = TestFixtures.authenticationUseCaseForSuccess
 
     @Test("AuthenticatedUser 존재")
     func fetchAUserWithExistingUser() {
       // Given
-      let authenticationUseCase = authenticationUseCase
       let fetchAuthenticatedUserUseCase = TestFixtures.fetchAuthenticatedUserUseCaseWithExistingUser
 
-      // When(초기화 시 fetchAUser 호출)
+      // When (초기화 시 fetchAUser 호출)
       let authManager = AuthManager(
-        authenticationUseCase: authenticationUseCase,
-        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase
+        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase,
+        signInUseCase: TestFixtures.signInUseCaseForSuccess,
+        signOutUseCase: TestFixtures.signOutUseCaseForSuccess
       )
 
       // Then
@@ -128,14 +136,14 @@ struct AuthManagerTests {
     @Test("AuthenticatedUser 미존재")
     func fetchAUserWithNoExistingUser() {
       // Given
-      let authenticationUseCase = authenticationUseCase
       let fetchAuthenticatedUserUseCase = TestFixtures
         .fetchAuthenticatedUserUseCaseWithoutExistingUser
 
-      // When(초기화 시 fetchAUser 호출)
+      // When (초기화 시 fetchAUser 호출)
       let authManager = AuthManager(
-        authenticationUseCase: authenticationUseCase,
-        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase
+        fetchAuthenticatedUserUseCase: fetchAuthenticatedUserUseCase,
+        signInUseCase: TestFixtures.signInUseCaseForSuccess,
+        signOutUseCase: TestFixtures.signOutUseCaseForSuccess
       )
 
       // Then
