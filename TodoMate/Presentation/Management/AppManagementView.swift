@@ -111,7 +111,11 @@ private struct AuthenticatedUserView: View {
     VStack(alignment: .leading) {
       if let user = authManager.authenticatedUser {
         Text(user.uid)
-        Text(user.gid.isEmpty ? "그룹 없음" : user.gid)
+        if let gid = user.gid {
+          Text(gid)
+        } else {
+          Text("그룹 없음")
+        }
       } else {
         Text("사용자 정보가 없습니다.")
       }
@@ -183,7 +187,7 @@ private struct WidgetView: View {
 #Preview {
   AppManagementView()
     .frame(width: 300, height: 400)
-    .environment(MessageStore.stub)
+    .environment(MessageStore.get)
     .environment(AuthManager.stub)
     .modelContainer(.forPreview())
 }

@@ -15,7 +15,7 @@ final class UserService: UserServiceType {
   func fetch() async -> [User] {
     print("[Fetching Users] -")
     do {
-      return try await userRepository.fetchAllUsers().map { $0.toModel() }
+      return try await userRepository.readAll().map { $0.toModel() }
     } catch {
       print("Error fetching users: \(error)")
     }
@@ -24,13 +24,13 @@ final class UserService: UserServiceType {
 
   func fetch(uid: String) async -> User? {
     print("[Fetching User] - \(uid)")
-    return try? await userRepository.fetchUser(id: uid).toModel()
+    return try? await userRepository.read(id: uid).toModel()
   }
 
   func update(_ user: User) async {
     print("[Updating User] - \(user)")
     do {
-      try await userRepository.updateUser(user: user.toDTO())
+      try await userRepository.createOrUpdate(user: user.toDTO())
     } catch {
       print("Error updating users: \(error)")
     }

@@ -15,17 +15,20 @@ final class DIContainer {
   @ObservationIgnored let userService: UserServiceType
   @ObservationIgnored let todoService: TodoServiceType
   @ObservationIgnored let chatService: ChatServiceType
-  @ObservationIgnored let groupService: GroupServiceType
   @ObservationIgnored let chatStreamProvider: ChatStreamProviderType
   @ObservationIgnored let todoStreamProvider: TodoStreamProviderType
-  @ObservationIgnored let userInfoService: UserInfoServiceType
   @ObservationIgnored let todoOrderService: TodoOrderServiceType
-  // UseCases
-  @ObservationIgnored let authenticationUseCase: AuthenticationUseCaseType
-  @ObservationIgnored let fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType
+  @ObservationIgnored let authenticatedUserCacheService: AuthenticatedUserCacheServiceType
+  @ObservationIgnored let userGroupCacheService: UserGroupCacheServiceType
+
+  // MARK: - UseCases
+
+  @ObservationIgnored let fetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType
   @ObservationIgnored let fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType
   @ObservationIgnored let saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
   @ObservationIgnored let syncWidgetDataWithUserTodoUseCase: SyncWidgetDataWithUserTodoUseCaseType
+  @ObservationIgnored let signInUseCase: SignInUseCaseType
+  @ObservationIgnored let signOutUseCase: SignOutUseCaseType
 
   init(authService: AuthServiceType,
        googleSignInService: GoogleSignInServiceType,
@@ -33,78 +36,43 @@ final class DIContainer {
        userService: UserServiceType,
        todoService: TodoServiceType,
        chatService: ChatServiceType,
-       groupService: GroupServiceType,
        chatStreamProvider: ChatStreamProviderType,
        todoStreamProvider: TodoStreamProviderType,
-       userInfoService: UserInfoServiceType,
-       todoOrderService: TodoOrderServiceType) {
-    self.googleSignInService = googleSignInService
-    self.widgetDataManager = widgetDataManager
-    self.userService = userService
-    self.todoService = todoService
-    self.chatService = chatService
-    self.groupService = groupService
-    self.chatStreamProvider = chatStreamProvider
-    self.todoStreamProvider = todoStreamProvider
-    self.userInfoService = userInfoService
-    self.todoOrderService = todoOrderService
-    self.authService = authService
-
-    // UseCases
-    #if PREVIEW
-      authenticationUseCase = StubAuthenticationUseCase()
-      fetchAuthenticatedUserUseCase = StubFetchAuthenticatedUserUseCase()
-      fetchTodosByUserUseCase = StubFetchUserGroupTodosWithOrderUseCase()
-      saveUserTodosOrderUseCase = StubSaveUserTodosOrderUseCase()
-      syncWidgetDataWithUserTodoUseCase =
-        StubSyncWidgetDataWithUserTodoUseCase(widgetDataManager: widgetDataManager)
-    #else
-      authenticationUseCase = AuthenticationUseCase(authService: authService,
-                                                    userInfoService: userInfoService,
-                                                    widgetDataManager: widgetDataManager)
-      fetchAuthenticatedUserUseCase =
-        FetchAuthenticatedUserUseCase(userInfoService: userInfoService)
-      fetchTodosByUserUseCase = FetchUserGroupTodosWithOrderUseCase(todoService: todoService,
-                                                                    todoOrderService: todoOrderService)
-      saveUserTodosOrderUseCase = SaveUserTodosOrderUseCase(todoOrderService: todoOrderService)
-      syncWidgetDataWithUserTodoUseCase =
-        SyncWidgetDataWithUserTodoUseCase(widgetDataManager: widgetDataManager)
-    #endif
-  }
-
-  init(authService: AuthServiceType,
-       googleSignInService: GoogleSignInServiceType,
-       widgetDataManager: WidgetDataManagerType,
-       userService: UserServiceType,
-       todoService: TodoServiceType,
-       chatService: ChatServiceType,
-       groupService: GroupServiceType,
-       chatStreamProvider: ChatStreamProviderType,
-       todoStreamProvider: TodoStreamProviderType,
-       userInfoService: UserInfoServiceType,
        todoOrderService: TodoOrderServiceType,
-       authenticationUseCase: AuthenticationUseCaseType,
-       fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType,
+       authenticatedUserCacheService: AuthenticatedUserCacheServiceType,
+       userGroupCacheService: UserGroupCacheServiceType,
+
+       // MARK: - UseCases
+
+       fetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType,
        fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType,
        saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType,
-       manageWidgetDataUseCase: SyncWidgetDataWithUserTodoUseCaseType) {
+       syncWidgetDataWithUserTodoUseCase: SyncWidgetDataWithUserTodoUseCaseType,
+       signInUseCase: SignInUseCaseType,
+       signOutUseCase: SignOutUseCaseType) {
     self.googleSignInService = googleSignInService
     self.widgetDataManager = widgetDataManager
     self.userService = userService
     self.todoService = todoService
     self.chatService = chatService
-    self.groupService = groupService
     self.chatStreamProvider = chatStreamProvider
     self.todoStreamProvider = todoStreamProvider
-    self.userInfoService = userInfoService
     self.todoOrderService = todoOrderService
     self.authService = authService
-    self.authenticationUseCase = authenticationUseCase
+    self.authenticatedUserCacheService = authenticatedUserCacheService
+    self.userGroupCacheService = userGroupCacheService
+
+    // MARK: - UseCases
+
     self.fetchAuthenticatedUserUseCase = fetchAuthenticatedUserUseCase
     self.fetchTodosByUserUseCase = fetchTodosByUserUseCase
     self.saveUserTodosOrderUseCase = saveUserTodosOrderUseCase
-    syncWidgetDataWithUserTodoUseCase = manageWidgetDataUseCase
+    self.syncWidgetDataWithUserTodoUseCase = syncWidgetDataWithUserTodoUseCase
+    self.signInUseCase = signInUseCase
+    self.signOutUseCase = signOutUseCase
   }
+
+  // MARK: - For Testing
 
   convenience init(testAuthService: AuthServiceType = StubAuthService(),
                    testGoogleSignInService: GoogleSignInServiceType = StubGoogleSignInService(),
@@ -114,22 +82,27 @@ final class DIContainer {
                    testUserService: UserServiceType = StubUserService(),
                    testTodoService: TodoServiceType = StubTodoService(),
                    testChatService: ChatServiceType = StubChatService(),
-                   testGroupService: GroupServiceType = StubGroupService(),
                    testChatStreamProvider: ChatStreamProviderType = StubChatStreamProvider(),
                    testTodoStreamProvider: TodoStreamProviderType = StubTodoStreamProvider(),
-                   testUserInfoService: UserInfoServiceType = StubUserInfoService(),
                    testTodoOrderService: TodoOrderServiceType = StubTodoOrderService(),
-                   testAuthenticationUseCase: AuthenticationUseCaseType = StubAuthenticationUseCase(
+                   testAuthenticationUserCacheService: AuthenticatedUserCacheServiceType =
+                     StubAuthenticatedUserCacheService(),
+                   testUserGroupCacheService: UserGroupCacheServiceType = StubUserGroupCacheService(
                    ),
-                   testFetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType =
-                     StubFetchAuthenticatedUserUseCase(),
+
+                   // MARK: - UseCases
+
+                   testFetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType =
+                     StubLoadCachedAuthenticatedUserUseCase(),
                    testFetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType =
                      StubFetchUserGroupTodosWithOrderUseCase(),
                    testSaveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType =
                      StubSaveUserTodosOrderUseCase(
                      ),
-                   testManageWidgetDataUseCase: SyncWidgetDataWithUserTodoUseCaseType =
-                     StubSyncWidgetDataWithUserTodoUseCase()) {
+                   testSyncWidgetDataWithUserTodoUseCase: SyncWidgetDataWithUserTodoUseCaseType =
+                     StubSyncWidgetDataWithUserTodoUseCase(),
+                   testSignInUseCase: SignInUseCaseType = StubSignInUseCase(),
+                   testSignOutUseCase: SignOutUseCaseType = StubSignOutUseCase()) {
     self.init(
       authService: testAuthService,
       googleSignInService: testGoogleSignInService,
@@ -137,32 +110,47 @@ final class DIContainer {
       userService: testUserService,
       todoService: testTodoService,
       chatService: testChatService,
-      groupService: testGroupService,
       chatStreamProvider: testChatStreamProvider,
       todoStreamProvider: testTodoStreamProvider,
-      userInfoService: testUserInfoService,
       todoOrderService: testTodoOrderService,
-      authenticationUseCase: testAuthenticationUseCase,
+      authenticatedUserCacheService: testAuthenticationUserCacheService,
+      userGroupCacheService: testUserGroupCacheService,
+
+      // MARK: - UseCases
+
       fetchAuthenticatedUserUseCase: testFetchAuthenticatedUserUseCase,
       fetchTodosByUserUseCase: testFetchTodosByUserUseCase,
       saveUserTodosOrderUseCase: testSaveUserTodosOrderUseCase,
-      manageWidgetDataUseCase: testManageWidgetDataUseCase
+      syncWidgetDataWithUserTodoUseCase: testSyncWidgetDataWithUserTodoUseCase,
+      signInUseCase: testSignInUseCase,
+      signOutUseCase: testSignOutUseCase
     )
   }
 }
 
 extension DIContainer {
-  static let stub = DIContainer(
-    authService: StubAuthService(),
-    googleSignInService: StubGoogleSignInService(),
-    widgetDataManager: WidgetDataManager(modelContainer: .forPreview()),
-    userService: StubUserService(),
-    todoService: StubTodoService(),
-    chatService: StubChatService(),
-    groupService: StubGroupService(),
-    chatStreamProvider: StubChatStreamProvider(),
-    todoStreamProvider: StubTodoStreamProvider(),
-    userInfoService: StubUserInfoService(),
-    todoOrderService: StubTodoOrderService()
+  // MARK: - For Preview
+
+  static let stub: DIContainer = .init(
+    testAuthService: StubAuthService(),
+    testGoogleSignInService: StubGoogleSignInService(),
+    testWidgetDataManager: WidgetDataManager(modelContainer: .forPreview()),
+    testUserService: StubUserService(),
+    testTodoService: StubTodoService(),
+    testChatService: StubChatService(),
+    testChatStreamProvider: StubChatStreamProvider(),
+    testTodoStreamProvider: StubTodoStreamProvider(),
+    testTodoOrderService: StubTodoOrderService(),
+    testAuthenticationUserCacheService: StubAuthenticatedUserCacheService(),
+    testUserGroupCacheService: StubUserGroupCacheService(),
+
+    // MARK: - UseCases
+
+    testFetchAuthenticatedUserUseCase: StubLoadCachedAuthenticatedUserUseCase(),
+    testFetchTodosByUserUseCase: StubFetchUserGroupTodosWithOrderUseCase(),
+    testSaveUserTodosOrderUseCase: StubSaveUserTodosOrderUseCase(),
+    testSyncWidgetDataWithUserTodoUseCase: StubSyncWidgetDataWithUserTodoUseCase(),
+    testSignInUseCase: StubSignInUseCase(),
+    testSignOutUseCase: StubSignOutUseCase()
   )
 }

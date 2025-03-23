@@ -12,9 +12,7 @@ import SwiftUI
 class TodoBoardViewModel {
   private let calendar = Calendar.current
   private let todoStreamProvider: TodoStreamProviderType
-  private let widgetDataManager: WidgetDataManagerType
   private let todoService: TodoServiceType
-  private let todoOrderService: TodoOrderServiceType
 
   private let fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType
   private let saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
@@ -28,9 +26,7 @@ class TodoBoardViewModel {
   init(container: DIContainer, userInfo: AuthenticatedUser) {
     todoStreamProvider = container.todoStreamProvider
 
-    widgetDataManager = container.widgetDataManager
     todoService = container.todoService
-    todoOrderService = container.todoOrderService
 
     fetchTodosByUserUseCase = container.fetchTodosByUserUseCase
     saveUserTodosOrderUseCase = container.saveUserTodosOrderUseCase

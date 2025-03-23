@@ -1,5 +1,5 @@
 //
-//  FetchAuthenticatedUserUseCaseTests.swift
+//  LoadCachedAuthenticatedUserUseCaseTests.swift
 //  TodoMate
 //
 //  Created by hs on 3/6/25.
@@ -9,7 +9,7 @@ import Foundation
 import Testing
 @testable import TodoMate
 
-@Suite("FetchAuthenticatedUserUseCase Tests")
+@Suite("LoadCachedAuthenticatedUserUseCaseTests Tests")
 struct FetchAuthenticatedUserUseCaseTests {
   private let mockUser: AuthenticatedUser
   private var mockUserInfoServiceWithUser: MockUserInfoService
@@ -25,7 +25,7 @@ struct FetchAuthenticatedUserUseCaseTests {
   @Test("수행 성공 - AuthenticatedUser 존재")
   func testFetchAuthenticatedUserWhenExists() throws {
     // Given
-    let useCase = FetchAuthenticatedUserUseCase(userInfoService: mockUserInfoServiceWithUser)
+    let useCase = LoadCachedAuthenticatedUserUseCase(userInfoService: mockUserInfoServiceWithUser)
 
     // When
     let result = useCase.execute()
@@ -42,7 +42,8 @@ struct FetchAuthenticatedUserUseCaseTests {
   @Test("수행 성공 - AuthenticatedUser 미존재")
   func testFetchAuthenticatedUserWhenNotExists() {
     // Given
-    let useCase = FetchAuthenticatedUserUseCase(userInfoService: mockUserInfoServiceWithoutUser)
+    let useCase =
+      LoadCachedAuthenticatedUserUseCase(userInfoService: mockUserInfoServiceWithoutUser)
 
     // When
     let result = useCase.execute()

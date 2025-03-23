@@ -30,7 +30,7 @@ struct AuthView: View {
       presenting: authManager.errorLog
     ) { _ in
       Button("OK") {
-        authManager.showPopup = false
+        authManager.closePopup()
       }
     } message: { message in
       Text(message)

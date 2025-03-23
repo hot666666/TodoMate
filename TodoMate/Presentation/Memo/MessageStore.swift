@@ -101,7 +101,7 @@ class MessageStore: MessageStoreType {
 }
 
 extension MessageStore {
-  static let stub: MessageStore = .init(
+  static let get: MessageStore = .init(
     messageRepository: FirestoreMessageRepository(),
     messageStreamProvider: FirestoreMessageStreamProvider()
   )

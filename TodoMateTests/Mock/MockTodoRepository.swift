@@ -9,6 +9,18 @@ import Foundation
 @testable import TodoMate
 
 struct MockTodoRepository: TodoRepositoryType {
+  func create(_ todo: TodoMate.TodoDTO) throws -> TodoDTO {
+    .stub
+  }
+
+  func readAll() async throws -> [TodoDTO] {
+    TodoDTO.stubs
+  }
+
+  func update(_ todo: TodoDTO) throws {}
+
+  func delete(id: String) {}
+
   // Behavior를 통해 각 메서드의 동작을 테스트마다 자유롭게 정의
   var createTodoHandler: ((TodoDTO) async throws -> TodoDTO)?
   var fetchTodosByUserHandler: ((String, Date, Date) async throws -> [TodoDTO])?

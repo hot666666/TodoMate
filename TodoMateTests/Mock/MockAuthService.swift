@@ -8,9 +8,10 @@
 import Foundation
 @testable import TodoMate
 
-struct MockAuthService: AuthServiceType {
+final class MockAuthService: AuthServiceType {
   private let shouldSignInSuccess: Bool
   private let signInReturn: User?
+  var didSignedOut: Bool = false
 
   init(shouldSignInSuccess: Bool = false, signInReturn: User? = nil) {
     self.shouldSignInSuccess = shouldSignInSuccess
@@ -25,5 +26,7 @@ struct MockAuthService: AuthServiceType {
     }
   }
 
-  func signOut() async {}
+  func signOut() async {
+    didSignedOut = true
+  }
 }

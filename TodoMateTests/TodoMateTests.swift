@@ -8,6 +8,10 @@
 import Testing
 @testable import TodoMate
 
+extension Tag {
+  @Tag static var emulator: Self
+}
+
 struct TodoMateTests {
   @Test(.disabled("비활성"))
   func example() async throws {

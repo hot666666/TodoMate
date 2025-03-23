@@ -34,13 +34,15 @@ extension Const {
 
 extension Const {
   #if DEBUG || PREVIEW
-    static let UserInfoKey = "test-userInfo"
+    static let AuthenticatedUserCacheKey = "test-userInfo"
     static let TodoOrderDateKey = "test-todoOrderDate"
     static let TodoOrderKey = "test-todoOrder"
+    static let UserGroupCacheKey = "test-userGroupCache"
   #else
     static let UserInfoKey = "userInfo"
     static let TodoOrderDateKey = "todoOrderDate"
     static let TodoOrderKey = "todoOrder"
+    static let UserGroupCacheKey = "userGroupCache"
   #endif
 }
 

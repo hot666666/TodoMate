@@ -9,10 +9,11 @@ import Foundation
 
 struct AuthenticatedUser: Codable {
   let uid: String
-  let gid: String
+  var gid: String?
 
-  static let stub = AuthenticatedUser(uid: User.stub[0].uid, gid: "")
-  static let hasGroupStub = AuthenticatedUser(uid: User.stub[0].uid, gid: UserGroup.stub.id)
+  static let anonymous = AuthenticatedUser(uid: "")
+  static let stub = AuthenticatedUser(uid: User.stub[0].uid)
+  static let hasGroupStub = AuthenticatedUser(uid: User.stub[0].uid, gid: "gid1")
 }
 
 extension AuthenticatedUser {

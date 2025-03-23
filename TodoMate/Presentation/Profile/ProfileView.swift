@@ -44,16 +44,14 @@ struct ProfileView: View {
   }
 
   var body: some View {
-    VStack(spacing: 20) {
-      userProfile
+    GroupBox {
+      VStack(spacing: 20) {
+        userProfile
 
-      Button {
-        Task { await viewModel.updateGroup() }
-      } label: {
-        Text("그룹 최신화")
+        groupUpdateButton
+
+        SignOutButton()
       }
-
-      SignOutButton()
     }
     .task {
       await viewModel.fetchUser()
@@ -67,6 +65,14 @@ struct ProfileView: View {
     } else {
       Text(viewModel.user?.nickname ?? "정보 없음")
         .font(.largeTitle)
+    }
+  }
+
+  var groupUpdateButton: some View {
+    Button {
+      Task { await viewModel.updateGroup() }
+    } label: {
+      Text("그룹 최신화")
     }
   }
 }

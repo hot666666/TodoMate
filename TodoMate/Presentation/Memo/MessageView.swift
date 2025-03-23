@@ -195,6 +195,6 @@ private struct MessageContent: View {
 }
 
 #Preview {
-  MessageView(messageStore: MessageStore.stub, userInfo: AuthenticatedUser.stub)
+  MessageView(messageStore: MessageStore.get, userInfo: AuthenticatedUser.stub)
     .frame(width: 450, height: 450)
 }

@@ -9,6 +9,7 @@ import Foundation
 
 enum FetchUserGrouptodosWithOrderUseCaseError: Error {
   case userNotFoundInTodos
+  case userHasNoGroup
 }
 
 protocol FetchUserGroupTodosWithOrderUseCaseType {
@@ -27,7 +28,11 @@ final class FetchUserGroupTodosWithOrderUseCase: FetchUserGroupTodosWithOrderUse
   func execute(for userInfo: AuthenticatedUser) async throws -> [String: [Todo]] {
     let today = Date.now
 
-    let userGroupTodoList = await todoService.fetchToday(groupId: userInfo.gid)
+    guard let gid = userInfo.gid else {
+      throw FetchUserGrouptodosWithOrderUseCaseError.userHasNoGroup
+    }
+
+    let userGroupTodoList = await todoService.fetchToday(groupId: gid)
     var todosByUid = makeTodosByUidDict(userGroupTodoList)
 
     guard let userTodos = todosByUid[userInfo.uid] else {

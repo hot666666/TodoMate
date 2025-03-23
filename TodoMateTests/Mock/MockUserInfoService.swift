@@ -8,25 +8,25 @@
 import Foundation
 @testable import TodoMate
 
-final class MockUserInfoService: UserInfoServiceType {
+final class MockUserInfoService: AuthenticatedUserCacheServiceType {
   private var userInfo: AuthenticatedUser?
 
   init(existingUserInfo: AuthenticatedUser? = nil) {
     userInfo = existingUserInfo
   }
 
-  func saveUserInfo(_ userInfo: AuthenticatedUser) throws {
+  func save(_ userInfo: AuthenticatedUser) throws {
     self.userInfo = userInfo
   }
 
-  func loadUserInfo() throws -> AuthenticatedUser {
+  func load() throws -> AuthenticatedUser {
     guard let userInfo = userInfo else {
       throw NSError(domain: "UserInfoServiceError", code: 0, userInfo: nil)
     }
     return userInfo
   }
 
-  func clearUserInfo() {
+  func clear() {
     userInfo = nil
   }
 }

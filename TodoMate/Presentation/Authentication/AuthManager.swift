@@ -9,30 +9,35 @@ import Observation
 
 @Observable
 final class AuthManager {
-  private let authUseCase: AuthenticationUseCaseType
-  private let fetchAUserUseCase: FetchAuthenticatedUserUseCaseType
+  private let fetchAUserUseCase: LoadCachedAuthenticatedUserUseCaseType
+  private let signInUseCase: SignInUseCaseType
+  private let signOutUseCase: SignOutUseCaseType
 
   private(set) var authenticatedUser: AuthenticatedUser?
   private(set) var state: State = .signedOut
   private(set) var errorLog: String?
   var showPopup: Bool = false
 
-  init(authenticationUseCase: AuthenticationUseCaseType,
-       fetchAuthenticatedUserUseCase: FetchAuthenticatedUserUseCaseType) {
-    authUseCase = authenticationUseCase
+  init(fetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType,
+       signInUseCase: SignInUseCaseType,
+       signOutUseCase: SignOutUseCaseType) {
     fetchAUserUseCase = fetchAuthenticatedUserUseCase
+    self.signInUseCase = signInUseCase
+    self.signOutUseCase = signOutUseCase
 
     fetchAUser()
   }
 
   func fetchAUser() {
-    if let aUser = fetchAUserUseCase.execute() {
-      authenticatedUser = aUser
-      state = .signedIn(aUser)
+    guard let aUser = fetchAUserUseCase.execute() else {
+      return
     }
+    authenticatedUser = aUser
+    state = .signedIn(aUser)
   }
 
-  func resetErrorLog() {
+  func closePopup() {
+    showPopup = false
     errorLog = nil
   }
 
@@ -40,7 +45,7 @@ final class AuthManager {
   func signIn() async {
     state = .loading
 
-    switch await authUseCase.signIn() {
+    switch await signInUseCase.execute() {
     case let .success(aUser):
       errorLog = nil
       authenticatedUser = aUser
@@ -57,7 +62,7 @@ final class AuthManager {
   func signOut() async {
     state = .loading
 
-    await authUseCase.signOut()
+    await signOutUseCase.execute()
     authenticatedUser = nil
     state = .signedOut
   }
@@ -73,7 +78,8 @@ extension AuthManager {
 
 extension AuthManager {
   static let stub = AuthManager(
-    authenticationUseCase: StubAuthenticationUseCase(),
-    fetchAuthenticatedUserUseCase: StubFetchAuthenticatedUserUseCase()
+    fetchAuthenticatedUserUseCase: StubLoadCachedAuthenticatedUserUseCase(),
+    signInUseCase: StubSignInUseCase(),
+    signOutUseCase: StubSignOutUseCase()
   )
 }
