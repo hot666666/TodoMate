@@ -8,26 +8,23 @@
 import SwiftUI
 
 struct HomeView: View {
+  @Environment(MainViewModel.self) private var viewModel
   @Environment(DIContainer.self) private var container
   @Environment(OverlayManager.self) private var overlayManager
-
-  // TODO: - GroupDashboard에서 그룹 유저를 패치하는 문제
-  let userInfo: AuthenticatedUser
-  let groupUsers: [User]
 
   var body: some View {
     ScrollView {
       VStack {
-        ChatBoardView(viewModel: .init(container: container, userInfo: userInfo))
-        TodoBoardView(viewModel: .init(container: container, userInfo: userInfo),
-                      users: groupUsers)
+        ChatBoardView(viewModel: .init(container: container, userInfo: viewModel.authenticatedUser))
+        TodoBoardView(viewModel: .init(container: container, userInfo: viewModel.authenticatedUser),
+                      users: viewModel.userGroup)
       }
       .padding(.horizontal)
     }
     .onReceive(NotificationCenter.default.publisher(for: .shortcutAction)) { notification in
       guard let userInfo = notification.userInfo,
             let actionRaw = userInfo["action"] as? String,
-            let action = ShortcutAction(rawValue: actionRaw) else {
+            let action = ShortcutActions(rawValue: actionRaw) else {
         return
       }
 
@@ -38,22 +35,24 @@ struct HomeView: View {
   }
 
   @MainActor
-  private func handleShortcutAction(_ action: ShortcutAction) async {
+  private func handleShortcutAction(_ action: ShortcutActions) async {
     switch action {
     case .createUserTodo:
-      print("Handling createUserTodo")
+      print("[HomeView] - Handling createUserTodo")
       guard
         overlayManager.isPushable,
-        let createdTodo = await container.todoService.create(from: .init(uid: userInfo.uid))
+        let createdTodo = await container.todoService.create(
+          from: .init(uid: viewModel.authenticatedUser.uid)
+        )
       else {
-        print("Could not create todo")
+        print("[HomeView] - create todo 실패")
         return
       }
       overlayManager.push(.todo(createdTodo, isMine: true, update: { _, updatedTodo in
         container.todoService.update(updatedTodo)
       }))
     case .closeOverlay:
-      print("Handling closeOverlay")
+      print("[HomeView] - Handling closeOverlay")
       overlayManager.pop()
     }
   }
