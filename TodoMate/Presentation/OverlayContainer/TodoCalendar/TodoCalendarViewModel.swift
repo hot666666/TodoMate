@@ -150,8 +150,14 @@ extension TodoCalendarViewModel {
   func update(oldDate: Date, newTodo: Todo) {
     guard isMine else { return }
 
-    // TODO: - Todo 엔티티 update 로직 사용(상태 조건)
-    todoService.update(newTodo)
+    var oldTodo = newTodo
+    oldTodo.date = oldDate
+    do {
+      try todoService.update(from: oldTodo, with: newTodo)
+    } catch {
+      print("[TodoCalendarViewModel] - 업데이트 실패")
+      return
+    }
 
     let oldDate = calendar.startOfDay(for: oldDate)
     let newDate = calendar.startOfDay(for: newTodo.date)
