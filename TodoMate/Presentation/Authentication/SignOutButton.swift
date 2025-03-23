@@ -16,7 +16,6 @@ struct SignOutButton: View {
         await authManager.signOut()
       }
     }
-    .buttonStyle(.borderedProminent)
   }
 }
 
