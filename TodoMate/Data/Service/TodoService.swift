@@ -7,6 +7,10 @@
 
 import Foundation
 
+enum TodoServiceError: Error {
+  case invalidUpdate
+}
+
 final class TodoService: TodoServiceType {
   private let todoRepository: TodoRepositoryType
   private let calendar: Calendar = .current
@@ -73,6 +77,16 @@ extension TodoService {
         print("Error updating todo: \(error)")
       }
     }
+  }
+
+  func update(from todo: Todo, with newTodo: Todo) throws {
+    // 진행 중인 Todo의 날짜 변경은 허용하지 않음
+    if todo.status == .inProgress, newTodo.status == .inProgress,
+       todo.date != newTodo.date {
+      throw TodoServiceError.invalidUpdate
+    }
+
+    try todoRepository.update(newTodo.toDTO())
   }
 
   func remove(_ todo: Todo) {

@@ -15,51 +15,66 @@ class TodoCalendarViewModel {
 
   @ObservationIgnored let isMine: Bool
   @ObservationIgnored let user: User
-  @ObservationIgnored let onDismiss: () -> Void
+  @ObservationIgnored let dismiss: () -> Void
 
   var todos: [Date: [Todo]] = [:]
   var currentDate: Date = .now
   var calendarDays: [CalendarDay] = []
   var isLoading: Bool = false
 
-  init(container: DIContainer, user: User, isMine: Bool, onDismiss: @escaping () -> Void) {
+  init(container: DIContainer, user: User, isMine: Bool, dismiss: @escaping () -> Void) {
     todoService = container.todoService
     self.user = user
     self.isMine = isMine
-    self.onDismiss = onDismiss
+    self.dismiss = dismiss
+
     updateCalendarDays()
   }
 }
 
 extension TodoCalendarViewModel {
+  // MARK: - Drag & Drop
+
   func setDropTarget(status: Bool) {
     isDropTargeted = status
   }
 
   func onDrop(data: [TodoTransferData], to newDate: Date) -> Bool {
-    guard isMine, let oldTodoData = data.first else { return false }
+    // 유효한 데이터인지 확인
+    guard isMine, let oldTodoData = data.first else {
+      return false
+    }
 
-    let fid = oldTodoData.fid
     let oldDate = calendar.startOfDay(for: oldTodoData.date)
     let newDate = calendar.startOfDay(for: newDate)
 
+    // 기존 데이터가 존재하는지 확인
     guard
-      var oldTodo = todos[oldDate]?.first(where: { $0.fid == fid }),
-      oldTodo.status != .inProgress
-    else { return false }
+      let oldTodos = todos[oldDate],
+      let oldTodo = oldTodos.first(where: { $0.fid == oldTodoData.fid })
+    else {
+      return false
+    }
 
-    oldTodo.date = newDate
+    // 업데이트
+    var newTodo = oldTodo
+    newTodo.date = newDate
+    do {
+      try todoService.update(from: oldTodo, with: newTodo)
+    } catch {
+      return false
+    }
 
-    todoService.update(oldTodo)
-
-    todos[oldDate, default: []].removeAll { $0.fid == fid }
-    todos[newDate, default: []].append(oldTodo)
+    todos[oldDate, default: []].removeAll { $0.fid == oldTodo.fid }
+    todos[newDate, default: []].append(newTodo)
 
     return true
   }
 }
 
 extension TodoCalendarViewModel {
+  // MARK: - update current dates
+
   func moveMonth(by value: Int) async {
     let updatedDate = calendar.addMonths(value, to: currentDate)!
     currentDate = updatedDate
@@ -135,8 +150,14 @@ extension TodoCalendarViewModel {
   func update(oldDate: Date, newTodo: Todo) {
     guard isMine else { return }
 
-    // TODO: - Todo 엔티티 update 로직 사용(상태 조건)
-    todoService.update(newTodo)
+    var oldTodo = newTodo
+    oldTodo.date = oldDate
+    do {
+      try todoService.update(from: oldTodo, with: newTodo)
+    } catch {
+      print("[TodoCalendarViewModel] - 업데이트 실패")
+      return
+    }
 
     let oldDate = calendar.startOfDay(for: oldDate)
     let newDate = calendar.startOfDay(for: newTodo.date)

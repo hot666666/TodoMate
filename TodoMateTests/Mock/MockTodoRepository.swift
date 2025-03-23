@@ -17,12 +17,18 @@ struct MockTodoRepository: TodoRepositoryType {
     TodoDTO.stubs
   }
 
-  func update(_ todo: TodoDTO) throws {}
+  func update(_ todo: TodoDTO) throws { // 추가
+    guard let handler = updateHandler else {
+      throw NSError(domain: "Mock", code: -1, userInfo: nil)
+    }
+    try handler(todo)
+  }
 
   func delete(id: String) {}
 
   // Behavior를 통해 각 메서드의 동작을 테스트마다 자유롭게 정의
   var createTodoHandler: ((TodoDTO) async throws -> TodoDTO)?
+  var updateHandler: ((TodoDTO) throws -> Void)?
   var fetchTodosByUserHandler: ((String, Date, Date) async throws -> [TodoDTO])?
   var fetchTodosByGroupHandler: ((String, Date, Date) async throws -> [TodoDTO])?
   var updateTodoHandler: ((TodoDTO) async throws -> Void)?

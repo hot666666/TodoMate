@@ -36,7 +36,7 @@ struct OverlayContainer<Content: View>: View {
     case let .todoDate(anchor, date):
       TodoDatePopover(anchor: anchor, date: date)
     case let .calendar(user, isMine):
-      TodoCalendar(user: user, isMine: isMine, onDismiss: overlayManager.pop)
+      TodoCalendar(user: user, isMine: isMine, dismiss: overlayManager.pop)
     }
   }
 
@@ -106,13 +106,13 @@ private struct TodoCalendar: View {
   @Environment(DIContainer.self) private var container
   let user: User
   let isMine: Bool
-  let onDismiss: () -> Void
+  let dismiss: () -> Void
 
   var body: some View {
     TodoCalendarView(viewModel: .init(container: container,
                                       user: user,
                                       isMine: isMine,
-                                      onDismiss: onDismiss))
+                                      dismiss: dismiss))
       .background(Color.customBlack)
   }
 }

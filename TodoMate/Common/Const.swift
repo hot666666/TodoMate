@@ -39,7 +39,7 @@ extension Const {
     static let TodoOrderKey = "test-todoOrder"
     static let UserGroupCacheKey = "test-userGroupCache"
   #else
-    static let UserInfoKey = "userInfo"
+    static let AuthenticatedUserCacheKey = "userInfo"
     static let TodoOrderDateKey = "todoOrderDate"
     static let TodoOrderKey = "todoOrder"
     static let UserGroupCacheKey = "userGroupCache"

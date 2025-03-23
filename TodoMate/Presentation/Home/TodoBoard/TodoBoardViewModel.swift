@@ -90,9 +90,14 @@ extension TodoBoardViewModel {
   }
 
   func updateTodo(from currentTodo: Todo, to updatedTodo: Todo) {
-    guard isMine(currentTodo), isValidUpdate(from: currentTodo, to: updatedTodo) else { return }
+    guard isMine(currentTodo) else { return }
 
-    todoService.update(updatedTodo)
+    do {
+      try todoService.update(from: updatedTodo, with: updatedTodo)
+    } catch {
+      print("[TodoBoardViewModel] - updateTodo: \(error)")
+      return
+    }
 
     updateTodoState(with: updatedTodo)
 
@@ -189,12 +194,5 @@ extension TodoBoardViewModel {
 
   private var myTodoList: [Todo]? {
     todosByUser[userInfo.uid]
-  }
-
-  private func isValidUpdate(from currentTodo: Todo, to updatedTodo: Todo) -> Bool {
-    if currentTodo.status == .inProgress {
-      return updatedTodo.status != .inProgress
-    }
-    return true
   }
 }

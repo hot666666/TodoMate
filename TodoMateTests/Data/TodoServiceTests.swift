@@ -80,6 +80,24 @@ private enum TestFixtures {
     repo.fetchTodosByGroupHandler = { _, _, _ in throw error }
     return repo
   }
+
+  // update 성공
+  static func todoRepositoryForUpdateSuccess() -> MockTodoRepository {
+    var repo = MockTodoRepository()
+    repo.updateHandler = { _ in } // 성공적으로 완료 (아무것도 하지 않음)
+    return repo
+  }
+
+  // update 실패
+  static func todoRepositoryForUpdateFailure(error: Error = NSError(
+    domain: "Test",
+    code: -1,
+    userInfo: [NSLocalizedDescriptionKey: "Mock Failure"]
+  )) -> MockTodoRepository {
+    var repo = MockTodoRepository()
+    repo.updateHandler = { _ in throw error } // 오류 발생
+    return repo
+  }
 }
 
 @Suite("TodoService Tests")
@@ -182,6 +200,119 @@ struct TodoServiceTests {
 
       // Then
       #expect(result.isEmpty, "fetchToday 실패 시 빈 배열이 반환되어야 함")
+    }
+  }
+
+  @Suite("update 메서드 테스트")
+  struct UpdateTests {
+    @Test("진행 중인 Todo의 날짜 변경 시 오류 발생")
+    func updateFailsWhenChangingDateOfInProgressTodo() throws {
+      // Given: 진행 중인 Todo와 날짜가 변경된 새 Todo 준비
+      let todoService = TodoService(todoRepository: TestFixtures.todoRepositoryForUpdateSuccess())
+      let inProgressTodo = Todo(
+        date: Date(),
+        content: "test",
+        detail: "test-detail",
+        status: .inProgress,
+        uid: "test-uid",
+        fid: "test-fid",
+        lastModifiedAt: Date()
+      )
+      let newDate = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+      let newTodo = Todo(
+        date: newDate,
+        content: "test",
+        detail: "test-detail",
+        status: .inProgress,
+        uid: "test-uid",
+        fid: "test-fid",
+        lastModifiedAt: Date()
+      )
+
+      // When & Then: 업데이트 시 invalidUpdate 오류 발생 확인
+      #expect(throws: TodoServiceError.invalidUpdate) {
+        try todoService.update(from: inProgressTodo, with: newTodo)
+      }
+    }
+
+    @Test("진행 중인 Todo의 날짜 변경 없이 업데이트 성공")
+    func updateSucceedsWhenNotChangingDateOfInProgressTodo() throws {
+      // Given: 진행 중인 Todo와 날짜가 동일한 새 Todo 준비
+      let todoService = TodoService(todoRepository: TestFixtures.todoRepositoryForUpdateSuccess())
+      let inProgressTodo = Todo(
+        date: Date(),
+        content: "test",
+        detail: "test-detail",
+        status: .inProgress,
+        uid: "test-uid",
+        fid: "test-fid",
+        lastModifiedAt: Date()
+      )
+      let newTodo = Todo(
+        date: inProgressTodo.date, // 날짜 동일
+        content: "updated",
+        detail: "updated-detail",
+        status: .inProgress,
+        uid: "test-uid",
+        fid: "test-fid",
+        lastModifiedAt: Date()
+      )
+
+      // When & Then: 업데이트 시 오류가 발생하지 않음 확인
+      #expect(throws: Never.self) {
+        try todoService.update(from: inProgressTodo, with: newTodo)
+      }
+    }
+
+    @Test("진행 중이 아닌 Todo의 날짜 변경 성공")
+    func updateSucceedsWhenChangingDateOfNotInProgressTodo() throws {
+      // Given: 진행 중이 아닌 Todo와 날짜가 변경된 새 Todo 준비
+      let todoService = TodoService(todoRepository: TestFixtures.todoRepositoryForUpdateSuccess())
+      let notInProgressTodo = Todo(
+        date: Date(),
+        content: "test",
+        detail: "test-detail",
+        status: .todo, // 진행 중 아님
+        uid: "test-uid",
+        fid: "test-fid",
+        lastModifiedAt: Date()
+      )
+      let newDate = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+      let newTodo = Todo(
+        date: newDate,
+        content: "test",
+        detail: "test-detail",
+        status: .todo,
+        uid: "test-uid",
+        fid: "test-fid",
+        lastModifiedAt: Date()
+      )
+
+      // When & Then: 업데이트 시 오류가 발생하지 않음 확인
+      #expect(throws: Never.self) {
+        try todoService.update(from: notInProgressTodo, with: newTodo)
+      }
+    }
+
+    @Test("업데이트 중 repository 오류 발생")
+    func updateFailsWhenRepositoryThrowsError() throws {
+      // Given: repository가 오류를 발생시키는 TodoService와 Todo 준비
+      let todoService = TodoService(todoRepository: TestFixtures.todoRepositoryForUpdateFailure())
+      let todo = TestFixtures.mockTodo
+      let newTodo = Todo(
+        date: todo.date,
+        content: "updated",
+        detail: "updated-detail",
+        status: todo.status,
+        uid: todo.uid,
+        fid: todo.fid,
+        lastModifiedAt: Date()
+      )
+
+      // When & Then: 업데이트 시 오류가 발생하는지 확인
+      #expect(throws: Error.self) {
+        try todoService.update(from: todo, with: newTodo)
+      }
     }
   }
 }

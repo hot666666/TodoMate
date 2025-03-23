@@ -27,6 +27,8 @@ struct DummyTodoStreamProvider: TodoStreamProviderType {
 }
 
 struct DummyTodoService: TodoServiceType {
+  func update(from todo: TodoMate.Todo, with newTodo: TodoMate.Todo) throws {}
+
   func fetchTodos() async throws -> [Todo] { [] }
 
   func create(from todo: Todo) async -> Todo? { nil }

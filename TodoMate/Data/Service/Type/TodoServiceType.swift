@@ -12,6 +12,7 @@ protocol TodoServiceType {
   func fetchMonth(userId: String, startDate: Date, endDate: Date) async -> [Date: [Todo]]
   func fetchToday(groupId: String) async -> [Todo]
   func update(_ todo: Todo)
+  func update(from todo: Todo, with newTodo: Todo) throws
   func remove(_ todo: Todo)
 }
 
@@ -36,6 +37,8 @@ class StubTodoService: TodoServiceType {
   func fetchToday(groupId: String) async -> [Todo] {
     Todo.stub.filter { calendar.isDateInToday($0.date) }
   }
+
+  func update(from todo: Todo, with newTodo: Todo) throws {}
 
   func update(_ todo: Todo) {}
 
