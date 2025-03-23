@@ -10,7 +10,7 @@ import Testing
 @testable import TodoMate
 
 // firebase emulators:start --only firestore --project [PROJECT_ID]
-@Suite("MessageRepository Tests")
+@Suite("MessageRepository Tests", .tags(.emulator), .disabled("비활성"))
 struct RealMessageRepositoryTests {
   let repository: FirestoreMessageRepository
 
@@ -72,7 +72,7 @@ struct RealMessageRepositoryTests {
     try? await Task.sleep(nanoseconds: 1_000_000_000)
 
     // When: 메시지 내용을 업데이트
-    if var messageModel = MessageModel.from(createdMessage) {
+    if let messageModel = MessageModel.from(createdMessage) {
       messageModel.content = "Updated text"
       messageModel.lastModifiedUser = "user_3_updated"
       try repository.update(MessageDTO.from(messageModel))

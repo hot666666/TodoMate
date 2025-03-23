@@ -14,7 +14,7 @@ private enum TestingError: Error {
 }
 
 // firebase emulators:start --only firestore --project [PROJECT_ID]
-@Suite("Real TodoStreamProvider Tests")
+@Suite("Real TodoStreamProvider Tests", .tags(.emulator), .disabled("비활성"))
 struct TodoRealtimeTests {
   private let userId = "testUser"
   private let groupId = "testGroup"
