@@ -21,8 +21,8 @@ struct User: Codable {
 
 extension User {
   static let stub: [User] = [
-    .init(uid: "hs", nickname: "hs", gid: UserGroup.stub.id),
-    .init(uid: "jy", nickname: "jy", gid: UserGroup.stub.id),
+    .init(uid: "hs", nickname: "hs", gid: "gid1"),
+    .init(uid: "jy", nickname: "jy", gid: "gid1"),
   ]
 
   static func from(_ dto: UserDTO) -> User? {

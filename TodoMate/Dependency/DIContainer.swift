@@ -23,7 +23,6 @@ final class DIContainer {
 
   // MARK: - UseCases
 
-  @ObservationIgnored let authenticationUseCase: AuthenticationUseCaseType
   @ObservationIgnored let fetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType
   @ObservationIgnored let fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType
   @ObservationIgnored let saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType
@@ -45,7 +44,6 @@ final class DIContainer {
 
        // MARK: - UseCases
 
-       authenticationUseCase: AuthenticationUseCaseType,
        fetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType,
        fetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType,
        saveUserTodosOrderUseCase: SaveUserTodosOrderUseCaseType,
@@ -66,7 +64,6 @@ final class DIContainer {
 
     // MARK: - UseCases
 
-    self.authenticationUseCase = authenticationUseCase
     self.fetchAuthenticatedUserUseCase = fetchAuthenticatedUserUseCase
     self.fetchTodosByUserUseCase = fetchTodosByUserUseCase
     self.saveUserTodosOrderUseCase = saveUserTodosOrderUseCase
@@ -95,8 +92,6 @@ final class DIContainer {
 
                    // MARK: - UseCases
 
-                   testAuthenticationUseCase: AuthenticationUseCaseType =
-                     StubAuthenticationUseCase(),
                    testFetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCaseType =
                      StubLoadCachedAuthenticatedUserUseCase(),
                    testFetchTodosByUserUseCase: FetchUserGroupTodosWithOrderUseCaseType =
@@ -123,7 +118,6 @@ final class DIContainer {
 
       // MARK: - UseCases
 
-      authenticationUseCase: testAuthenticationUseCase,
       fetchAuthenticatedUserUseCase: testFetchAuthenticatedUserUseCase,
       fetchTodosByUserUseCase: testFetchTodosByUserUseCase,
       saveUserTodosOrderUseCase: testSaveUserTodosOrderUseCase,
@@ -152,7 +146,6 @@ extension DIContainer {
 
     // MARK: - UseCases
 
-    testAuthenticationUseCase: StubAuthenticationUseCase(),
     testFetchAuthenticatedUserUseCase: StubLoadCachedAuthenticatedUserUseCase(),
     testFetchTodosByUserUseCase: StubFetchUserGroupTodosWithOrderUseCase(),
     testSaveUserTodosOrderUseCase: StubSaveUserTodosOrderUseCase(),

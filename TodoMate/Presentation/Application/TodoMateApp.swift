@@ -113,11 +113,6 @@ private struct _TodoMateApp: View {
 
         // MARK: - UseCase
 
-        authenticationUseCase: AuthenticationUseCase(
-          authService: authService,
-          userInfoService: authenticatedUserCacheService,
-          widgetDataManager: widgetDataManager
-        ),
         fetchAuthenticatedUserUseCase: LoadCachedAuthenticatedUserUseCase(
           userInfoService: authenticatedUserCacheService
         ),

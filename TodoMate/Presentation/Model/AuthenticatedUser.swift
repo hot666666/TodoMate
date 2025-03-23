@@ -13,7 +13,7 @@ struct AuthenticatedUser: Codable {
 
   static let anonymous = AuthenticatedUser(uid: "")
   static let stub = AuthenticatedUser(uid: User.stub[0].uid)
-  static let hasGroupStub = AuthenticatedUser(uid: User.stub[0].uid, gid: UserGroup.stub.id)
+  static let hasGroupStub = AuthenticatedUser(uid: User.stub[0].uid, gid: "gid1")
 }
 
 extension AuthenticatedUser {
