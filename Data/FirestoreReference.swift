@@ -13,14 +13,14 @@ final class FirestoreReference {
 
   private init() {
     db = Firestore.firestore()
-    #if DEBUG
-      let settings = db.settings
-      settings.host = "127.0.0.1:8080"
-      settings.cacheSettings = MemoryCacheSettings()
-      settings.isSSLEnabled = false
-      db.settings = settings
-      db.useEmulator(withHost: "localhost", port: 8080)
-    #endif
+    // #if DEBUG
+//      let settings = db.settings
+//      settings.host = "127.0.0.1:8080"
+//      settings.cacheSettings = MemoryCacheSettings()
+//      settings.isSSLEnabled = false
+//      db.settings = settings
+//      db.useEmulator(withHost: "localhost", port: 8080)
+    // #endif
   }
 
   func userCollection() -> CollectionReference {

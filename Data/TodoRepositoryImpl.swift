@@ -1,12 +1,10 @@
 //
-//  TodoRepository.swift
+//  TodoRepositoryImpl.swift
 //  Todo
 //
 
 import FirebaseFirestore
 import Foundation
-
-// MARK: - FirestoreTodoRepository
 
 final class FirestoreTodoRepository: TodoRepository {
   private let reference: FirestoreReference

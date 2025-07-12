@@ -1,5 +1,5 @@
 //
-//  CalendarDayService.swift
+//  CalendarDayServiceImpl.swift
 //  Todo
 //
 //  Created by hs on 6/28/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class FoundationCalendarDayService: CalendarDayService {
+final class CalendarDayServiceImpl: CalendarDayService {
   private let calendar: Calendar
 
   init(calendar: Calendar = .current) {

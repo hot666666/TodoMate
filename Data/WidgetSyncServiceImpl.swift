@@ -1,5 +1,5 @@
 //
-//  WidgetSyncService.swift
+//  WidgetSyncServiceImpl.swift
 //  Todo
 //
 //  Created by Claude on 6/27/25.

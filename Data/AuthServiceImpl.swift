@@ -1,5 +1,5 @@
 //
-//  AuthService.swift
+//  AuthServiceImpl.swift
 //  Todo
 //
 //  Created by hs on 6/3/25.
@@ -9,7 +9,7 @@ import FirebaseAuth
 import GoogleSignIn
 
 final class FirebaseAuthService: AuthService {
-  var signedInUserId: UID? {
+  var signedInUserId: String? {
     Auth.auth().currentUser?.uid
   }
 
@@ -49,7 +49,7 @@ final class FirebaseAuthService: AuthService {
     GIDSignIn.sharedInstance.signOut()
   }
 
-  func listenToAuthStateChanges() -> AsyncStream<UID?> {
+  func listenToAuthStateChanges() -> AsyncStream<String?> {
     AsyncStream { continuation in
       let authHandle = Auth.auth().addStateDidChangeListener { _, firebaseUser in
         continuation.yield(firebaseUser?.uid)
@@ -63,7 +63,7 @@ final class FirebaseAuthService: AuthService {
 }
 
 final class StubAuthService: AuthService {
-  var signedInUserId: UID? {
+  var signedInUserId: String? {
     User.stub.id
   }
 
@@ -71,7 +71,7 @@ final class StubAuthService: AuthService {
 
   func signOut() throws {}
 
-  func listenToAuthStateChanges() -> AsyncStream<UID?> {
+  func listenToAuthStateChanges() -> AsyncStream<String?> {
     AsyncStream { continuation in
       continuation.yield(User.stub.id)
       continuation.finish()
