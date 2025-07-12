@@ -19,7 +19,7 @@ final class ReadGroupTodoUseCaseImpl: ReadGroupTodoUseCase {
   }
 
   func run(for userIds: [String], in date: Date, useCache: Bool) async throws -> [String: [Todo]] {
-    let query = repository.createQuery()
+    let query = TodoQuery()
       .owners(userIds: userIds)
       .dateRange(date.dayRange)
     let result = try await repository.readAll(query: query, source: useCache ? .cache : .server)

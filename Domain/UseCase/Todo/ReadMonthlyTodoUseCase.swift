@@ -19,7 +19,7 @@ final class ReadMonthlyTodoUseCaseImpl: ReadMonthlyTodoUseCase {
   }
 
   func run(for userId: String, range: ClosedRange<Date>, useCache: Bool) async throws -> [Todo] {
-    let query = repository.createQuery()
+    let query = TodoQuery()
       .owner(userId: userId)
       .dateRange(range)
     return try await repository.readAll(query: query, source: useCache ? .cache : .server)

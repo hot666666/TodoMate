@@ -19,7 +19,7 @@ final class ObserveGroupTodoUseCaseImpl: ObserveGroupTodoUseCase {
   }
 
   func run(for userIds: [String], in date: Date) -> AsyncStream<RepositoryEvent<Todo>> {
-    let query = repository.createQuery()
+    let query = TodoQuery()
       .owners(userIds: userIds)
       .dateRange(date.dayRange)
     return repository.observeAll(query: query)

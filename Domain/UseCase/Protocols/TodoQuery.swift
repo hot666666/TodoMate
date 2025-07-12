@@ -8,39 +8,39 @@
 
 import Foundation
 
-public enum TodoFilter {
+enum TodoFilter {
   case owner(userId: String)
   case owners(userIds: [String])
   case dateRange(ClosedRange<Date>)
   case status(TodoStatus)
 }
 
-public struct TodoQuery {
-  public private(set) var filters: [TodoFilter]
+struct TodoQuery {
+  private(set) var filters: [TodoFilter]
 
-  public init(filters: [TodoFilter] = []) {
+  init(filters: [TodoFilter] = []) {
     self.filters = filters
   }
 
-  public func owner(userId: String) -> TodoQuery {
+  func owner(userId: String) -> TodoQuery {
     var newQuery = self
     newQuery.filters.append(.owner(userId: userId))
     return newQuery
   }
 
-  public func owners(userIds: [String]) -> TodoQuery {
+  func owners(userIds: [String]) -> TodoQuery {
     var newQuery = self
     newQuery.filters.append(.owners(userIds: userIds))
     return newQuery
   }
 
-  public func dateRange(_ range: ClosedRange<Date>) -> TodoQuery {
+  func dateRange(_ range: ClosedRange<Date>) -> TodoQuery {
     var newQuery = self
     newQuery.filters.append(.dateRange(range))
     return newQuery
   }
 
-  public func status(_ status: TodoStatus) -> TodoQuery {
+  func status(_ status: TodoStatus) -> TodoQuery {
     var newQuery = self
     newQuery.filters.append(.status(status))
     return newQuery
