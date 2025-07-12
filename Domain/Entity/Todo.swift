@@ -1,0 +1,124 @@
+//
+//  Todo.swift
+//  Todo
+//
+//  Created by hs on 5/24/25.
+//
+
+import SwiftUI
+
+enum TodoStatus: String, CaseIterable, Codable {
+  case inComplete = "미완료"
+  case todo = "시작 전"
+  case inProgress = "진행 중"
+  case complete = "완료"
+
+  var color: Color {
+    switch self {
+    case .todo: .customGray
+    case .inProgress: .customBlue
+    case .complete: .customGreen
+    case .inComplete: .customRed
+    }
+  }
+}
+
+struct Todo: Identifiable, Codable {
+  let id: String /// DocumentID
+  var content: String
+  var status: TodoStatus
+  var detail: String
+  var date: Date
+  let createdAt: Date
+  var updatedAt: Date
+  let owner: String /// UserID
+
+  init(
+    id: String = UUID().uuidString,
+    content: String = "",
+    status: TodoStatus = .todo,
+    detail: String = "",
+    date: Date = .now,
+    createdAt: Date,
+    updatedAt: Date,
+    owner: String
+  ) {
+    self.id = id
+    self.content = content
+    self.status = status
+    self.detail = detail
+    self.date = date.startOfDay
+    self.createdAt = createdAt
+    self.updatedAt = updatedAt
+    self.owner = owner
+  }
+
+  init(owner: String, content: String = "", detail: String = "", in date: Date? = nil) {
+    let now = date ?? Date()
+    self.init(
+      id: UUID().uuidString,
+      content: content,
+      status: .todo,
+      detail: detail,
+      date: now.startOfDay,
+      createdAt: now,
+      updatedAt: now,
+      owner: owner
+    )
+  }
+
+  static func == (lhs: Todo, rhs: Todo) -> Bool {
+    lhs.date == rhs.date
+      && lhs.content == rhs.content
+      && lhs.status == rhs.status
+      && lhs.detail == rhs.detail
+      && lhs.owner == rhs.owner
+      && lhs.id == rhs.id
+  }
+
+  func withUpdatedStatus(_ newStatus: TodoStatus) -> Todo {
+    var updated = self
+    updated.status = newStatus
+    updated.updatedAt = .now
+    return updated
+  }
+}
+
+extension Todo {
+  static let stub = Todo(
+    id: UUID().uuidString,
+    content: "Sample Todo",
+    date: .now,
+    createdAt: .now,
+    updatedAt: .now,
+    owner: EntityConstant.User.stubId
+  )
+
+  static func copy(from todo: Todo) -> Todo {
+    let now: Date = .now
+    return Todo(
+      id: UUID().uuidString,
+      content: todo.content,
+      status: .todo,
+      detail: todo.detail,
+      date: todo.date,
+      createdAt: now,
+      updatedAt: now,
+      owner: todo.owner
+    )
+  }
+}
+
+extension Todo {
+  var contentOrPlaceholder: String { content.isEmpty ? "이름없음" : content }
+  var compactDetail: String {
+    let strippedDetail = detail.replacingOccurrences(of: "\n", with: " ")
+    let maxLength = 20
+    if strippedDetail.count > maxLength {
+      let index = strippedDetail.index(strippedDetail.startIndex, offsetBy: maxLength)
+      return String(strippedDetail[..<index]) + "..."
+    } else {
+      return strippedDetail
+    }
+  }
+}
