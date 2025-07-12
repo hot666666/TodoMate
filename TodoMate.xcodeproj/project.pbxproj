@@ -179,6 +179,9 @@
 		4526B0B12D422B0900DC90F5 /* WeakTodoObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakTodoObserver.swift; sourceTree = "<group>"; };
 		4526B0B32D42394600DC90F5 /* ModelContainer+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelContainer+Extension.swift"; sourceTree = "<group>"; };
 		4526B0D02D48C6E300DC90F5 /* AuthenticatedUserCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedUserCacheService.swift; sourceTree = "<group>"; };
+		452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = ".pre-commit-config.yaml"; sourceTree = "<group>"; };
+		452C64D32E21F56600A68B94 /* .swiftformat */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
+		452C64D42E21F56600A68B94 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		45322B492C8449520097D530 /* StorageUploadProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageUploadProvider.swift; sourceTree = "<group>"; };
 		45322B4B2C845F650097D530 /* ImageUploadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageUploadService.swift; sourceTree = "<group>"; };
 		453844692D4F3E33002B8721 /* TodoCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarView.swift; sourceTree = "<group>"; };
@@ -684,6 +687,9 @@
 		45E10B862C69B77300FC31CD = {
 			isa = PBXGroup;
 			children = (
+				452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */,
+				452C64D32E21F56600A68B94 /* .swiftformat */,
+				452C64D42E21F56600A68B94 /* .swiftlint.yml */,
 				453FC0D92CAE803D00574437 /* Shared */,
 				45E10B912C69B77300FC31CD /* TodoMate */,
 				45E0A0E42D78497C000FDC24 /* TodoMateTests */,
