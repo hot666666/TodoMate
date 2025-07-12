@@ -85,6 +85,18 @@ struct Todo: Identifiable, Codable {
 }
 
 extension Todo {
+  var contentOrPlaceholder: String { content.isEmpty ? "이름없음" : content }
+  var compactDetail: String {
+    let strippedDetail = detail.replacingOccurrences(of: "\n", with: " ")
+    let maxLength = 20
+    if strippedDetail.count > maxLength {
+      let index = strippedDetail.index(strippedDetail.startIndex, offsetBy: maxLength)
+      return String(strippedDetail[..<index]) + "..."
+    } else {
+      return strippedDetail
+    }
+  }
+
   static let stub = Todo(
     id: UUID().uuidString,
     content: "Sample Todo",
@@ -109,16 +121,10 @@ extension Todo {
   }
 }
 
-extension Todo {
-  var contentOrPlaceholder: String { content.isEmpty ? "이름없음" : content }
-  var compactDetail: String {
-    let strippedDetail = detail.replacingOccurrences(of: "\n", with: " ")
-    let maxLength = 20
-    if strippedDetail.count > maxLength {
-      let index = strippedDetail.index(strippedDetail.startIndex, offsetBy: maxLength)
-      return String(strippedDetail[..<index]) + "..."
-    } else {
-      return strippedDetail
-    }
+// MARK: - WidgetTodo->Todo
+
+extension WidgetTodo {
+  static func from(_ todo: Todo) -> WidgetTodo {
+    WidgetTodo(id: todo.id, content: todo.content)
   }
 }
