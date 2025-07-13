@@ -33,7 +33,7 @@ final class LoadUserSessionUseCaseImpl: LoadUserSessionUseCase {
     switch phase {
     case .initial:
       // 1. 캐시 우선
-      if let cachedUser = try await readUserUseCase.run(for: userId, useCache: true) {
+      if let cachedUser = try? await readUserUseCase.run(for: userId, useCache: true) {
         return try await makeSession(for: cachedUser, useCache: true)
       }
       // 2. 서버에서 fetch
