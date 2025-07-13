@@ -19,6 +19,9 @@ struct TodoMateApp: App {
   init() {
     modelContainer = TodoMateApp.makeModelContainer()
     container = TodoMateApp.makeContainer(with: modelContainer)
+
+    // 앱 업데이트 체크 및 처리
+    TodoMateApp.checkAndHandleAppUpdate(modelContainer: modelContainer, container: container)
   }
 
   var body: some Scene {
@@ -27,7 +30,7 @@ struct TodoMateApp: App {
         .environment(\.colorScheme, .dark)
         .environment(container)
         .onAppear {
-          //					appDelegate.syncWidgetData = container.widgetSyncService.sync
+          appDelegate.syncWidgetData = container.widgetSyncService.sync
         }
         .background(Color.customDarkBg)
         .background(.ultraThickMaterial)
@@ -104,5 +107,32 @@ private extension TodoMateApp {
       return
     }
     GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
+  }
+
+  static func checkAndHandleAppUpdate(modelContainer: ModelContainer, container: DIContainer) {
+    let userDefaults = UserDefaults.standard
+
+    let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    let lastVersion = userDefaults.string(forKey: "app_last_version")
+
+    print("[TodoMateApp] Current version: \(currentVersion)")
+    print("[TodoMateApp] Last version: \(lastVersion ?? "none")")
+
+    if lastVersion == nil {
+      try? container.authService.signOut()
+
+      // 앱의 모든 UserDefaults 데이터 삭제
+      if let bundleIdentifier = Bundle.main.bundleIdentifier {
+        userDefaults.removePersistentDomain(forName: bundleIdentifier)
+      }
+
+      // 앱의 모든 SwiftData 데이터 삭제
+      let context = modelContainer.mainContext
+      try? context.delete(model: WidgetTodo.self)
+      try? context.save()
+    }
+
+    // 현재 버전 저장
+    userDefaults.set(currentVersion, forKey: "app_last_version")
   }
 }
