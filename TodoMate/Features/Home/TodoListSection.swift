@@ -64,11 +64,6 @@ extension TodoListSection {
           }
           .onMove(perform: isMine ? moveTodos : nil)
         }
-        .contextMenu {
-          if isMine {
-            addButton
-          }
-        }
         .id(isMine ? (!overlayManager.overlays.isEmpty ? "overlay" : "none") : "static")
         .safeAreaInset(edge: .top, spacing: 0) {
           Color.clear.frame(height: HomeDesignSystem.Layout.safeAreaInset)
@@ -77,6 +72,11 @@ extension TodoListSection {
         .scrollContentBackground(.hidden)
         .background(.clear)
         .clipShape(RoundedRectangle(cornerRadius: HomeDesignSystem.CornerRadius.large))
+      }
+    }
+    .contextMenu {
+      if isMine {
+        addButton
       }
     }
     .padding([.top, .bottom], HomeDesignSystem.Padding.xSmall)
