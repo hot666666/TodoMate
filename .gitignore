@@ -71,3 +71,8 @@ Firestore/exported-data/*
 
 # Certificate & Profile
 private/
+
+# AI
+GEMINI.md
+CLAUDE.md
+.claude/
