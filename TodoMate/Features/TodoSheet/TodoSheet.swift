@@ -58,10 +58,10 @@ extension TodoSheet {
       )
       HStack(alignment: .center) {
         TodoStatusButton(
-          status: $editableTodo.status,
+          status: $editableTodo.status
         )
         TodoDateButton(
-          date: $editableTodo.date,
+          date: $editableTodo.date
         )
         Spacer()
 

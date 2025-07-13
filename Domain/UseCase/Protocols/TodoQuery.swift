@@ -1,4 +1,3 @@
-
 //
 //  TodoQuery.swift
 //  Todo

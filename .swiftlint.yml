@@ -17,3 +17,4 @@ opt_in_rules:
   - empty_count
   - sorted_imports
   - indentation_width
+  - trailing_comma

@@ -75,6 +75,6 @@ final class SessionStore {
 extension SessionStore {
   static let preview: SessionStore = .init(
     container: .preview,
-    userSession: .stub,
+    userSession: .stub
   )
 }
