@@ -6,8 +6,7 @@ excluded:
   - script/
   - FIRESTORE/
 
-indentation:
-  indent_width: 2
+indentation_width: 2
 
 line_length:
   warning: 120
@@ -17,7 +16,4 @@ line_length:
 opt_in_rules:
   - empty_count
   - sorted_imports
-  - no_tabs
-  - force_cast
-  - trailing_whitespace
-  - vertical_whitespace
+  - indentation_width
