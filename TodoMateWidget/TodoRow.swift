@@ -9,40 +9,38 @@ import SwiftUI
 
 struct TodoRow: View {
   @Environment(\.widgetFamily) var widgetFamily
-  var todo: WidgetTodo
+  let todo: WidgetTodo
 
   var body: some View {
-    HStack {
-      status
-      content
+    HStack(alignment: .center, spacing: 10) {
+      statusChip
+
+      Text(todo.contentOrPlaceholder)
+        .font(widgetFamily == .systemSmall ? .caption : .body)
+        .lineLimit(1)
+
       Spacer()
     }
+    .padding(5)
   }
 
   @ViewBuilder
-  private var status: some View {
+  private var statusChip: some View {
+    // TODO: - NavigationLink
     Button(action: {}) {
       HStack {
         Spacer()
         Text("진행 중")
           .foregroundColor(.white)
-          .bold()
+          .font(widgetFamily == .systemSmall ? .caption : .body)
           .lineLimit(1)
           .fixedSize()
         Spacer()
       }
+      .padding(3)
     }
     .frame(width: widgetFamily == .systemSmall ? 50 : 70)
     .background(Color.customBlue)
-    .clipShape(.capsule)
-    .padding(.vertical, widgetFamily == .systemSmall ? 3 : 5)
-    .padding(.horizontal, 5)
-    .clipShape(RoundedRectangle(cornerRadius: widgetFamily == .systemSmall ? 3 : 5))
-  }
-
-  @ViewBuilder
-  private var content: some View {
-    Text(todo.content.isEmpty ? "이름없음" : todo.content)
-      .font(.title3)
+    .clipShape(Capsule())
   }
 }

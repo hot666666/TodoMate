@@ -19,16 +19,28 @@ struct TodoMateWidget: Widget {
       TodoMateWidgetEntryView(entry: entry)
         .containerBackground(.fill.tertiary, for: .widget)
     }
-    .configurationDisplayName("TodoMate Widget")
-    .description("TodoMate Widget의 예시")
+    .configurationDisplayName("TodoMate 위젯")
+    .description("진행 중인 할 일을 빠르게 확인하세요")
+    .supportedFamilies([.systemSmall, .systemMedium])
   }
 }
 
-// MARK: - TodoEntity
+// MARK: - TodoEntry
 
 struct TodoEntry: TimelineEntry {
   let date: Date
   let todos: [WidgetTodo]
+}
+
+extension TodoEntry {
+  static let placeholder = TodoEntry(
+    date: Date(),
+    todos: [
+      WidgetTodo(id: "1", content: "할 일 예 1"),
+      WidgetTodo(id: "2", content: "할 일 예 2"),
+      WidgetTodo(id: "3", content: "할 일 예 3"),
+    ]
+  )
 }
 
 // MARK: - TodoMateWidgetEntryView
@@ -37,16 +49,30 @@ struct TodoMateWidgetEntryView: View {
   var entry: TodoEntry
 
   var body: some View {
-    VStack {
-      ForEach(entry.todos) { todo in
-        TodoRow(todo: todo)
+    VStack(alignment: .leading) {
+      if entry.todos.isEmpty {
+        // 빈 상태
+        Text("진행 중인 할 일이 없습니다")
+          .font(.callout)
+          .foregroundColor(.secondary)
+          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+      } else {
+        // Todo 리스트
+        VStack(alignment: .leading, spacing: 3) {
+          ForEach(entry.todos.prefix(3)) { todo in
+            TodoRow(todo: todo)
+          }
+
+          if entry.todos.count > 3 {
+            Text("외 \(entry.todos.count - 3)개...")
+              .font(.caption2)
+              .foregroundColor(.secondary)
+          }
+        }
       }
     }
-    if entry.todos.isEmpty {
-      Text("진행 중인 나의 Todo가 없습니다.")
-    } else {
-      Spacer()
-    }
+    .frame(maxHeight: .infinity, alignment: .top)
+    .padding(5)
   }
 }
 
@@ -55,32 +81,36 @@ struct TodoMateWidgetEntryView: View {
 struct Provider: TimelineProvider {
   private let modelContext = ModelContext(Self.container)
 
-  func placeholder(in context: Context) -> TodoEntry {
-    TodoEntry(date: .now, todos: WidgetTodo.stub)
+  func placeholder(in _: Context) -> TodoEntry {
+    TodoEntry.placeholder
   }
 
-  func getSnapshot(in context: Context, completion: @escaping (TodoEntry) -> Void) {
-    let entry = TodoEntry(date: .now, todos: WidgetTodo.stub)
-    completion(entry)
+  func getSnapshot(in _: Context, completion: @escaping (TodoEntry) -> Void) {
+    completion(TodoEntry.placeholder)
   }
 
-  func getTimeline(in context: Context, completion: @escaping (Timeline<TodoEntry>) -> Void) {
-    // 엔트리 생성
-    let todos = fetch()
-    let entries: TodoEntry = .init(date: .now, todos: todos)
-    // 타임라인 생성(with 엔트리)
-    let timeline = Timeline(entries: [entries], policy: .never)
-    // completion에 타임라인 전달
-    completion(timeline)
-  }
-
-  private func fetch() -> [WidgetTodo] {
+  func getTimeline(in _: Context, completion: @escaping (Timeline<TodoEntry>) -> Void) {
     do {
-      let WidgetTodo = try modelContext.fetch(FetchDescriptor<WidgetTodo>())
-      return WidgetTodo
+      let inProgressTodos = try fetch()
+
+      let entry = TodoEntry(
+        date: Date(),
+        todos: inProgressTodos
+      )
+
+      let timeline = Timeline(entries: [entry], policy: .never)
+      completion(timeline)
     } catch {
-      return []
+      print("[Widget] Error loading todos: \(error)")
+      let errorEntry = TodoEntry(date: Date(), todos: [])
+      let timeline = Timeline(entries: [errorEntry], policy: .never)
+      completion(timeline)
     }
+  }
+
+  private func fetch() throws -> [WidgetTodo] {
+    let fetchDescriptor = FetchDescriptor<WidgetTodo>()
+    return try modelContext.fetch(fetchDescriptor)
   }
 }
 
@@ -89,7 +119,7 @@ extension Provider {
     do {
       return try ModelContainer(for: WidgetTodo.self)
     } catch {
-      print("Failed to create ModelContainer: \(error)")
+      print("[Widget] - Failed to create ModelContainer: \(error)")
       fatalError("\(error)")
     }
   }()
