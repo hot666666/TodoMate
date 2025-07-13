@@ -115,10 +115,10 @@ private extension TodoMateApp {
     let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     let lastVersion = userDefaults.string(forKey: "app_last_version")
 
-    print("[TodoMateApp] Current version: \(currentVersion)")
-    print("[TodoMateApp] Last version: \(lastVersion ?? "none")")
+    print("[TodoMateApp] - Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
 
     if lastVersion == nil {
+      print("[TodoMateApp] - First launch detected. Initializing app state...")
       try? container.authService.signOut()
 
       // 앱의 모든 UserDefaults 데이터 삭제

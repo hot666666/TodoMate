@@ -27,14 +27,14 @@ final class FirestoreMemoRepository: MemoRepository {
   }
 
   func readByUserId(_ userId: String, useCache: Bool = true) async throws -> Memo? {
-    let source: FirestoreSource = useCache ? .default : .server
+    let source: FirestoreSource = useCache ? .cache : .server
     let snapshot = try await reference.memoCollection().document(userId).getDocument(source: source)
     return try? snapshot.data(as: Memo.self)
   }
 
   func readByUserIds(_ userIds: [String], useCache: Bool = true) async throws -> [Memo] {
     guard !userIds.isEmpty else { return [] }
-    let source: FirestoreSource = useCache ? .default : .server
+    let source: FirestoreSource = useCache ? .cache : .server
     let snapshot = try await reference.memoCollection().whereField(FieldPath.documentID(), in: userIds).getDocuments(source: source)
     return snapshot.documents.compactMap { try? $0.data(as: Memo.self) }
   }
