@@ -1,0 +1,17 @@
+//
+//  Color+Extension.swift
+//  Todo
+//
+//  Created by hs on 5/24/25.
+//
+
+import SwiftUI
+
+extension Color {
+  static let customBlue = Color(red: 0x28 / 255, green: 0x45 / 255, blue: 0x6C / 255)
+  static let customGray = Color(red: 0x5A / 255, green: 0x5A / 255, blue: 0x5A / 255)
+  static let customGreen = Color(red: 0x2B / 255, green: 0x59 / 255, blue: 0x3F / 255)
+  static let customRed = Color(red: 0x69 / 255, green: 0x31 / 255, blue: 0x4C / 255)
+  static let customBlack = Color(red: 0x12 / 255, green: 0x12 / 255, blue: 0x16 / 255)
+  static let customDarkBg = Color(red: 0x21 / 255, green: 0x21 / 255, blue: 0x21 / 255)
+}
