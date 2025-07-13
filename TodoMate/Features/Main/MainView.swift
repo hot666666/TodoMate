@@ -66,7 +66,7 @@ struct MainView: View {
   private var addTodoButton: some View {
     Button("새 할일", systemImage: "plus") {
       let selectedTodo = EditableTodo(owner: sessionStore.userId)
-      overlayManager.presentSheet {
+      overlayManager.presentSheet(editableTodo: selectedTodo) {
         TodoSheet(editableTodo: selectedTodo)
       }
     }

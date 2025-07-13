@@ -40,7 +40,15 @@ struct CalendarScreen: View {
   private func presentTodoEditSheet(for todo: Todo) {
     let selectedTodo = EditableTodo(from: todo)
 
-    overlayManager.presentSheet {
+    overlayManager.presentSheet(
+      editableTodo: selectedTodo,
+      onDismiss: {
+        // TodoSheet dismiss 시 캘린더 데이터 refresh
+        Task {
+          await calendarVM.refresh(userId: sessionStore.userId)
+        }
+      }
+    ) {
       TodoSheet(editableTodo: selectedTodo)
     }
   }

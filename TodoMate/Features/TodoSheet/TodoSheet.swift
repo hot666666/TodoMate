@@ -79,7 +79,7 @@ extension TodoSheet {
     }
     .compositingGroup()
     .onKeyPress(keyCode: 53) {
-      overlayManager.pop()
+      overlayManager.popWithConfirmation()
     }
     .padding(TodoSheetDesignSystem.Layout.sheetPadding)
     .frame(maxWidth: TodoSheetDesignSystem.Layout.maxWidth)

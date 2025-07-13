@@ -16,6 +16,7 @@ final class OverlayManager {
   }
 
   func presentSheet(
+    editableTodo: EditableTodo? = nil,
     onDismiss: (() -> Void)? = nil,
     @ViewBuilder content: @escaping () -> some View
   ) {
@@ -23,7 +24,8 @@ final class OverlayManager {
       type: .sheet,
       content: AnyView(content()),
       onDismiss: onDismiss,
-      canDismiss: nil
+      canDismiss: nil,
+      editableTodo: editableTodo
     )
     overlays.append(item)
   }
@@ -95,6 +97,40 @@ final class OverlayManager {
     item.onDismiss?()
   }
 
+  func popWithConfirmation() {
+    guard let item = overlays.last else { return }
+
+    // TodoSheet이고 EditableTodo가 있는 경우 상황에 따라 처리
+    if item.type == .sheet, let editableTodo = item.editableTodo {
+      if editableTodo.isDirty {
+        let title = editableTodo.isNew ? "작성 중인 내용을 폐기하시겠습니까?" : "변경사항을 폐기하시겠습니까?"
+        let message = editableTodo.isNew ? "작성 중인 내용이 사라집니다." : "저장하지 않은 변경사항이 있습니다."
+
+        presentConfirmation(
+          title: title,
+          message: message,
+          destructiveActionTitle: "폐기",
+          cancelTitle: "취소"
+        ) {
+          // confirmation은 ConfirmationView의 onDismiss에서 자동으로 pop됨
+          // 여기서는 TodoSheet만 처리
+          if self.overlays.count >= 2 {
+            let sheetItem = self.overlays[self.overlays.count - 2] // confirmation 아래의 sheet
+            if sheetItem.type == .sheet {
+              self.overlays.remove(at: self.overlays.count - 2) // TodoSheet 닫기
+              sheetItem.onDismiss?()
+            }
+          }
+        }
+        return
+      }
+    }
+
+    // 일반적인 경우 바로 pop
+    overlays.removeLast()
+    item.onDismiss?()
+  }
+
   func clear() {
     overlays.removeAll()
   }
@@ -121,6 +157,7 @@ extension OverlayManager {
     let popoverType: PopoverType?
     let buttonWidth: CGFloat?
     let buttonHeight: CGFloat?
+    let editableTodo: EditableTodo?
 
     init(
       type: OverlayType,
@@ -130,7 +167,8 @@ extension OverlayManager {
       anchorPoint: CGPoint? = nil,
       popoverType: PopoverType? = nil,
       buttonWidth: CGFloat? = nil,
-      buttonHeight: CGFloat? = nil
+      buttonHeight: CGFloat? = nil,
+      editableTodo: EditableTodo? = nil
     ) {
       self.type = type
       self.content = content
@@ -140,6 +178,7 @@ extension OverlayManager {
       self.popoverType = popoverType
       self.buttonWidth = buttonWidth
       self.buttonHeight = buttonHeight
+      self.editableTodo = editableTodo
     }
 
     enum OverlayType {

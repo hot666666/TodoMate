@@ -47,7 +47,7 @@ struct OverlayContainer<Content: View>: View {
             .ignoresSafeArea()
             .contentShape(.rect)
             .onTapGesture {
-              overlayManager.pop()
+              overlayManager.popWithConfirmation()
             }
 
           VStack {

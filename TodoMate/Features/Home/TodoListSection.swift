@@ -20,7 +20,7 @@ struct TodoListSection: View {
   func presentTodoAddSheet() {
     let selectedTodo = EditableTodo(owner: sessionStore.userId)
 
-    overlayManager.presentSheet {
+    overlayManager.presentSheet(editableTodo: selectedTodo) {
       TodoSheet(editableTodo: selectedTodo)
     }
   }
@@ -28,7 +28,7 @@ struct TodoListSection: View {
   private func presentTodoEditSheet(for todo: Todo) {
     let selectedTodo = EditableTodo(from: todo)
 
-    overlayManager.presentSheet {
+    overlayManager.presentSheet(editableTodo: selectedTodo) {
       TodoSheet(editableTodo: selectedTodo)
     }
   }
