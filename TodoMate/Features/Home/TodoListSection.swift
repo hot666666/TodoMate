@@ -11,10 +11,10 @@ struct TodoListSection: View {
   @Environment(SessionStore.self) var sessionStore
   @Environment(TodoStore.self) var todoStore
   @Environment(OverlayManager.self) var overlayManager
-  @Environment(HomeScreenVM.self) var homeScreenVM
+  var selectedUserId: String
 
   var isMine: Bool {
-    homeScreenVM.selectedUserId == sessionStore.userId
+    selectedUserId == sessionStore.userId
   }
 
   func presentTodoAddSheet() {
@@ -50,11 +50,11 @@ struct TodoListSection: View {
 extension TodoListSection {
   var body: some View {
     Group {
-      if todoStore.todos[homeScreenVM.selectedUserId, default: []].isEmpty {
+      if todoStore.todos[selectedUserId, default: []].isEmpty {
         EmptyTodoListView()
       } else {
         List {
-          ForEach(todoStore.todos[homeScreenVM.selectedUserId, default: []]) { todo in
+          ForEach(todoStore.todos[selectedUserId, default: []]) { todo in
             todoListItem(for: todo)
               .contextMenu {
                 if isMine {

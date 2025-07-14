@@ -9,30 +9,39 @@ import SwiftUI
 
 struct HomeScreen: View {
   @Environment(DIContainer.self) var container
-  @Environment(MainVM.self) var mainVM
   @Environment(SessionStore.self) var sessionStore
   @Environment(MessageStore.self) var messageStore
   @Environment(TodoStore.self) var todoStore
   @Environment(MemoStore.self) var memoStore
   @Environment(OverlayManager.self) var overlayManager
+  @Environment(RefreshTrigger.self) var refreshTrigger
 
-  @State var homeScreenVM: HomeScreenVM
+  @AppStorage("userSelection.showDropdown") private var showDropdown: Bool = false
+  @State private var selectedUserId: String = ""
+  @State private var isEditingMemo: Bool = false
 
-  private func presentCalendarFullScreen() {
-    overlayManager.presentFullScreen {
-      CalendarScreen(calendarVM: .init(container: container))
+  enum Action {
+    case setSelectedUser(String)
+    case refresh
+  }
+
+  @MainActor
+  private func perform(_ action: Action) async {
+    switch action {
+    case let .setSelectedUser(userId):
+      selectedUserId = userId
+
+    case .refresh:
+      let userIds = sessionStore.userGroup.map(\.id)
+      await loadCachedMemoAndTodo(for: userIds)
+      await memoStore.load(for: userIds, useCache: false)
+      await todoStore.observe(for: userIds)
     }
   }
 
-  private func refresh() async {
-    let userIds = sessionStore.userGroup.map(\.id)
-    // 모든 사용자의 캐싱 데이터 로드
+  private func loadCachedMemoAndTodo(for userIds: [String]) async {
     await memoStore.load(for: userIds)
     await todoStore.load(for: userIds, currentUserId: sessionStore.userId)
-    // 메모 데이터 로드
-    await memoStore.load(for: userIds, useCache: false)
-    // Todo 데이터 실시간 동기화
-    await todoStore.observe(for: userIds)
   }
 }
 
@@ -40,40 +49,45 @@ extension HomeScreen {
   var body: some View {
     VStack {
       VStack(spacing: HomeDesignSystem.Layout.sectionSpacing) {
-        UserSelectionHeader()
-          .padding([.horizontal, .top], HomeDesignSystem.Padding.large)
-          .shadow(radius: HomeDesignSystem.Shadow.light)
+        UserSelectionHeader(
+          selectedUserId: $selectedUserId,
+          showDropdown: $showDropdown,
+          isEditingMemo: isEditingMemo
+        )
+        .padding([.horizontal, .top], HomeDesignSystem.Padding.large)
+        .shadow(radius: HomeDesignSystem.Shadow.light)
 
-        if homeScreenVM.showDropdown {
-          MemoSection()
-            .padding(.horizontal, HomeDesignSystem.Padding.small)
+        if showDropdown {
+          MemoSection(
+            selectedUserId: selectedUserId,
+            isEditingMemo: $isEditingMemo
+          )
+          .padding(.horizontal, HomeDesignSystem.Padding.small)
         }
 
-        TodoListSection()
+        TodoListSection(selectedUserId: selectedUserId)
           .background(.ultraThinMaterial, in: .rect(cornerRadius: HomeDesignSystem.CornerRadius.large))
           .shadow(radius: HomeDesignSystem.Shadow.light)
           .padding([.horizontal, .bottom], HomeDesignSystem.Padding.large)
       }
     }
-    .environment(homeScreenVM)
-    .task(id: mainVM.refreshSessionTrigger) {
-      await refresh()
+    .task(id: refreshTrigger.value) {
+      await perform(.refresh)
     }
     .onAppear {
-      // 초기 선택 유저 설정
-      homeScreenVM.selectedUserId = sessionStore.userId
+      Task { await perform(.setSelectedUser(sessionStore.userId)) }
     }
   }
 }
 
 #Preview {
-  HomeScreen(homeScreenVM: .init())
+  HomeScreen()
     .environment(DIContainer.preview)
-    .environment(MainVM())
-    .environment(OverlayManager())
     .environment(SessionStore.preview)
     .environment(MessageStore.preview)
     .environment(TodoStore.preview)
     .environment(MemoStore.preview)
+    .environment(OverlayManager())
+    .environment(RefreshTrigger())
     .frame(width: 500, height: 400)
 }

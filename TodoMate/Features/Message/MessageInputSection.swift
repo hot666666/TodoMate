@@ -12,12 +12,25 @@ struct MessageInputSection: View {
   @Environment(MessageStore.self) private var messageStore
   @State private var inputText: String = ""
 
+  enum Action {
+    case sendMessage
+  }
+
+  private func perform(_ action: Action) {
+    switch action {
+    case .sendMessage:
+      sendMessage()
+    }
+  }
+
   private func sendMessage() {
     let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmed.isEmpty else { return }
-    let message = GroupMessage(content: trimmed,
-                               groupId: sessionStore.userGroupId,
-                               owner: sessionStore.userId)
+    let message = GroupMessage(
+      content: trimmed,
+      groupId: sessionStore.userGroupId,
+      owner: sessionStore.userId
+    )
     messageStore.add(message, userId: sessionStore.userId)
     inputText = ""
   }
@@ -42,7 +55,7 @@ extension MessageInputSection {
         // Command + Enter to send message
         .onKeyPress(.return, phases: .down) { key in
           if key.modifiers.contains(.command) {
-            sendMessage()
+            perform(.sendMessage)
             return .handled
           }
           return .ignored
@@ -68,7 +81,9 @@ extension MessageInputSection {
       .disabled(true)
 
       Spacer()
-      Button(action: sendMessage) {
+      Button(action: {
+        perform(.sendMessage)
+      }) {
         Image(systemName: "arrow.up.circle.fill")
           .font(.system(size: MessageDesignSystem.Component.MessageInput.buttonSize, weight: .bold))
       }

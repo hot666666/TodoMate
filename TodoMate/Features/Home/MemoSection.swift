@@ -10,14 +10,15 @@ import SwiftUI
 struct MemoSection: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(MemoStore.self) private var memoStore
-  @Environment(HomeScreenVM.self) private var homeScreenVM
+  var selectedUserId: String
+  @Binding var isEditingMemo: Bool
 
   private var currentMemo: Memo? {
-    memoStore.memos[homeScreenVM.selectedUserId] ?? nil
+    memoStore.memos[selectedUserId] ?? nil
   }
 
   private var isMyMemo: Bool {
-    sessionStore.userId == homeScreenVM.selectedUserId
+    sessionStore.userId == selectedUserId
   }
 
   private func saveMemo(content: String) {
@@ -30,7 +31,7 @@ extension MemoSection {
     MarkdownEditor(
       content: currentMemo?.content ?? "",
       isEditable: isMyMemo,
-      isEditing: isMyMemo ? Bindable(homeScreenVM).isEditingMemo : .constant(false),
+      isEditing: isMyMemo ? $isEditingMemo : .constant(false),
       onSave: saveMemo
     )
     .padding(.horizontal, HomeDesignSystem.Padding.small)
@@ -38,9 +39,13 @@ extension MemoSection {
 }
 
 #Preview {
-  MemoSection()
-    .environment(SessionStore.preview)
-    .environment(MemoStore.preview)
-    .environment(HomeScreenVM())
-    .frame(width: 400, height: 300)
+  @State @Previewable var isEditingMemo = false
+
+  MemoSection(
+    selectedUserId: "user1",
+    isEditingMemo: $isEditingMemo
+  )
+  .environment(SessionStore.preview)
+  .environment(MemoStore.preview)
+  .frame(width: 400, height: 300)
 }

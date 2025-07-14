@@ -182,6 +182,5 @@ extension CalendarScreen {
 #Preview {
   CalendarScreen(calendarVM: .init(container: DIContainer.preview))
     .environment(SessionStore.preview)
-    .environment(MainVM())
     .frame(width: 500, height: 800)
 }

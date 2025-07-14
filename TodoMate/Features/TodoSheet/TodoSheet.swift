@@ -11,18 +11,9 @@ struct TodoSheet: View {
   @Environment(DIContainer.self) private var container
   @Environment(SessionStore.self) private var sessionStore
   @Environment(OverlayManager.self) private var overlayManager
-  @FocusState private var focusedField: Field?
-  enum Field: Hashable {
-    case content
-  }
 
+  @FocusState private var focusedField: SheetField?
   @Bindable var editableTodo: EditableTodo
-
-  private func focusContentField() {
-    if isEditable, editableTodo.content.isEmpty {
-      focusedField = .content
-    }
-  }
 
   private var isEditable: Bool {
     sessionStore.userId == editableTodo.owner
@@ -32,15 +23,31 @@ struct TodoSheet: View {
     !isEditable || editableTodo.content.isEmpty || !editableTodo.isDirty
   }
 
-  private func submitAndDismiss() {
-    guard isEditable else { return }
+  enum Action {
+    case focusContentField
+    case submitAndDismiss
+    case dismissWithConfirmation
+  }
 
-    if editableTodo.isDirty {
-      let updatedTodo = Todo.from(editableTodo)
-      try? container.updateTodoUseCase.run(for: sessionStore.userId, updatedTodo)
+  private func perform(_ action: Action) {
+    switch action {
+    case .focusContentField:
+      if isEditable, editableTodo.content.isEmpty {
+        focusedField = .content
+      }
+
+    case .submitAndDismiss:
+      guard isEditable else { return }
+
+      if editableTodo.isDirty {
+        let updatedTodo = Todo.from(editableTodo)
+        try? container.updateTodoUseCase.run(for: sessionStore.userId, updatedTodo)
+      }
+      overlayManager.pop()
+
+    case .dismissWithConfirmation:
+      overlayManager.popWithConfirmation()
     }
-
-    overlayManager.pop()
   }
 }
 
@@ -50,11 +57,11 @@ extension TodoSheet {
       TodoContentTextField(
         content: $editableTodo.content,
         focusedField: $focusedField,
-        onSubmit: submitAndDismiss
+        onSubmit: { perform(.submitAndDismiss) }
       )
       TodoDetailTextEditor(
         detail: $editableTodo.detail,
-        onSubmit: submitAndDismiss
+        onSubmit: { perform(.submitAndDismiss) }
       )
       HStack(alignment: .center) {
         TodoStatusButton(
@@ -66,7 +73,7 @@ extension TodoSheet {
         Spacer()
 
         Button(editableTodo.isNew ? "생성" : "수정") {
-          submitAndDismiss()
+          perform(.submitAndDismiss)
         }
         .opacity(isEditable ? 1 : 0)
         .disabled(isSubmitDisabled)
@@ -75,11 +82,11 @@ extension TodoSheet {
     }
     .disabled(!isEditable)
     .onAppear {
-      focusContentField()
+      perform(.focusContentField)
     }
     .compositingGroup()
     .onKeyPress(keyCode: 53) {
-      overlayManager.popWithConfirmation()
+      perform(.dismissWithConfirmation)
     }
     .padding(TodoSheetDesignSystem.Layout.sheetPadding)
     .frame(maxWidth: TodoSheetDesignSystem.Layout.maxWidth)

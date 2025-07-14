@@ -9,19 +9,39 @@ import SwiftUI
 
 struct RootView: View {
   @Environment(DIContainer.self) private var container
-  @State var rootVM: RootVM
+  @State private var authState: AuthState = .loading
 
+  @MainActor
+  private func authenticate(with uid: String) async {
+    authState = .loading
+    do {
+      let session = try await container.loadUserSessionUseCase.run(for: uid, phase: .initial)
+      authState = .authenticated(session)
+    } catch {
+      print("[RootView] - Failed to load user: \(error)")
+      authState = .unauthenticated
+    }
+  }
+}
+
+extension RootView {
   var body: some View {
     content
       .task {
-        await rootVM.start()
+        for await storedUid in container.listenAuthStateUseCase.run() {
+          if let uid = storedUid {
+            await authenticate(with: uid)
+          } else {
+            authState = .unauthenticated
+          }
+        }
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 
   @ViewBuilder
   private var content: some View {
-    switch rootVM.authState {
+    switch authState {
     case .loading:
       ProgressView()
     case let .authenticated(userSession):
@@ -33,25 +53,17 @@ struct RootView: View {
 
   @ViewBuilder
   private func makeMainView(userSession: UserSession) -> some View {
-    MainView(mainVM: .init())
+    MainView()
       .environment(SessionStore(container: container, userSession: userSession))
       .environment(MessageStore(container: container))
       .environment(TodoStore(container: container))
       .environment(MemoStore(container: container))
       .environment(OverlayManager())
   }
-
-  //			ContentUnavailableView(label: {
-  //				Label("유효하지 않은 사용자입니다", systemImage: "xmark")
-  //			}) {
-  //				Text("관리자에게 문의하세요.")
-  //			} actions: {
-  //				SignOutButton()
-  //			}
 }
 
 #Preview {
-  RootView(rootVM: .init(container: DIContainer.preview))
+  RootView()
     .frame(width: 300, height: 400)
     .environment(DIContainer.preview)
 }

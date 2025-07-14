@@ -26,7 +26,7 @@ struct TodoMateApp: App {
 
   var body: some Scene {
     WindowGroup {
-      RootView(rootVM: .init(container: container))
+      RootView()
         .environment(\.colorScheme, .dark)
         .environment(container)
         .onAppear {

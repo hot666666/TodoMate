@@ -12,18 +12,52 @@ struct MainView: View {
   @Environment(SessionStore.self) var sessionStore
   @Environment(OverlayManager.self) var overlayManager
 
-  @State var mainVM: MainVM
+  @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
+  @State private var isMessageScreenPresented: Bool = false
+  @State private var selectedScreen: Sidebar = .home
+  @State private var refreshTrigger: RefreshTrigger = .init()
 
+  enum Action {
+    case triggerRefresh
+    case toggleMessageScreen
+    case presentAddTodoSheet
+    case presentCalendarScreen
+  }
+
+  private func perform(_ action: Action) {
+    switch action {
+    case .triggerRefresh:
+      refreshTrigger.trigger()
+
+    case .toggleMessageScreen:
+      isMessageScreenPresented.toggle()
+
+    case .presentAddTodoSheet:
+      let selectedTodo = EditableTodo(owner: sessionStore.userId)
+      overlayManager.presentSheet(editableTodo: selectedTodo) {
+        TodoSheet(editableTodo: selectedTodo)
+      }
+
+    case .presentCalendarScreen:
+      // TODO: - VM 처리
+      overlayManager.presentFullScreen {
+        CalendarScreen(calendarVM: .init(container: container))
+      }
+    }
+  }
+}
+
+extension MainView {
   var body: some View {
     OverlayContainer {
-      NavigationSplitView(columnVisibility: $mainVM.columnVisibility) {
-        List(MainSidebar.allCases, selection: $mainVM.selectedScreen) { screen in
+      NavigationSplitView(columnVisibility: $columnVisibility) {
+        List(Sidebar.allCases, selection: $selectedScreen) { screen in
           Text(screen.rawValue)
         }
       } detail: {
         selectedView
       }
-      .inspector(isPresented: $mainVM.isMessageScreenPresented) {
+      .inspector(isPresented: $isMessageScreenPresented) {
         MessageScreen()
           .inspectorColumnWidth(min: 300, ideal: 500)
       }
@@ -38,19 +72,19 @@ struct MainView: View {
           }
         }
       }
-      .task(id: mainVM.refreshSessionTrigger) {
+      .task(id: refreshTrigger.value) {
         await sessionStore.refresh()
       }
       .disabled(overlayManager.isPresented)
     }
-    .environment(mainVM)
   }
 
   @ViewBuilder
   private var selectedView: some View {
-    switch mainVM.selectedScreen {
+    switch selectedScreen {
     case .home:
-      HomeScreen(homeScreenVM: .init())
+      HomeScreen()
+        .environment(refreshTrigger)
     case .profile:
       ProfileScreen()
     }
@@ -58,48 +92,35 @@ struct MainView: View {
 
   private var reloadButton: some View {
     Button("새로고침", systemImage: "arrow.clockwise") {
-      mainVM.triggerRefresh()
+      perform(.triggerRefresh)
     }
     .keyboardShortcut("r", modifiers: .command)
   }
 
   private var addTodoButton: some View {
     Button("새 할일", systemImage: "plus") {
-      let selectedTodo = EditableTodo(owner: sessionStore.userId)
-      overlayManager.presentSheet(editableTodo: selectedTodo) {
-        TodoSheet(editableTodo: selectedTodo)
-      }
+      perform(.presentAddTodoSheet)
     }
     .keyboardShortcut("n", modifiers: .command)
   }
 
   private var calendarButton: some View {
     Button("달력", systemImage: "calendar") {
-      overlayManager.presentFullScreen {
-        CalendarScreen(calendarVM: .init(container: container))
-      }
+      perform(.presentCalendarScreen)
     }
     .keyboardShortcut("m", modifiers: .command)
   }
 
   private var messageButton: some View {
     Button("메시지", systemImage: "bubble.right") {
-      mainVM.toggleMessageScreenButton()
+      perform(.toggleMessageScreen)
     }
     .keyboardShortcut("i", modifiers: .command)
   }
 }
 
-extension MainView {
-  enum MainSidebar: String, CaseIterable, Identifiable {
-    case home = "홈"
-    case profile = "프로필"
-    var id: Self { self }
-  }
-}
-
 #Preview {
-  MainView(mainVM: .init())
+  MainView()
     .environment(DIContainer.preview)
     .environment(SessionStore.preview)
     .environment(MessageStore.preview)

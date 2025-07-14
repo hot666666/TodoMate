@@ -9,21 +9,29 @@ import SwiftUI
 
 struct UserSelectionHeader: View {
   @Environment(SessionStore.self) private var sessionStore
-  @Environment(HomeScreenVM.self) private var homeScreenVM
+  @Binding var selectedUserId: String
+  @Binding var showDropdown: Bool
+  var isEditingMemo: Bool
 
   var body: some View {
     UserSegmentedControl(
       users: sessionStore.userGroup,
-      selectedUserId: Bindable(homeScreenVM).selectedUserId,
-      showDropdown: Bindable(homeScreenVM).showDropdown,
-      isEditingMemo: homeScreenVM.isEditingMemo
+      selectedUserId: $selectedUserId,
+      showDropdown: $showDropdown,
+      isEditingMemo: isEditingMemo
     )
   }
 }
 
 #Preview {
-  UserSelectionHeader()
-    .environment(HomeScreenVM())
-    .environment(SessionStore.preview)
-    .frame(width: 300, height: 100)
+  @State @Previewable var selectedUserId = "user1"
+  @State @Previewable var showDropdown = false
+
+  UserSelectionHeader(
+    selectedUserId: $selectedUserId,
+    showDropdown: $showDropdown,
+    isEditingMemo: false
+  )
+  .environment(SessionStore.preview)
+  .frame(width: 300, height: 100)
 }
