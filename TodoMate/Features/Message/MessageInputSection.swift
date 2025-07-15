@@ -52,7 +52,6 @@ extension MessageInputSection {
         .frame(minHeight: MessageDesignSystem.Component.MessageInput.minHeight, maxHeight: MessageDesignSystem.Component.MessageInput.maxHeight, alignment: .bottom)
         .fixedSize(horizontal: false, vertical: true)
         .padding()
-        // Command + Enter to send message
         .onKeyPress(.return, phases: .down) { key in
           if key.modifiers.contains(.command) {
             perform(.sendMessage)
