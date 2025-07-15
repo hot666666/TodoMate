@@ -24,6 +24,16 @@ struct GroupMessage: Identifiable, Codable {
     createdAt = now
     updatedAt = now
   }
+
+  func withUpdatedContent(_ content: String) -> GroupMessage? {
+    let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else { return nil }
+
+    var updated = self
+    updated.content = trimmed
+    updated.updatedAt = Date()
+    return updated
+  }
 }
 
 extension GroupMessage {
