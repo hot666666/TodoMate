@@ -11,42 +11,33 @@ struct MessageListSection: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(MessageStore.self) private var messageStore
   @Environment(OverlayManager.self) private var overlayManager
-  @FocusState private var focusedMessageId: String?
-  @State private var selectedMessageId: String?
   @State private var editingText: String = ""
-  @State private var originalText: String = ""
-  @Binding var isEditingMessage: Bool
-
-  private var hasChanges: Bool {
-    editingText.trimmingCharacters(in: .whitespacesAndNewlines) != originalText.trimmingCharacters(in: .whitespacesAndNewlines)
-  }
+  let messageScreenState: MessageScreenState
 
   enum Action {
-    case focusMessage(GroupMessage)
+    case selectMessage(GroupMessage)
     case cancelEdit
-    case endEditing
-    case saveMessage(GroupMessage)
+    case updateEdit
     case removeMessage(GroupMessage)
-    case handleFocusChange(String?)
   }
 
   private func perform(_ action: Action) {
     switch action {
-    case let .focusMessage(message):
-      guard message.owner == sessionStore.userId, !isEditingMessage else { return }
-      startEditingState(for: message)
-
-    case .endEditing:
-      clearEditingState()
+    case let .selectMessage(message):
+      guard message.owner == sessionStore.userId, !messageScreenState.isEditingMessage else { return }
+      editingText = message.content
+      messageScreenState.selectMessage(message)
 
     case .cancelEdit:
-      editingText = originalText
-      perform(.endEditing)
+      messageScreenState.selectMessage(nil)
 
-    case let .saveMessage(message):
-      guard let updatedMessage = message.withUpdatedContent(editingText) else { return }
+    case .updateEdit:
+      guard
+        let message = messageScreenState.selectedMessage,
+        let updatedMessage = message.withUpdatedContent(editingText)
+      else { return }
       messageStore.update(updatedMessage, userId: sessionStore.userId)
-      perform(.endEditing)
+      perform(.cancelEdit)
 
     case let .removeMessage(message):
       overlayManager.presentConfirmation(
@@ -56,51 +47,29 @@ struct MessageListSection: View {
       ) {
         messageStore.delete(message, userId: sessionStore.userId)
       }
-
-    case let .handleFocusChange(newValue):
-      guard newValue == nil else { return }
-      if hasChanges {
-        focusedMessageId = selectedMessageId
-      } else {
-        perform(.endEditing)
-      }
     }
-  }
-
-  private func startEditingState(for message: GroupMessage) {
-    selectedMessageId = message.id
-    editingText = message.content
-    originalText = message.content
-    focusedMessageId = message.id
-    isEditingMessage = true
-  }
-
-  private func clearEditingState() {
-    selectedMessageId = nil
-    editingText = ""
-    originalText = ""
-    focusedMessageId = nil
-    isEditingMessage = false
   }
 }
 
 extension MessageListSection {
   var body: some View {
-    ScrollViewReader { _ in
+    ScrollViewReader { proxy in
       List {
         scrollAnchor
         ForEach(messageStore.messages) { message in
-          if selectedMessageId == message.id {
+          if let mid = messageScreenState.selectedMessage?.id, mid == message.id {
             editingMessageView(for: message)
           } else {
             displayMessageView(for: message)
           }
         }
       }
-      .listModifiers()
-      .onChange(of: focusedMessageId) { _, newValue in
-        perform(.handleFocusChange(newValue))
+      .onChange(of: messageStore.messages.count) { _, _ in
+        withAnimation(.easeInOut(duration: 0.3)) {
+          proxy.scrollTo("top", anchor: .top)
+        }
       }
+      .simpleListModifier()
     }
   }
 
@@ -124,13 +93,13 @@ extension MessageListSection {
     .padding(.bottom)
     .contentShape(.rect)
     .onTapGesture {
-      if !isEditingMessage {
-        perform(.focusMessage(message))
+      if !messageScreenState.isEditingMessage {
+        perform(.selectMessage(message))
       }
     }
-    .opacity(isEditingMessage && message.owner == sessionStore.userId ? 0.5 : 1.0)
+    .opacity(messageScreenState.isEditingMessage ? 0.5 : 1.0)
     .contextMenu {
-      if message.owner == sessionStore.userId, !isEditingMessage {
+      if message.owner == sessionStore.userId, !messageScreenState.isEditingMessage {
         Button("삭제") {
           perform(.removeMessage(message))
         }
@@ -138,9 +107,8 @@ extension MessageListSection {
     }
   }
 
-  private func messageTextEditor(for message: GroupMessage) -> some View {
+  private func messageTextEditor(for _: GroupMessage) -> some View {
     TextEditor(text: $editingText)
-      .focused($focusedMessageId, equals: message.id)
       .font(MessageDesignSystem.Component.Typography.contentFont)
       .textFieldStyle(.plain)
       .background(Color.clear)
@@ -151,7 +119,7 @@ extension MessageListSection {
       )
       .onKeyPress(.return, phases: .down) { key in
         if key.modifiers.contains(.command) {
-          perform(.saveMessage(message))
+          perform(.updateEdit)
           return .handled
         }
         return .ignored
@@ -173,7 +141,7 @@ extension MessageListSection {
         .buttonStyle(GlassmorphismButtonStyle(isSecondary: true))
 
         Button("확인") {
-          perform(.saveMessage(message))
+          perform(.updateEdit)
         }
         .buttonStyle(GlassmorphismButtonStyle(isSecondary: false))
       }
@@ -188,16 +156,8 @@ extension MessageListSection {
   }
 }
 
-private extension View {
-  func listModifiers() -> some View {
-    listStyle(.inset)
-      .scrollContentBackground(.hidden)
-      .background(.clear)
-  }
-}
-
 #Preview {
-  MessageListSection(isEditingMessage: .constant(false))
+  MessageListSection(messageScreenState: .init())
     .environment(SessionStore.preview)
     .environment(MessageStore.preview)
     .environment(OverlayManager())

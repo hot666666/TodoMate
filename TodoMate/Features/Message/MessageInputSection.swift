@@ -19,20 +19,16 @@ struct MessageInputSection: View {
   private func perform(_ action: Action) {
     switch action {
     case .sendMessage:
-      sendMessage()
+      let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+      guard !trimmed.isEmpty else { return }
+      let message = GroupMessage(
+        content: trimmed,
+        groupId: sessionStore.userGroupId,
+        owner: sessionStore.userId
+      )
+      messageStore.add(message, userId: sessionStore.userId)
+      inputText = ""
     }
-  }
-
-  private func sendMessage() {
-    let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !trimmed.isEmpty else { return }
-    let message = GroupMessage(
-      content: trimmed,
-      groupId: sessionStore.userGroupId,
-      owner: sessionStore.userId
-    )
-    messageStore.add(message, userId: sessionStore.userId)
-    inputText = ""
   }
 }
 

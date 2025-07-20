@@ -22,9 +22,11 @@ struct MainView: View {
     case toggleMessageScreen
     case presentAddTodoSheet
     case presentCalendarScreen
+    case refreshSession
   }
 
-  private func perform(_ action: Action) {
+  @MainActor
+  private func perform(_ action: Action) async {
     switch action {
     case .triggerRefresh:
       refreshTrigger.trigger()
@@ -43,6 +45,9 @@ struct MainView: View {
       overlayManager.presentFullScreen {
         CalendarScreen(calendarVM: .init(container: container))
       }
+
+    case .refreshSession:
+      await sessionStore.refresh()
     }
   }
 }
@@ -73,7 +78,7 @@ extension MainView {
         }
       }
       .task(id: refreshTrigger.value) {
-        await sessionStore.refresh()
+        await perform(.refreshSession)
       }
       .disabled(overlayManager.isPresented)
     }
@@ -92,28 +97,28 @@ extension MainView {
 
   private var reloadButton: some View {
     Button("새로고침", systemImage: "arrow.clockwise") {
-      perform(.triggerRefresh)
+      Task { await perform(.triggerRefresh) }
     }
     .keyboardShortcut("r", modifiers: .command)
   }
 
   private var addTodoButton: some View {
     Button("새 할일", systemImage: "plus") {
-      perform(.presentAddTodoSheet)
+      Task { await perform(.presentAddTodoSheet) }
     }
     .keyboardShortcut("n", modifiers: .command)
   }
 
   private var calendarButton: some View {
     Button("달력", systemImage: "calendar") {
-      perform(.presentCalendarScreen)
+      Task { await perform(.presentCalendarScreen) }
     }
-    .keyboardShortcut("m", modifiers: .command)
+    .keyboardShortcut("d", modifiers: .command)
   }
 
   private var messageButton: some View {
     Button("메시지", systemImage: "bubble.right") {
-      perform(.toggleMessageScreen)
+      Task { await perform(.toggleMessageScreen) }
     }
     .keyboardShortcut("i", modifiers: .command)
   }
