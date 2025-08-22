@@ -75,6 +75,7 @@ extension TodoSheet {
         Button(editableTodo.isNew ? "생성" : "수정") {
           perform(.submitAndDismiss)
         }
+        .buttonStyle(GlassmorphismButtonStyle(isSecondary: isSubmitDisabled))
         .opacity(isEditable ? 1 : 0)
         .disabled(isSubmitDisabled)
       }

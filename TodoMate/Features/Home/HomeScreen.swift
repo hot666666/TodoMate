@@ -20,26 +20,19 @@ struct HomeScreen: View {
   @State private var selectedUserId: String = ""
   @State private var isEditingMemo: Bool = false
 
-  enum Action {
-    case setSelectedUser(String)
-    case refresh
+  private func setSelectedUser(userId: String) {
+    selectedUserId = userId
   }
 
-  @MainActor
-  private func perform(_ action: Action) async {
-    switch action {
-    case let .setSelectedUser(userId):
-      selectedUserId = userId
-
-    case .refresh:
-      let userIds = sessionStore.userGroup.map(\.id)
-      await loadCachedMemoAndTodo(for: userIds)
-      await memoStore.load(for: userIds, useCache: false)
-      await todoStore.observe(for: userIds)
-    }
+  private func load() async {
+    let userIds = sessionStore.userGroup.map(\.id)
+    await loadFromCache(for: userIds)
+    await memoStore.load(for: userIds, useCache: false)
+    await todoStore.observe(for: userIds)
   }
 
-  private func loadCachedMemoAndTodo(for userIds: [String]) async {
+  /// 초기 빠른 로딩을 위한 캐시 이용
+  private func loadFromCache(for userIds: [String]) async {
     await memoStore.load(for: userIds)
     await todoStore.load(for: userIds, currentUserId: sessionStore.userId)
   }
@@ -72,10 +65,10 @@ extension HomeScreen {
       }
     }
     .task(id: refreshTrigger.value) {
-      await perform(.refresh)
+      await load()
     }
     .onAppear {
-      Task { await perform(.setSelectedUser(sessionStore.userId)) }
+      setSelectedUser(userId: sessionStore.userId)
     }
   }
 }
