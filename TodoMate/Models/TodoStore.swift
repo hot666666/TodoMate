@@ -38,6 +38,8 @@ final class TodoStore {
 
   @MainActor
   func load(for userIds: [String], currentUserId: String, useCache: Bool = true) async {
+    currentDate = .now
+
     do {
       todos = try await readGroupTodoUseCase.run(for: userIds, in: currentDate, useCache: useCache)
 

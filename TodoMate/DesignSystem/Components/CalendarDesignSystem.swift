@@ -54,6 +54,25 @@ enum CalendarDesignSystem {
       static let cornerRadius: CGFloat = 8
     }
 
+    enum Screen {
+      static let headerHeight: CGFloat = 80
+      static let weekdayHeight: CGFloat = 40
+      static let topPadding: CGFloat = 20
+      static let bottomPadding: CGFloat = 20
+      static let minCellHeight: CGFloat = 57
+      static let maxCellHeight: CGFloat = 150
+
+      // 고정 높이 계산을 위한 computed property
+      static var fixedHeight: CGFloat {
+        headerHeight +
+          weekdayHeight +
+          topPadding +
+          bottomPadding +
+          Layout.gridContainerBottomPadding +
+          (Layout.gridContainerPadding * 2)
+      }
+    }
+
     enum TodoItem {
       static let horizontalPadding: CGFloat = 6
       static let verticalPadding: CGFloat = 3

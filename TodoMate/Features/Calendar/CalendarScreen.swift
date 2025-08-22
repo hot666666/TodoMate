@@ -43,7 +43,7 @@ struct CalendarScreen: View {
     overlayManager.presentSheet(
       editableTodo: selectedTodo,
       onDismiss: {
-        // TodoSheet dismiss 시 캘린더 데이터 refresh
+        guard selectedTodo.isDirty else { return }
         Task {
           await calendarVM.refresh(userId: sessionStore.userId)
         }
@@ -54,30 +54,12 @@ struct CalendarScreen: View {
   }
 
   private func updateCellHeight(containerHeight: CGFloat) {
-    let newHeight = calculateCellHeight(containerHeight: containerHeight)
-    calculatedCellHeight = newHeight
-  }
-
-  // TODO: - 단순화
-
-  private func calculateCellHeight(containerHeight: CGFloat) -> CGFloat {
-    // 실제 구성 요소들의 정확한 높이
-    let headerHeight: CGFloat = 80 // 헤더 영역 (padding 포함)
-    let weekdayHeight: CGFloat = 40 // 요일 영역
-    let topPadding: CGFloat = 20
-    let bottomPadding: CGFloat = 20 // 필수 하단 여백
-    let gridContainerBottomPadding: CGFloat = CalendarDesignSystem.Layout.gridContainerBottomPadding
-    let gridPadding: CGFloat = CalendarDesignSystem.Layout.gridContainerPadding * 2
-
-    let totalFixedHeight = headerHeight + weekdayHeight + topPadding + bottomPadding + gridContainerBottomPadding + gridPadding
-    let availableHeight = containerHeight - totalFixedHeight
     let weekCount = CGFloat(calendarVM.calendarDays.count / 7)
     let gridSpacing = CalendarDesignSystem.Layout.gridSpacing * (weekCount - 1)
+    let availableHeight = containerHeight - CalendarDesignSystem.Component.Screen.fixedHeight - gridSpacing
+    let calculatedHeight = availableHeight / weekCount
 
-    let calculatedHeight = (availableHeight - gridSpacing) / weekCount
-
-    // 실제 코드 기반 정확한 최소 높이: dateView(22) + spacing(8) + 아이템/텍스트(16) + spacing(5) + 안전마진(6) = 57
-    return max(57, min(150, calculatedHeight))
+    calculatedCellHeight = max(CalendarDesignSystem.Component.Screen.minCellHeight, calculatedHeight)
   }
 }
 
@@ -182,6 +164,5 @@ extension CalendarScreen {
 #Preview {
   CalendarScreen(calendarVM: .init(container: DIContainer.preview))
     .environment(SessionStore.preview)
-    .environment(MainVM())
     .frame(width: 500, height: 800)
 }

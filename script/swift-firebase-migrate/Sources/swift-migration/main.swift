@@ -169,7 +169,7 @@ struct Main {
             )
             return (id, todo)
         }
-        
+
         // --- Message -> Memo 마이그레이션: messages -> v2-memos ---
         await processAndCopyToV2(
             db: db, sourceCollection: "messages", destinationCollection: "v2-memos"
@@ -190,7 +190,7 @@ struct Main {
             db: db, sourceCollection: "chats", destinationCollection: "v2-group_messages"
         ) { (dto: ChatDTO) -> (String, GroupMessage) in
             guard let id = dto.id else { throw NSError(domain: "Missing ID", code: -1) }
-            
+
             // Chat 마이그레이션에서는 groupId를 찾아야 하지만, 여기서는 우선 nil-coalescing으로 처리합니다.
             // 더 정확한 마이그레이션을 위해서는 User 데이터를 먼저 조회해야 합니다.
             let groupMessage = GroupMessage(

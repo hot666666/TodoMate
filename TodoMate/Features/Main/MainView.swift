@@ -8,22 +8,79 @@
 import SwiftUI
 
 struct MainView: View {
+  @Environment(\.scenePhase) private var scenePhase
   @Environment(DIContainer.self) private var container
   @Environment(SessionStore.self) var sessionStore
   @Environment(OverlayManager.self) var overlayManager
 
-  @State var mainVM: MainVM
+  @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
+  @State private var isMessageScreenPresented: Bool = false
+  @State private var selectedScreen: Sidebar = .home
+  @State private var refreshTrigger: RefreshTrigger = .init()
+  @State private var syncTask: Task<Void, Never>?
 
+  enum Action {
+    case triggerRefresh
+    case toggleMessageScreen
+    case presentAddTodoSheet
+    case presentCalendarScreen
+    case refreshSession
+    case syncWidget
+    case toggleSidebar
+  }
+
+  @MainActor
+  private func perform(_ action: Action) async {
+    switch action {
+    case .triggerRefresh:
+      refreshTrigger.trigger()
+
+    case .toggleMessageScreen:
+      isMessageScreenPresented.toggle()
+
+    case .presentAddTodoSheet:
+      let selectedTodo = EditableTodo(owner: sessionStore.userId)
+      overlayManager.presentSheet(editableTodo: selectedTodo) {
+        TodoSheet(editableTodo: selectedTodo)
+      }
+
+    case .presentCalendarScreen:
+      overlayManager.presentFullScreen {
+        CalendarScreen(calendarVM: .init(container: container))
+      }
+
+    case .refreshSession:
+      await sessionStore.refresh()
+
+    case .syncWidget:
+      guard syncTask == nil else { return }
+
+      syncTask = Task {
+        defer { syncTask = nil }
+        await container.widgetSyncService.sync()
+      }
+
+    case .toggleSidebar:
+      if columnVisibility == .detailOnly {
+        columnVisibility = .all
+      } else {
+        columnVisibility = .detailOnly
+      }
+    }
+  }
+}
+
+extension MainView {
   var body: some View {
     OverlayContainer {
-      NavigationSplitView(columnVisibility: $mainVM.columnVisibility) {
-        List(MainSidebar.allCases, selection: $mainVM.selectedScreen) { screen in
+      NavigationSplitView(columnVisibility: $columnVisibility) {
+        List(Sidebar.allCases, selection: $selectedScreen) { screen in
           Text(screen.rawValue)
         }
       } detail: {
         selectedView
       }
-      .inspector(isPresented: $mainVM.isMessageScreenPresented) {
+      .inspector(isPresented: $isMessageScreenPresented) {
         MessageScreen()
           .inspectorColumnWidth(min: 300, ideal: 500)
       }
@@ -38,19 +95,23 @@ struct MainView: View {
           }
         }
       }
-      .task(id: mainVM.refreshSessionTrigger) {
-        await sessionStore.refresh()
+      .task(id: refreshTrigger.value) {
+        await perform(.refreshSession)
       }
+      .onChange(of: scenePhase) { _, _ in
+        Task { await perform(.syncWidget) }
+      }
+      .background(sidebarButton)
       .disabled(overlayManager.isPresented)
     }
-    .environment(mainVM)
   }
 
   @ViewBuilder
   private var selectedView: some View {
-    switch mainVM.selectedScreen {
+    switch selectedScreen {
     case .home:
-      HomeScreen(homeScreenVM: .init())
+      HomeScreen()
+        .environment(refreshTrigger)
     case .profile:
       ProfileScreen()
     }
@@ -58,48 +119,43 @@ struct MainView: View {
 
   private var reloadButton: some View {
     Button("새로고침", systemImage: "arrow.clockwise") {
-      mainVM.triggerRefresh()
+      Task { await perform(.triggerRefresh) }
     }
     .keyboardShortcut("r", modifiers: .command)
   }
 
   private var addTodoButton: some View {
     Button("새 할일", systemImage: "plus") {
-      let selectedTodo = EditableTodo(owner: sessionStore.userId)
-      overlayManager.presentSheet(editableTodo: selectedTodo) {
-        TodoSheet(editableTodo: selectedTodo)
-      }
+      Task { await perform(.presentAddTodoSheet) }
     }
     .keyboardShortcut("n", modifiers: .command)
   }
 
   private var calendarButton: some View {
     Button("달력", systemImage: "calendar") {
-      overlayManager.presentFullScreen {
-        CalendarScreen(calendarVM: .init(container: container))
-      }
+      Task { await perform(.presentCalendarScreen) }
     }
-    .keyboardShortcut("m", modifiers: .command)
+    .keyboardShortcut("d", modifiers: .command)
   }
 
   private var messageButton: some View {
     Button("메시지", systemImage: "bubble.right") {
-      mainVM.toggleMessageScreenButton()
+      Task { await perform(.toggleMessageScreen) }
     }
     .keyboardShortcut("i", modifiers: .command)
   }
-}
 
-extension MainView {
-  enum MainSidebar: String, CaseIterable, Identifiable {
-    case home = "홈"
-    case profile = "프로필"
-    var id: Self { self }
+  private var sidebarButton: some View {
+    Button("") {
+      Task { await perform(.toggleSidebar) }
+    }
+    .keyboardShortcut("b", modifiers: .command)
+    .hidden()
   }
 }
 
 #Preview {
-  MainView(mainVM: .init())
+  MainView()
     .environment(DIContainer.preview)
     .environment(SessionStore.preview)
     .environment(MessageStore.preview)

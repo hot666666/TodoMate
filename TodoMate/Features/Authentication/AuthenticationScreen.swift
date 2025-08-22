@@ -11,7 +11,23 @@ import SwiftUI
 struct AuthenticationScreen: View {
   @Environment(DIContainer.self) private var container
   @State private var isLoading = false
+  @State private var isErrorDialogPresented = false
+  @State private var errorMessage: String?
 
+  @MainActor
+  private func signIn() async {
+    defer { isLoading = false }
+    isLoading = true
+    do {
+      try await container.signInUseCase.run()
+    } catch {
+      errorMessage = "로그인에 실패했습니다: \(error.localizedDescription)"
+      isErrorDialogPresented = true
+    }
+  }
+}
+
+extension AuthenticationScreen {
   var body: some View {
     VStack {
       VStack {
@@ -22,9 +38,7 @@ struct AuthenticationScreen: View {
 
         Button {
           Task {
-            isLoading = true
-            try? await container.signInUseCase.run()
-            isLoading = false
+            await signIn()
           }
         } label: {
           HStack(spacing: 4) {
@@ -38,7 +52,19 @@ struct AuthenticationScreen: View {
         .disabled(isLoading)
       }
     }
+
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .confirmationDialog(
+      "로그인 오류",
+      isPresented: $isErrorDialogPresented,
+      titleVisibility: .visible
+    ) {
+      Button("확인") {}
+    } message: {
+      if let errorMessage {
+        Text(errorMessage)
+      }
+    }
   }
 }
 

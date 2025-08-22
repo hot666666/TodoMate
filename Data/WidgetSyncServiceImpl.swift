@@ -23,12 +23,11 @@ final class SwiftDataWidgetSyncService: WidgetSyncService {
     self.modelContext = modelContext
   }
 
-  @MainActor
   func sync() async {
     do {
       // 1. 현재 로그인된 사용자 ID 확인
       guard let userId = authService.signedInUserId else {
-        await clearAllWidgetTodos()
+        clearAllWidgetTodos()
         return
       }
 
@@ -39,7 +38,7 @@ final class SwiftDataWidgetSyncService: WidgetSyncService {
       let inProgressTodos = try await todoRepository.readAll(query: query, source: .cache)
 
       // 3. SwiftData 업데이트
-      await replaceAllWidgetTodos(with: inProgressTodos)
+      replaceAllWidgetTodos(with: inProgressTodos)
 
       // 4. 위젯 갱신
       WidgetCenter.shared.reloadAllTimelines()
@@ -53,8 +52,7 @@ final class SwiftDataWidgetSyncService: WidgetSyncService {
 
   // MARK: - Private Methods
 
-  @MainActor
-  private func replaceAllWidgetTodos(with todos: [Todo]) async {
+  private func replaceAllWidgetTodos(with todos: [Todo]) {
     do {
       // 1. 기존 데이터 전체 삭제 (효율적)
       try modelContext.delete(model: WidgetTodo.self)
@@ -73,8 +71,7 @@ final class SwiftDataWidgetSyncService: WidgetSyncService {
     }
   }
 
-  @MainActor
-  private func clearAllWidgetTodos() async {
+  private func clearAllWidgetTodos() {
     do {
       try modelContext.delete(model: WidgetTodo.self)
       try modelContext.save()

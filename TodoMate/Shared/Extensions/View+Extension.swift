@@ -42,3 +42,13 @@ extension View {
     modifier(KeyPressModifier(keyCode: keyCode, action: action))
   }
 }
+
+// MARK: - List 깔끔 스타일 설정
+
+extension View {
+  func simpleListModifier() -> some View {
+    listStyle(.inset)
+      .scrollContentBackground(.hidden)
+      .background(.clear)
+  }
+}

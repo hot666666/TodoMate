@@ -12,7 +12,8 @@ TodoMate는 사용자들이 그룹을 통해 오늘의 할 일들을 실시간�
 - [x] Presentation Layer
 - [x] Widget
 - [x] 최초 앱 실행 시 세팅 처리 / 기존 사용 캐시 초기화
-- [x] Presentation Layer 정리
+- [ ] Presentation Layer 정리
+- [ ] OverlayManager 정리
 - [ ] 유저 처리
 - [ ] 자동화 파이프라인(issue->pr->배포)
 
