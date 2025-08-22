@@ -29,9 +29,6 @@ struct TodoMateApp: App {
       RootView()
         .environment(\.colorScheme, .dark)
         .environment(container)
-        .onAppear {
-          appDelegate.syncWidgetData = container.widgetSyncService.sync
-        }
         .background(Color.customDarkBg)
         .background(.ultraThickMaterial)
     }
@@ -117,6 +114,7 @@ private extension TodoMateApp {
 
     print("[TodoMateApp] - Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
 
+    // 업데이트 기록이 존재하면 작업 x -> 3.0.0 이전버전에서 업데이트 시, 수행
     if lastVersion == nil {
       print("[TodoMateApp] - First launch detected. Initializing app state...")
       try? container.authService.signOut()

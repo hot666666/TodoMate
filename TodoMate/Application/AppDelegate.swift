@@ -48,59 +48,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
     }
   }
 
-  func windowWillClose(_ notification: Notification) {
-    /// x 버튼 누르면: 최소화 → 동기화 → 종료
-    if let window = notification.object as? NSWindow {
-      // 1. 먼저 최소화
-      window.miniaturize(nil)
-
-      // 2. 동기화 후 종료
-      guard let syncWidgetData else {
-        NSApplication.shared.terminate(nil)
-        return
-      }
-
-      Task {
-        print("[AppDelegate] - after widget sync, terminating app.")
-        await syncWidgetData()
-        await MainActor.run {
-          NSApplication.shared.terminate(nil)
-        }
-      }
-    }
+  func windowWillClose(_: Notification) {
+    /// x 버튼 누르면 앱 종료
+    NSApplication.shared.terminate(nil)
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
     true
-  }
-
-  func applicationDidBecomeActive(_: Notification) {
-    // 앱이 활성화될 때는 동기화하지 않음
-  }
-
-  func applicationDidResignActive(_: Notification) {
-    guard let syncWidgetData else { return }
-
-    Task {
-      print("[AppDelegate] - after widget sync, terminating app.")
-      await syncWidgetData()
-    }
-  }
-
-  func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {
-    guard let syncWidgetData else {
-      return .terminateNow
-    }
-
-    Task {
-      print("[AppDelegate] - after widget sync, terminating app.")
-      await syncWidgetData()
-      await MainActor.run {
-        NSApplication.shared.reply(toApplicationShouldTerminate: true)
-      }
-    }
-
-    return .terminateLater
   }
 }
 

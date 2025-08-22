@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainView: View {
+  @Environment(\.scenePhase) private var scenePhase
   @Environment(DIContainer.self) private var container
   @Environment(SessionStore.self) var sessionStore
   @Environment(OverlayManager.self) var overlayManager
@@ -16,6 +17,7 @@ struct MainView: View {
   @State private var isMessageScreenPresented: Bool = false
   @State private var selectedScreen: Sidebar = .home
   @State private var refreshTrigger: RefreshTrigger = .init()
+  @State private var syncTask: Task<Void, Never>?
 
   enum Action {
     case triggerRefresh
@@ -23,6 +25,7 @@ struct MainView: View {
     case presentAddTodoSheet
     case presentCalendarScreen
     case refreshSession
+    case syncWidget
   }
 
   @MainActor
@@ -48,6 +51,15 @@ struct MainView: View {
 
     case .refreshSession:
       await sessionStore.refresh()
+
+    case .syncWidget:
+      // 이미 동기화 작업이 진행 중이면 무시
+      guard syncTask == nil else { return }
+
+      syncTask = Task {
+        defer { syncTask = nil }
+        await container.widgetSyncService.sync()
+      }
     }
   }
 }
@@ -79,6 +91,9 @@ extension MainView {
       }
       .task(id: refreshTrigger.value) {
         await perform(.refreshSession)
+      }
+      .onChange(of: scenePhase) { _, _ in
+        Task { await perform(.syncWidget) }
       }
       .disabled(overlayManager.isPresented)
     }
