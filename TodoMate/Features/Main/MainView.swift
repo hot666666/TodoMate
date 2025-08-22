@@ -26,6 +26,7 @@ struct MainView: View {
     case presentCalendarScreen
     case refreshSession
     case syncWidget
+    case toggleSidebar
   }
 
   @MainActor
@@ -44,7 +45,6 @@ struct MainView: View {
       }
 
     case .presentCalendarScreen:
-      // TODO: - VM 처리
       overlayManager.presentFullScreen {
         CalendarScreen(calendarVM: .init(container: container))
       }
@@ -53,12 +53,18 @@ struct MainView: View {
       await sessionStore.refresh()
 
     case .syncWidget:
-      // 이미 동기화 작업이 진행 중이면 무시
       guard syncTask == nil else { return }
 
       syncTask = Task {
         defer { syncTask = nil }
         await container.widgetSyncService.sync()
+      }
+
+    case .toggleSidebar:
+      if columnVisibility == .detailOnly {
+        columnVisibility = .all
+      } else {
+        columnVisibility = .detailOnly
       }
     }
   }
@@ -95,6 +101,7 @@ extension MainView {
       .onChange(of: scenePhase) { _, _ in
         Task { await perform(.syncWidget) }
       }
+      .background(sidebarButton)
       .disabled(overlayManager.isPresented)
     }
   }
@@ -136,6 +143,14 @@ extension MainView {
       Task { await perform(.toggleMessageScreen) }
     }
     .keyboardShortcut("i", modifiers: .command)
+  }
+
+  private var sidebarButton: some View {
+    Button("") {
+      Task { await perform(.toggleSidebar) }
+    }
+    .keyboardShortcut("b", modifiers: .command)
+    .hidden()
   }
 }
 
