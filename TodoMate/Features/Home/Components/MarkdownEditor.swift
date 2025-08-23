@@ -42,6 +42,7 @@ extension MarkdownEditor {
         displayView
       }
     }
+    .padding(.vertical, HomeDesignSystem.Padding.medium)
     .onAppear {
       editingContent = content
     }
@@ -58,7 +59,6 @@ extension MarkdownEditor {
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
-    .padding(.vertical, HomeDesignSystem.Padding.xSmall)
     .padding(.horizontal, HomeDesignSystem.Padding.medium)
     .onTapGesture {
       if isEditable {
