@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct GlassmorphismButtonStyle: ButtonStyle {
-  let isSecondary: Bool
+  let disabled: Bool
 
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .font(.system(size: 13, weight: .medium))
-      .foregroundColor(isSecondary ? .secondary : .primary)
+      .font(.caption)
+      .foregroundColor(disabled ? .secondary : .primary)
       .padding(.horizontal, 14)
       .padding(.vertical, 6)
       .background {
-        if isSecondary {
+        if disabled {
           RoundedRectangle(cornerRadius: 6)
             .fill(.ultraThinMaterial)
             .overlay(

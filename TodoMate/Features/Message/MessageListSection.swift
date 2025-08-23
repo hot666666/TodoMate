@@ -138,12 +138,12 @@ extension MessageListSection {
         Button("취소") {
           perform(.cancelEdit)
         }
-        .buttonStyle(GlassmorphismButtonStyle(isSecondary: true))
+        .buttonStyle(GlassmorphismButtonStyle(disabled: true))
 
         Button("확인") {
           perform(.updateEdit)
         }
-        .buttonStyle(GlassmorphismButtonStyle(isSecondary: false))
+        .buttonStyle(GlassmorphismButtonStyle(disabled: false))
       }
     }
     .padding(.leading, 5)
