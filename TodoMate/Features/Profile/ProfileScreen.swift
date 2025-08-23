@@ -15,6 +15,7 @@ struct ProfileScreen: View {
       Button("로그아웃") {
         sessionStore.signOut()
       }
+      .buttonStyle(GlassmorphismButtonStyle(disabled: false))
     }
     .padding()
   }
