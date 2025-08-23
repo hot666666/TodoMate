@@ -95,6 +95,12 @@ extension TodoSheet {
   }
 }
 
+extension TodoSheet {
+  enum SheetField: Hashable {
+    case content
+  }
+}
+
 #Preview {
   TodoSheet(editableTodo: EditableTodo(owner: SessionStore.preview.userId))
     .environment(OverlayManager())

@@ -2,7 +2,7 @@
 //  Sidebar.swift
 //  TodoMate
 //
-//  Created by hs on 7/14/25.
+//  Created by hs on 8/24/25.
 //
 
 enum Sidebar: Identifiable, Hashable, Equatable {
@@ -11,19 +11,15 @@ enum Sidebar: Identifiable, Hashable, Equatable {
 
   var id: String {
     switch self {
-    case .profile:
-      "profile"
-    case let .user(user):
-      "user_\(user.id)"
+    case .profile: "profile"
+    case let .user(user): "user_\(user.id)"
     }
   }
 
   var title: String {
     switch self {
-    case .profile:
-      "계정"
-    case let .user(user):
-      user.displayName
+    case .profile: "계정"
+    case let .user(user): user.displayName
     }
   }
 }

@@ -9,9 +9,8 @@ import SwiftUI
 
 struct EmptyTodoListView: View {
   var body: some View {
-    // 메시지
     VStack(spacing: 6) {
-      Text("등록된 할일이 없습니다")
+      Label("등록된 할일이 없습니다", systemImage: "tray")
         .font(.headline)
         .fontWeight(.medium)
         .foregroundStyle(.primary)

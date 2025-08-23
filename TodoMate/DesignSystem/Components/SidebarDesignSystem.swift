@@ -1,5 +1,5 @@
 //
-//  SidebarConstants.swift
+//  SidebarDesignSystem.swift
 //  TodoMate
 //
 //  Created by hs on 8/23/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum SidebarConstants {
+enum SidebarDesignSystem {
   // MARK: - Spacing
 
   static let itemSpacing: CGFloat = 3

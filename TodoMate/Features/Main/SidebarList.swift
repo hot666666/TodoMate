@@ -16,7 +16,7 @@ struct SidebarList: View {
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: SidebarConstants.itemSpacing) {
+    VStack(alignment: .leading, spacing: SidebarDesignSystem.itemSpacing) {
       // MARK: - 그룹 섹션
 
       if !sidebarItems.isEmpty {
@@ -44,7 +44,7 @@ struct SidebarList: View {
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-    .padding(SidebarConstants.containerPadding)
-    .background(SidebarConstants.backgroundColor)
+    .padding(SidebarDesignSystem.containerPadding)
+    .background(SidebarDesignSystem.backgroundColor)
   }
 }

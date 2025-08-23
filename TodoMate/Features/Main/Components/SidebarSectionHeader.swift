@@ -12,11 +12,11 @@ struct SidebarSectionHeader: View {
 
   var body: some View {
     Text(title)
-      .font(SidebarConstants.sectionHeaderFont)
+      .font(SidebarDesignSystem.sectionHeaderFont)
       .fontWeight(.semibold)
-      .foregroundColor(.white.opacity(SidebarConstants.sectionHeaderOpacity))
+      .foregroundColor(.white.opacity(SidebarDesignSystem.sectionHeaderOpacity))
       .textCase(.uppercase)
-      .padding(.horizontal, SidebarConstants.itemPaddingHorizontal)
+      .padding(.horizontal, SidebarDesignSystem.itemPaddingHorizontal)
       .padding(.top, 4)
       .padding(.bottom, 2)
       .accessibilityAddTraits(.isHeader)

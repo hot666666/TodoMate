@@ -44,6 +44,7 @@ extension RootView {
     switch authState {
     case .loading:
       ProgressView()
+        .opacity(0.5)
     case let .authenticated(userSession):
       makeMainView(userSession: userSession)
     case .unauthenticated:
@@ -59,6 +60,14 @@ extension RootView {
       .environment(TodoStore(container: container))
       .environment(MemoStore(container: container))
       .environment(OverlayManager())
+  }
+}
+
+extension RootView {
+  private enum AuthState {
+    case loading
+    case authenticated(UserSession)
+    case unauthenticated
   }
 }
 

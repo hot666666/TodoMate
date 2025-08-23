@@ -31,8 +31,8 @@ struct SidebarItem<Content: View>: View {
       Spacer()
     }
     .frame(maxWidth: .infinity, alignment: .leading)
-    .padding(.horizontal, SidebarConstants.itemPaddingHorizontal)
-    .padding(.vertical, SidebarConstants.itemPaddingVertical)
+    .padding(.horizontal, SidebarDesignSystem.itemPaddingHorizontal)
+    .padding(.vertical, SidebarDesignSystem.itemPaddingVertical)
     .background {
       if isSelected {
         selectedBackground
@@ -45,7 +45,7 @@ struct SidebarItem<Content: View>: View {
     .contentShape(.rect)
     .onTapGesture(perform: onTap)
     .onHover { hovering in
-      withAnimation(SidebarConstants.hoverAnimation) {
+      withAnimation(SidebarDesignSystem.hoverAnimation) {
         isHovered = hovering
       }
     }
@@ -54,20 +54,20 @@ struct SidebarItem<Content: View>: View {
   }
 
   private var selectedBackground: some View {
-    RoundedRectangle(cornerRadius: SidebarConstants.itemCornerRadius)
-      .fill(.ultraThinMaterial.opacity(SidebarConstants.selectedBackgroundOpacity))
+    RoundedRectangle(cornerRadius: SidebarDesignSystem.itemCornerRadius)
+      .fill(.ultraThinMaterial.opacity(SidebarDesignSystem.selectedBackgroundOpacity))
       .overlay(
-        RoundedRectangle(cornerRadius: SidebarConstants.itemCornerRadius)
-          .stroke(Color.white.opacity(SidebarConstants.selectedBorderOpacity), lineWidth: 1)
+        RoundedRectangle(cornerRadius: SidebarDesignSystem.itemCornerRadius)
+          .stroke(Color.white.opacity(SidebarDesignSystem.selectedBorderOpacity), lineWidth: 1)
       )
-      .animation(SidebarConstants.selectionAnimation, value: isSelected)
+      .animation(SidebarDesignSystem.selectionAnimation, value: isSelected)
   }
 
   private var hoverBackground: some View {
-    RoundedRectangle(cornerRadius: SidebarConstants.itemCornerRadius)
+    RoundedRectangle(cornerRadius: SidebarDesignSystem.itemCornerRadius)
       .fill(.ultraThinMaterial.opacity(0.3))
       .overlay(
-        RoundedRectangle(cornerRadius: SidebarConstants.itemCornerRadius)
+        RoundedRectangle(cornerRadius: SidebarDesignSystem.itemCornerRadius)
           .stroke(Color.white.opacity(0.1), lineWidth: 1)
       )
   }
