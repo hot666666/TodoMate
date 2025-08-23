@@ -37,6 +37,12 @@ final class TodoStore {
   // MARK: - Public Methods
 
   @MainActor
+  func refresh(for userIds: [String], currentUserId: String) async {
+    await load(for: userIds, currentUserId: currentUserId, useCache: true)
+    await observe(for: userIds)
+  }
+
+  @MainActor
   func load(for userIds: [String], currentUserId: String, useCache: Bool = true) async {
     currentDate = .now
 

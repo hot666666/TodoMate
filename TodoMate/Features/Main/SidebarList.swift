@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SidebarList: View {
   @Environment(SessionStore.self) private var sessionStore
-  @Binding var selectedScreen: Sidebar
+  @Binding var item: Sidebar
 
   private var sidebarItems: [Sidebar] {
     sessionStore.userGroup.map { Sidebar.user($0) }
@@ -22,12 +22,12 @@ struct SidebarList: View {
       if !sidebarItems.isEmpty {
         SidebarSectionHeader(title: "그룹")
 
-        ForEach(sidebarItems, id: \.id) { screen in
+        ForEach(sidebarItems, id: \.id) { sidebar in
           SidebarItem(
-            isSelected: selectedScreen.id == screen.id,
-            onTap: { selectedScreen = screen }
+            isSelected: item.id == sidebar.id,
+            onTap: { item = sidebar }
           ) {
-            Text(screen.title)
+            Text(sidebar.title)
           }
         }
       }
@@ -37,8 +37,8 @@ struct SidebarList: View {
       // MARK: - 프로필 섹션
 
       SidebarItem(
-        isSelected: selectedScreen.id == Sidebar.profile.id,
-        onTap: { selectedScreen = .profile }
+        isSelected: item.id == Sidebar.profile.id,
+        onTap: { item = .profile }
       ) {
         Label(Sidebar.profile.title, systemImage: "person.circle.fill")
       }
