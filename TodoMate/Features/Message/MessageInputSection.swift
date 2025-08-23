@@ -61,8 +61,7 @@ extension MessageInputSection {
         .padding(.bottom, 6)
         .frame(height: MessageDesignSystem.Component.MessageInput.containerHeight)
     }
-    .background(.ultraThinMaterial, in: .rect(cornerRadius: MessageDesignSystem.CornerRadius.large))
-    .shadow(radius: MessageDesignSystem.Shadow.light)
+    .background(Color.customLightDark, in: .rect(cornerRadius: MessageDesignSystem.CornerRadius.large))
   }
 
   private var messageInputButtons: some View {
