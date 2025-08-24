@@ -14,6 +14,7 @@ final class SessionStore {
   private let signOutUseCase: SignOutUseCase
   private let readUserUseCase: ReadUserUseCase
   private let readUserGroupUseCae: ReadUserGroupUseCase
+  private let widgetSyncService: WidgetSyncService
 
   // MARK: - State
 
@@ -42,6 +43,7 @@ final class SessionStore {
     signOutUseCase = container.signOutUseCase
     readUserUseCase = container.readUserUseCase
     readUserGroupUseCae = container.readUserGroupUseCase
+    widgetSyncService = container.widgetSyncService
   }
 
   // MARK: - Public Methods
@@ -49,6 +51,11 @@ final class SessionStore {
   func signOut() {
     do {
       try signOutUseCase.run()
+
+      // Clear widget database on logout
+      Task {
+        await widgetSyncService.clearAllWidgetTodos()
+      }
     } catch {
       print("[SessionStore] - Sign out error: \(error)")
     }

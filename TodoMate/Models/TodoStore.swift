@@ -18,6 +18,7 @@ final class TodoStore {
   private let observeGroupTodoUseCase: ObserveGroupTodoUseCase
   private let applyTodoOrderUseCase: ApplyTodoOrderUseCase
   private let reorderTodosUseCase: ReorderTodosUseCase
+  private let widgetSyncService: WidgetSyncService
 
   // MARK: - State
 
@@ -32,6 +33,7 @@ final class TodoStore {
     observeGroupTodoUseCase = container.observeGroupTodoUseCase
     applyTodoOrderUseCase = container.applyTodoOrderUseCase
     reorderTodosUseCase = container.reorderTodosUseCase
+    widgetSyncService = container.widgetSyncService
   }
 
   // MARK: - Public Methods
@@ -95,6 +97,9 @@ final class TodoStore {
           userTodos[index] = todo
         }
       }
+
+      // Widget sync for the todo owner
+      syncWidgetForUser(todo.owner)
     } catch {
       print("[TodoStore] - Failed to update todo: \(error)")
     }
@@ -136,6 +141,14 @@ extension TodoStore {
     var userTodos = todos[userId, default: []]
     update(&userTodos)
     todos[userId] = userTodos
+  }
+
+  private func syncWidgetForUser(_ userId: String) {
+    Task.detached(priority: .background) { [weak self] in
+      guard let self else { return }
+      let userTodos = todos[userId, default: []]
+      await widgetSyncService.sync(with: userTodos)
+    }
   }
 
   private func handleTodoAdded(_ todo: Todo) {

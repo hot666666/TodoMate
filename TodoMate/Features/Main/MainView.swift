@@ -5,10 +5,10 @@
 //  Created by hs on 6/2/25.
 //
 
+import Combine
 import SwiftUI
 
 struct MainView: View {
-  @Environment(\.scenePhase) private var scenePhase
   @Environment(DIContainer.self) private var container
   @Environment(SessionStore.self) var sessionStore
   @Environment(MessageStore.self) var messageStore
@@ -68,12 +68,9 @@ struct MainView: View {
       }
 
     case .syncWidget:
-      guard syncTask == nil else { return }
-
-      syncTask = Task {
-        defer { syncTask = nil }
-        await container.widgetSyncService.sync()
-      }
+      defer { syncTask = nil }
+      let userTodos = todoStore.todos[sessionStore.userId, default: []]
+      await container.widgetSyncService.sync(with: userTodos)
 
     case .toggleSidebar:
       withAnimation {
@@ -129,6 +126,15 @@ extension MainView {
         setupInitialSidebar()
       }
     }
+    #if os(macOS)
+    .onReceive(Publishers.Merge(
+      NotificationCenter.default.publisher(for: NSWindow.didResignKeyNotification),
+      NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)
+    )) { _ in
+      guard syncTask == nil else { return }
+      syncTask = Task { await perform(.syncWidget) }
+    }
+    #endif
   }
 
   @ViewBuilder

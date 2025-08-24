@@ -6,5 +6,6 @@
 //
 
 protocol WidgetSyncService {
-  func sync() async
+  func sync(with todos: [Todo]) async
+  func clearAllWidgetTodos() async
 }

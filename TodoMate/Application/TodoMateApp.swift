@@ -74,7 +74,6 @@ private extension TodoMateApp {
     let calendarDayService = CalendarDayServiceImpl()
     let widgetSyncService = SwiftDataWidgetSyncService(
       todoRepository: todoRepo,
-      authService: authService,
       modelContext: modelContainer.mainContext
     )
     let messageReadTracker = MessageReadTrackerImpl()
