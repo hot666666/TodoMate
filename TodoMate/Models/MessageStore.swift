@@ -5,6 +5,7 @@
 //  Created by hs on 6/9/25.
 //
 
+import Foundation
 import Observation
 
 @Observable
@@ -16,10 +17,12 @@ final class MessageStore {
   private let deleteMessageUseCase: DeleteMessageUseCase
   private let readMessagesUseCase: ReadMessageUseCase
   private let observeMessagesUseCase: ObserveMessageUseCase
+  private let readTracker: MessageReadTracker
 
   // MARK: - State
 
   private(set) var messages: [GroupMessage] = []
+  private(set) var hasUnreadMessages: Bool = false
 
   init(container: DIContainer) {
     createMessageUseCase = container.createMessageUseCase
@@ -27,20 +30,29 @@ final class MessageStore {
     deleteMessageUseCase = container.deleteMessageUseCase
     readMessagesUseCase = container.readMessagesUseCase
     observeMessagesUseCase = container.observeMessagesUseCase
+    readTracker = container.messageReadTracker
   }
 
   // MARK: - Public Methods
 
   @MainActor
   func refresh(groupId: String) async {
-    await load(groupId: groupId)
+    // Message는 cache 이용말고, 서버로부터 로드
+    await load(groupId: groupId, useCache: false)
     await observe(groupId: groupId)
+  }
+
+  func markAllAsRead() {
+    readTracker.markAsRead()
+    hasUnreadMessages = false
   }
 
   func add(_ message: GroupMessage, userId: String) {
     do {
       try createMessageUseCase.run(for: userId, message)
       messages.append(message)
+      // 내가 보낸 메시지는 항상 읽음 처리
+      markAllAsRead()
     } catch {
       print("[MessageStore] - Failed to add message \(message.id): \(error)")
     }
@@ -69,9 +81,11 @@ final class MessageStore {
   }
 
   @MainActor
-  func load(groupId: String) async {
+  func load(groupId: String, useCache: Bool = true) async {
     do {
-      messages = try await readMessagesUseCase.run(in: groupId, useCache: true)
+      messages = try await readMessagesUseCase.run(in: groupId, useCache: useCache)
+      // 로드 후 읽지 않은 메시지 확인
+      hasUnreadMessages = readTracker.hasUnreadMessages(in: messages)
     } catch {
       print("[MessageStore] - Failed to load messages for group \(groupId): \(error)")
     }
@@ -84,13 +98,17 @@ final class MessageStore {
       case let .added(newMessage):
         if !messages.contains(where: { $0.id == newMessage.id }) {
           messages.append(newMessage)
+          hasUnreadMessages = readTracker.hasUnreadMessages(in: messages)
         }
+
       case let .modified(updatedMessage):
         if let index = messages.firstIndex(where: { $0.id == updatedMessage.id }), updatedMessage.updatedAt > messages[index].updatedAt {
           messages[index] = updatedMessage
         }
+
       case let .removed(removedMessage):
         messages.removeAll(where: { $0.id == removedMessage.id })
+
       case let .error(error):
         print("[MessageStore] - Error observing messages: \(error)")
       }

@@ -54,7 +54,7 @@ struct MainView: View {
 
     case .refreshSession:
       await sessionStore.refresh()
-      // refresh 메서드는 캐시로드->데이터패치/구독갱신
+      // refresh 메서드는 로드->데이터패치/구독갱신
       await withTaskGroup(of: Void.self) { group in
         group.addTask {
           await memoStore.refresh(for: sessionStore.userGroupIds)
@@ -103,6 +103,11 @@ extension MainView {
       .inspector(isPresented: $isMessageScreenPresented) {
         MessageScreen()
           .inspectorColumnWidth(min: 300, ideal: 500)
+      }
+      .onChange(of: isMessageScreenPresented) { _, isPresented in
+        if isPresented {
+          messageStore.markAllAsRead()
+        }
       }
       .toolbar {
         ToolbarItemGroup(placement: .primaryAction) {
@@ -162,7 +167,7 @@ extension MainView {
   }
 
   private var messageButton: some View {
-    Button("메시지", systemImage: "bubble.right") {
+    Button("메시지", systemImage: messageStore.hasUnreadMessages ? "bubble.right.fill" : "bubble.right") {
       Task { await perform(.toggleMessageScreen) }
     }
     .keyboardShortcut("i", modifiers: .command)

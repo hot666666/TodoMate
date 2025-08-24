@@ -38,6 +38,7 @@ final class FirestoreMessageRepository: MessageRepository {
     AsyncStream { continuation in
       let listener = reference.messageCollection()
         .whereField("groupId", isEqualTo: groupId)
+        .order(by: "createdAt", descending: false)
         .addSnapshotListener { snapshot, error in
           if let error { continuation.yield(.error(error)); return }
           guard let snapshot else { continuation.yield(.error(FirestoreRepositoryError.snapshotNotFound)); return }

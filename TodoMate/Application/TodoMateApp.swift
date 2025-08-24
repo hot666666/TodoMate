@@ -77,6 +77,7 @@ private extension TodoMateApp {
       authService: authService,
       modelContext: modelContainer.mainContext
     )
+    let messageReadTracker = MessageReadTrackerImpl()
 
     return DIContainer(
       userRepository: userRepo,
@@ -86,7 +87,8 @@ private extension TodoMateApp {
       memoRepository: memoRepo,
       authService: authService,
       calendarDayService: calendarDayService,
-      widgetSyncService: widgetSyncService
+      widgetSyncService: widgetSyncService,
+      messageReadTracker: messageReadTracker
     )
   }
 
