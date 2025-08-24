@@ -44,6 +44,7 @@ extension RootView {
     switch authState {
     case .loading:
       ProgressView()
+        .font(.callout)
         .opacity(0.5)
     case let .authenticated(userSession):
       makeMainView(userSession: userSession)
