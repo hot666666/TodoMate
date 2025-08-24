@@ -86,6 +86,10 @@ struct MainView: View {
   private func setupInitialSidebar() {
     selectedSidebar = .user(sessionStore.user)
   }
+
+  private var hasUnreadMessages: Bool {
+    messageStore.hasUnreadMessages && !isMessageScreenPresented
+  }
 }
 
 extension MainView {
@@ -101,10 +105,8 @@ extension MainView {
         MessageScreen()
           .inspectorColumnWidth(min: 300, ideal: 500)
       }
-      .onChange(of: isMessageScreenPresented) { _, isPresented in
-        if isPresented {
-          messageStore.markAllAsRead()
-        }
+      .onChange(of: isMessageScreenPresented) { _, _ in
+        messageStore.markAllAsRead()
       }
       .toolbar {
         ToolbarItemGroup(placement: .primaryAction) {
@@ -127,10 +129,7 @@ extension MainView {
       }
     }
     #if os(macOS)
-    .onReceive(Publishers.Merge(
-      NotificationCenter.default.publisher(for: NSWindow.didResignKeyNotification),
-      NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)
-    )) { _ in
+    .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
       guard syncTask == nil else { return }
       syncTask = Task { await perform(.syncWidget) }
     }
@@ -173,7 +172,7 @@ extension MainView {
   }
 
   private var messageButton: some View {
-    Button("메시지", systemImage: messageStore.hasUnreadMessages ? "bubble.right.fill" : "bubble.right") {
+    Button("메시지", systemImage: hasUnreadMessages ? "bubble.right.fill" : "bubble.right") {
       Task { await perform(.toggleMessageScreen) }
     }
     .keyboardShortcut("i", modifiers: .command)
