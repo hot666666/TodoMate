@@ -40,7 +40,7 @@ final class MessageStore {
   func add(_ message: GroupMessage, userId: String) {
     do {
       try createMessageUseCase.run(for: userId, message)
-      messages.insert(message, at: 0)
+      messages.append(message)
     } catch {
       print("[MessageStore] - Failed to add message \(message.id): \(error)")
     }
@@ -83,7 +83,7 @@ final class MessageStore {
       switch event {
       case let .added(newMessage):
         if !messages.contains(where: { $0.id == newMessage.id }) {
-          messages.insert(newMessage, at: 0)
+          messages.append(newMessage)
         }
       case let .modified(updatedMessage):
         if let index = messages.firstIndex(where: { $0.id == updatedMessage.id }), updatedMessage.updatedAt > messages[index].updatedAt {

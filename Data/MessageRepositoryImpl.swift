@@ -29,7 +29,7 @@ final class FirestoreMessageRepository: MessageRepository {
   func readAll(groupId: String, source: DataSource) async throws -> [GroupMessage] {
     let snapshot = try await reference.messageCollection()
       .whereField("groupId", isEqualTo: groupId)
-      .order(by: "createdAt", descending: true)
+      .order(by: "createdAt", descending: false)
       .getDocuments(source: source.firestoreSource)
     return snapshot.documents.compactMap { try? $0.data(as: GroupMessage.self) }
   }

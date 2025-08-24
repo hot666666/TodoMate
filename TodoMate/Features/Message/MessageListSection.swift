@@ -55,7 +55,6 @@ extension MessageListSection {
   var body: some View {
     ScrollViewReader { proxy in
       List {
-        scrollAnchor
         ForEach(messageStore.messages) { message in
           if let mid = messageScreenState.selectedMessage?.id, mid == message.id {
             editingMessageView(for: message)
@@ -63,10 +62,11 @@ extension MessageListSection {
             displayMessageView(for: message)
           }
         }
+        scrollAnchor
       }
       .onChange(of: messageStore.messages.count) { _, _ in
         withAnimation(.easeInOut(duration: 0.3)) {
-          proxy.scrollTo("top", anchor: .top)
+          proxy.scrollTo("bottom", anchor: .bottom)
         }
       }
       .simpleListModifier()
@@ -152,7 +152,7 @@ extension MessageListSection {
   private var scrollAnchor: some View {
     Color.clear
       .frame(height: 1)
-      .id("top")
+      .id("bottom")
   }
 }
 
