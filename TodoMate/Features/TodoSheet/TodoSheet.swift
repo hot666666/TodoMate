@@ -39,6 +39,12 @@ struct TodoSheet: View {
     case .submitAndDismiss:
       guard isEditable else { return }
 
+      // popover가 열려있다면 먼저 popover를 닫고, 없다면 submit 수행
+      if overlayManager.overlays.last?.type == .popover {
+        overlayManager.pop()
+        return
+      }
+
       if editableTodo.isDirty {
         let updatedTodo = Todo.from(editableTodo)
         try? container.updateTodoUseCase.run(for: sessionStore.userId, updatedTodo)
@@ -46,7 +52,12 @@ struct TodoSheet: View {
       overlayManager.pop()
 
     case .dismissWithConfirmation:
-      overlayManager.popWithConfirmation()
+      // popover가 열려있다면 먼저 popover를 닫고, 없다면 confirmation 수행
+      if overlayManager.overlays.last?.type == .popover {
+        overlayManager.pop()
+      } else {
+        overlayManager.popWithConfirmation()
+      }
     }
   }
 }
@@ -75,7 +86,7 @@ extension TodoSheet {
         Button(editableTodo.isNew ? "생성" : "수정") {
           perform(.submitAndDismiss)
         }
-        .buttonStyle(GlassmorphismButtonStyle(isSecondary: isSubmitDisabled))
+        .buttonStyle(GlassmorphismButtonStyle(disabled: isSubmitDisabled))
         .opacity(isEditable ? 1 : 0)
         .disabled(isSubmitDisabled)
       }
@@ -92,6 +103,12 @@ extension TodoSheet {
     .padding(TodoSheetDesignSystem.Layout.sheetPadding)
     .frame(maxWidth: TodoSheetDesignSystem.Layout.maxWidth)
     .coordinateSpace(name: "TodoSheet")
+  }
+}
+
+extension TodoSheet {
+  enum SheetField: Hashable {
+    case content
   }
 }
 

@@ -5,17 +5,20 @@
 //  Created by hs on 6/2/25.
 //
 
+import Combine
 import SwiftUI
 
 struct MainView: View {
-  @Environment(\.scenePhase) private var scenePhase
   @Environment(DIContainer.self) private var container
   @Environment(SessionStore.self) var sessionStore
+  @Environment(MessageStore.self) var messageStore
+  @Environment(TodoStore.self) var todoStore
+  @Environment(MemoStore.self) var memoStore
   @Environment(OverlayManager.self) var overlayManager
 
   @State private var columnVisibility: NavigationSplitViewVisibility = .detailOnly
   @State private var isMessageScreenPresented: Bool = false
-  @State private var selectedScreen: Sidebar = .home
+  @State private var selectedSidebar: Sidebar = .profile
   @State private var refreshTrigger: RefreshTrigger = .init()
   @State private var syncTask: Task<Void, Never>?
 
@@ -51,22 +54,37 @@ struct MainView: View {
 
     case .refreshSession:
       await sessionStore.refresh()
+      // refresh 메서드는 로드->데이터패치/구독갱신
+      await withTaskGroup(of: Void.self) { group in
+        group.addTask {
+          await memoStore.refresh(for: sessionStore.userGroupIds)
+        }
+        group.addTask {
+          await todoStore.refresh(for: sessionStore.userGroupIds, currentUserId: sessionStore.userId)
+        }
+        group.addTask {
+          await messageStore.refresh(groupId: sessionStore.userGroupId)
+        }
+      }
 
     case .syncWidget:
-      guard syncTask == nil else { return }
-
-      syncTask = Task {
-        defer { syncTask = nil }
-        await container.widgetSyncService.sync()
-      }
+      defer { syncTask = nil }
+      let userTodos = todoStore.todos[sessionStore.userId, default: []]
+      await container.widgetSyncService.sync(with: userTodos)
 
     case .toggleSidebar:
-      if columnVisibility == .detailOnly {
-        columnVisibility = .all
-      } else {
-        columnVisibility = .detailOnly
+      withAnimation {
+        if columnVisibility == .detailOnly {
+          columnVisibility = .all
+        } else {
+          columnVisibility = .detailOnly
+        }
       }
     }
+  }
+
+  private func setupInitialSidebar() {
+    selectedSidebar = .user(sessionStore.user)
   }
 }
 
@@ -74,15 +92,19 @@ extension MainView {
   var body: some View {
     OverlayContainer {
       NavigationSplitView(columnVisibility: $columnVisibility) {
-        List(Sidebar.allCases, selection: $selectedScreen) { screen in
-          Text(screen.rawValue)
-        }
+        SidebarList(item: $selectedSidebar)
+          .transaction { $0.animation = nil }
       } detail: {
         selectedView
       }
       .inspector(isPresented: $isMessageScreenPresented) {
         MessageScreen()
           .inspectorColumnWidth(min: 300, ideal: 500)
+      }
+      .onChange(of: isMessageScreenPresented) { _, isPresented in
+        if isPresented {
+          messageStore.markAllAsRead()
+        }
       }
       .toolbar {
         ToolbarItemGroup(placement: .primaryAction) {
@@ -98,22 +120,34 @@ extension MainView {
       .task(id: refreshTrigger.value) {
         await perform(.refreshSession)
       }
-      .onChange(of: scenePhase) { _, _ in
-        Task { await perform(.syncWidget) }
-      }
       .background(sidebarButton)
       .disabled(overlayManager.isPresented)
+      .onAppear {
+        setupInitialSidebar()
+      }
     }
+    #if os(macOS)
+    .onReceive(Publishers.Merge(
+      NotificationCenter.default.publisher(for: NSWindow.didResignKeyNotification),
+      NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)
+    )) { _ in
+      guard syncTask == nil else { return }
+      syncTask = Task { await perform(.syncWidget) }
+    }
+    #endif
   }
 
   @ViewBuilder
   private var selectedView: some View {
-    switch selectedScreen {
-    case .home:
-      HomeScreen()
-        .environment(refreshTrigger)
+    switch selectedSidebar {
     case .profile:
       ProfileScreen()
+    case let .user(user):
+      if user.id == sessionStore.userId {
+        MyUserScreen(user: user)
+      } else {
+        OtherUserScreen(user: user)
+      }
     }
   }
 
@@ -135,11 +169,11 @@ extension MainView {
     Button("달력", systemImage: "calendar") {
       Task { await perform(.presentCalendarScreen) }
     }
-    .keyboardShortcut("d", modifiers: .command)
+    .keyboardShortcut("a", modifiers: .command)
   }
 
   private var messageButton: some View {
-    Button("메시지", systemImage: "bubble.right") {
+    Button("메시지", systemImage: messageStore.hasUnreadMessages ? "bubble.right.fill" : "bubble.right") {
       Task { await perform(.toggleMessageScreen) }
     }
     .keyboardShortcut("i", modifiers: .command)

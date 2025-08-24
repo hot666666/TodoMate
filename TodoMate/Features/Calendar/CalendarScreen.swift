@@ -53,6 +53,22 @@ struct CalendarScreen: View {
     }
   }
 
+  private func presentAddTodoSheet() {
+    let selectedTodo = EditableTodo(owner: sessionStore.userId)
+
+    overlayManager.presentSheet(
+      editableTodo: selectedTodo,
+      onDismiss: {
+        guard selectedTodo.isDirty else { return }
+        Task {
+          await calendarVM.refresh(userId: sessionStore.userId)
+        }
+      }
+    ) {
+      TodoSheet(editableTodo: selectedTodo)
+    }
+  }
+
   private func updateCellHeight(containerHeight: CGFloat) {
     let weekCount = CGFloat(calendarVM.calendarDays.count / 7)
     let gridSpacing = CalendarDesignSystem.Layout.gridSpacing * (weekCount - 1)
@@ -93,9 +109,10 @@ extension CalendarScreen {
     .task {
       await calendarVM.load(userId: sessionStore.userId)
     }
-    .onKeyPress(keyCode: 53) { // ESC key
-      overlayManager.pop()
-    }
+    .onKeyPress([
+      (.escape, overlayManager.pop),
+      (.newTodo, presentAddTodoSheet),
+    ])
   }
 
   private var backgroundGradient: some View {

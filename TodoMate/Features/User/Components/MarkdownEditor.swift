@@ -42,6 +42,7 @@ extension MarkdownEditor {
         displayView
       }
     }
+    .padding(.vertical, HomeDesignSystem.Padding.medium)
     .onAppear {
       editingContent = content
     }
@@ -58,7 +59,6 @@ extension MarkdownEditor {
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
-    .padding(.vertical, HomeDesignSystem.Padding.xSmall)
     .padding(.horizontal, HomeDesignSystem.Padding.medium)
     .onTapGesture {
       if isEditable {
@@ -95,12 +95,12 @@ extension MarkdownEditor {
         Button("취소") {
           cancelEditing()
         }
-        .buttonStyle(GlassmorphismButtonStyle(isSecondary: true))
+        .buttonStyle(GlassmorphismButtonStyle(disabled: true))
 
         Button("저장") {
           saveChanges()
         }
-        .buttonStyle(GlassmorphismButtonStyle(isSecondary: false))
+        .buttonStyle(GlassmorphismButtonStyle(disabled: false))
         .keyboardShortcut(.return, modifiers: .command)
       }
       .padding(.horizontal, HomeDesignSystem.Padding.xSmall)

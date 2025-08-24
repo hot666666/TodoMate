@@ -28,6 +28,12 @@ final class MemoStore {
   // MARK: - Public Methods
 
   @MainActor
+  func refresh(for userIds: [String]) async {
+    await load(for: userIds, useCache: true)
+    await load(for: userIds, useCache: false)
+  }
+
+  @MainActor
   func load(for userIds: [String], useCache: Bool = true) async {
     do {
       memos = try await readGroupMemoUseCase.run(for: userIds, useCache: useCache)

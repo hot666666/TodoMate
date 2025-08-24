@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TodoContentTextField: View {
   @Binding var content: String
-  @FocusState.Binding var focusedField: SheetField?
+  @FocusState.Binding var focusedField: TodoSheet.SheetField?
   let onSubmit: () -> Void
 
   var body: some View {

@@ -11,9 +11,13 @@ struct TodoStatusPicker: View {
   let selectedStatus: TodoStatus
   let onStatusSelected: (TodoStatus) -> Void
 
+  private var statuses: [TodoStatus] {
+    TodoStatus.allCases.filter { $0 != selectedStatus }
+  }
+
   var body: some View {
     VStack(spacing: TodoSheetDesignSystem.Spacing.small) {
-      ForEach(TodoStatus.allCases, id: \.self) { status in
+      ForEach(statuses, id: \.self) { status in
         TodoStatusChip(status: status, action: {
           onStatusSelected(status)
         })

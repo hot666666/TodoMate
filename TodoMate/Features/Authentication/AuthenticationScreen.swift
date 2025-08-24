@@ -49,6 +49,7 @@ extension AuthenticationScreen {
           .padding(.horizontal, 16)
           .padding(.vertical, 8)
         }
+        .buttonStyle(GlassmorphismButtonStyle(disabled: isLoading))
         .disabled(isLoading)
       }
     }

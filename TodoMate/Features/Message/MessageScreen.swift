@@ -42,10 +42,6 @@ struct MessageScreen: View {
         .disabled(state.isEditingMessage)
         .opacity(state.isEditingMessage ? 0.5 : 1.0)
     }
-    .task(id: sessionStore.userGroupIds) {
-      // MessageScreen은 MainView의 Inspector여서, MainView가 로드되면 로드
-      await perform(.refreshMessages)
-    }
   }
 }
 
