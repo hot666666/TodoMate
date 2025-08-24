@@ -48,7 +48,7 @@ enum TodoSheetDesignSystem {
       static let buttonPadding: CGFloat = 8
       static let popoverPadding: CGFloat = 12
       static let height: CGFloat = 100
-      static let width: CGFloat = 90
+      static let width: CGFloat = 80
     }
 
     enum TextField {

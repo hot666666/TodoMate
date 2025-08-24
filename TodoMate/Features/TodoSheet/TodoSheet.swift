@@ -39,6 +39,12 @@ struct TodoSheet: View {
     case .submitAndDismiss:
       guard isEditable else { return }
 
+      // popover가 열려있다면 먼저 popover를 닫고, 없다면 submit 수행
+      if overlayManager.overlays.last?.type == .popover {
+        overlayManager.pop()
+        return
+      }
+
       if editableTodo.isDirty {
         let updatedTodo = Todo.from(editableTodo)
         try? container.updateTodoUseCase.run(for: sessionStore.userId, updatedTodo)
@@ -46,7 +52,12 @@ struct TodoSheet: View {
       overlayManager.pop()
 
     case .dismissWithConfirmation:
-      overlayManager.popWithConfirmation()
+      // popover가 열려있다면 먼저 popover를 닫고, 없다면 confirmation 수행
+      if overlayManager.overlays.last?.type == .popover {
+        overlayManager.pop()
+      } else {
+        overlayManager.popWithConfirmation()
+      }
     }
   }
 }
