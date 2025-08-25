@@ -53,6 +53,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
     NSApplication.shared.terminate(nil)
   }
 
+  func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {
+    /// 즉시 종료 허가
+    .terminateNow
+  }
+
   func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
     true
   }
