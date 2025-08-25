@@ -23,17 +23,6 @@ struct MessageScreen: View {
 
   @State private var state: MessageScreenState = .init()
 
-  enum Action {
-    case refreshMessages
-  }
-
-  private func perform(_ action: Action) async {
-    switch action {
-    case .refreshMessages:
-      await messageStore.refresh(groupId: sessionStore.userGroupId)
-    }
-  }
-
   var body: some View {
     VStack(spacing: 0) {
       MessageListSection(messageScreenState: state)

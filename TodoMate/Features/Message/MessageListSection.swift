@@ -54,22 +54,30 @@ struct MessageListSection: View {
 extension MessageListSection {
   var body: some View {
     ScrollViewReader { proxy in
-      List {
-        ForEach(messageStore.messages) { message in
-          if let mid = messageScreenState.selectedMessage?.id, mid == message.id {
-            editingMessageView(for: message)
-          } else {
-            displayMessageView(for: message)
+      ScrollView {
+        LazyVStack(alignment: .leading, spacing: 8) {
+          ForEach(messageStore.messages) { message in
+            if let mid = messageScreenState.selectedMessage?.id, mid == message.id {
+              editingMessageView(for: message)
+            } else {
+              displayMessageView(for: message)
+            }
           }
+          .padding(.horizontal, MessageDesignSystem.Component.MessageInput.containerPadding)
+
+          scrollAnchor
         }
-        scrollAnchor
       }
-      .onChange(of: messageStore.messages.count) { _, _ in
-        withAnimation(.easeInOut(duration: 0.3)) {
+      .onAppear {
+        DispatchQueue.main.async {
           proxy.scrollTo("bottom", anchor: .bottom)
         }
       }
-      .simpleListModifier()
+      .onChange(of: messageStore.messages.count) { _, _ in
+        withAnimation {
+          proxy.scrollTo("bottom", anchor: .bottom)
+        }
+      }
     }
   }
 
@@ -151,7 +159,7 @@ extension MessageListSection {
 
   private var scrollAnchor: some View {
     Color.clear
-      .frame(height: 1)
+      .frame(height: 30)
       .id("bottom")
   }
 }
