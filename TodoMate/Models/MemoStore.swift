@@ -36,7 +36,13 @@ final class MemoStore {
   @MainActor
   func load(for userIds: [String], useCache: Bool = true) async {
     do {
-      memos = try await readGroupMemoUseCase.run(for: userIds, useCache: useCache)
+      let fetchedMemos = try await readGroupMemoUseCase.run(for: userIds, useCache: useCache)
+
+      for (userId, memo) in fetchedMemos {
+        if let memo {
+          memos[userId] = memo
+        }
+      }
     } catch {
       print("[MemoVM] - Failed to load memos for users \(userIds): \(error)")
     }

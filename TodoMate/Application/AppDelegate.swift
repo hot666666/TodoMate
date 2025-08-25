@@ -48,9 +48,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
     }
   }
 
-  func windowWillClose(_: Notification) {
-    /// x 버튼 누르면 앱 종료
-    NSApplication.shared.terminate(nil)
+  func windowWillClose(_ notification: Notification) {
+    /// x 버튼 누르면: 최소화 → 종료
+    if let window = notification.object as? NSWindow {
+      // 1. 먼저 최소화
+      window.miniaturize(nil)
+      // 2. 종료
+      NSApplication.shared.terminate(nil)
+    }
   }
 
   func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {

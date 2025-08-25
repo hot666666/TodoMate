@@ -49,11 +49,15 @@ extension MessageInputSection {
         .fixedSize(horizontal: false, vertical: true)
         .padding()
         .onKeyPress(.return, phases: .down) { key in
-          if key.modifiers.contains(.command) {
+          if key.modifiers.contains(.shift) {
+            // Shift+Enter: 개행 (기본 동작 유지)
+            return .ignored
+          } else {
+            // Enter: 제출 동작
             perform(.sendMessage)
-            return .handled
+            inputText = "" // 제출 후 텍스트 초기화
+            return .handled // 기본 개행 방지 시도
           }
-          return .ignored
         }
 
       messageInputButtons
