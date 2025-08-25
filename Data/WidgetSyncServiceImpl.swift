@@ -21,7 +21,8 @@ final class SwiftDataWidgetSyncService: WidgetSyncService {
   }
 
   func sync(with todos: [Todo]) async {
-    updateWidgetTodos(with: todos)
+    let inProgressTodos = todos.filter { $0.status == .inProgress }
+    updateWidgetTodos(with: inProgressTodos)
     WidgetCenter.shared.reloadAllTimelines()
     print("[WidgetSyncUseCase] - Synced \(todos.count) todos")
   }
