@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    # macOS 버전 지정(latest로 해당 15버전이 지정안됨, Xcode도 지정 필요)
+    # macOS 버전 지정
     runs-on: macos-26
 
     steps:
@@ -71,8 +71,8 @@ jobs:
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
           cp $WIDGET_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      - name: Set Up Xcode 16.2
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+      - name: Set Up Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.app
 
       - name: Build App
         run: |
