@@ -38,4 +38,5 @@ struct MessageScreen: View {
   MessageScreen()
     .environment(SessionStore.preview)
     .environment(MessageStore.preview)
+    .environment(OverlayManager())
 }

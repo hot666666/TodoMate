@@ -103,7 +103,6 @@ extension MainView {
       }
       .inspector(isPresented: $isMessageScreenPresented) {
         MessageScreen()
-          .inspectorColumnWidth(min: 300, ideal: 500)
       }
       .onChange(of: isMessageScreenPresented) { _, _ in
         messageStore.markAllAsRead()
@@ -152,7 +151,10 @@ extension MainView {
 
   private var reloadButton: some View {
     Button("새로고침", systemImage: "arrow.clockwise") {
-      Task { await perform(.triggerRefresh) }
+      Task {
+        await perform(.triggerRefresh)
+        await perform(.syncWidget)
+      }
     }
     .keyboardShortcut("r", modifiers: .command)
   }

@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-deploy:
     # macOS 버전 지정(latest로 해당 15버전이 지정안됨, Xcode도 지정 필요)
-    runs-on: macos-15
+    runs-on: macos-26
 
     steps:
       - name: Checkout repository
