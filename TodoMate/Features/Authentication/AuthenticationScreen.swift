@@ -30,7 +30,7 @@ struct AuthenticationScreen: View {
 extension AuthenticationScreen {
   var body: some View {
     VStack {
-      VStack {
+      VStack(spacing: 32) {
         Image("AppImage")
           .resizable()
           .aspectRatio(contentMode: .fit)
