@@ -27,6 +27,7 @@ struct TodoMateApp: App {
   var body: some Scene {
     WindowGroup {
       RootView()
+        .frame(minWidth: 720)
         .environment(\.colorScheme, .dark)
         .environment(container)
         .background(Color.customDarkBg)
