@@ -101,6 +101,7 @@ extension MainView {
       } detail: {
         selectedView
       }
+      .inspectorColumnWidth(min: 180, ideal: 240)
       .inspector(isPresented: $isMessageScreenPresented) {
         MessageScreen()
       }
