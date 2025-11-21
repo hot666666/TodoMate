@@ -14,20 +14,16 @@ struct TodoListSection: View {
   let todos: [Todo]
   let isMine: Bool
 
-  func presentTodoAddSheet() {
-    let selectedTodo = EditableTodo(owner: sessionStore.userId)
+  private var sheetPresenter: TodoSheetPresenter {
+    TodoSheetPresenter(overlayManager: overlayManager)
+  }
 
-    overlayManager.presentSheet(editableTodo: selectedTodo) {
-      TodoSheet(editableTodo: selectedTodo)
-    }
+  private func presentTodoAddSheet() {
+    sheetPresenter.presentAddSheet(for: sessionStore.userId)
   }
 
   private func presentTodoEditSheet(for todo: Todo) {
-    let selectedTodo = EditableTodo(from: todo)
-
-    overlayManager.presentSheet(editableTodo: selectedTodo) {
-      TodoSheet(editableTodo: selectedTodo)
-    }
+    sheetPresenter.presentEditSheet(for: todo)
   }
 
   private func onUpdateTodo(_ todo: Todo) {
@@ -65,9 +61,7 @@ extension TodoListSection {
         .safeAreaInset(edge: .top, spacing: 0) {
           Color.clear.frame(height: HomeDesignSystem.Layout.safeAreaInset)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(.clear)
+        .cleanListStyle()
         .clipShape(RoundedRectangle(cornerRadius: HomeDesignSystem.CornerRadius.large))
       }
     }

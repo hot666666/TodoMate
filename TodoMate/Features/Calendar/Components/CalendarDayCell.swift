@@ -100,10 +100,13 @@ struct CalendarDayCell: View {
         CalendarDayTodoItem(todo: todo, sourceDate: calendarDay.date)
           .frame(height: 16)
           .onTapGesture { onTapTodo(todo) }
-          .contextMenu {
-            Button("복제") { onCopyTodo(todo) }
-            DeleteContextMenuButton(todo: todo, onDelete: onDeleteTodo)
-          }
+          .todoContextMenu(
+            for: todo,
+            showCopy: true,
+            showDelete: true,
+            onCopy: onCopyTodo,
+            onDelete: onDeleteTodo
+          )
       }
 
       if todos.count > maxTodosForHeight {

@@ -143,3 +143,93 @@ extension View {
     modifier(ScrollToBottomModifier(anchor: anchor, itemCount: itemCount))
   }
 }
+
+// MARK: - Hoverable Modifier
+
+struct HoverableModifier: ViewModifier {
+  let backgroundColor: Color
+  let cornerRadius: CGFloat
+  let animationDuration: Double
+
+  @State private var isHovering = false
+
+  func body(content: Content) -> some View {
+    content
+      .onHover { hovering in
+        withAnimation(.easeInOut(duration: animationDuration)) {
+          isHovering = hovering
+        }
+      }
+      .background(
+        RoundedRectangle(cornerRadius: cornerRadius)
+          .fill(isHovering ? backgroundColor : .clear)
+      )
+  }
+}
+
+extension View {
+  /// 호버 시 배경색이 변경되는 애니메이션을 추가합니다.
+  /// - Parameters:
+  ///   - backgroundColor: 호버 시 표시할 배경색 (기본: .secondary.opacity(0.1))
+  ///   - cornerRadius: 모서리 반경 (기본: 8)
+  ///   - animationDuration: 애니메이션 지속 시간 (기본: 0.2)
+  func hoverable(
+    backgroundColor: Color = .secondary.opacity(0.1),
+    cornerRadius: CGFloat = 8,
+    animationDuration: Double = 0.2
+  ) -> some View {
+    modifier(HoverableModifier(
+      backgroundColor: backgroundColor,
+      cornerRadius: cornerRadius,
+      animationDuration: animationDuration
+    ))
+  }
+}
+
+// MARK: - Card Background Modifier
+
+struct CardBackgroundModifier: ViewModifier {
+  let backgroundColor: Color
+  let cornerRadius: CGFloat
+  let padding: EdgeInsets
+
+  func body(content: Content) -> some View {
+    content
+      .padding(padding)
+      .background(
+        RoundedRectangle(cornerRadius: cornerRadius)
+          .fill(backgroundColor)
+      )
+  }
+}
+
+extension View {
+  /// 카드 스타일 배경을 추가합니다.
+  /// - Parameters:
+  ///   - backgroundColor: 배경색 (기본: .clear)
+  ///   - cornerRadius: 모서리 반경 (기본: 8)
+  ///   - padding: 내부 여백 (기본: 모든 방향 16)
+  func cardBackground(
+    backgroundColor: Color = .clear,
+    cornerRadius: CGFloat = 8,
+    padding: EdgeInsets = EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16)
+  ) -> some View {
+    modifier(CardBackgroundModifier(
+      backgroundColor: backgroundColor,
+      cornerRadius: cornerRadius,
+      padding: padding
+    ))
+  }
+}
+
+// MARK: - Clean List Style
+
+extension View {
+  /// 깔끔한 리스트 스타일을 적용합니다 (배경 투명, 구분선 없음).
+  func cleanListStyle() -> some View {
+    self
+      .listStyle(.plain)
+      .scrollContentBackground(.hidden)
+      .background(.clear)
+  }
+}

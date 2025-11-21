@@ -15,7 +15,6 @@ struct TodoItem: View {
   let showDragHandle: Bool
 
   @State private var todoStatus: TodoStatus
-  @State private var isHovering: Bool = false
 
   init(
     todo: Todo,
@@ -44,23 +43,14 @@ struct TodoItem: View {
       let updatedTodo = todo.withUpdatedStatus(newValue)
       onUpdate?(updatedTodo)
     }
-    .onHover { hovering in
-      withAnimation(.easeInOut(duration: 0.2)) {
-        isHovering = hovering
-      }
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 12)
-    .background(
-      RoundedRectangle(cornerRadius: 8)
-        .fill(isHovering ? Color.secondary.opacity(0.1) : Color.clear)
-    )
+    .cardBackground(padding: EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+    .hoverable()
   }
 
   private var dragHandleView: some View {
     Image(systemName: "line.3.horizontal")
       .foregroundStyle(.secondary)
-      .opacity(showDragHandle && isHovering ? HomeDesignSystem.Component.TodoList.dragHandleOpacity : 0)
+      .opacity(showDragHandle ? HomeDesignSystem.Component.TodoList.dragHandleOpacity : 0)
       .frame(width: HomeDesignSystem.Component.TodoList.dragHandleWidth)
   }
 

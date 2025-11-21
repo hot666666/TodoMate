@@ -14,6 +14,10 @@ struct CalendarScreen: View {
   @State private var calculatedCellHeight: CGFloat = 90
   @State var calendarVM: CalendarScreenVM
 
+  private var sheetPresenter: TodoSheetPresenter {
+    TodoSheetPresenter(overlayManager: overlayManager)
+  }
+
   private func addTodo(_ date: Date) {
     let newTodo = Todo(owner: sessionStore.userId, in: date)
     calendarVM.addTodo(newTodo, for: sessionStore.userId)
@@ -38,35 +42,15 @@ struct CalendarScreen: View {
   }
 
   private func presentTodoEditSheet(for todo: Todo) {
-    let selectedTodo = EditableTodo(from: todo)
-
-    overlayManager.presentSheet(
-      editableTodo: selectedTodo,
-      onDismiss: {
-        guard selectedTodo.isDirty else { return }
-        Task {
-          await calendarVM.refresh(userId: sessionStore.userId)
-        }
+    sheetPresenter.presentEditSheet(for: todo) {
+      Task {
+        await calendarVM.refresh(userId: sessionStore.userId)
       }
-    ) {
-      TodoSheet(editableTodo: selectedTodo)
     }
   }
 
   private func presentAddTodoSheet() {
-    let selectedTodo = EditableTodo(owner: sessionStore.userId)
-
-    overlayManager.presentSheet(
-      editableTodo: selectedTodo,
-      onDismiss: {
-        guard selectedTodo.isDirty else { return }
-        Task {
-          await calendarVM.refresh(userId: sessionStore.userId)
-        }
-      }
-    ) {
-      TodoSheet(editableTodo: selectedTodo)
-    }
+    sheetPresenter.presentAddSheet(for: sessionStore.userId)
   }
 
   private func updateCellHeight(containerHeight: CGFloat) {
