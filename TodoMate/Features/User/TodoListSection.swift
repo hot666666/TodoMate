@@ -44,7 +44,7 @@ extension TodoListSection {
   var body: some View {
     Group {
       if todos.isEmpty {
-        EmptyTodoListView()
+        EmptyStateView.emptyTodoList
       } else {
         List {
           ForEach(todos) { todo in

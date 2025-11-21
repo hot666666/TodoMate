@@ -81,8 +81,8 @@ extension CalendarScreen {
         .frame(maxHeight: .infinity, alignment: .top)
 
         closeButtonOverlay
-        loadingView
       }
+      .loadingOverlay(isLoading: calendarVM.isLoading)
       .onAppear {
         updateCellHeight(containerHeight: geometry.size.height)
       }
@@ -152,13 +152,6 @@ extension CalendarScreen {
         .fill(Color.white.opacity(0.05))
     )
     .padding(.bottom, CalendarDesignSystem.Layout.gridContainerBottomPadding)
-  }
-
-  @ViewBuilder
-  private var loadingView: some View {
-    if calendarVM.isLoading {
-      ProgressView()
-    }
   }
 }
 

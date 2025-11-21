@@ -233,3 +233,61 @@ extension View {
       .background(.clear)
   }
 }
+
+// MARK: - Loading Overlay Modifier
+
+struct LoadingOverlayModifier: ViewModifier {
+  let isLoading: Bool
+
+  func body(content: Content) -> some View {
+    ZStack {
+      content
+
+      if isLoading {
+        ProgressView()
+          .controlSize(.large)
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+      }
+    }
+  }
+}
+
+extension View {
+  /// 로딩 오버레이를 추가합니다.
+  /// - Parameter isLoading: 로딩 상태
+  func loadingOverlay(isLoading: Bool) -> some View {
+    modifier(LoadingOverlayModifier(isLoading: isLoading))
+  }
+}
+
+// MARK: - Error Alert Modifier
+
+struct ErrorAlertModifier: ViewModifier {
+  @Binding var error: AppError?
+
+  func body(content: Content) -> some View {
+    content
+      .alert(
+        error?.title ?? "오류",
+        isPresented: .constant(error != nil),
+        actions: {
+          Button("확인") {
+            error = nil
+          }
+        },
+        message: {
+          if let error {
+            Text(error.message)
+          }
+        }
+      )
+  }
+}
+
+extension View {
+  /// 에러 알림을 표시합니다.
+  /// - Parameter error: 에러 바인딩
+  func errorAlert(error: Binding<AppError?>) -> some View {
+    modifier(ErrorAlertModifier(error: error))
+  }
+}
