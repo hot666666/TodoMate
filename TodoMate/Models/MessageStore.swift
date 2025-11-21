@@ -23,6 +23,8 @@ final class MessageStore {
 
   private(set) var messages: [GroupMessage] = []
   private(set) var hasUnreadMessages: Bool = false
+  private(set) var isLoading: Bool = false
+  private(set) var error: AppError?
 
   init(container: DIContainer) {
     createMessageUseCase = container.createMessageUseCase
@@ -82,13 +84,19 @@ final class MessageStore {
 
   @MainActor
   func load(groupId: String, useCache: Bool = true) async {
+    isLoading = true
+    error = nil
+
     do {
       messages = try await readMessagesUseCase.run(in: groupId, useCache: useCache)
       // 로드 후 읽지 않은 메시지 확인
       hasUnreadMessages = readTracker.hasUnreadMessages(in: messages)
     } catch {
       print("[MessageStore] - Failed to load messages for group \(groupId): \(error)")
+      self.error = AppError.from(error)
     }
+
+    isLoading = false
   }
 
   @MainActor

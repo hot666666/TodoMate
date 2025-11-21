@@ -110,3 +110,36 @@ extension View {
       .background(.clear)
   }
 }
+
+// MARK: - ScrollToBottom Modifier
+
+struct ScrollToBottomModifier: ViewModifier {
+  let anchor: String
+  let itemCount: Int
+
+  func body(content: Content) -> some View {
+    ScrollViewReader { proxy in
+      content
+        .onAppear {
+          DispatchQueue.main.async {
+            proxy.scrollTo(anchor, anchor: .bottom)
+          }
+        }
+        .onChange(of: itemCount) { _, _ in
+          withAnimation {
+            proxy.scrollTo(anchor, anchor: .bottom)
+          }
+        }
+    }
+  }
+}
+
+extension View {
+  /// 아이템 수가 변경될 때마다 자동으로 하단으로 스크롤합니다.
+  /// - Parameters:
+  ///   - anchor: 스크롤할 앵커 ID (기본값: "bottom")
+  ///   - itemCount: 관찰할 아이템 수
+  func scrollToBottomOnChange(anchor: String = "bottom", itemCount: Int) -> some View {
+    modifier(ScrollToBottomModifier(anchor: anchor, itemCount: itemCount))
+  }
+}

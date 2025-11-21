@@ -109,24 +109,20 @@ extension MainView {
         messageStore.markAllAsRead()
       }
       .toolbar {
-        ToolbarItemGroup(placement: .primaryAction) {
-          reloadButton
-          Spacer()
-          HStack(spacing: 8) {
-            addTodoButton
-            calendarButton
-            messageButton
-          }
-        }
+        MainToolbar(
+          hasUnreadMessages: hasUnreadMessages,
+          onRefresh: { Task { await handleRefresh() } },
+          onAddTodo: { Task { await perform(.presentAddTodoSheet) } },
+          onShowCalendar: { Task { await perform(.presentCalendarScreen) } },
+          onToggleMessage: { Task { await perform(.toggleMessageScreen) } }
+        )
       }
       .task(id: refreshTrigger.value) {
         await perform(.refreshSession)
       }
-      .background(sidebarButton)
+      .background(sidebarToggleButton)
       .disabled(overlayManager.isPresented)
-      .onAppear {
-        setupInitialSidebar()
-      }
+      .onAppear(perform: setupInitialSidebar)
     }
     #if os(macOS)
     .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
@@ -150,43 +146,17 @@ extension MainView {
     }
   }
 
-  private var reloadButton: some View {
-    Button("새로고침", systemImage: "arrow.clockwise") {
-      Task {
-        await perform(.triggerRefresh)
-        await perform(.syncWidget)
-      }
-    }
-    .keyboardShortcut("r", modifiers: .command)
-  }
-
-  private var addTodoButton: some View {
-    Button("새 할일", systemImage: "plus") {
-      Task { await perform(.presentAddTodoSheet) }
-    }
-    .keyboardShortcut("n", modifiers: .command)
-  }
-
-  private var calendarButton: some View {
-    Button("달력", systemImage: "calendar") {
-      Task { await perform(.presentCalendarScreen) }
-    }
-    .keyboardShortcut("a", modifiers: .command)
-  }
-
-  private var messageButton: some View {
-    Button("메시지", systemImage: hasUnreadMessages ? "bubble.right.fill" : "bubble.right") {
-      Task { await perform(.toggleMessageScreen) }
-    }
-    .keyboardShortcut("i", modifiers: .command)
-  }
-
-  private var sidebarButton: some View {
+  private var sidebarToggleButton: some View {
     Button("") {
       Task { await perform(.toggleSidebar) }
     }
     .keyboardShortcut("b", modifiers: .command)
     .hidden()
+  }
+
+  private func handleRefresh() async {
+    await perform(.triggerRefresh)
+    await perform(.syncWidget)
   }
 }
 

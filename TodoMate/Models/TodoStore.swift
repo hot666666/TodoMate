@@ -23,6 +23,8 @@ final class TodoStore {
   // MARK: - State
 
   private(set) var todos: [String: [Todo]] = [:]
+  private(set) var isLoading: Bool = false
+  private(set) var error: AppError?
   private var currentDate: Date = .now
 
   init(container: DIContainer) {
@@ -46,6 +48,8 @@ final class TodoStore {
 
   @MainActor
   func load(for userIds: [String], currentUserId: String, useCache: Bool = true) async {
+    isLoading = true
+    error = nil
     currentDate = .now
 
     do {
@@ -56,8 +60,11 @@ final class TodoStore {
       }
     } catch {
       print("[TodoStore] - Failed to load todos for users \(userIds): \(error)")
+      self.error = AppError.from(error)
       todos = [:]
     }
+
+    isLoading = false
   }
 
   @MainActor
@@ -83,8 +90,10 @@ final class TodoStore {
       updateUserTodos(for: todo.owner) { userTodos in
         userTodos.append(todo)
       }
+      error = nil
     } catch {
       print("[TodoStore] - Failed to add todo: \(error)")
+      self.error = AppError.from(error)
     }
   }
 
@@ -100,8 +109,10 @@ final class TodoStore {
 
       // Widget sync for the todo owner
       syncWidgetForUser(todo.owner)
+      error = nil
     } catch {
       print("[TodoStore] - Failed to update todo: \(error)")
+      self.error = AppError.from(error)
     }
   }
 
@@ -113,8 +124,10 @@ final class TodoStore {
         updateUserTodos(for: todo.owner) { userTodos in
           userTodos.removeAll { $0.id == todo.id }
         }
+        error = nil
       } catch {
         print("[TodoStore] - Failed to delete todo: \(error)")
+        self.error = AppError.from(error)
       }
     }
   }

@@ -53,32 +53,21 @@ struct MessageListSection: View {
 
 extension MessageListSection {
   var body: some View {
-    ScrollViewReader { proxy in
-      ScrollView {
-        LazyVStack(alignment: .leading, spacing: 8) {
-          ForEach(messageStore.messages) { message in
-            if let mid = messageScreenState.selectedMessage?.id, mid == message.id {
-              editingMessageView(for: message)
-            } else {
-              displayMessageView(for: message)
-            }
+    ScrollView {
+      LazyVStack(alignment: .leading, spacing: 8) {
+        ForEach(messageStore.messages) { message in
+          if let mid = messageScreenState.selectedMessage?.id, mid == message.id {
+            editingMessageView(for: message)
+          } else {
+            displayMessageView(for: message)
           }
-          .padding(.horizontal, MessageDesignSystem.Component.MessageInput.containerPadding)
+        }
+        .padding(.horizontal, MessageDesignSystem.Component.MessageInput.containerPadding)
 
-          scrollAnchor
-        }
-      }
-      .onAppear {
-        DispatchQueue.main.async {
-          proxy.scrollTo("bottom", anchor: .bottom)
-        }
-      }
-      .onChange(of: messageStore.messages.count) { _, _ in
-        withAnimation {
-          proxy.scrollTo("bottom", anchor: .bottom)
-        }
+        scrollAnchor
       }
     }
+    .scrollToBottomOnChange(itemCount: messageStore.messages.count)
   }
 
   private func editingMessageView(for message: GroupMessage) -> some View {
