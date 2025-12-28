@@ -27,48 +27,24 @@ final class SyncManager {
 
   func enableSync() async throws {
     guard canEnableSync else {
-      Log.warning(
-        "Cannot enable sync: user not authorized. User must sign in with a social account to enable sync.",
-        category: .sync
-      )
+      print("[SyncManager] Cannot enable sync: user not authorized")
       return
     }
-
-    do {
-      try await db.enableNetwork()
-      isSyncEnabled = true
-      Log.info("Network enabled", category: .sync)
-    } catch {
-      // Ensure sync flag reflects the actual network state on failure
-      isSyncEnabled = false
-      Log.warning("Failed to enable network: \(error)", category: .sync)
-      throw error
-    }
+    try await db.enableNetwork()
+    isSyncEnabled = true
+    print("[SyncManager] Network enabled")
   }
 
   func disableSync() async throws {
-    do {
-      try await db.disableNetwork()
-      isSyncEnabled = false
-      Log.info("Network disabled", category: .sync)
-    } catch {
-      // If disabling fails, keep sync flagged as enabled
-      isSyncEnabled = true
-      Log.warning("Failed to disable network: \(error)", category: .sync)
-      throw error
-    }
+    try await db.disableNetwork()
+    isSyncEnabled = false
+    print("[SyncManager] Network disabled")
   }
 
   /// 앱 시작 시 기본 오프라인 모드로 시작
   func initializeOfflineMode() async throws {
-    do {
-      try await db.disableNetwork()
-      isSyncEnabled = false
-      Log.info("Initialized in offline mode", category: .sync)
-    } catch {
-      // Initialization in offline mode failed; leave current sync state as-is
-      Log.warning("Failed to initialize offline mode: \(error)", category: .sync)
-      throw error
-    }
+    try await db.disableNetwork()
+    isSyncEnabled = false
+    print("[SyncManager] Initialized in offline mode")
   }
 }

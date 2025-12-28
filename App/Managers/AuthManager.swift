@@ -12,7 +12,7 @@ import FirebaseFirestore
 @Observable
 final class AuthManager {
   private var authHandle: AuthStateDidChangeListenerHandle?
-  private let db: Firestore
+  private let db = Firestore.firestore()
 
   private(set) var firebaseUser: FirebaseAuth.User?
   private(set) var currentUser: User?
@@ -20,15 +20,7 @@ final class AuthManager {
   var isAuthenticated: Bool { firebaseUser != nil }
   var isAnonymous: Bool { firebaseUser?.isAnonymous ?? true }
 
-  init(db: Firestore) {
-    self.db = db
-  }
-
-  deinit {
-    if let handle = authHandle {
-      Auth.auth().removeStateDidChangeListener(handle)
-    }
-  }
+  init() {}
 
   func startListening() {
     authHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
@@ -43,103 +35,43 @@ final class AuthManager {
     }
   }
 
-  /// 익명 로그인 (수동 호출)
+  /// 앱 시작 시 익명 로그인
   func signInAnonymously() async throws {
     let result = try await Auth.auth().signInAnonymously()
     let user = User(id: result.user.uid)
-
-    do {
-      try db.collection("users").document(result.user.uid).setData(from: user)
-      currentUser = user
-      Log.info("Anonymous sign in successful: \(result.user.uid)", category: .auth)
-    } catch {
-      // Firestore 사용자 문서 생성 실패 시, 생성된 익명 계정을 정리하여 상태 불일치를 방지
-      Log.error(
-        "Failed to create user document, deleting anonymous user: \(error)", category: .auth,
-      )
-      do {
-        try await result.user.delete()
-      } catch {
-        Log.error(
-          "Failed to delete anonymous user after Firestore error: \(error)", category: .auth,
-        )
-      }
-      throw error
-    }
+    try db.collection("users").document(result.user.uid).setData(from: user)
+    currentUser = user
   }
 
   /// 소셜 계정 연동 (익명 → 정식 유저)
-  /// 주의: authorized는 자동으로 true가 되지 않음.
   func linkWithCredential(_ credential: AuthCredential) async throws {
     guard let firebaseUser else { return }
+    let result = try await firebaseUser.link(with: credential)
 
-    do {
-      let result = try await firebaseUser.link(with: credential)
+    // User.authorized = true 로 업데이트
+    try await db.collection("users").document(result.user.uid).updateData([
+      "authorized": true,
+      "email": result.user.email ?? "",
+      "displayName": result.user.displayName ?? "User",
+      "updatedAt": FieldValue.serverTimestamp(),
+    ])
 
-      do {
-        try await db.collection("users").document(result.user.uid).updateData([
-          "email": result.user.email ?? "",
-          "displayName": result.user.displayName ?? "User",
-          "updatedAt": FieldValue.serverTimestamp(),
-        ])
-        await fetchUser(uid: result.user.uid)
-        Log.info("Linked credential for user: \(result.user.uid)", category: .auth)
-      } catch {
-        // Firestore 업데이트 실패 시, 연동을 롤백 시도
-        Log.error("Firestore update failed, unlinking provider: \(error)", category: .auth)
-        do {
-          try await result.user.unlink(fromProvider: credential.provider)
-        } catch {
-          Log.error("Failed to unlink provider after Firestore error: \(error)", category: .auth)
-        }
-        throw error
-      }
-    } catch {
-      Log.error("linkWithCredential error: \(error)", category: .auth)
-      throw error
-    }
+    await fetchUser(uid: result.user.uid)
   }
 
-  /// 로그아웃 (Firebase Auth 로그아웃 + Firestore 로컬 캐시 삭제)
+  /// 로그아웃 (로컬 캐시만 삭제)
   func signOut() async throws {
-    // Firebase Auth 로그아웃
     try Auth.auth().signOut()
-
-    // Firestore 네트워크를 비활성화한 뒤, 로컬 퍼시스턴스를 정리
-    do {
-      try await db.disableNetwork()
-      try await db.clearPersistence()
-      Log.info("User signed out and Firestore persistence cleared", category: .auth)
-    } catch {
-      // 활성 리스너/대기 중인 작업 등으로 인해 실패할 수 있으므로, 에러만 로깅하고 로그아웃 자체는 유지
-      Log.error("Failed to clear Firestore persistence on sign out: \(error)", category: .auth)
-    }
-
+    try await Firestore.firestore().clearPersistence()
     currentUser = nil
   }
 
   private func fetchUser(uid: String) async {
     do {
       let doc = try await db.collection("users").document(uid).getDocument()
-
-      guard doc.exists else {
-        Log.warning("User document not found for uid=\(uid)", category: .auth)
-        currentUser = nil
-        return
-      }
-
       currentUser = try doc.data(as: User.self)
-    } catch let decodingError as DecodingError {
-      Log.error("fetchUser decoding error for uid=\(uid): \(decodingError)", category: .auth)
-      currentUser = nil
-    } catch let nsError as NSError {
-      Log.error(
-        "fetchUser Firestore error for uid=\(uid): domain=\(nsError.domain), code=\(nsError.code)",
-        category: .auth,
-      )
-      currentUser = nil
     } catch {
-      Log.error("fetchUser unexpected error for uid=\(uid): \(error)", category: .auth)
+      print("[AuthManager] fetchUser error: \(error)")
       currentUser = nil
     }
   }

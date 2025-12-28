@@ -157,4 +157,4 @@ FirestoreQuery: SwiftUI에서 @FirestoreQuery 사용하기 (Medium 공식 블로
 
 Firebase와 Swift Async/Await 활용법
 
-이 영상은 기존 콜백 기반의 Firebase 코드를 최신 Swift의 async/await 및 2025년 개발 트렌드인 AsyncStream을 활용하는 방식으로 변환하는 과정을 실무적으로 다룬다.
+이 영상은 기존 콜백 기반의 Firebase 코드를 최신 Swift의 async/await 방식으로 변환하는 과정을 실무적

@@ -14,12 +14,17 @@ struct TodoMateApp: App {
 
   var body: some Scene {
     WindowGroup {
-      Text("Hello")
-        .background(.ultraThickMaterial)
-        .environment(dependencies)
-        .task {
-          dependencies.authManager.startListening()
+      Group {
+        if let dependencies = appDelegate.dependencies {
+          Text("Hello")
+            .background(.ultraThickMaterial)
+            .environment(dependencies)
+            .environment(dependencies.authManager)
+            .environment(dependencies.syncManager)
+        } else {
+          ProgressView("Loading...")
         }
+      }
     }
     #if os(macOS)
     .windowToolbarStyle(.unifiedCompact)
