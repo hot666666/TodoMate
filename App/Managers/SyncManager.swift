@@ -33,21 +33,42 @@ final class SyncManager {
       )
       return
     }
-    isSyncEnabled = true
-    try await db.enableNetwork()
-    Log.info("Network enabled", category: .sync)
+
+    do {
+      try await db.enableNetwork()
+      isSyncEnabled = true
+      Log.info("Network enabled", category: .sync)
+    } catch {
+      // Ensure sync flag reflects the actual network state on failure
+      isSyncEnabled = false
+      Log.warning("Failed to enable network: \(error)", category: .sync)
+      throw error
+    }
   }
 
   func disableSync() async throws {
-    isSyncEnabled = false
-    try await db.disableNetwork()
-    Log.info("Network disabled", category: .sync)
+    do {
+      try await db.disableNetwork()
+      isSyncEnabled = false
+      Log.info("Network disabled", category: .sync)
+    } catch {
+      // If disabling fails, keep sync flagged as enabled
+      isSyncEnabled = true
+      Log.warning("Failed to disable network: \(error)", category: .sync)
+      throw error
+    }
   }
 
   /// 앱 시작 시 기본 오프라인 모드로 시작
   func initializeOfflineMode() async throws {
-    isSyncEnabled = false
-    try await db.disableNetwork()
-    Log.info("Initialized in offline mode", category: .sync)
+    do {
+      try await db.disableNetwork()
+      isSyncEnabled = false
+      Log.info("Initialized in offline mode", category: .sync)
+    } catch {
+      // Initialization in offline mode failed; leave current sync state as-is
+      Log.warning("Failed to initialize offline mode: \(error)", category: .sync)
+      throw error
+    }
   }
 }
