@@ -51,3 +51,21 @@ git checkout -b feat/<feature-name>
   git commit -m "feat: <description>"
   ```
 - Notify user with "Senior-Level PR Description" as defined in `Agents.md`.
+
+## 6. Push & Create PR
+
+```bash
+# Push to remote
+git push -u origin HEAD
+```
+// turbo
+
+- Create Pull Request via GitHub CLI:
+  ```bash
+  # -w flag opens browser for PR creation
+  gh pr create -w
+  ```
+  또는 수동으로 GitHub 웹에서 PR 생성.
+
+> [!TIP]
+> PR 제목 형식: `[Feat] <간결한 설명>` (예: `[Feat] Offline-First Sync Infrastructure`)
