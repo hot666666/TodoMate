@@ -15,6 +15,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
   var dependencies: AppDependencies?
 
   func applicationWillFinishLaunching(_: Notification) {
+    // Firebase 초기화 (SwiftUI body 평가 전에 완료되어야 함!)
+    FirebaseApp.configure()
+
+    // AppDependencies 생성 (Firebase 초기화 후)
+    dependencies = AppDependencies()
+
+    // Auth 리스너 시작
+    dependencies?.authManager.startListening()
+
     /// 새 윈도우 생성 메뉴 삭제
     if let mainMenu = NSApplication.shared.mainMenu {
       for item in mainMenu.items {
@@ -31,15 +40,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
   }
 
   func applicationDidFinishLaunching(_: Notification) {
-    // Firebase 초기화 (가장 먼저!)
-    FirebaseApp.configure()
-
-    // AppDependencies 생성 (Firebase 초기화 후)
-    dependencies = AppDependencies()
-
-    // Auth 리스너 시작
-    dependencies?.authManager.startListening()
-
     #if !DEBUG
       /// Sparkle Controller 설정
       let updaterController = SPUStandardUpdaterController(
