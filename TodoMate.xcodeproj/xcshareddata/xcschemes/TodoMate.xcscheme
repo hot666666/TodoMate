@@ -34,6 +34,30 @@
             default = "YES">
          </TestPlanReference>
       </TestPlans>
+      <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "451500FB2F011EE0007FF547"
+               BuildableName = "TodoMateUITests.xctest"
+               BlueprintName = "TodoMateUITests"
+               ReferencedContainer = "container:TodoMate.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4515010A2F011F08007FF547"
+               BuildableName = "TodoMateTests.xctest"
+               BlueprintName = "TodoMateTests"
+               ReferencedContainer = "container:TodoMate.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
