@@ -27,7 +27,10 @@ final class SyncManager {
 
   func enableSync() async throws {
     guard canEnableSync else {
-      Log.warning("Cannot enable sync: user not authorized", category: .sync)
+      Log.warning(
+        "Cannot enable sync: user not authorized. User must sign in with a social account to enable sync.",
+        category: .sync
+      )
       return
     }
     isSyncEnabled = true
