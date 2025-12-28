@@ -96,10 +96,20 @@ final class AuthManager {
 
   /// 로그아웃 (Firebase Auth 로그아웃 + Firestore 로컬 캐시 삭제)
   func signOut() async throws {
+    // Firebase Auth 로그아웃
     try Auth.auth().signOut()
-    try await db.clearPersistence()
+
+    // Firestore 네트워크를 비활성화한 뒤, 로컬 퍼시스턴스를 정리
+    do {
+      try await db.disableNetwork()
+      try await db.clearPersistence()
+      Log.info("User signed out and Firestore persistence cleared", category: .auth)
+    } catch {
+      // 활성 리스너/대기 중인 작업 등으로 인해 실패할 수 있으므로, 에러만 로깅하고 로그아웃 자체는 유지
+      Log.error("Failed to clear Firestore persistence on sign out: \(error)", category: .auth)
+    }
+
     currentUser = nil
-    Log.info("User signed out and persistence cleared", category: .auth)
   }
 
   private func fetchUser(uid: String) async {
