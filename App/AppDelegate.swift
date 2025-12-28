@@ -5,12 +5,14 @@
 //  Created by hs on 6/27/25.
 //
 
+import FirebaseCore
 import Sparkle
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
   var syncWidgetData: (() async -> Void)?
+  var dependencies: AppDependencies?
 
   func applicationWillFinishLaunching(_: Notification) {
     /// 새 윈도우 생성 메뉴 삭제
@@ -29,6 +31,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
   }
 
   func applicationDidFinishLaunching(_: Notification) {
+    // Firebase 초기화 (가장 먼저!)
+    FirebaseApp.configure()
+
+    // AppDependencies 생성 (Firebase 초기화 후)
+    dependencies = AppDependencies()
+
+    // Auth 리스너 시작
+    dependencies?.authManager.startListening()
+
     #if !DEBUG
       /// Sparkle Controller 설정
       let updaterController = SPUStandardUpdaterController(
