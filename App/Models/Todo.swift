@@ -40,7 +40,7 @@ struct Todo: Identifiable, Codable, Hashable {
 
   /// owner 검증 - 해당 userId가 이 Todo의 소유자인지 확인
   func isOwned(by userId: String?) -> Bool {
-    guard let userId else { return false }
+    guard let userId, !userId.isEmpty else { return false }
     return owner == userId
   }
 }
