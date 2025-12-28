@@ -5,25 +5,14 @@
 //  Created by hs on 6/27/25.
 //
 
-import FirebaseCore
 import Sparkle
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
   var syncWidgetData: (() async -> Void)?
-  var dependencies: AppDependencies?
 
   func applicationWillFinishLaunching(_: Notification) {
-    // Firebase 초기화 (SwiftUI body 평가 전에 완료되어야 함!)
-    FirebaseApp.configure()
-
-    // AppDependencies 생성 (Firebase 초기화 후)
-    dependencies = AppDependencies()
-
-    // Auth 리스너 시작
-    dependencies?.authManager.startListening()
-
     /// 새 윈도우 생성 메뉴 삭제
     if let mainMenu = NSApplication.shared.mainMenu {
       for item in mainMenu.items {

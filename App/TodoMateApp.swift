@@ -10,20 +10,19 @@ import SwiftUI
 @main
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+  @State private var dependencies = AppDependencies()
 
   var body: some Scene {
     WindowGroup {
-      Group {
-        if let dependencies = appDelegate.dependencies {
-          Text("Hello")
-            .background(.ultraThickMaterial)
-            .environment(dependencies)
-            .environment(dependencies.authManager)
-            .environment(dependencies.syncManager)
-        } else {
-          ProgressView("Loading...")
+      Text("Hello")
+        .accessibilityIdentifier("메인_콘텐츠")
+        .background(.ultraThickMaterial)
+        .environment(dependencies)
+        .environment(dependencies.authManager)
+        .environment(dependencies.syncManager)
+        .task {
+          dependencies.authManager.startListening()
         }
-      }
     }
     #if os(macOS)
     .windowToolbarStyle(.unifiedCompact)

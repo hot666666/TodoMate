@@ -38,6 +38,7 @@
 		451500652F0100A9007FF547 /* TodoMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		451500FC2F011EE0007FF547 /* TodoMateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoMateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4515010B2F011F08007FF547 /* TodoMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		451501292F013DF0007FF547 /* TestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TestPlan.xctestplan; sourceTree = "<group>"; };
 		452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = ".pre-commit-config.yaml"; sourceTree = "<group>"; };
 		452C64D32E21F56600A68B94 /* .swiftformat */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
 		452C64D42E21F56600A68B94 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
@@ -117,6 +118,7 @@
 		45E10B862C69B77300FC31CD = {
 			isa = PBXGroup;
 			children = (
+				451501292F013DF0007FF547 /* TestPlan.xctestplan */,
 				45DA6A6F2E238BAF007183E3 /* README.md */,
 				452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */,
 				452C64D32E21F56600A68B94 /* .swiftformat */,
@@ -184,10 +186,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 45E10B9E2C69B77400FC31CD /* Build configuration list for PBXNativeTarget "TodoMate" */;
 			buildPhases = (
-				451500512F00FF1A007FF547 /* ShellScript */,
 				45E10B8B2C69B77300FC31CD /* Sources */,
 				45E10B8C2C69B77300FC31CD /* Frameworks */,
 				45E10B8D2C69B77300FC31CD /* Resources */,
+				451500512F00FF1A007FF547 /* ShellScript */,
 			);
 			buildRules = (
 			);

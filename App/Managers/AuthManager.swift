@@ -48,9 +48,8 @@ final class AuthManager {
     guard let firebaseUser else { return }
     let result = try await firebaseUser.link(with: credential)
 
-    // User.authorized = true 로 업데이트
+    // 이메일/이름만 업데이트 (authorized는 유지 - 명시적 Merge 버튼 필요)
     try await db.collection("users").document(result.user.uid).updateData([
-      "authorized": true,
       "email": result.user.email ?? "",
       "displayName": result.user.displayName ?? "User",
       "updatedAt": FieldValue.serverTimestamp(),
