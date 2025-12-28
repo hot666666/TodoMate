@@ -5,12 +5,18 @@
 //  Created by hs on 12/28/25.
 //
 
+import FirebaseCore
 import SwiftUI
 
 @main
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-  @State private var dependencies = AppDependencies()
+  @State private var dependencies: AppDependencies
+
+  init() {
+    FirebaseApp.configure()
+    _dependencies = State(initialValue: AppDependencies())
+  }
 
   var body: some Scene {
     WindowGroup {
