@@ -21,12 +21,11 @@ final class AppDependencies {
     {
       FirebaseApp.configure(options: options)
     } else {
-      // 번들에 plist가 없는 경우 (Preview 등)
-      print("[AppDependencies] GoogleService-Info.plist not found, Firebase not configured")
+      Log.warning("GoogleService-Info.plist not found, Firebase not configured", category: .general)
     }
 
     let db = Firestore.firestore()
-    let authManager = AuthManager()
+    let authManager = AuthManager(db: db)
     let syncManager = SyncManager(db: db, authManager: authManager)
 
     self.authManager = authManager
