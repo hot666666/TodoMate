@@ -17,8 +17,6 @@ struct TodoMateApp: App {
       Text("Hello")
         .background(.ultraThickMaterial)
         .environment(dependencies)
-        .environment(dependencies.authManager)
-        .environment(dependencies.syncManager)
         .task {
           dependencies.authManager.startListening()
         }
