@@ -24,6 +24,12 @@ final class AuthManager {
     self.db = db
   }
 
+  deinit {
+    if let handle = authHandle {
+      Auth.auth().removeStateDidChangeListener(handle)
+    }
+  }
+
   func startListening() {
     authHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
       Task { @MainActor in
