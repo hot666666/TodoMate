@@ -12,12 +12,18 @@ import FirebaseFirestore
 final class GroupManager {
   private let db: Firestore
   private let authManager: AuthManager
+  private let inviteCodeGenerator: InviteCodeGeneratorProtocol
 
   private(set) var currentGroup: Group?
 
-  init(db: Firestore, authManager: AuthManager) {
+  init(
+    db: Firestore,
+    authManager: AuthManager,
+    inviteCodeGenerator: InviteCodeGeneratorProtocol,
+  ) {
     self.db = db
     self.authManager = authManager
+    self.inviteCodeGenerator = inviteCodeGenerator
   }
 
   /// 그룹 생성 (Batch Write: Group 생성 + User.groupId 업데이트)
@@ -30,7 +36,7 @@ final class GroupManager {
     let groupRef = db.collection("groups").document()
     let userRef = db.collection("users").document(userId)
 
-    let inviteCode = generateInviteCode()
+    let inviteCode = inviteCodeGenerator.generate()
 
     let group = Group(
       id: groupRef.documentID,
@@ -79,10 +85,5 @@ final class GroupManager {
       Log.error("Failed to fetch group: \(error)", category: .sync)
       currentGroup = nil
     }
-  }
-
-  private func generateInviteCode() -> String {
-    let characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-    return String((0 ..< 6).map { _ in characters.randomElement()! })
   }
 }

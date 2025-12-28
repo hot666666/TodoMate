@@ -25,7 +25,10 @@ final class AppDependencies {
     let db = Firestore.firestore()
     let authManager = AuthManager(db: db)
     let syncManager = SyncManager(db: db, authManager: authManager)
-    let groupManager = GroupManager(db: db, authManager: authManager)
+    let inviteCodeGenerator = InviteCodeGenerator()
+    let groupManager = GroupManager(
+      db: db, authManager: authManager, inviteCodeGenerator: inviteCodeGenerator,
+    )
     let todoManager = TodoManager(db: db, authManager: authManager)
 
     self.authManager = authManager
