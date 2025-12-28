@@ -1,5 +1,5 @@
 ---
-description: description: Strict workflow: Implement -> Target Test -> Commit -> Rebase -> PR (Template Required)
+description: Strict workflow: Implement -> Target Test -> Commit -> Rebase -> PR (Template Required)
 ---
 
 # Strict Feature Implementation Workflow
