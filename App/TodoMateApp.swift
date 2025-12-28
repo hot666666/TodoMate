@@ -10,11 +10,16 @@ import SwiftUI
 @main
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+  @State private var dependencies = AppDependencies()
 
   var body: some Scene {
     WindowGroup {
       Text("Hello")
         .background(.ultraThickMaterial)
+        .environment(dependencies)
+        .task {
+          dependencies.authManager.startListening()
+        }
     }
     #if os(macOS)
     .windowToolbarStyle(.unifiedCompact)
