@@ -15,7 +15,6 @@ struct TodoMateApp: App {
   var body: some Scene {
     WindowGroup {
       Text("Hello")
-        .accessibilityIdentifier("메인_콘텐츠")
         .background(.ultraThickMaterial)
         .environment(dependencies)
         .environment(dependencies.authManager)
