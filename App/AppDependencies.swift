@@ -16,12 +16,8 @@ final class AppDependencies {
 
   init() {
     // Firebase 초기화 (Firestore 사용 전에 반드시 필요)
-    if let plistPath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
-       let options = FirebaseOptions(contentsOfFile: plistPath)
-    {
-      FirebaseApp.configure(options: options)
-    } else {
-      Log.warning("GoogleService-Info.plist not found, Firebase not configured", category: .general)
+    if FirebaseApp.app() == nil {
+      FirebaseApp.configure()
     }
 
     let db = Firestore.firestore()
