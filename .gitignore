@@ -30,6 +30,7 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+.swiftpm/
 
 # CocoaPods
 #
@@ -62,6 +63,7 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 
 # Firebase
+FirebaseConfig/
 GoogleService-Info.plist
 
 # Firebase emulator
@@ -71,8 +73,3 @@ Firestore/exported-data/*
 
 # Certificate & Profile
 private/
-
-# AI
-GEMINI.md
-CLAUDE.md
-.claude/
