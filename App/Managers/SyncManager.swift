@@ -27,24 +27,24 @@ final class SyncManager {
 
   func enableSync() async throws {
     guard canEnableSync else {
-      print("[SyncManager] Cannot enable sync: user not authorized")
+      Log.warning("Cannot enable sync: user not authorized", category: .sync)
       return
     }
-    try await db.enableNetwork()
     isSyncEnabled = true
-    print("[SyncManager] Network enabled")
+    try await db.enableNetwork()
+    Log.info("Network enabled", category: .sync)
   }
 
   func disableSync() async throws {
-    try await db.disableNetwork()
     isSyncEnabled = false
-    print("[SyncManager] Network disabled")
+    try await db.disableNetwork()
+    Log.info("Network disabled", category: .sync)
   }
 
   /// 앱 시작 시 기본 오프라인 모드로 시작
   func initializeOfflineMode() async throws {
-    try await db.disableNetwork()
     isSyncEnabled = false
-    print("[SyncManager] Initialized in offline mode")
+    try await db.disableNetwork()
+    Log.info("Initialized in offline mode", category: .sync)
   }
 }
