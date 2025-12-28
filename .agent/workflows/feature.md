@@ -1,71 +1,85 @@
 ---
-description: Standard workflow for implementing a new feature or fix.
+description: description: Strict workflow: Implement -> Target Test -> Commit -> Rebase -> PR (Template Required)
 ---
 
-# Feature Implementation Workflow
+# Strict Feature Implementation Workflow
 
-Use this workflow when starting a new task or feature request.
+Follow this cycle precisely. Do NOT skip testing or committing in small steps.
+
+## 1. Setup & Branching (Base: refactor)
+- **Base Branch**: Checks out from `refactor` (unless specified otherwise).
+- **Update Base**: Ensure base is up-to-date.
+  ```bash
+  git checkout refactor
+  git pull origin refactor
+  git checkout -b feat/<feature-name>
+  ```
+  // turbo
+
+## 2. Implementation Loop (Repeat for each logical unit)
+
+### A. Implement
+- Write code for a specific, small unit.
+- **Do not** implement the entire feature at once.
+
+### B. Targeted Verify (CRITICAL)
+- **Do NOT** run full tests (`just test`) initially.
+- Run tests **ONLY** for the code you modified.
+  ```bash
+  # Example
+  xcodebuild test -scheme TodoMate -destination 'platform=macOS' -only-testing:TodoMateTests/TodoManagerTests 2>&1 | xcbeautify
+  ```
+- If tests fail, **FIX** immediately.
+
+### C. Atomic Commit
+- Commit **only** what you verified.
+  ```bash
+  git add <specific-files>
+  git commit -m "feat(scope): detailed message"
+  ```
+- **Note**: If pre-commit hooks modify files, re-add and commit.
+
+## 3. Pre-PR Rebase (MANDATORY)
+- **Requirement**: You MUST perform an interactive rebase onto `refactor` before PR.
+- **Interaction**: Ask the user for permission/confirmation before running rebase.
+  ```bash
+  git fetch origin refactor
+  git rebase -i origin/refactor
+  ```
+
+## 4. Pull Request (Template Required)
+- **Documentation**: Update `walkthrough.md` first.
+- **PR Format**: Use the following Markdown template in the PR body.
+
+### PR Template
+
+```markdown
+## Summary
+(Brief description of the feature/fix)
+
+## Changes
+| 파일 | 역할 |
+|---|---|
+| `User.swift` | (Description) |
+| `Manager.swift` | (Description) |
+
+## Key Design Decisions
+1. (Decision 1)
+2. (Decision 2)
+
+## Verification
+- [ ] just build 성공
+- [ ] Unit Test passed
+```
+
+- **Command**:
+  ```bash
+  gh pr create --title "[Feat] <Title>" --body-file <path-to-body-file> --base refactor
+  ```
+  *(Tip: Write body to a temporary file first to ensure formatting)*
 
 > [!IMPORTANT]
-> **작업 시작 전 반드시 브랜치를 먼저 생성할 것!**
-> 코드 작성 전에 Step 1을 수행해야 함.
-
-## 1. Create Branch (MUST - 작업 전 필수)
-
-```bash
-# Replace <feature-name> with the task name (kebab-case)
-# 예: offline-first-sync, auth-manager, user-model
-git checkout -b feat/<feature-name>
-```
-// turbo
-
-## 2. Develop & Build
-
-- Implement changes.
-- Run build frequently:
-  ```bash
-  just build
-  ```
-
-## 3. Verify
-
-- Run tests:
-  ```bash
-  just test
-  ```
-
-## 4. Documentation
-
-- Create/Update `walkthrough.md`.
-- **Important**: Use the PR Title as the H2 header (e.g., `## [Feat] ...`).
-- Content:
-  - Context
-  - Key Changes
-  - Verification Results (Log snippets, Screenshots)
-
-## 5. Prepare for Review
-
-- Commit changes:
-  ```bash
-  git add .
-  git commit -m "feat: <description>"
-  ```
-- Notify user with "Senior-Level PR Description" as defined in `Agents.md`.
-
-## 6. Push & Create PR
-
-```bash
-# Push to remote
-git push -u origin HEAD
-```
-// turbo
-
-- Create Pull Request via GitHub CLI:
-  ```bash
-  # -w flag opens browser for PR creation
-  gh pr create -w
-  ```
-  또는 수동으로 GitHub 웹에서 PR 생성.
-
-> [!TIP]
-> PR 제목 형식: `[Feat] <간결한 설명>` (예: `[Feat] Offline-First Sync Infrastructure`)
+> **Rules**:
+> 1. **Base Branch**: Always target `refactor` unless instructed otherwise.
+> 2. **Feedback Loop**: Fix -> Test -> Commit. Do not batch everything.
+> 3. **Rebase**: Always rebase before PR to keep history clean.
