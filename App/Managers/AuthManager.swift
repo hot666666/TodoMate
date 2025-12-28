@@ -11,7 +11,7 @@ import FirebaseFirestore
 @MainActor
 @Observable
 final class AuthManager {
-  private var authHandle: AuthStateDidChangeListenerHandle?
+  private nonisolated(unsafe) var authHandle: AuthStateDidChangeListenerHandle?
   private let db: Firestore
 
   private(set) var firebaseUser: FirebaseAuth.User?
