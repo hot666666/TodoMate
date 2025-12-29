@@ -64,6 +64,8 @@ final class GroupManager {
     do {
       try await batch.commit()
       currentGroup = group
+      // Refresh local user state to sync the updated groupId
+      await authManager.refreshCurrentUser()
       Log.info("Group created: \(groupRef.documentID)", category: .sync)
     } catch {
       Log.error("Failed to create group: \(error)", category: .sync)

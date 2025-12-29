@@ -118,6 +118,15 @@ final class AuthManager {
     currentUser = nil
   }
 
+  /// Refresh current user data from Firestore
+  func refreshCurrentUser() async {
+    guard let uid = firebaseUser?.uid else {
+      currentUser = nil
+      return
+    }
+    await fetchUser(uid: uid)
+  }
+
   private func fetchUser(uid: String) async {
     do {
       let doc = try await db.collection("users").document(uid).getDocument()
