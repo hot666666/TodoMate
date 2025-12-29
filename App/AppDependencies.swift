@@ -5,7 +5,6 @@
 //  Created by agent on 12/28/25.
 //
 
-import FirebaseCore
 import FirebaseFirestore
 
 @MainActor
