@@ -52,7 +52,7 @@ cp .github/PR_TEMPLATE.md "$tmpfile"
 # Optional: open the file in your editor to fill it in
 # open -e "$tmpfile"
 
-# 3. Create PR using the body file(don't include $tmpfile in commit, it is just temperary file to be removed)
+# 3. Create PR using the body file(don't include $tmpfile in commit, it is just temporary file to be removed)
 gh pr create --base <BASE_BRANCH> --title "feat: description" --body-file "$tmpfile"
 
 # 4. Delete the temporary file
