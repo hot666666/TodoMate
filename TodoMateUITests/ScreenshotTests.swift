@@ -9,10 +9,12 @@ import XCTest
 
 final class ScreenshotTests: XCTestCase {
   let app = XCUIApplication()
+  private lazy var navigator = ScreenNavigator(app: app)
 
-  // MARK: - Path to stitch design files
+  // MARK: - Paths
 
   private let stitchBasePath = "/Users/hs/Programming/project/TodoMate/stitch"
+  private let screenshotsPath = "/Users/hs/Programming/project/TodoMate/screenshots"
 
   override func setUpWithError() throws {
     continueAfterFailure = false
@@ -20,6 +22,28 @@ final class ScreenshotTests: XCTestCase {
   }
 
   override func tearDownWithError() throws {}
+
+  // MARK: - Screenshot Save Helper
+
+  /// Saves a screenshot to the screenshots directory for PR review.
+  /// - Parameters:
+  ///   - screenshot: The screenshot to save
+  ///   - screenType: The screen type for filename
+  private func saveScreenshot(_ screenshot: XCUIScreenshot, for screenType: ScreenType) {
+    let savePath = URL(fileURLWithPath: screenshotsPath)
+      .appendingPathComponent(screenType.screenshotFilename)
+
+    do {
+      try FileManager.default.createDirectory(
+        atPath: screenshotsPath,
+        withIntermediateDirectories: true,
+      )
+      try screenshot.pngRepresentation.write(to: savePath)
+      print("✅ Screenshot saved: \(savePath.path)")
+    } catch {
+      print("⚠️ Failed to save screenshot: \(error)")
+    }
+  }
 
   // MARK: - Screenshot Capture Tests
 
