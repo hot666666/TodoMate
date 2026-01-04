@@ -1,5 +1,5 @@
 ---
-trigger: model_decision
+trigger: always_on
 description: Apply this rule when generating Git commit messages, handling Git hooks, or resolving Git lock issues.
 ---
 
@@ -32,7 +32,7 @@ body
 
 ### Body
 - Wrap lines at 72 characters.
-- Explain **What** changed and **Why** (The code explains *How* - prefer Korean).
+- Explain **What** changed and **Why** (The code explains *How* - Prefer Korean!).
 
 ## 2. Pre-commit Hooks Warning
 - **Warning**: This project uses pre-commit hooks (e.g., SwiftFormat, SwiftLint).
