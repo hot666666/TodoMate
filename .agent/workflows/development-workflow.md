@@ -2,12 +2,15 @@
 description: Development Workflow - create branches and tests (TDD) for the project, outlining the Red-Green-Refactor cycle and verification steps.
 ---
 
+Before executing the workflow, check the Git status to determine whether the branch is already merged and the work is completed.
+If the branch is already finished and merged, and the user has not explicitly stated otherwise, do not proceed with the task and terminate the process.
+
 | Parameter     | Default | Description                                               |
 | ------------- | ------- | --------------------------------------------------------- |
-| `BASE_BRANCH` | (current branch) | The branch from which to create a new feature/fix branch. |
+| `BASE_BRANCH` | `dev`   | The branch from which to create a new feature/fix branch. |
 | `USE_PR`      | `false` | Whether to use GitHub PR workflow for merging.            |
 
-> **Note**: If you need to work from a different base branch, specify it explicitly (e.g., `BASE_BRANCH=main`). Otherwise, the workflow assumes the **current working branch** as the default.
+> **Note**: If you need to work from a different base branch, specify it explicitly (e.g., `BASE_BRANCH=main`). Otherwise, use `BASE_BRANCH=dev`.
 
 # Development Workflow
 
@@ -20,8 +23,8 @@ This project defines a strict **Red-Green-Refactor** cycle for all tasks. Agents
 
 ## Branching Strategy
 
-- All work must start by creating a new branch from `BASE_BRANCH` (default: current working branch).
-- **Naming**: Use prefixes like `feat/X`, `fix/X`, `refactor/X` or `chore/X`.
+- All work must start by creating a new branch from `BASE_BRANCH`.
+- **Naming**: Use prefixes like `feat/<topic>`, `fix/<topic>`, `refactor/<topic>` or `chore/<topic>`.
 - When merging back to `BASE_BRANCH`, a **Squash Merge** must be performed to maintain a clean history.
 
 ## 0. Test Authoring
@@ -42,17 +45,16 @@ Declare the values to be used and verified at the beginning of the test:
 ```swift
 func testExample() {
   // MARK: - Given
-  let cardFrontOld = "elephant"
-  let cardFrontNew = "modified_elephant"
-  let targetDeck = "New Deck"
+  let originalTitle = "Buy milk"
+  let updatedTitle = "Buy milk and eggs"
 
   // MARK: - When
-  navigateToDeck(named: targetDeck)
-  openCardEditSheet(for: cardFrontOld)
+  // Perform the action under test.
   ...
 
   // MARK: - Then
-  XCTAssert(app.staticTexts[cardFrontNew].exists)
+  // Assert the expected outcome.
+  ...
 }
 
 ```
@@ -68,9 +70,11 @@ func testExample() {
 
 - **Goal**: Define the expected behavior before implementing it.
 - **Action**:
-- Create or modify a unit test in the `AmgiTests` target.
-- Use `XCTest` / `Swift Testing` to assert expected outcomes.
-- Ensure the test fails (either does not compile or assertion fails).
+
+  - Create or modify a unit test in the `TodoMateTests` target.
+  - If the behavior is UI-level, use `TodoMateUITests`.
+  - Use `XCTest` to assert expected outcomes.
+  - Ensure the test fails (either does not compile or assertion fails).
 
 - **Tip**: Naming conventions for tests should clearly state the scenario and expected result.
 
@@ -78,26 +82,73 @@ func testExample() {
 
 - **Goal**: Pass the test with the minimal amount of code.
 - **Action**:
-- Write just enough code in the application targets to satisfy the test.
-- Focus on functionality, not perfection.
-- **Do not** over-engineer at this stage.
+  - Write just enough code in the app targets to satisfy the test.
+  - Focus on functionality, not perfection.
+  - **Do not** over-engineer at this stage.
 
 ### 3. Refactor: Improve Code
 
 - **Goal**: Improve code structure while keeping tests green.
 - **Action**:
-- Remove code duplication.
-- Optimization and cleanup.
-- **Crucial**: Verify against `.agent/rules/project-rules.md` (e.g., proper `@Observable` usage, modern Swift concurrency).
+
+  - Remove code duplication.
+  - Do cleanup/optimization only if it improves clarity or prevents regressions.
+  - **Crucial**: Verify against `.agent/rules/project-rules.md` (e.g., proper `@Observable` usage, modern Swift concurrency).
 
 - **Verification**: Run tests frequently to ensure no regression.
 
 ### 4. Verification
 
-- **Goal**: Confirm the solution works in the target environment.
+#### Verification Source of Truth (What to Follow)
+
+Before implementing (or before marking the work as complete), identify the verification criteria from one of the following sources, in this order:
+
+1. The workflow/task documentation (this repo’s workflow files)
+2. The related issue/PR description and acceptance criteria
+3. Any attached test plan / checklist / manual steps / expected results
+
+If a feature/task explicitly provides a verification method, you must treat it as the primary reference and follow it as written.
+Do not replace it with a different verification approach unless the owner explicitly approves.
+
+#### Implement to Satisfy Verification
+
+Your implementation must be shaped to meet the verification criteria.
+
+- If the criteria can be automated, encode them as tests (Unit/Integration/UI) and make them pass.
+- If automation is impractical, write a reproducible manual verification procedure (environment/account/data/steps/expected results) and ensure the app behavior matches it.
+
+#### Definition of Done
+
+You can call the implementation “done” only when all of the following are true:
+
+1. **Acceptance criteria are covered by a test or a verification procedure**
+   - Preferred: automated tests (Unit/Integration/UI)
+   - If automation is impractical: document a reproducible manual verification procedure (environment/account/data/steps/expected results)
+2. **Failure cases on the changed code paths are considered** (errors, empty states, permissions, network, etc.)
+3. **Appropriate tests pass for the impact scope**
+   - Minimum: targeted tests for the changed components
+   - Before merging: full test suite (or the team-agreed minimum set)
+
+#### Verification Checklist
+
+- **Is Given-When-Then explicit?** Does the test read like the requirement/intent?
+- **Are success and failure paths verified?** Especially network/auth/sync/storage errors
+- **Are state transitions stable?** Loading/error/empty/retry flows keep UI and data consistent
+- **Is regression risk covered?** The minimum checks that prove existing behavior didn’t break
+- **Is the environment consistent?** Reproducible on `GEMINI.md` Minimum Version / Test Device
+
+- **Goal**: Confirm the solution works in the target environment (and provide evidence it is “done”).
 - **Impact-Based Testing (Targeted)**:
-- To maintain development speed, prioritize running tests related to the modified components.
-- Use the following command to run specific test classes or methods(with xcodebuild ... `-only-testing:`)
+  - To maintain development speed, prioritize running tests related to the modified components.
+  - Use the repo helpers in `justfile`:
+
+```bash
+# Run a single focused test target
+just test-only TodoMateTests/InviteCodeGeneratorTests
+
+# Run multiple focused test targets
+just test-only-many TodoMateTests/InviteCodeGeneratorTests TodoMateTests/TodoMateTests
+```
 
 - **Full Verification**:
 - Run the full test suite before finalizing the branch:
@@ -120,6 +171,9 @@ Perform a local squash merge directly without creating a PR.
 ```bash
 # 1. Checkout BASE_BRANCH
 git checkout <BASE_BRANCH>
+
+# 1.1 Sync base branch
+git pull --rebase
 
 # 2. Squash merge the branch(replace <feature-branch> with your branch name)
 git merge --squash <feature-branch>
@@ -158,11 +212,11 @@ git branch -d <feature-branch>
 
 Follow the **GitHub Pull Request Workflow** for code review and remote squash merge.
 
-→ See: `.agent/workflows/github-pr-workflow.md`
+→ See: `.agent/workflows/github/gh-create-pr.md`
 
 ```bash
 # 1. Push the working branch
 git push origin <feature-branch>
 
-# 2. Follow github-pr-workflow.md for PR creation, review, and merge
+# 2. Create PR and complete review
 ```
