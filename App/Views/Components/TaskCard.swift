@@ -100,7 +100,7 @@ struct TaskCard: View {
       }
       .padding(12)
     }
-    .background(Color(nsColor: .controlBackgroundColor))
+    .background(DesignSystem.Colors.surfaceDark)
     .clipShape(.rect(cornerRadius: 12))
     .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
   }
