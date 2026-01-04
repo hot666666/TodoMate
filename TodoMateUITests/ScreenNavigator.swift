@@ -58,6 +58,14 @@ struct ScreenNavigator {
       return
     }
     boardButton.click()
+
+    // Wait for Board View content (e.g., Add Task button is a good proxy for Board)
+    if !app.buttons["addTaskButton"].waitForExistence(timeout: 5.0) {
+      // Fallback check for toolbar button variant
+      if !app.toolbars.buttons["addTaskButton"].waitForExistence(timeout: 2.0) {
+        print("⚠️ Board elements did not appear")
+      }
+    }
   }
 
   private func navigateToPersonalCalendar() {
@@ -66,6 +74,12 @@ struct ScreenNavigator {
     let calendarButton = app.radioButtons["viewMode_calendar"].firstMatch
     if calendarButton.exists {
       calendarButton.click()
+      // Wait for Calendar View (Check for 'Today' button which is central to Calendar nav)
+      // or check for "Sunday", "Monday" headers?
+      // Assuming 'Today' button exists in Calendar view.
+      if !app.buttons["Today"].waitForExistence(timeout: 5.0) {
+        print("⚠️ Calendar 'Today' button did not appear")
+      }
     } else {
       XCTFail("⚠️ 'viewMode_calendar' radio button not found.")
     }

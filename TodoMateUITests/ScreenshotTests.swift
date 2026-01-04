@@ -23,7 +23,9 @@ final class ScreenshotTests: XCTestCase {
   @MainActor
   func testFullScreenshotFlow() throws {
     // 1. Capture Default Window State (Initial Launch)
-    sleep(1)
+    // Wait for App Launch
+    XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 10), "App window should appear")
+
     let defaultScreenshot = captureWindow()
     ScreenshotCapture.save(screenshot: defaultScreenshot, name: "window_default", to: self)
 
@@ -43,8 +45,7 @@ final class ScreenshotTests: XCTestCase {
       XCTContext.runActivity(named: "Capture \(screenType)") { activity in
         navigator.navigate(to: screenType)
 
-        // Allow animations to settle
-        sleep(1)
+        // Navigation methods now include explicit waits, so extra sleep is removed.
 
         // Verify specific elements if needed
         if screenType == .noGroupsView {
@@ -69,7 +70,7 @@ final class ScreenshotTests: XCTestCase {
     // 3. Capture Sidebar Toggle (Destructive/State-changing action, do last)
     // Navigate back to a known state (Personal Board)
     navigator.navigate(to: .personalBoard)
-    sleep(1)
+    // Removed sleep(1) here as navigate now waits.
 
     // Capture Open State (Explicitly named)
     let openScreenshot = captureWindow()
@@ -82,7 +83,18 @@ final class ScreenshotTests: XCTestCase {
 
     if toggleButton.exists {
       toggleButton.click()
-      sleep(1)
+
+      // Wait for Sidebar to Close (Wait for 'sidebar_memo' to disappear)
+      let sidebarElement = app.buttons["sidebar_memo"].firstMatch
+      if sidebarElement.exists {
+        let doesNotExist = NSPredicate(format: "exists == false")
+        let expectation = XCTNSPredicateExpectation(predicate: doesNotExist, object: sidebarElement)
+        _ = XCTWaiter.wait(for: [expectation], timeout: 2.0)
+      } else {
+        // If it didn't exist, maybe it was already closed or transient.
+        // Just verify window still exists.
+        _ = app.windows.firstMatch.waitForExistence(timeout: 2.0)
+      }
 
       let closedScreenshot = captureWindow()
       ScreenshotCapture.save(screenshot: closedScreenshot, name: "sidebar_closed", to: self)
