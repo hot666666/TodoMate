@@ -22,7 +22,7 @@
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
-   </BuildAction>ㅋ
+   </BuildAction>
    <TestAction
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
