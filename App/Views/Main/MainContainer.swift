@@ -15,11 +15,15 @@ struct MainContainer: View {
     if shouldBypassAuth {
       AuthenticatedView()
     } else {
-      if dependencies.authManager.isAuthenticated {
+      #if DEBUG
         AuthenticatedView()
-      } else {
-        AuthView()
-      }
+      #else
+        if dependencies.authManager.isAuthenticated {
+          AuthenticatedView()
+        } else {
+          AuthView()
+        }
+      #endif
     }
   }
 
