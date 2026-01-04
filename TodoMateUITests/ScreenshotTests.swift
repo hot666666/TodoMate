@@ -7,6 +7,7 @@
 
 import XCTest
 
+@MainActor
 final class ScreenshotTests: XCTestCase {
   let app = XCUIApplication()
   private lazy var navigator = ScreenNavigator(app: app)
