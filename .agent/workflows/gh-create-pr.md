@@ -31,6 +31,7 @@ git push origin <feature-branch-name>
 Use the `gh` CLI to create the PR.
 ```bash
 gh pr create --base <BASE_BRANCH> --head <feature-branch-name> --title "PR Title" --body-file pr_body.md
+rm pr_body.md # Cleanup the body file
 ```
 *   `BASE_BRANCH` is typically `main` or `develop`.
 
