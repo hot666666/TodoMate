@@ -13,6 +13,8 @@ enum TaskCardStyle {
 }
 
 struct TaskCard: View {
+  @Environment(\.colorScheme) private var colorScheme
+
   let task: Todo
   var style: TaskCardStyle = .normal
 
@@ -100,7 +102,9 @@ struct TaskCard: View {
       }
       .padding(12)
     }
-    .background(Color(nsColor: .controlBackgroundColor))
+    .background(
+      colorScheme == .dark ? DesignSystem.Colors.surfaceDark : DesignSystem.Colors.surfaceLight,
+    )
     .clipShape(.rect(cornerRadius: 12))
     .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
   }
