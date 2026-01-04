@@ -69,12 +69,12 @@ struct CalendarContentView: View {
             date: date,
             currentMonth: currentDate,
             tasks: tasksForDate(date),
+            cellHeight: cellHeight,
             selectedTask: $selectedTask,
             onDrop: { task in
               moveTask(task, to: date)
             },
           )
-          .frame(minHeight: 100, maxHeight: .infinity, alignment: .top)
           .frame(height: cellHeight)
         }
       }
@@ -156,10 +156,17 @@ struct CalendarCell: View {
   let date: Date
   let currentMonth: Date
   let tasks: [Todo]
+  let cellHeight: CGFloat
   @Binding var selectedTask: Todo?
   let onDrop: (Todo) -> Void
 
   private let calendar = Calendar.current
+
+  // Layout constants
+  private let dateHeaderHeight: CGFloat = 28
+  private let itemHeight: CGFloat = 22
+  private let itemSpacing: CGFloat = 2
+  private let moreButtonHeight: CGFloat = 18
 
   private var isCurrentMonth: Bool {
     calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
@@ -167,6 +174,21 @@ struct CalendarCell: View {
 
   private var isToday: Bool {
     calendar.isDateInToday(date)
+  }
+
+  /// Calculate max visible items based on available cell height
+  private var maxVisibleItems: Int {
+    let availableHeight = cellHeight - dateHeaderHeight - moreButtonHeight - 8
+    let itemTotalHeight = itemHeight + itemSpacing
+    return max(1, Int(availableHeight / itemTotalHeight))
+  }
+
+  private var visibleTasks: [Todo] {
+    Array(tasks.prefix(maxVisibleItems))
+  }
+
+  private var hiddenTaskCount: Int {
+    max(0, tasks.count - maxVisibleItems)
   }
 
   var body: some View {
@@ -179,15 +201,24 @@ struct CalendarCell: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(6)
 
-      // Tasks
-      VStack(alignment: .leading, spacing: 2) {
-        ForEach(tasks) { task in
+      // Tasks (limited by available space)
+      VStack(alignment: .leading, spacing: itemSpacing) {
+        ForEach(visibleTasks) { task in
           TaskCard(task: task, style: .compact)
-            .draggable(task) // Ensure Todo conforms to Transferable
+            .draggable(task)
             .onTapGesture {
               selectedTask = task
             }
-            .opacity(selectedTask?.id == task.id ? 1.0 : (selectedTask == nil ? 1.0 : 0.6)) // Dim unselected if one is selected
+            .opacity(selectedTask?.id == task.id ? 1.0 : (selectedTask == nil ? 1.0 : 0.6))
+        }
+
+        // "More" indicator when items are hidden
+        if hiddenTaskCount > 0 {
+          Text("+\(hiddenTaskCount) more")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
         }
       }
       .padding(.horizontal, 2)

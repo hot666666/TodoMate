@@ -68,22 +68,24 @@ struct BoardView: View {
         .fontWeight(.semibold)
         .padding(.horizontal)
 
-      // Simple HStack - each column takes equal width via frame(maxWidth: .infinity)
-      HStack(alignment: .top, spacing: 16) {
-        TodoColumn(title: "To Do", count: todoTasks.count, color: .gray, tasks: todoTasks)
-          .frame(maxWidth: .infinity)
-        TodoColumn(
-          title: "In Progress", count: inProgressTasks.count, color: DesignSystem.Colors.accentCyan,
-          tasks: inProgressTasks,
-        )
-        .frame(maxWidth: .infinity)
-        TodoColumn(
-          title: "Done", count: doneTasks.count, color: DesignSystem.Colors.accentGreen,
-          tasks: doneTasks,
-        )
-        .frame(maxWidth: .infinity)
+      // Horizontal scroll to prevent column crushing when window is too narrow
+      ScrollView(.horizontal, showsIndicators: false) {
+        HStack(alignment: .top, spacing: 16) {
+          TodoColumn(title: "To Do", count: todoTasks.count, color: .gray, tasks: todoTasks)
+            .frame(minWidth: 200, maxWidth: .infinity)
+          TodoColumn(
+            title: "In Progress", count: inProgressTasks.count, color: DesignSystem.Colors.accentCyan,
+            tasks: inProgressTasks,
+          )
+          .frame(minWidth: 200, maxWidth: .infinity)
+          TodoColumn(
+            title: "Done", count: doneTasks.count, color: DesignSystem.Colors.accentGreen,
+            tasks: doneTasks,
+          )
+          .frame(minWidth: 200, maxWidth: .infinity)
+        }
+        .padding(.horizontal)
       }
-      .padding(.horizontal)
     }
     .padding(.top)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
