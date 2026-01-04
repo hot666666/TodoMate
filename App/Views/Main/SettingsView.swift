@@ -23,6 +23,7 @@ struct SettingsView: View {
         // Account Section
         accountSection
       }
+      .accessibilityIdentifier("settings_view")
       .padding(32)
       .frame(maxWidth: 500)
       .frame(maxWidth: .infinity)

@@ -1,0 +1,98 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "FFDED973-DEBB-4E09-902C-AAF314D6528F.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "sidebar_closed_0_0_6DD4080E-2C32-4ABD-B178-41F38DAA84F6.png",
+        "timestamp" : 1767515269.158
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "A395D525-1F0D-4CDA-AF8C-3329C107456E.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "sidebar_open_0_0_E4D95257-DD7B-4E38-BD33-EE33CA2D13D8.png",
+        "timestamp" : 1767515267.674
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "C2C13F8C-DD36-44EC-90D9-6812B939FCDE.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "profile_0_0_0FF604BD-FEEA-467A-86DA-9AF0F7827C7D.png",
+        "timestamp" : 1767515263.307
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "46992AD6-0D34-41A8-A11D-D5A83F8B5BB7.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "no_groups_view_0_0_5EA4296B-7F07-4541-B024-FD1A95CEE5DA.png",
+        "timestamp" : 1767515261.719
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "A6B6339C-C95B-430D-8A8C-C62CB123D559.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "group_feed_0_0_9343AAB7-0F4E-4C67-BCC5-D2006220F3FB.png",
+        "timestamp" : 1767515258.007
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "C91B4DAE-77DA-4A8B-8662-4026C9FCD756.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "memo_0_0_D7002A37-D9EA-4B08-86F9-CE4D6C59DCD6.png",
+        "timestamp" : 1767515254.305
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "33862ED1-A876-42DA-8DC8-A82BD0F2D2CD.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "add_task_overlay_0_0_97F10284-13EC-4C21-9F83-946F3C8AF4D2.png",
+        "timestamp" : 1767515250.092
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "907F6B28-0E31-49A1-A6A6-8EC1609E4BBD.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "personal_calendar_0_0_BA53EDF5-788E-4C40-B26C-CAD814E2237D.png",
+        "timestamp" : 1767515243.051
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "A6D9BB5D-FD55-46C2-9BA3-A1915B916A63.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "personal_board_0_0_D211CB0A-745A-4193-850C-9FFBA3BD0DD5.png",
+        "timestamp" : 1767515241.469
+      },
+      {
+        "configurationName" : "Configuration 1",
+        "deviceId" : "00008112-000D58EE0CDBC01E",
+        "deviceName" : "My Mac",
+        "exportedFileName" : "81AAA8E1-C610-49C5-876A-67E2FF7DB4AE.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "window_default_0_0_45C64347-4EEC-4117-8832-5D6C4B72B36D.png",
+        "timestamp" : 1767515237.08
+      }
+    ],
+    "testIdentifier" : "ScreenshotTests/testFullScreenshotFlow()",
+    "testIdentifierURL" : "test://com.apple.xcode/TodoMate/TodoMateUITests/ScreenshotTests/testFullScreenshotFlow"
+  }
+]

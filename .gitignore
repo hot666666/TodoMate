@@ -78,3 +78,7 @@ private/
 TaskMemo/
 
 # Design
+
+# Test Results (generated during tests, uploaded to PR for review)
+TestResults.xcresult
+screenshots/

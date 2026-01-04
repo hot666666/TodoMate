@@ -50,12 +50,57 @@ Details: `.agent/workflows/development-workflow.md`
 - Commit only things you modified yourself.
 - When unsure, **ASK** the user.
 
+## UI Verification
+
+For UI-related changes, verify results visually using screenshots captured during XCUITests.
+
+### Capture Screenshots
+
+Run the following command to execute UI tests and export screenshots:
+
+```bash
+just test-ui-screenshots
+```
+
+This will:
+1. Run `TodoMateUITests/ScreenshotTests` (6 tests)
+2. Export attachments from `TestResults.xcresult`
+3. Rename files to human-readable names (e.g., `personal_board_0.png`)
+4. Save all screenshots to `screenshots/` directory
+
+### Screenshot Files
+
+Screenshots are named based on `ScreenType` enum defined in `TodoMateUITests/ScreenType.swift`:
+- `personal_board_0.png` - Personal Todo Board view
+- `personal_calendar_0.png` - Personal Calendar view
+- `group_feed_0.png` - Group Feed view
+- `no_groups_view_0.png` - "No Groups Joined" empty state
+- `add_task_overlay_0.png` - Add Task overlay
+- `sidebar_open_0.png`, `sidebar_closed_0.png` - Sidebar toggle states
+- `window_default_0.png` - Default window state
+
+### Key Files
+
+- `TodoMateUITests/ScreenType.swift` - Enum defining capturable screens
+- `TodoMateUITests/ScreenNavigator.swift` - Navigation helper for tests
+- `TodoMateUITests/ScreenshotCapture.swift` - Screenshot capture utility
+- `TodoMateUITests/ScreenshotTests.swift` - UI screenshot tests
+- `script/rename_screenshots.py` - Renames exported files to readable names
+
+### Manual Export
+
+To extract screenshots from an existing xcresult:
+
+```bash
+just export-screenshots <path-to-xcresult>
+```
+
 ## Documentation & Resources
 
 ### Core Documentation
 
 - **Architecture**: [docs/App/architecture.md]
-- **MV Patterns**: [docs/mv-patterns.md] - _Essential for View Refactoring_
+- **MV Patterns**: [docs/mv-patterns.md]
 - **Performance**: [docs/understanding-improving-swiftui-performance.md], [docs/optimizing-swiftui-performance-instruments.md]
 
 ### Workflows

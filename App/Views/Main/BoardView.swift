@@ -88,6 +88,7 @@ struct BoardView: View {
     .padding(.top)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .background(Color(nsColor: .windowBackgroundColor))
+    .accessibilityIdentifier("personalBoardView")
   }
 }
 

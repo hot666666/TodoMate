@@ -36,6 +36,7 @@ struct SidebarView: View {
         NavigationLink(value: SidebarSelection.settings) {
           SidebarProfileView()
         }
+        .accessibilityIdentifier("sidebar_profile")
         .buttonStyle(.plain) // Remove default button style if needed, or let List handle it
       }
 
@@ -49,6 +50,7 @@ struct SidebarView: View {
           }
           .badge(12)
         }
+        .accessibilityIdentifier("sidebar_todo")
 
         NavigationLink(value: SidebarSelection.memo) {
           Label {
@@ -58,6 +60,7 @@ struct SidebarView: View {
               .foregroundStyle(DesignSystem.Colors.trafficYellow)
           }
         }
+        .accessibilityIdentifier("sidebar_memo")
       } header: {
         Text("Private")
       }
@@ -71,6 +74,7 @@ struct SidebarView: View {
               .foregroundStyle(DesignSystem.Colors.accentIndigo)
           }
         }
+        .accessibilityIdentifier("sidebar_group_design-team")
       } header: {
         Text("Groups")
       }
@@ -86,6 +90,7 @@ struct SidebarView: View {
               .foregroundStyle(.secondary)
           }
         }
+        .accessibilityIdentifier("sidebar_noGroups")
       }
     }
     .listStyle(.sidebar)

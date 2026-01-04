@@ -34,6 +34,7 @@ struct CalendarContentView: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor)) // Matches CSS "bg-white/30 dark:bg-black/20" roughly
+    .accessibilityIdentifier("personalCalendarView")
     .onAppear {
       loadMockTasks()
     }

@@ -126,10 +126,12 @@ private struct AuthenticatedView: View {
       ForEach(ContentViewMode.allCases) { mode in
         Image(systemName: mode.systemImage)
           .tag(mode)
+          .accessibilityIdentifier("viewMode_\(mode.rawValue)")
       }
     }
     .pickerStyle(.segmented)
     .labelsHidden()
+    .accessibilityIdentifier("viewModePicker")
   }
 
   private var addButton: some View {
@@ -139,6 +141,7 @@ private struct AuthenticatedView: View {
       Image(systemName: "plus")
     }
     .keyboardShortcut("n", modifiers: .command)
+    .accessibilityIdentifier("addTaskButton")
   }
 }
 
@@ -204,7 +207,7 @@ struct AddTaskSheet: View {
       Divider()
 
       // Description
-      TextField("Add description...", text: $description, axis: .vertical)
+      TextField("Ad description...", text: $description, axis: .vertical)
         .textFieldStyle(.plain)
         .lineLimit(3 ... 6)
 
