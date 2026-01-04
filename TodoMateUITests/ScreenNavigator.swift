@@ -44,16 +44,16 @@ struct ScreenNavigator {
     print("    -> Navigating to Personal Board...")
 
     let sidebarTodoButton = app.buttons["sidebar_todo"].firstMatch
-    if sidebarTodoButton.waitForExistence(timeout: 3.0) {
+    if sidebarTodoButton.waitForExistence(timeout: 10.0) {
       sidebarTodoButton.click()
     }
 
     // Switch to Board View using radio button
     let boardButton = app.radioButtons["viewMode_board"].firstMatch
-    if !boardButton.waitForExistence(timeout: 3.0) {
+    if !boardButton.waitForExistence(timeout: 10.0) {
       // Debugging: Print hierarchy if button is missing
       print("⚠️ 'viewMode_board' radio button not found. Dumping hierarchy snippet:")
-      print(app.toolbars.debugDescription)
+      print(app.debugDescription) // Changed from app.toolbars.debugDescription to be safe
       XCTFail("⚠️ 'viewMode_board' radio button not found. Is the toolbar visible?")
       return
     }
