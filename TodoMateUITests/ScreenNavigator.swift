@@ -76,10 +76,13 @@ struct ScreenNavigator {
     let memoButton = app.buttons["sidebar_memo"].firstMatch
     if memoButton.exists {
       memoButton.click()
+      // Wait for Memo view to appear
+      if !app.staticTexts["Memo"].waitForExistence(timeout: 3.0) {
+        print("⚠️ Memo title did not appear")
+      }
     } else {
       XCTFail("⚠️ 'sidebar_memo' not found.")
     }
-    sleep(1)
   }
 
   private func navigateToProfile() {
@@ -88,6 +91,10 @@ struct ScreenNavigator {
     let profileLink = app.buttons["sidebar_profile"].firstMatch
     if profileLink.exists {
       profileLink.click()
+      // Wait for Profile view
+      if !app.staticTexts["Profile"].waitForExistence(timeout: 3.0) {
+        print("⚠️ Profile title did not appear")
+      }
     } else {
       XCTFail("⚠️ 'sidebar_profile' not found.")
     }
@@ -99,10 +106,17 @@ struct ScreenNavigator {
     let groupButton = app.buttons["sidebar_group_design-team"].firstMatch
     if groupButton.exists {
       groupButton.click()
+      // Wait for Group Feed to load
+      // Using a generic wait if specific element unknown,
+      // but waitForExistence is preferred over sleep.
+      // Assuming a header or unique element exists.
+      let feedIndicator = app.staticTexts["Design Team"]
+      if !feedIndicator.waitForExistence(timeout: 5.0) {
+        print("⚠️ Group Feed 'Design Team' title did not appear")
+      }
     } else {
       XCTFail("⚠️ 'sidebar_group_design-team' not found.")
     }
-    sleep(2)
   }
 
   private func navigateToNoGroupsView() {
@@ -110,10 +124,13 @@ struct ScreenNavigator {
     let noGroupsButton = app.buttons["sidebar_noGroups"].firstMatch
     if noGroupsButton.exists {
       noGroupsButton.click()
+      // Wait for "No Groups" content
+      if !app.staticTexts["No Groups Joined"].waitForExistence(timeout: 3.0) {
+        print("⚠️ 'No Groups Joined' text did not appear")
+      }
     } else {
       XCTFail("⚠️ 'sidebar_noGroups' not found.")
     }
-    sleep(1)
   }
 
   private func navigateToAddTaskOverlay() {
@@ -141,14 +158,18 @@ struct ScreenNavigator {
     if !newTaskTitle.waitForExistence(timeout: 5.0) {
       XCTFail("⚠️ Add Task Overlay did not appear within 5 seconds.")
     }
-    sleep(1)
   }
 
   func closeAddTaskOverlay() {
     let closeButton = app.buttons["xmark.circle.fill"].firstMatch
     if closeButton.exists {
       closeButton.click()
-      sleep(1) // Wait for animation
+
+      // Wait for overlay to disappear (Explicit Wait)
+      let newTaskTitle = app.staticTexts["New Task"]
+      let doesNotExist = NSPredicate(format: "exists == false")
+      let expectation = XCTNSPredicateExpectation(predicate: doesNotExist, object: newTaskTitle)
+      _ = XCTWaiter.wait(for: [expectation], timeout: 3.0)
     }
   }
 }
