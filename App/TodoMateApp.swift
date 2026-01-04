@@ -26,7 +26,6 @@ struct TodoMateApp: App {
         .task {
           dependencies.authManager.startListening()
         }
-        .frame(minWidth: 1000, minHeight: 600)
     }
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)

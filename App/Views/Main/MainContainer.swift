@@ -24,11 +24,7 @@ struct MainContainer: View {
   }
 
   private var shouldBypassAuth: Bool {
-    #if DEBUG
-      return ProcessInfo.processInfo.environment["BYPASS_AUTH"] == "1"
-    #else
-      return false
-    #endif
+    ProcessInfo.processInfo.environment["BYPASS_AUTH"] == "1"
   }
 }
 
