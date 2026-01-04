@@ -171,32 +171,47 @@ struct CalendarCell: View {
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      // Date Number
-      Text("\(calendar.component(.day, from: date))")
-        .font(.system(size: 14, weight: isToday ? .bold : .medium))
-        .foregroundStyle(isToday ? .primary : (isCurrentMonth ? .primary : .secondary))
-        .opacity(isCurrentMonth ? 1 : 0.4)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(6)
+    GeometryReader { geometry in
+      let availableHeight = geometry.size.height - 30 // Approximate header height + padding
+      let itemHeight: CGFloat = 26.0 // Approximate height of compact task card + spacing
+      let maxItems = max(0, Int(availableHeight / itemHeight))
+      let showMore = tasks.count > maxItems
+      let visibleCount = showMore ? max(0, maxItems - 1) : tasks.count
 
-      // Tasks
-      VStack(alignment: .leading, spacing: 2) {
-        ForEach(tasks) { task in
-          TaskCard(task: task, style: .compact)
-            .draggable(task) // Ensure Todo conforms to Transferable
-            .onTapGesture {
-              selectedTask = task
-            }
-            .opacity(selectedTask?.id == task.id ? 1.0 : (selectedTask == nil ? 1.0 : 0.6)) // Dim unselected if one is selected
+      VStack(alignment: .leading, spacing: 4) {
+        // Date Number
+        Text("\(calendar.component(.day, from: date))")
+          .font(.system(size: 14, weight: isToday ? .bold : .medium))
+          .foregroundStyle(isToday ? .primary : (isCurrentMonth ? .primary : .secondary))
+          .opacity(isCurrentMonth ? 1 : 0.4)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .padding(6)
+
+        // Tasks
+        VStack(alignment: .leading, spacing: 2) {
+          ForEach(tasks.prefix(visibleCount)) { task in
+            TaskCard(task: task, style: .compact)
+              .draggable(task)
+              .onTapGesture {
+                selectedTask = task
+              }
+              .opacity(selectedTask?.id == task.id ? 1.0 : (selectedTask == nil ? 1.0 : 0.6))
+          }
+
+          if showMore {
+            Text("+\(tasks.count - visibleCount) more")
+              .font(.caption2)
+              .foregroundStyle(.secondary)
+              .padding(.horizontal, 4)
+          }
         }
-      }
-      .padding(.horizontal, 2)
+        .padding(.horizontal, 2)
 
-      Spacer()
+        Spacer(minLength: 0)
+      }
     }
     .background(
-      Rectangle() // Borders
+      Rectangle()
         .stroke(Color.secondary.opacity(0.1), lineWidth: 0.5),
     )
     .background(isToday ? Color.blue.opacity(0.05) : Color.clear)
