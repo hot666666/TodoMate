@@ -215,7 +215,7 @@ struct AddTaskSheet: View {
       Divider()
 
       // Description
-      TextField("Ad description...", text: $description, axis: .vertical)
+      TextField("Add description...", text: $description, axis: .vertical)
         .textFieldStyle(.plain)
         .lineLimit(3 ... 6)
 
