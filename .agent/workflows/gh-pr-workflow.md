@@ -22,6 +22,12 @@ PR body should follow the repository template:
 
 - `.github/PR_TEMPLATE.md`
 
+Also, link the PR to a GitHub Issue by including a closing keyword in the PR description (recommended):
+
+```md
+Fixes #<issue-number>
+```
+
 ### Option A: Using GitHub CLI (`gh`)
 
 ```bash

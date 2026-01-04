@@ -4,10 +4,10 @@ description: Development Workflow - create branches and tests (TDD) for the proj
 
 | Parameter     | Default | Description                                               |
 | ------------- | ------- | --------------------------------------------------------- |
-| `BASE_BRANCH` | `dev`   | The branch from which to create a new feature/fix branch. |
+| `BASE_BRANCH` | (current branch) | The branch from which to create a new feature/fix branch. |
 | `USE_PR`      | `false` | Whether to use GitHub PR workflow for merging.            |
 
-> **Note**: If you need to work from a different base branch, specify it explicitly (e.g., `BASE_BRANCH=main`). Otherwise, the workflow assumes `dev` as the default.
+> **Note**: If you need to work from a different base branch, specify it explicitly (e.g., `BASE_BRANCH=main`). Otherwise, the workflow assumes the **current working branch** as the default.
 
 # Development Workflow
 
@@ -20,7 +20,7 @@ This project defines a strict **Red-Green-Refactor** cycle for all tasks. Agents
 
 ## Branching Strategy
 
-- All work must start by creating a new branch from `BASE_BRANCH` (default: `dev`).
+- All work must start by creating a new branch from `BASE_BRANCH` (default: current working branch).
 - **Naming**: Use prefixes like `feat/X`, `fix/X`, `refactor/X` or `chore/X`.
 - When merging back to `BASE_BRANCH`, a **Squash Merge** must be performed to maintain a clean history.
 
