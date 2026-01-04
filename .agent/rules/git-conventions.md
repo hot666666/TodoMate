@@ -17,9 +17,8 @@ body
 ### Header (Type & Title)
 - **Format**: `type: title`
 - **Constraint**: Title must not exceed 50 characters. No periods (.) or special characters at the end.
-- **Language**: Start with an imperative English verb (e.g., "Add user login", not "Added..." or "Adding...").
 
-#### Types
+#### Types(Prefer Korean Description!, not type)
 | Type | Description |
 | --- | --- |
 | **feat** | New feature |
@@ -32,7 +31,7 @@ body
 
 ### Body
 - Wrap lines at 72 characters.
-- Explain **What** changed and **Why** (The code explains *How* - Prefer Korean!).
+- Explain **What** changed and **Why** in concise.
 
 ## 2. Pre-commit Hooks Warning
 - **Warning**: This project uses pre-commit hooks (e.g., SwiftFormat, SwiftLint).

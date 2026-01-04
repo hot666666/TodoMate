@@ -2,10 +2,13 @@
 description: Development Workflow - create branches and tests (TDD) for the project, outlining the Red-Green-Refactor cycle and verification steps.
 ---
 
-| Parameter     | Default | Description                                               |
-| ------------- | ------- | --------------------------------------------------------- |
+Before executing the workflow, check the Git status to determine whether the branch is already merged and the work is completed.
+If the branch is already finished and merged, and the user has not explicitly stated otherwise, do not proceed with the task and terminate the process.
+
+| Parameter     | Default          | Description                                               |
+| ------------- | ---------------- | --------------------------------------------------------- |
 | `BASE_BRANCH` | (current branch) | The branch from which to create a new feature/fix branch. |
-| `USE_PR`      | `false` | Whether to use GitHub PR workflow for merging.            |
+| `USE_PR`      | `false`          | Whether to use GitHub PR workflow for merging.            |
 
 > **Note**: If you need to work from a different base branch, specify it explicitly (e.g., `BASE_BRANCH=main`). Otherwise, the workflow assumes the **current working branch** as the default.
 
@@ -158,7 +161,7 @@ git branch -d <feature-branch>
 
 Follow the **GitHub Pull Request Workflow** for code review and remote squash merge.
 
-→ See: `.agent/workflows/github-pr-workflow.md`
+→ See: `.agent/workflows/github/gh-create-pr.md`
 
 ```bash
 # 1. Push the working branch

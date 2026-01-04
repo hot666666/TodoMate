@@ -64,6 +64,7 @@ Details: `.agent/workflows/development-workflow.md`
 - **Performance Audit**: `.agent/workflows/performance-audit.md`
 - **Development Workflow**: `.agent/workflows/development-workflow.md`
 - **Build Commands**: `.agent/workflows/build-commands.md`
+- **Github**: `.agent/workflows/github/*`
 
 ### Reference
 
