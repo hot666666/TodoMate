@@ -14,6 +14,7 @@ final class ScreenshotTests: XCTestCase {
 
   override func setUpWithError() throws {
     continueAfterFailure = false
+    app.launchEnvironment["BYPASS_AUTH"] = "1"
     app.launch()
   }
 
