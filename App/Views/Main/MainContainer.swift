@@ -11,15 +11,23 @@ struct MainContainer: View {
   @Environment(AppDependencies.self) private var dependencies
 
   var body: some View {
-    #if DEBUG
-      // Bypass auth for development
+    // Check environment variable for auth bypass (useful for UI tests)
+    if shouldBypassAuth {
       AuthenticatedView()
-    #else
+    } else {
       if dependencies.authManager.isAuthenticated {
         AuthenticatedView()
       } else {
         AuthView()
       }
+    }
+  }
+
+  private var shouldBypassAuth: Bool {
+    #if DEBUG
+      return ProcessInfo.processInfo.environment["BYPASS_AUTH"] == "1"
+    #else
+      return false
     #endif
   }
 }

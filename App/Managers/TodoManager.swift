@@ -63,7 +63,17 @@ final class TodoManager {
         .order(by: "date", descending: true)
         .getDocuments()
 
-      myTodos = snapshot.documents.compactMap { try? $0.data(as: Todo.self) }
+      myTodos = snapshot.documents.compactMap { document in
+        do {
+          return try document.data(as: Todo.self)
+        } catch {
+          Log.error(
+            "Failed to decode my todo: \(error.localizedDescription), documentID: \(document.documentID)",
+            category: .sync,
+          )
+          return nil
+        }
+      }
     } catch {
       Log.error("Failed to fetch my todos: \(error)", category: .sync)
       myTodos = []
@@ -83,7 +93,17 @@ final class TodoManager {
         .order(by: "date", descending: true)
         .getDocuments()
 
-      groupTodos = snapshot.documents.compactMap { try? $0.data(as: Todo.self) }
+      groupTodos = snapshot.documents.compactMap { document in
+        do {
+          return try document.data(as: Todo.self)
+        } catch {
+          Log.error(
+            "Failed to decode group todo: \(error.localizedDescription), documentID: \(document.documentID)",
+            category: .sync,
+          )
+          return nil
+        }
+      }
     } catch {
       Log.error("Failed to fetch group todos: \(error)", category: .sync)
       groupTodos = []
