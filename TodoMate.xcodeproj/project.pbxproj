@@ -7,35 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		451501162F012A92007FF547 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 451501152F012A92007FF547 /* FirebaseAuth */; };
+		451501182F012A92007FF547 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 451501172F012A92007FF547 /* FirebaseCore */; };
+		4515011A2F012A92007FF547 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 451501192F012A92007FF547 /* FirebaseFirestore */; };
+		4515011D2F012AFA007FF547 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 4515011C2F012AFA007FF547 /* GoogleSignIn */; };
+		455F3E822F00DB9700F7888D /* SimpleOverlaySystem in Frameworks */ = {isa = PBXBuildFile; productRef = 455F3E812F00DB9700F7888D /* SimpleOverlaySystem */; };
 		458B30F82E7E6B0500820E47 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 458B30F72E7E6B0500820E47 /* SwiftUIIntrospect */; };
 		45962D2C2D4B128300089A48 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = 45962D2B2D4B128300089A48 /* Sparkle */; };
 		45B81D122E21EEB900BB1434 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 45B81D112E21EEB900BB1434 /* MarkdownUI */; };
-		45B81D152E21EF0700BB1434 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 45B81D142E21EF0700BB1434 /* FirebaseAuth */; };
-		45B81D172E21EF0700BB1434 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 45B81D162E21EF0700BB1434 /* FirebaseCore */; };
-		45B81D192E21EF0700BB1434 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 45B81D182E21EF0700BB1434 /* FirebaseFirestore */; };
-		45B81D1C2E21EF2000BB1434 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 45B81D1B2E21EF2000BB1434 /* GoogleSignIn */; };
-		45B81D1E2E21EF2000BB1434 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 45B81D1D2E21EF2000BB1434 /* GoogleSignInSwift */; };
-		45C1A57B2D7D704A005293BD /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45CA5CF62C9C398E00285EB4 /* WidgetKit.framework */; };
-		45C1A57C2D7D704A005293BD /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45CA5CF82C9C398E00285EB4 /* SwiftUI.framework */; };
-		45C1A5882D7D704B005293BD /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 45C1A57A2D7D704A005293BD /* TodoMateWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		451DEDEB2D3EA11B00A20417 /* PBXContainerItemProxy */ = {
+		451501022F011EE0007FF547 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 45E10B872C69B77300FC31CD /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 45C1A5792D7D704A005293BD;
-			remoteInfo = TodoMateWidgetExtension;
+			remoteGlobalIDString = 45E10B8E2C69B77300FC31CD;
+			remoteInfo = TodoMate;
 		};
-		45C1A5862D7D704B005293BD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 45E10B872C69B77300FC31CD /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 45C1A5792D7D704A005293BD;
-			remoteInfo = TodoMateWidgetExtension;
-		};
-		45E0A0E72D78497C000FDC24 /* PBXContainerItemProxy */ = {
+		4515010F2F011F08007FF547 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 45E10B872C69B77300FC31CD /* Project object */;
 			proxyType = 1;
@@ -44,102 +34,48 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		451DEDEA2D3EA11300A20417 /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				45C1A5882D7D704B005293BD /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		4525D73E2CA0706500D6C449 /* TodoMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		451500652F0100A9007FF547 /* TodoMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		451500FC2F011EE0007FF547 /* TodoMateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoMateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4515010B2F011F08007FF547 /* TodoMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		451501292F013DF0007FF547 /* TestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TestPlan.xctestplan; sourceTree = "<group>"; };
 		452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = ".pre-commit-config.yaml"; sourceTree = "<group>"; };
 		452C64D32E21F56600A68B94 /* .swiftformat */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftformat; sourceTree = "<group>"; };
 		452C64D42E21F56600A68B94 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
-		45C1A57A2D7D704A005293BD /* TodoMateWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TodoMateWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		45CA5CF62C9C398E00285EB4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
-		45CA5CF82C9C398E00285EB4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		45DA6A6F2E238BAF007183E3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		45E0A0E32D78497C000FDC24 /* TodoMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		45C1A5892D7D704B005293BD /* Exceptions for "TodoMateWidget" folder in "TodoMateWidgetExtension" target */ = {
+		451500B22F0116D7007FF547 /* Exceptions for "Resource" folder in "TodoMate" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
-			);
-			target = 45C1A5792D7D704A005293BD /* TodoMateWidgetExtension */;
-		};
-		45DA6A302E238B00007183E3 /* Exceptions for "TodoMate" folder in "TodoMate" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-				InfoDebug.plist,
+				AppIcon.icon,
+				Assets.xcassets,
 			);
 			target = 45E10B8E2C69B77300FC31CD /* TodoMate */;
-		};
-		45DA6A322E238B4F007183E3 /* Exceptions for "TodoMate" folder in "TodoMateWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Resources/AppIcon.icon,
-				"Shared/Extensions/Color+Extension.swift",
-			);
-			target = 45C1A5792D7D704A005293BD /* TodoMateWidgetExtension */;
-		};
-		45DA6A342E238B82007183E3 /* Exceptions for "Domain" folder in "TodoMateWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Entity/WidgetTodo.swift,
-			);
-			target = 45C1A5792D7D704A005293BD /* TodoMateWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		452C66822E226FF600A68B94 /* Domain */ = {
+		451500B12F0116C3007FF547 /* Resource */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				45DA6A342E238B82007183E3 /* Exceptions for "Domain" folder in "TodoMateWidgetExtension" target */,
+				451500B22F0116D7007FF547 /* Exceptions for "Resource" folder in "TodoMate" target */,
 			);
-			path = Domain;
+			path = Resource;
 			sourceTree = "<group>";
 		};
-		452C66A12E22752500A68B94 /* Data */ = {
+		451500C72F0119EB007FF547 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Data;
+			path = App;
 			sourceTree = "<group>";
 		};
-		45C1A57D2D7D704A005293BD /* TodoMateWidget */ = {
+		451500FD2F011EE0007FF547 /* TodoMateUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				45C1A5892D7D704B005293BD /* Exceptions for "TodoMateWidget" folder in "TodoMateWidgetExtension" target */,
-			);
-			path = TodoMateWidget;
+			path = TodoMateUITests;
 			sourceTree = "<group>";
 		};
-		45DA69ED2E238B00007183E3 /* TodoMate */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				45DA6A302E238B00007183E3 /* Exceptions for "TodoMate" folder in "TodoMate" target */,
-				45DA6A322E238B4F007183E3 /* Exceptions for "TodoMate" folder in "TodoMateWidgetExtension" target */,
-			);
-			path = TodoMate;
-			sourceTree = "<group>";
-		};
-		45DA6A742E238BEF007183E3 /* Dependency */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Dependency;
-			sourceTree = "<group>";
-		};
-		45E0A0E42D78497C000FDC24 /* TodoMateTests */ = {
+		4515010C2F011F08007FF547 /* TodoMateTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TodoMateTests;
 			sourceTree = "<group>";
@@ -147,16 +83,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		45C1A5772D7D704A005293BD /* Frameworks */ = {
+		451500F92F011EE0007FF547 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				45C1A57C2D7D704A005293BD /* SwiftUI.framework in Frameworks */,
-				45C1A57B2D7D704A005293BD /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		45E0A0E02D78497C000FDC24 /* Frameworks */ = {
+		451501082F011F08007FF547 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -168,94 +102,84 @@
 			buildActionMask = 2147483647;
 			files = (
 				45962D2C2D4B128300089A48 /* Sparkle in Frameworks */,
-				45B81D152E21EF0700BB1434 /* FirebaseAuth in Frameworks */,
-				45B81D1E2E21EF2000BB1434 /* GoogleSignInSwift in Frameworks */,
-				45B81D172E21EF0700BB1434 /* FirebaseCore in Frameworks */,
-				45B81D192E21EF0700BB1434 /* FirebaseFirestore in Frameworks */,
+				4515011D2F012AFA007FF547 /* GoogleSignIn in Frameworks */,
+				451501162F012A92007FF547 /* FirebaseAuth in Frameworks */,
 				45B81D122E21EEB900BB1434 /* MarkdownUI in Frameworks */,
-				45B81D1C2E21EF2000BB1434 /* GoogleSignIn in Frameworks */,
 				458B30F82E7E6B0500820E47 /* SwiftUIIntrospect in Frameworks */,
+				451501182F012A92007FF547 /* FirebaseCore in Frameworks */,
+				455F3E822F00DB9700F7888D /* SimpleOverlaySystem in Frameworks */,
+				4515011A2F012A92007FF547 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		459AA4322C78D1DB00CA43F2 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				45CA5CF62C9C398E00285EB4 /* WidgetKit.framework */,
-				45CA5CF82C9C398E00285EB4 /* SwiftUI.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		45E10B862C69B77300FC31CD = {
 			isa = PBXGroup;
 			children = (
+				451501292F013DF0007FF547 /* TestPlan.xctestplan */,
 				45DA6A6F2E238BAF007183E3 /* README.md */,
 				452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */,
 				452C64D32E21F56600A68B94 /* .swiftformat */,
 				452C64D42E21F56600A68B94 /* .swiftlint.yml */,
-				452C66A12E22752500A68B94 /* Data */,
-				452C66822E226FF600A68B94 /* Domain */,
-				45DA6A742E238BEF007183E3 /* Dependency */,
-				45DA69ED2E238B00007183E3 /* TodoMate */,
-				45E0A0E42D78497C000FDC24 /* TodoMateTests */,
-				45C1A57D2D7D704A005293BD /* TodoMateWidget */,
-				459AA4322C78D1DB00CA43F2 /* Frameworks */,
-				4525D73E2CA0706500D6C449 /* TodoMate.app */,
-				45E0A0E32D78497C000FDC24 /* TodoMateTests.xctest */,
-				45C1A57A2D7D704A005293BD /* TodoMateWidgetExtension.appex */,
+				451500C72F0119EB007FF547 /* App */,
+				451500B12F0116C3007FF547 /* Resource */,
+				451500652F0100A9007FF547 /* TodoMate.app */,
+				451500FC2F011EE0007FF547 /* TodoMateUITests.xctest */,
+				451500FD2F011EE0007FF547 /* TodoMateUITests */,
+				4515010B2F011F08007FF547 /* TodoMateTests.xctest */,
+				4515010C2F011F08007FF547 /* TodoMateTests */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		45C1A5792D7D704A005293BD /* TodoMateWidgetExtension */ = {
+		451500FB2F011EE0007FF547 /* TodoMateUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 45C1A58A2D7D704B005293BD /* Build configuration list for PBXNativeTarget "TodoMateWidgetExtension" */;
+			buildConfigurationList = 451501042F011EE0007FF547 /* Build configuration list for PBXNativeTarget "TodoMateUITests" */;
 			buildPhases = (
-				45C1A5762D7D704A005293BD /* Sources */,
-				45C1A5772D7D704A005293BD /* Frameworks */,
-				45C1A5782D7D704A005293BD /* Resources */,
+				451500F82F011EE0007FF547 /* Sources */,
+				451500F92F011EE0007FF547 /* Frameworks */,
+				451500FA2F011EE0007FF547 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				451501032F011EE0007FF547 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				45C1A57D2D7D704A005293BD /* TodoMateWidget */,
+				451500FD2F011EE0007FF547 /* TodoMateUITests */,
 			);
-			name = TodoMateWidgetExtension;
+			name = TodoMateUITests;
 			packageProductDependencies = (
 			);
-			productName = TodoMateWidgetExtension;
-			productReference = 45C1A57A2D7D704A005293BD /* TodoMateWidgetExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
+			productName = TodoMateUITests;
+			productReference = 451500FC2F011EE0007FF547 /* TodoMateUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		45E0A0E22D78497C000FDC24 /* TodoMateTests */ = {
+		4515010A2F011F08007FF547 /* TodoMateTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 45E0A0E92D78497C000FDC24 /* Build configuration list for PBXNativeTarget "TodoMateTests" */;
+			buildConfigurationList = 451501112F011F08007FF547 /* Build configuration list for PBXNativeTarget "TodoMateTests" */;
 			buildPhases = (
-				45E0A0DF2D78497C000FDC24 /* Sources */,
-				45E0A0E02D78497C000FDC24 /* Frameworks */,
-				45E0A0E12D78497C000FDC24 /* Resources */,
+				451501072F011F08007FF547 /* Sources */,
+				451501082F011F08007FF547 /* Frameworks */,
+				451501092F011F08007FF547 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				45E0A0E82D78497C000FDC24 /* PBXTargetDependency */,
+				451501102F011F08007FF547 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				45E0A0E42D78497C000FDC24 /* TodoMateTests */,
+				4515010C2F011F08007FF547 /* TodoMateTests */,
 			);
 			name = TodoMateTests;
 			packageProductDependencies = (
 			);
 			productName = TodoMateTests;
-			productReference = 45E0A0E32D78497C000FDC24 /* TodoMateTests.xctest */;
+			productReference = 4515010B2F011F08007FF547 /* TodoMateTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		45E10B8E2C69B77300FC31CD /* TodoMate */ = {
@@ -265,33 +189,28 @@
 				45E10B8B2C69B77300FC31CD /* Sources */,
 				45E10B8C2C69B77300FC31CD /* Frameworks */,
 				45E10B8D2C69B77300FC31CD /* Resources */,
-				451DEDEA2D3EA11300A20417 /* Embed Foundation Extensions */,
+				451500512F00FF1A007FF547 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				451DEDEC2D3EA11B00A20417 /* PBXTargetDependency */,
-				45C1A5872D7D704B005293BD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				452C66822E226FF600A68B94 /* Domain */,
-				452C66A12E22752500A68B94 /* Data */,
-				45DA69ED2E238B00007183E3 /* TodoMate */,
-				45DA6A742E238BEF007183E3 /* Dependency */,
+				451500C72F0119EB007FF547 /* App */,
 			);
 			name = TodoMate;
 			packageProductDependencies = (
 				45962D2B2D4B128300089A48 /* Sparkle */,
 				45B81D112E21EEB900BB1434 /* MarkdownUI */,
-				45B81D142E21EF0700BB1434 /* FirebaseAuth */,
-				45B81D162E21EF0700BB1434 /* FirebaseCore */,
-				45B81D182E21EF0700BB1434 /* FirebaseFirestore */,
-				45B81D1B2E21EF2000BB1434 /* GoogleSignIn */,
-				45B81D1D2E21EF2000BB1434 /* GoogleSignInSwift */,
 				458B30F72E7E6B0500820E47 /* SwiftUIIntrospect */,
+				455F3E812F00DB9700F7888D /* SimpleOverlaySystem */,
+				451501152F012A92007FF547 /* FirebaseAuth */,
+				451501172F012A92007FF547 /* FirebaseCore */,
+				451501192F012A92007FF547 /* FirebaseFirestore */,
+				4515011C2F012AFA007FF547 /* GoogleSignIn */,
 			);
 			productName = TodoMate;
-			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
+			productReference = 451500652F0100A9007FF547 /* TodoMate.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -301,14 +220,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
-					45C1A5792D7D704A005293BD = {
-						CreatedOnToolsVersion = 16.2;
+					451500FB2F011EE0007FF547 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 45E10B8E2C69B77300FC31CD;
 					};
-					45E0A0E22D78497C000FDC24 = {
-						CreatedOnToolsVersion = 16.2;
+					4515010A2F011F08007FF547 = {
+						CreatedOnToolsVersion = 26.2;
 						TestTargetID = 45E10B8E2C69B77300FC31CD;
 					};
 					45E10B8E2C69B77300FC31CD = {
@@ -327,9 +247,10 @@
 			packageReferences = (
 				45962D2A2D4B128300089A48 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				45B81D102E21EEB900BB1434 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
-				45B81D132E21EF0700BB1434 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				45B81D1A2E21EF2000BB1434 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				458B30F62E7E6B0500820E47 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
+				455F3E802F00DB9700F7888D /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */,
+				451501142F012A92007FF547 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4515011B2F012AFA007FF547 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 45E10B862C69B77300FC31CD;
@@ -337,21 +258,21 @@
 			projectRoot = "";
 			targets = (
 				45E10B8E2C69B77300FC31CD /* TodoMate */,
-				45E0A0E22D78497C000FDC24 /* TodoMateTests */,
-				45C1A5792D7D704A005293BD /* TodoMateWidgetExtension */,
+				451500FB2F011EE0007FF547 /* TodoMateUITests */,
+				4515010A2F011F08007FF547 /* TodoMateTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		45C1A5782D7D704A005293BD /* Resources */ = {
+		451500FA2F011EE0007FF547 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		45E0A0E12D78497C000FDC24 /* Resources */ = {
+		451501092F011F08007FF547 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -367,15 +288,36 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		451500512F00FF1A007FF547 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n/bin/bash \"${PROJECT_DIR}/script/copy_firebase_config.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-		45C1A5762D7D704A005293BD /* Sources */ = {
+		451500F82F011EE0007FF547 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		45E0A0DF2D78497C000FDC24 /* Sources */ = {
+		451501072F011F08007FF547 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -392,94 +334,60 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		451DEDEC2D3EA11B00A20417 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 45C1A5792D7D704A005293BD /* TodoMateWidgetExtension */;
-			targetProxy = 451DEDEB2D3EA11B00A20417 /* PBXContainerItemProxy */;
-		};
-		45C1A5872D7D704B005293BD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 45C1A5792D7D704A005293BD /* TodoMateWidgetExtension */;
-			targetProxy = 45C1A5862D7D704B005293BD /* PBXContainerItemProxy */;
-		};
-		45E0A0E82D78497C000FDC24 /* PBXTargetDependency */ = {
+		451501032F011EE0007FF547 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 45E10B8E2C69B77300FC31CD /* TodoMate */;
-			targetProxy = 45E0A0E72D78497C000FDC24 /* PBXContainerItemProxy */;
+			targetProxy = 451501022F011EE0007FF547 /* PBXContainerItemProxy */;
+		};
+		451501102F011F08007FF547 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 45E10B8E2C69B77300FC31CD /* TodoMate */;
+			targetProxy = 4515010F2F011F08007FF547 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		45C1A58B2D7D704B005293BD /* Debug */ = {
+		451501052F011EE0007FF547 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = TodoMateWidget/TodoMateWidget.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMateWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TodoMateWidget;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 2.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.TodoMateWidget;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMateUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMateWidget;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = TodoMate;
 			};
 			name = Debug;
 		};
-		45C1A58D2D7D704B005293BD /* Release */ = {
+		451501062F011EE0007FF547 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = TodoMateWidget/TodoMateWidget.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
-				ENABLE_HARDENED_RUNTIME = YES;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMateWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TodoMateWidget;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 2.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate.TodoMateWidget;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMateUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMateWidget;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = TodoMate;
 			};
 			name = Release;
 		};
-		45E0A0EA2D78497C000FDC24 /* Debug */ = {
+		451501122F011F08007FF547 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -487,17 +395,20 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8PRWAG4355;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMateTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TodoMate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TodoMate";
 			};
 			name = Debug;
 		};
-		45E0A0EC2D78497C000FDC24 /* Release */ = {
+		451501132F011F08007FF547 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -505,11 +416,14 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8PRWAG4355;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMateTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TodoMate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TodoMate";
 			};
@@ -645,21 +559,20 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMate.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resource/TodoMateDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMate/InfoDebug.plist;
+				INFOPLIST_FILE = Resource/InfoDebug.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -673,10 +586,9 @@
 				MARKETING_VERSION = 2.0.0;
 				OTHER_LDFLAGS = "-ObjC";
 				OTHER_SWIFT_FLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
+				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMateDebug;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMate;
 				SUPPORTED_PLATFORMS = macosx;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -693,23 +605,20 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMate.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resource/TodoMate.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 8PRWAG4355;
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = 8PRWAG4355;
+				DEVELOPMENT_TEAM = 8PRWAG4355;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMate/Info.plist;
+				INFOPLIST_FILE = Resource/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -726,8 +635,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "TodoMate iOS";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = TodoMate;
 				SUPPORTED_PLATFORMS = macosx;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -740,20 +647,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		45C1A58A2D7D704B005293BD /* Build configuration list for PBXNativeTarget "TodoMateWidgetExtension" */ = {
+		451501042F011EE0007FF547 /* Build configuration list for PBXNativeTarget "TodoMateUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				45C1A58B2D7D704B005293BD /* Debug */,
-				45C1A58D2D7D704B005293BD /* Release */,
+				451501052F011EE0007FF547 /* Debug */,
+				451501062F011EE0007FF547 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		45E0A0E92D78497C000FDC24 /* Build configuration list for PBXNativeTarget "TodoMateTests" */ = {
+		451501112F011F08007FF547 /* Build configuration list for PBXNativeTarget "TodoMateTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				45E0A0EA2D78497C000FDC24 /* Debug */,
-				45E0A0EC2D78497C000FDC24 /* Release */,
+				451501122F011F08007FF547 /* Debug */,
+				451501132F011F08007FF547 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -779,6 +686,30 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		451501142F012A92007FF547 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
+		4515011B2F012AFA007FF547 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+		455F3E802F00DB9700F7888D /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hot666666/SimpleOverlaySystem.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		458B30F62E7E6B0500820E47 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
@@ -803,25 +734,34 @@
 				minimumVersion = 2.4.1;
 			};
 		};
-		45B81D132E21EF0700BB1434 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.15.0;
-			};
-		};
-		45B81D1A2E21EF2000BB1434 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		451501152F012A92007FF547 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 451501142F012A92007FF547 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		451501172F012A92007FF547 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 451501142F012A92007FF547 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		451501192F012A92007FF547 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 451501142F012A92007FF547 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		4515011C2F012AFA007FF547 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4515011B2F012AFA007FF547 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		455F3E812F00DB9700F7888D /* SimpleOverlaySystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 455F3E802F00DB9700F7888D /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */;
+			productName = SimpleOverlaySystem;
+		};
 		458B30F72E7E6B0500820E47 /* SwiftUIIntrospect */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 458B30F62E7E6B0500820E47 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
@@ -836,31 +776,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 45B81D102E21EEB900BB1434 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
-		};
-		45B81D142E21EF0700BB1434 /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 45B81D132E21EF0700BB1434 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
-		45B81D162E21EF0700BB1434 /* FirebaseCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 45B81D132E21EF0700BB1434 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCore;
-		};
-		45B81D182E21EF0700BB1434 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 45B81D132E21EF0700BB1434 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		45B81D1B2E21EF2000BB1434 /* GoogleSignIn */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 45B81D1A2E21EF2000BB1434 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignIn;
-		};
-		45B81D1D2E21EF2000BB1434 /* GoogleSignInSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 45B81D1A2E21EF2000BB1434 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignInSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,3 +1,17 @@
 # TodoMate
 
-TodoMate는 사용자들이 그룹을 통해 오늘의 할 일들을 실시간으로 공유할 수 있습니다.
+## Build
+
+### App (Xcode)
+
+```bash
+just build   # 빌드
+just test    # 테스트
+```
+
+### scheme
+
+| Scheme | 용도 |
+|--------|------|
+| Debug | 디버깅 |
+| Release | 배포 |

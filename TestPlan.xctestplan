@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "553E7E4A-1E11-4630-8DC9-0DBA9E55CA3C",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:TodoMate.xcodeproj",
+        "identifier" : "451500FB2F011EE0007FF547",
+        "name" : "TodoMateUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:TodoMate.xcodeproj",
+        "identifier" : "4515010A2F011F08007FF547",
+        "name" : "TodoMateTests"
+      }
+    }
+  ],
+  "version" : 1
+}
