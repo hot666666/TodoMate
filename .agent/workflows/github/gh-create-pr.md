@@ -27,7 +27,12 @@ Also, link the PR to a GitHub Issue by including a closing keyword in the PR des
 Fixes #<issue-number>
 ```
 
-### Option A: Using GitHub CLI (`gh`)
+### Option A: Using GitHub MCP
+
+- Use GitHub MCP to open a PR targeting `BASE_BRANCH`.
+- When drafting the PR description/body, copy the structure from `.github/PR_TEMPLATE.md` and fill it in.
+
+### Option B: Using GitHub CLI (`gh`)
 
 ```bash
 # Example using GitHub CLI
@@ -47,14 +52,9 @@ cp .github/PR_TEMPLATE.md "$tmpfile"
 # Optional: open the file in your editor to fill it in
 # open -e "$tmpfile"
 
-# 3. Create PR using the body file
+# 3. Create PR using the body file(don't include $tmpfile in commit, it is just temperary file to be removed)
 gh pr create --base <BASE_BRANCH> --title "feat: description" --body-file "$tmpfile"
 
 # 4. Delete the temporary file
 rm -f "$tmpfile"
 ```
-
-### Option B: Using GitHub MCP
-
-- Use GitHub MCP to open a PR targeting `BASE_BRANCH`.
-- When drafting the PR description/body, copy the structure from `.github/PR_TEMPLATE.md` and fill it in.

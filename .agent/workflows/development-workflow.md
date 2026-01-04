@@ -7,7 +7,7 @@ If the branch is already finished and merged, and the user has not explicitly st
 
 | Parameter     | Default | Description                                               |
 | ------------- | ------- | --------------------------------------------------------- |
-| `BASE_BRANCH` | `dev`   | The branch from which to create a new feature/fix branch. |
+| `BASE_BRANCH` | current_branch   | The branch from which to create a new feature/fix branch. |
 | `USE_PR`      | `false` | Whether to use GitHub PR workflow for merging.            |
 
 > **Note**: If you need to work from a different base branch, specify it explicitly (e.g., `BASE_BRANCH=main`). Otherwise, use `BASE_BRANCH=dev`.
