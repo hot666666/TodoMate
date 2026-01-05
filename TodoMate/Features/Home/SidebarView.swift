@@ -63,11 +63,7 @@ struct SidebarView: View {
           .accessibilityIdentifier("sidebar_group_\(groupId)")
         }
       } header: {
-        HStack {
-          Text("Groups")
-          Spacer()
-          networkToggle
-        }
+        Text("Groups")
       }
 
       Section {
@@ -85,31 +81,34 @@ struct SidebarView: View {
       }
     }
     .listStyle(.sidebar)
+    .safeAreaInset(edge: .bottom) {
+      networkToggle
+        .padding()
+    }
   }
 
   // MARK: - Network Toggle
 
   private var networkToggle: some View {
-    Button {
-      Task {
-        await networkManager.toggle()
-      }
-    } label: {
-      HStack(spacing: 4) {
-        Image(systemName: networkManager.isOnline ? "wifi" : "wifi.slash")
-          .font(.caption2)
-        Text(networkManager.isOnline ? "Online" : "Offline")
-          .font(.caption2)
-      }
-      .foregroundStyle(networkManager.isOnline ? .green : .secondary)
-      .padding(.horizontal, 6)
-      .padding(.vertical, 2)
-      .background(
-        Capsule()
-          .fill(networkManager.isOnline ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
+    HStack {
+      Image(systemName: networkManager.isOnline ? "wifi" : "wifi.slash")
+      Text(networkManager.isOnline ? "Online" : "Offline")
+      Spacer()
+      Toggle(
+        "",
+        isOn: Binding(
+          get: { networkManager.isOnline },
+          set: { newValue in
+            Task {
+              await networkManager.setOnline(newValue)
+            }
+          },
+        ),
       )
+      .labelsHidden()
+      .toggleStyle(.switch)
     }
-    .buttonStyle(.plain)
+    .font(.body)
     .disabled(networkManager.isTransitioning)
     .accessibilityIdentifier("network_toggle")
   }
@@ -123,13 +122,14 @@ private struct SidebarProfileView: View {
     HStack(spacing: 12) {
       Circle()
         .fill(Color.orange.opacity(0.8))
-        .frame(width: 40, height: 40)
+        .frame(width: 32, height: 32)
         .overlay {
           Image(systemName: "person.fill")
             .foregroundStyle(.white)
+            .font(.caption)
         }
 
-      VStack(alignment: .leading, spacing: 2) {
+      VStack(alignment: .leading, spacing: 0) {
         Text(displayName)
           .font(.subheadline)
           .fontWeight(.semibold)

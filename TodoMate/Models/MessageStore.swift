@@ -11,6 +11,8 @@ import Observation
 @Observable
 @MainActor
 final class MessageStore {
+  @ObservationIgnored private var task: Task<Void, Never>?
+
   // MARK: - Dependencies
 
   private let createMessageUseCase: CreateMessageUseCase
@@ -39,7 +41,8 @@ final class MessageStore {
   func refresh(groupId: String) async {
     // Message는 cache 이용말고, 서버로부터 로드
     await load(groupId: groupId, useCache: false)
-    Task {
+    task?.cancel()
+    task = Task {
       await observe(groupId: groupId)
     }
   }
