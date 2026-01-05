@@ -63,16 +63,7 @@ fastlane/test_output
 
 # Firebase
 GoogleService-Info.plist
-
-# Firebase emulator
-Firestore/firebase-debug.log
-Firestore/firestore-debug.log
-Firestore/exported-data/*
+FirebaseConfig/
 
 # Certificate & Profile
 private/
-
-# AI
-GEMINI.md
-CLAUDE.md
-.claude/
