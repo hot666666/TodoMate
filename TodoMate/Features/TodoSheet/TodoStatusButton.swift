@@ -18,28 +18,28 @@ struct TodoStatusButton: View {
       action: {
         let anchorPoint = CGPoint(
           x: buttonFrame.midX,
-          y: buttonFrame.minY
+          y: buttonFrame.minY,
         )
 
         overlayManager.presentPopover(
           anchorPoint: anchorPoint,
           popoverType: .status,
           buttonWidth: buttonFrame.width,
-          buttonHeight: buttonFrame.height
+          buttonHeight: buttonFrame.height,
         ) {
           TodoStatusPicker(
             selectedStatus: status,
             onStatusSelected: { newStatus in
               status = newStatus
               overlayManager.pop()
-            }
+            },
           )
           .onKeyPress(.escape) {
             overlayManager.pop()
             return .handled
           }
         }
-      }
+      },
     )
     .background(
       GeometryReader { geo in
@@ -50,7 +50,7 @@ struct TodoStatusButton: View {
           .onChange(of: geo.frame(in: .global)) { _, newFrame in
             buttonFrame = newFrame
           }
-      }
+      },
     )
   }
 }

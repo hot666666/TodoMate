@@ -84,7 +84,7 @@ private struct PopoverView: View {
       ForEach(calendarDays) { calendarDay in
         DayCell(
           calendarDay: calendarDay,
-          isSelected: calendarDay.date.isSameDay(as: date)
+          isSelected: calendarDay.date.isSameDay(as: date),
         )
         .onTapGesture {
           date = calendarDay.date

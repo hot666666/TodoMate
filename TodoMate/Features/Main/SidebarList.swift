@@ -25,7 +25,7 @@ struct SidebarList: View {
         ForEach(sidebarItems, id: \.id) { sidebar in
           SidebarItem(
             isSelected: item.id == sidebar.id,
-            onTap: { item = sidebar }
+            onTap: { item = sidebar },
           ) {
             Text(sidebar.title)
           }
@@ -38,7 +38,7 @@ struct SidebarList: View {
 
       SidebarItem(
         isSelected: item.id == Sidebar.profile.id,
-        onTap: { item = .profile }
+        onTap: { item = .profile },
       ) {
         Label(Sidebar.profile.title, systemImage: "person.circle.fill")
       }

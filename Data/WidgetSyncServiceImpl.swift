@@ -14,7 +14,7 @@ final class SwiftDataWidgetSyncService: WidgetSyncService {
 
   init(
     todoRepository: TodoRepository,
-    modelContext: ModelContext
+    modelContext: ModelContext,
   ) {
     self.todoRepository = todoRepository
     self.modelContext = modelContext

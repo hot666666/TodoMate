@@ -18,6 +18,6 @@ struct UserSession {
 extension UserSession {
   static let stub = UserSession(
     currentUser: User.stub,
-    groupMembers: User.stubs
+    groupMembers: User.stubs,
   )
 }

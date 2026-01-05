@@ -22,7 +22,7 @@ final class LoadUserSessionUseCaseImpl: LoadUserSessionUseCase {
   init(
     readUserUseCase: ReadUserUseCase,
     readUserGroupUseCase: ReadUserGroupUseCase,
-    userRepository: UserRepository
+    userRepository: UserRepository,
   ) {
     self.readUserUseCase = readUserUseCase
     self.readUserGroupUseCase = readUserGroupUseCase

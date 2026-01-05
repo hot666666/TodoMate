@@ -41,7 +41,7 @@ struct Todo: Identifiable, Codable {
     date: Date = .now,
     createdAt: Date,
     updatedAt: Date,
-    owner: String
+    owner: String,
   ) {
     self.id = id
     self.content = content
@@ -63,7 +63,7 @@ struct Todo: Identifiable, Codable {
       date: now.startOfDay,
       createdAt: now,
       updatedAt: now,
-      owner: owner
+      owner: owner,
     )
   }
 
@@ -103,7 +103,7 @@ extension Todo {
     date: .now,
     createdAt: .now,
     updatedAt: .now,
-    owner: EntityConstant.User.stubId
+    owner: EntityConstant.User.stubId,
   )
 
   static func copy(from todo: Todo) -> Todo {
@@ -116,7 +116,7 @@ extension Todo {
       date: todo.date,
       createdAt: now,
       updatedAt: now,
-      owner: todo.owner
+      owner: todo.owner,
     )
   }
 }

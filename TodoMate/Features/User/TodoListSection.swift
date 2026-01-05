@@ -39,7 +39,7 @@ struct TodoListSection: View {
     todoStore.reorderTodos(
       from: sourceIndex,
       to: destination,
-      currentUserId: sessionStore.userId
+      currentUserId: sessionStore.userId,
     )
   }
 }
@@ -85,7 +85,7 @@ extension TodoListSection {
       isInteractive: isMine,
       showDragHandle: isMine,
       onTap: presentTodoEditSheet,
-      onUpdate: isMine ? onUpdateTodo : nil
+      onUpdate: isMine ? onUpdateTodo : nil,
     )
     .contentShape(.rect)
     .listRowSeparator(.hidden)
@@ -96,7 +96,7 @@ extension TodoListSection {
   private func deleteButton(for todo: Todo) -> some View {
     DeleteContextMenuButton.withConfirmation(
       todo: todo,
-      overlayManager: overlayManager
+      overlayManager: overlayManager,
     ) { todo in
       todoStore.delete(todo, userId: sessionStore.userId)
     }

@@ -19,7 +19,7 @@ struct Memo: Identifiable, Codable, Equatable {
     content: String = "",
     createdAt: Date,
     updatedAt: Date,
-    owner: String
+    owner: String,
   ) {
     self.id = id
     self.content = content
@@ -35,7 +35,7 @@ struct Memo: Identifiable, Codable, Equatable {
       content: content,
       createdAt: now,
       updatedAt: now,
-      owner: owner
+      owner: owner,
     )
   }
 
@@ -61,13 +61,13 @@ extension Memo {
     content: "# 샘플 메모\n\n- 첫 번째 항목\n- 두 번째 항목\n\n**볼드 텍스트**와 *이탤릭 텍스트*",
     createdAt: .now,
     updatedAt: .now,
-    owner: EntityConstant.User.stubId
+    owner: EntityConstant.User.stubId,
   )
 }
 
 extension Memo {
   var isEmpty: Bool { content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-  var wordCount: Int { content.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.count }
+  var wordCount: Int { content.components(separatedBy: .whitespacesAndNewlines).count(where: { !$0.isEmpty }) }
 
   static func empty(for userId: String) -> Memo {
     Memo(owner: userId, content: "")

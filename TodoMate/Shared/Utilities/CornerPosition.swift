@@ -23,7 +23,7 @@ struct CornerPosition: OptionSet {
       topLeading: contains(.topLeading) ? CalendarDesignSystem.Layout.gridCornerRadius : 0,
       bottomLeading: contains(.bottomLeading) ? CalendarDesignSystem.Layout.gridCornerRadius : 0,
       bottomTrailing: contains(.bottomTrailing) ? CalendarDesignSystem.Layout.gridCornerRadius : 0,
-      topTrailing: contains(.topTrailing) ? CalendarDesignSystem.Layout.gridCornerRadius : 0
+      topTrailing: contains(.topTrailing) ? CalendarDesignSystem.Layout.gridCornerRadius : 0,
     )
   }
 }

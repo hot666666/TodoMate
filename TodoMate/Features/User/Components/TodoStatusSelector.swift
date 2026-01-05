@@ -16,7 +16,7 @@ struct TodoStatusSelector: View {
   var body: some View {
     TodoStatusChip(
       status: selectedStatus,
-      action: isInteractive ? { showMenu.toggle() } : nil
+      action: isInteractive ? { showMenu.toggle() } : nil,
     )
     .popover(isPresented: $showMenu) {
       if isInteractive {
@@ -42,12 +42,12 @@ struct TodoStatusSelector: View {
   VStack(spacing: 20) {
     TodoStatusSelector(
       selectedStatus: .constant(.todo),
-      isInteractive: true
+      isInteractive: true,
     )
 
     TodoStatusSelector(
       selectedStatus: .constant(.complete),
-      isInteractive: false
+      isInteractive: false,
     )
   }
   .frame(width: 200, height: 200)

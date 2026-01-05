@@ -67,7 +67,7 @@ final class DIContainer {
     authService: AuthService,
     calendarDayService: CalendarDayService,
     widgetSyncService: WidgetSyncService,
-    messageReadTracker: MessageReadTracker
+    messageReadTracker: MessageReadTracker,
   ) {
     // Data Layer
     self.userRepository = userRepository
@@ -88,7 +88,7 @@ final class DIContainer {
     loadUserSessionUseCase = LoadUserSessionUseCaseImpl(
       readUserUseCase: readUserUseCase,
       readUserGroupUseCase: readUserGroupUseCase,
-      userRepository: userRepository
+      userRepository: userRepository,
     )
 
     // Domain Layer - Todo
@@ -103,7 +103,7 @@ final class DIContainer {
     saveTodoOrderUseCase = SaveTodoOrderUseCaseImpl(orderRepository: todoOrderRepository)
     applyTodoOrderUseCase = ApplyTodoOrderUseCaseImpl(
       orderRepository: todoOrderRepository,
-      saveTodoOrderUseCase: saveTodoOrderUseCase
+      saveTodoOrderUseCase: saveTodoOrderUseCase,
     )
     reorderTodosUseCase = ReorderTodosUseCaseImpl(saveTodoOrderUseCase: saveTodoOrderUseCase)
 
@@ -136,6 +136,6 @@ extension DIContainer {
     authService: StubAuthService(),
     calendarDayService: CalendarDayServiceImpl(),
     widgetSyncService: StubWidgetSyncService(),
-    messageReadTracker: StubMessageReadTracker()
+    messageReadTracker: StubMessageReadTracker(),
   )
 }

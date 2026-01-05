@@ -68,7 +68,7 @@ extension Todo {
       date: editable.date,
       createdAt: editable.createdAt,
       updatedAt: editable.isNew ? editable.createdAt : .now,
-      owner: editable.owner
+      owner: editable.owner,
     )
   }
 }

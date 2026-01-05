@@ -31,7 +31,7 @@ final class CalendarDayServiceImpl: CalendarDayService {
         CalendarDay(
           day: calendar.component(.day, from: date),
           isCurrentMonth: calendar.component(.month, from: date) == currentMonth,
-          date: date
+          date: date,
         )
       }
   }

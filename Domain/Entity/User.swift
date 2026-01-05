@@ -19,7 +19,7 @@ struct User: Codable, Identifiable, Hashable {
     displayName: String,
     groupId: String,
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
   ) {
     self.id = id
     self.displayName = displayName
@@ -31,7 +31,7 @@ struct User: Codable, Identifiable, Hashable {
   init(
     id: String = UUID().uuidString,
     displayName: String = "Unknown",
-    groupId: String = UUID().uuidString
+    groupId: String = UUID().uuidString,
   ) {
     let now: Date = .now
     self.init(
@@ -39,7 +39,7 @@ struct User: Codable, Identifiable, Hashable {
       displayName: displayName,
       groupId: groupId,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     )
   }
 }
@@ -52,7 +52,7 @@ extension User {
     displayName: EntityConstant.User.stubDisplayName,
     groupId: EntityConstant.UserGroup.stubId,
     createdAt: .now,
-    updatedAt: .now
+    updatedAt: .now,
   )
 
   static let stubs = [

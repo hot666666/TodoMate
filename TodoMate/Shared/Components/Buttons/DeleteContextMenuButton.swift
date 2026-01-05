@@ -22,13 +22,13 @@ extension DeleteContextMenuButton {
   static func withConfirmation(
     todo: Todo,
     overlayManager: OverlayManager,
-    onConfirmedDelete: @escaping (Todo) -> Void
+    onConfirmedDelete: @escaping (Todo) -> Void,
   ) -> DeleteContextMenuButton {
     DeleteContextMenuButton(todo: todo) { todo in
       overlayManager.presentConfirmation(
         title: "\(todo.content) 삭제",
         message: "이 할일을 삭제하시겠습니까?",
-        destructiveActionTitle: "삭제"
+        destructiveActionTitle: "삭제",
       ) {
         onConfirmedDelete(todo)
       }

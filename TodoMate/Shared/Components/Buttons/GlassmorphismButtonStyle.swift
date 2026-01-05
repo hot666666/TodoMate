@@ -22,14 +22,14 @@ struct GlassmorphismButtonStyle: ButtonStyle {
             .fill(.ultraThinMaterial)
             .overlay(
               RoundedRectangle(cornerRadius: 6)
-                .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5)
+                .stroke(Color.secondary.opacity(0.3), lineWidth: 0.5),
             )
         } else {
           RoundedRectangle(cornerRadius: 6)
             .fill(.thinMaterial)
             .overlay(
               RoundedRectangle(cornerRadius: 6)
-                .stroke(Color.primary.opacity(0.2), lineWidth: 0.5)
+                .stroke(Color.primary.opacity(0.2), lineWidth: 0.5),
             )
         }
       }

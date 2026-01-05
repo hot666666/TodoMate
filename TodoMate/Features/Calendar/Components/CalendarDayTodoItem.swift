@@ -17,7 +17,7 @@ struct CalendarDayTodoItem: View {
     DraggedTodo(
       todoId: todo.id,
       sourceDate: sourceDate,
-      content: todo.contentOrPlaceholder
+      content: todo.contentOrPlaceholder,
     )
   }
 
@@ -33,7 +33,7 @@ struct CalendarDayTodoItem: View {
     .padding(.vertical, CalendarDesignSystem.Component.TodoItem.verticalPadding)
     .background(
       RoundedRectangle(cornerRadius: CalendarDesignSystem.Component.TodoItem.cornerRadius)
-        .fill(todo.status.color)
+        .fill(todo.status.color),
     )
     .opacity(dragState == .draggedOut ? CalendarDesignSystem.Animation.dragOpacity : 1.0)
     .scaleEffect(dragState == .dragging ? CalendarDesignSystem.Animation.dragScale : 1.0)
@@ -53,7 +53,7 @@ struct CalendarDayTodoItem: View {
     .padding(.vertical, CalendarDesignSystem.Component.TodoItem.dragPreviewVerticalPadding)
     .background(
       RoundedRectangle(cornerRadius: CalendarDesignSystem.Component.TodoItem.cornerRadius)
-        .fill(todo.status.color.opacity(CalendarDesignSystem.Component.TodoItem.dragPreviewOpacity))
+        .fill(todo.status.color.opacity(CalendarDesignSystem.Component.TodoItem.dragPreviewOpacity)),
     )
   }
 }

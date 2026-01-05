@@ -67,7 +67,7 @@ final class CalendarScreenVM {
         date: todo.date,
         createdAt: now,
         updatedAt: now,
-        owner: todo.owner
+        owner: todo.owner,
       )
       try createTodoUseCase.run(for: userId, newTodo)
 

@@ -17,7 +17,7 @@ struct SidebarItem<Content: View>: View {
   init(
     isSelected: Bool,
     onTap: @escaping () -> Void,
-    @ViewBuilder content: () -> Content
+    @ViewBuilder content: () -> Content,
   ) {
     self.isSelected = isSelected
     self.onTap = onTap
@@ -58,7 +58,7 @@ struct SidebarItem<Content: View>: View {
       .fill(.ultraThinMaterial.opacity(SidebarDesignSystem.selectedBackgroundOpacity))
       .overlay(
         RoundedRectangle(cornerRadius: SidebarDesignSystem.itemCornerRadius)
-          .stroke(Color.white.opacity(SidebarDesignSystem.selectedBorderOpacity), lineWidth: 1)
+          .stroke(Color.white.opacity(SidebarDesignSystem.selectedBorderOpacity), lineWidth: 1),
       )
       .animation(SidebarDesignSystem.selectionAnimation, value: isSelected)
   }
@@ -68,7 +68,7 @@ struct SidebarItem<Content: View>: View {
       .fill(.ultraThinMaterial.opacity(0.3))
       .overlay(
         RoundedRectangle(cornerRadius: SidebarDesignSystem.itemCornerRadius)
-          .stroke(Color.white.opacity(0.1), lineWidth: 1)
+          .stroke(Color.white.opacity(0.1), lineWidth: 1),
       )
   }
 }

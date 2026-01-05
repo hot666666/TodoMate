@@ -68,18 +68,18 @@ extension TodoSheet {
       TodoContentTextField(
         content: $editableTodo.content,
         focusedField: $focusedField,
-        onSubmit: { perform(.submitAndDismiss) }
+        onSubmit: { perform(.submitAndDismiss) },
       )
       TodoDetailTextEditor(
         detail: $editableTodo.detail,
-        onSubmit: { perform(.submitAndDismiss) }
+        onSubmit: { perform(.submitAndDismiss) },
       )
       HStack(alignment: .center) {
         TodoStatusButton(
-          status: $editableTodo.status
+          status: $editableTodo.status,
         )
         TodoDateButton(
-          date: $editableTodo.date
+          date: $editableTodo.date,
         )
         Spacer()
 

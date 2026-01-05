@@ -43,7 +43,7 @@ struct MessageListSection: View {
       overlayManager.presentConfirmation(
         title: "메시지 삭제",
         message: "이 메시지를 삭제하시겠습니까?",
-        destructiveActionTitle: "삭제"
+        destructiveActionTitle: "삭제",
       ) {
         messageStore.delete(message, userId: sessionStore.userId)
       }
@@ -123,7 +123,7 @@ extension MessageListSection {
       .scrollContentBackground(.hidden)
       .frame(
         minHeight: MessageDesignSystem.Component.MessageList.editingMinHeight,
-        maxHeight: MessageDesignSystem.Component.MessageList.editingMaxHeight
+        maxHeight: MessageDesignSystem.Component.MessageList.editingMaxHeight,
       )
       .onKeyPress(.return, phases: .down) { key in
         if key.modifiers.contains(.command) {

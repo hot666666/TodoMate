@@ -38,7 +38,7 @@ final class FirebaseAuthService: AuthService {
     let accessToken = signInResult.user.accessToken.tokenString
     let credential = GoogleAuthProvider.credential(
       withIDToken: idToken,
-      accessToken: accessToken
+      accessToken: accessToken,
     )
 
     try await Auth.auth().signIn(with: credential)

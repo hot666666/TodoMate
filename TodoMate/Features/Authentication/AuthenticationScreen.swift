@@ -58,7 +58,7 @@ extension AuthenticationScreen {
     .confirmationDialog(
       "로그인 오류",
       isPresented: $isErrorDialogPresented,
-      titleVisibility: .visible
+      titleVisibility: .visible,
     ) {
       Button("확인") {}
     } message: {

@@ -31,7 +31,7 @@ struct CalendarScreen: View {
     overlayManager.presentConfirmation(
       title: "\(todo.content) 삭제",
       message: "이 할일을 삭제하시겠습니까?",
-      destructiveActionTitle: "삭제"
+      destructiveActionTitle: "삭제",
     ) {
       calendarVM.deleteTodo(todo, for: sessionStore.userId)
     }
@@ -47,7 +47,7 @@ struct CalendarScreen: View {
         Task {
           await calendarVM.refresh(userId: sessionStore.userId)
         }
-      }
+      },
     ) {
       TodoSheet(editableTodo: selectedTodo)
     }
@@ -63,7 +63,7 @@ struct CalendarScreen: View {
         Task {
           await calendarVM.refresh(userId: sessionStore.userId)
         }
-      }
+      },
     ) {
       TodoSheet(editableTodo: selectedTodo)
     }
@@ -125,7 +125,7 @@ extension CalendarScreen {
       yearMonth: calendarVM.currentDate.yearMonth,
       onPrevious: { calendarVM.moveToPrevMonth(userId: sessionStore.userId) },
       onNext: { calendarVM.moveToNextMonth(userId: sessionStore.userId) },
-      onToday: { calendarVM.moveToCurrMonth(userId: sessionStore.userId) }
+      onToday: { calendarVM.moveToCurrMonth(userId: sessionStore.userId) },
     )
     .padding(.horizontal, 8)
   }
@@ -158,14 +158,14 @@ extension CalendarScreen {
           onMoveTodo: moveTodo,
           onCopyTodo: copyTodo,
           onDeleteTodo: deleteTodo,
-          onTapTodo: presentTodoEditSheet
+          onTapTodo: presentTodoEditSheet,
         )
       }
     }
     .padding(CalendarDesignSystem.Layout.gridContainerPadding)
     .background(
       RoundedRectangle(cornerRadius: CalendarDesignSystem.Layout.gridCornerRadius)
-        .fill(Color.white.opacity(0.05))
+        .fill(Color.white.opacity(0.05)),
     )
     .padding(.bottom, CalendarDesignSystem.Layout.gridContainerBottomPadding)
   }

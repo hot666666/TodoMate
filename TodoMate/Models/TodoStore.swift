@@ -128,7 +128,7 @@ final class TodoStore {
         currentUserId: currentUserId,
         currentDate: currentDate,
         from: from,
-        to: to
+        to: to,
       )
     }
   }

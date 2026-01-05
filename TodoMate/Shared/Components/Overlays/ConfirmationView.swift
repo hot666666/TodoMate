@@ -57,7 +57,7 @@ struct ConfirmationView: View {
     .background(.ultraThickMaterial, in: .rect(cornerRadius: OverlayDesignSystem.Confirmation.cornerRadius))
     .overlay(
       RoundedRectangle(cornerRadius: OverlayDesignSystem.Confirmation.cornerRadius)
-        .stroke(.secondary.opacity(OverlayDesignSystem.Confirmation.strokeOpacity), lineWidth: OverlayDesignSystem.Confirmation.strokeWidth)
+        .stroke(.secondary.opacity(OverlayDesignSystem.Confirmation.strokeOpacity), lineWidth: OverlayDesignSystem.Confirmation.strokeWidth),
     )
     .shadow(radius: OverlayDesignSystem.Confirmation.shadowRadius)
     .onKeyPress(.escape) {
@@ -74,6 +74,6 @@ struct ConfirmationView: View {
     destructiveActionTitle: "삭제",
     cancelTitle: "취소",
     destructiveAction: {},
-    onDismiss: {}
+    onDismiss: {},
   )
 }

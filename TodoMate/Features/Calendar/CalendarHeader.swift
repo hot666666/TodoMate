@@ -35,19 +35,19 @@ struct CalendarHeader: View {
       navigationButton(
         icon: "chevron.left",
         style: .navigation,
-        action: onPrevious
+        action: onPrevious,
       )
 
       navigationButton(
         icon: "dot.circle.fill",
         style: .today,
-        action: onToday
+        action: onToday,
       )
 
       navigationButton(
         icon: "chevron.right",
         style: .navigation,
-        action: onNext
+        action: onNext,
       )
     }
     .padding(.horizontal, CalendarDesignSystem.Component.Header.navigationPadding)
@@ -63,7 +63,7 @@ struct CalendarHeader: View {
   private func navigationButton(
     icon: String,
     style: ButtonStyle,
-    action: @escaping () -> Void
+    action: @escaping () -> Void,
   ) -> some View {
     Button(action: action) {
       Image(systemName: icon)
@@ -73,7 +73,7 @@ struct CalendarHeader: View {
         .background(
           style == .today ? .clear :
             Color.primary.opacity(0.05),
-          in: Circle()
+          in: Circle(),
         )
         .scaleEffect(style == .today ? CalendarDesignSystem.Component.Header.todayScale : 1.0)
     }

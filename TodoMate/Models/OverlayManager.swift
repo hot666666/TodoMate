@@ -18,27 +18,27 @@ final class OverlayManager {
   func presentSheet(
     editableTodo: EditableTodo? = nil,
     onDismiss: (() -> Void)? = nil,
-    @ViewBuilder content: @escaping () -> some View
+    @ViewBuilder content: @escaping () -> some View,
   ) {
     let item = OverlayItem(
       type: .sheet,
       content: AnyView(content()),
       onDismiss: onDismiss,
       canDismiss: nil,
-      editableTodo: editableTodo
+      editableTodo: editableTodo,
     )
     overlays.append(item)
   }
 
   func presentFullScreen(
     onDismiss: (() -> Void)? = nil,
-    @ViewBuilder content: @escaping () -> some View
+    @ViewBuilder content: @escaping () -> some View,
   ) {
     let item = OverlayItem(
       type: .fullScreen,
       content: AnyView(content()),
       onDismiss: onDismiss,
-      canDismiss: nil
+      canDismiss: nil,
     )
     overlays.append(item)
   }
@@ -48,7 +48,7 @@ final class OverlayManager {
     message: String? = nil,
     destructiveActionTitle: String,
     cancelTitle: String = "취소",
-    destructiveAction: @escaping () -> Void
+    destructiveAction: @escaping () -> Void,
   ) {
     let confirmationView = ConfirmationView(
       title: title,
@@ -58,14 +58,14 @@ final class OverlayManager {
       destructiveAction: destructiveAction,
       onDismiss: { [weak self] in
         self?.pop()
-      }
+      },
     )
 
     let item = OverlayItem(
       type: .confirmation,
       content: AnyView(confirmationView),
       onDismiss: nil,
-      canDismiss: nil
+      canDismiss: nil,
     )
     overlays.append(item)
   }
@@ -76,7 +76,7 @@ final class OverlayManager {
     buttonWidth: CGFloat? = nil,
     buttonHeight: CGFloat? = nil,
     onDismiss: (() -> Void)? = nil,
-    @ViewBuilder content: @escaping () -> some View
+    @ViewBuilder content: @escaping () -> some View,
   ) {
     let item = OverlayItem(
       type: .popover,
@@ -86,7 +86,7 @@ final class OverlayManager {
       anchorPoint: anchorPoint,
       popoverType: popoverType,
       buttonWidth: buttonWidth,
-      buttonHeight: buttonHeight
+      buttonHeight: buttonHeight,
     )
     overlays.append(item)
   }
@@ -110,7 +110,7 @@ final class OverlayManager {
           title: title,
           message: message,
           destructiveActionTitle: "폐기",
-          cancelTitle: "취소"
+          cancelTitle: "취소",
         ) {
           // confirmation은 ConfirmationView의 onDismiss에서 자동으로 pop됨
           // 여기서는 TodoSheet만 처리
@@ -168,7 +168,7 @@ extension OverlayManager {
       popoverType: PopoverType? = nil,
       buttonWidth: CGFloat? = nil,
       buttonHeight: CGFloat? = nil,
-      editableTodo: EditableTodo? = nil
+      editableTodo: EditableTodo? = nil,
     ) {
       self.type = type
       self.content = content

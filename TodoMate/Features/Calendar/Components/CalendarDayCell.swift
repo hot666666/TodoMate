@@ -145,9 +145,9 @@ struct CalendarDayCell: View {
           LinearGradient(
             colors: [.secondary.opacity(0.8), .secondary.opacity(0.4)],
             startPoint: .topLeading,
-            endPoint: .bottomTrailing
+            endPoint: .bottomTrailing,
           ),
-          lineWidth: 2
+          lineWidth: 2,
         )
         .shadow(color: .secondary.opacity(0.2), radius: 4, x: 0, y: 1)
     case .accepting:
@@ -156,13 +156,13 @@ struct CalendarDayCell: View {
           LinearGradient(
             colors: [.secondary.opacity(0.15), .secondary.opacity(0.08)],
             startPoint: .topLeading,
-            endPoint: .bottomTrailing
-          )
+            endPoint: .bottomTrailing,
+          ),
         )
         .overlay(
           UnevenRoundedRectangle(cornerRadii: cornerPosition.cornerRadii)
             .inset(by: 1)
-            .stroke(.secondary.opacity(0.8), lineWidth: 2)
+            .stroke(.secondary.opacity(0.8), lineWidth: 2),
         )
         .shadow(color: .secondary.opacity(0.2), radius: 4, x: 0, y: 1)
     case .normal:

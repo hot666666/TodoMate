@@ -40,7 +40,7 @@ struct TodoStatusChip: View {
     .background(
       Capsule()
         .fill(status.color.opacity(isInteractive ? HomeDesignSystem.Component.TodoList.StatusChip.interactiveOpacity : HomeDesignSystem.Component.TodoList.StatusChip.readOnlyOpacity))
-        .shadow(color: status.color.opacity(0.2), radius: HomeDesignSystem.Shadow.medium, x: 0, y: 1)
+        .shadow(color: status.color.opacity(0.2), radius: HomeDesignSystem.Shadow.medium, x: 0, y: 1),
     )
   }
 }

@@ -30,7 +30,7 @@ final class UserDefaultsTodoOrderRepository: TodoOrderRepository {
     return TodoOrder(
       userId: userId,
       dateKey: dateKey,
-      todoIds: todoIds
+      todoIds: todoIds,
     )
   }
 

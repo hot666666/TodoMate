@@ -27,7 +27,7 @@ struct GroupUserTodoCard: View {
     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
     .overlay(
       RoundedRectangle(cornerRadius: 16)
-        .stroke(.tertiary.opacity(0.3), lineWidth: 0.5)
+        .stroke(.tertiary.opacity(0.3), lineWidth: 0.5),
     )
   }
 
@@ -79,7 +79,7 @@ private struct TodoRow: View {
     todos: [
       Todo(owner: "user1", content: "할일 1"),
       Todo(owner: "user1", content: "할일 2"),
-    ]
+    ],
   )
   .frame(width: 200, height: 150)
 }

@@ -16,14 +16,14 @@ struct TodoDateButton: View {
     Button(action: {
       let anchorPoint = CGPoint(
         x: buttonFrame.minX,
-        y: buttonFrame.minY
+        y: buttonFrame.minY,
       )
 
       overlayManager.presentPopover(
         anchorPoint: anchorPoint,
         popoverType: .date,
         buttonWidth: buttonFrame.width,
-        buttonHeight: buttonFrame.height
+        buttonHeight: buttonFrame.height,
       ) {
         TodoDatePicker(date: $date)
       }
@@ -47,7 +47,7 @@ struct TodoDateButton: View {
           .onChange(of: geo.frame(in: .global)) { _, newFrame in
             buttonFrame = newFrame
           }
-      }
+      },
     )
   }
 }

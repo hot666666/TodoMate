@@ -32,7 +32,7 @@ extension MemoSection {
       content: currentMemo?.content ?? "",
       isEditable: isMyMemo,
       isEditing: isMyMemo ? $isEditingMemo : .constant(false),
-      onSave: saveMemo
+      onSave: saveMemo,
     )
     .padding(.horizontal, HomeDesignSystem.Padding.small)
   }
@@ -43,7 +43,7 @@ extension MemoSection {
 
   MemoSection(
     selectedUserId: "user1",
-    isEditingMemo: $isEditingMemo
+    isEditingMemo: $isEditingMemo,
   )
   .environment(SessionStore.preview)
   .environment(MemoStore.preview)

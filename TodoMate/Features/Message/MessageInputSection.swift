@@ -26,7 +26,7 @@ struct MessageInputSection: View {
       let message = GroupMessage(
         content: trimmed,
         groupId: sessionStore.userGroupId,
-        owner: sessionStore.userId
+        owner: sessionStore.userId,
       )
       messageStore.add(message, userId: sessionStore.userId)
       inputText = ""

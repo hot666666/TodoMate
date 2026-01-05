@@ -62,7 +62,7 @@ struct OverlayContainer<Content: View>: View {
               .background(.ultraThickMaterial, in: .rect(cornerRadius: OverlayDesignSystem.Container.Sheet.cornerRadius))
               .overlay(
                 RoundedRectangle(cornerRadius: OverlayDesignSystem.Container.Sheet.cornerRadius)
-                  .stroke(.secondary.opacity(OverlayDesignSystem.Container.Sheet.strokeOpacity), lineWidth: OverlayDesignSystem.Container.Sheet.strokeWidth)
+                  .stroke(.secondary.opacity(OverlayDesignSystem.Container.Sheet.strokeOpacity), lineWidth: OverlayDesignSystem.Container.Sheet.strokeWidth),
               )
               .shadow(radius: OverlayDesignSystem.Container.Sheet.shadowRadius)
           }
@@ -120,12 +120,12 @@ struct OverlayContainer<Content: View>: View {
             .background(.ultraThickMaterial, in: .rect(cornerRadius: OverlayDesignSystem.Container.Popover.cornerRadius))
             .overlay(
               RoundedRectangle(cornerRadius: OverlayDesignSystem.Container.Popover.cornerRadius)
-                .stroke(.secondary.opacity(OverlayDesignSystem.Container.Popover.strokeOpacity), lineWidth: OverlayDesignSystem.Container.Popover.strokeWidth)
+                .stroke(.secondary.opacity(OverlayDesignSystem.Container.Popover.strokeOpacity), lineWidth: OverlayDesignSystem.Container.Popover.strokeWidth),
             )
             .shadow(radius: OverlayDesignSystem.Container.Popover.shadowRadius)
             .position(
               x: calculatePopoverX(anchorPoint: anchorPoint, popoverType: overlay.popoverType),
-              y: calculatePopoverY(anchorPoint: anchorPoint, popoverType: overlay.popoverType)
+              y: calculatePopoverY(anchorPoint: anchorPoint, popoverType: overlay.popoverType),
             )
         }
       }

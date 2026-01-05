@@ -36,7 +36,7 @@ final class SessionStore {
 
   init(
     container: DIContainer,
-    userSession: UserSession
+    userSession: UserSession,
   ) {
     user = userSession.currentUser
     userGroup = userSession.groupMembers
@@ -82,6 +82,6 @@ final class SessionStore {
 extension SessionStore {
   static let preview: SessionStore = .init(
     container: .preview,
-    userSession: .stub
+    userSession: .stub,
   )
 }

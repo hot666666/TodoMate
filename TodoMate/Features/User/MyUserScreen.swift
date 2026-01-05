@@ -21,7 +21,7 @@ struct MyUserScreen: View {
     VStack(spacing: HomeDesignSystem.Layout.sectionSpacing) {
       MemoSection(
         selectedUserId: user.id,
-        isEditingMemo: $isEditingMemo
+        isEditingMemo: $isEditingMemo,
       )
 
       singleOrGroup
@@ -39,7 +39,7 @@ struct MyUserScreen: View {
     if isSingle {
       TodoListSection(
         todos: todoStore.todos[user.id, default: []],
-        isMine: true
+        isMine: true,
       )
     } else {
       VStack {
@@ -47,7 +47,7 @@ struct MyUserScreen: View {
           ForEach(sessionStore.userGroup) { member in
             GroupUserTodoCard(
               user: member,
-              todos: todoStore.todos[member.id, default: []]
+              todos: todoStore.todos[member.id, default: []],
             )
           }
         }

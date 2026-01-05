@@ -19,12 +19,12 @@ struct OtherUserScreen: View {
     VStack(spacing: HomeDesignSystem.Layout.sectionSpacing) {
       MemoSection(
         selectedUserId: user.id,
-        isEditingMemo: .constant(false)
+        isEditingMemo: .constant(false),
       )
 
       TodoListSection(
         todos: todoStore.todos[user.id, default: []],
-        isMine: false
+        isMine: false,
       )
       .padding(.top, 45)
       .background(.ultraThickMaterial, in: UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 16))

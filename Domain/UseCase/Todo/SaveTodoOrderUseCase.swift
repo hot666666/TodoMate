@@ -24,7 +24,7 @@ final class SaveTodoOrderUseCaseImpl: SaveTodoOrderUseCase {
     let order = TodoOrder(
       userId: userId,
       dateKey: dateKey,
-      todoIds: todoIds
+      todoIds: todoIds,
     )
     orderRepository.saveTodoOrder(order)
   }

@@ -22,7 +22,7 @@ struct TodoItem: View {
     isInteractive: Bool = false,
     showDragHandle: Bool = false,
     onTap: @escaping (Todo) -> Void,
-    onUpdate: ((Todo) -> Void)? = nil
+    onUpdate: ((Todo) -> Void)? = nil,
   ) {
     self.todo = todo
     self.isInteractive = isInteractive
@@ -53,7 +53,7 @@ struct TodoItem: View {
     .padding(.vertical, 12)
     .background(
       RoundedRectangle(cornerRadius: 8)
-        .fill(isHovering ? Color.secondary.opacity(0.1) : Color.clear)
+        .fill(isHovering ? Color.secondary.opacity(0.1) : Color.clear),
     )
   }
 
@@ -67,7 +67,7 @@ struct TodoItem: View {
   private var statusSelector: some View {
     TodoStatusSelector(
       selectedStatus: $todoStatus,
-      isInteractive: isInteractive
+      isInteractive: isInteractive,
     )
   }
 

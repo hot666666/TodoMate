@@ -117,7 +117,7 @@ extension MarkdownEditor {
     MarkdownEditor(
       content: "# 샘플 메모\n\n- 첫 번째 항목\n- 두 번째 항목\n\n**볼드 텍스트**와 *이탤릭 텍스트*",
       isEditable: true,
-      isEditing: $isEditing1
+      isEditing: $isEditing1,
     ) { _ in }
 
     Divider()
@@ -125,7 +125,7 @@ extension MarkdownEditor {
     MarkdownEditor(
       content: "",
       isEditable: true,
-      isEditing: $isEditing2
+      isEditing: $isEditing2,
     ) { _ in }
 
     Divider()
@@ -133,7 +133,7 @@ extension MarkdownEditor {
     MarkdownEditor(
       content: "## 읽기 전용\n\n이 메모는 수정할 수 없습니다.",
       isEditable: false,
-      isEditing: $isEditing3
+      isEditing: $isEditing3,
     ) { _ in }
   }
   .padding()
