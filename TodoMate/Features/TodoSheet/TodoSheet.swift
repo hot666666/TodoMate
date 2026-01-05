@@ -5,12 +5,13 @@
 //  Created by hs on 6/7/25.
 //
 
+import SimpleOverlaySystem
 import SwiftUI
 
 struct TodoSheet: View {
   @Environment(DIContainer.self) private var container
   @Environment(SessionStore.self) private var sessionStore
-  @Environment(OverlayManager.self) private var overlayManager
+  @Environment(\.overlayManager) private var overlay
 
   @FocusState private var focusedField: SheetField?
   @Bindable var editableTodo: EditableTodo
@@ -39,24 +40,39 @@ struct TodoSheet: View {
     case .submitAndDismiss:
       guard isEditable else { return }
 
-      // popover가 열려있다면 먼저 popover를 닫고, 없다면 submit 수행
-      if overlayManager.overlays.last?.type == .popover {
-        overlayManager.pop()
-        return
-      }
-
+      // Dismiss logic - SimpleOverlay handles stack
       if editableTodo.isDirty {
         let updatedTodo = Todo.from(editableTodo)
         try? container.updateTodoUseCase.run(for: sessionStore.userId, updatedTodo)
       }
-      overlayManager.pop()
+      overlay?.dismissTop()
 
     case .dismissWithConfirmation:
-      // popover가 열려있다면 먼저 popover를 닫고, 없다면 confirmation 수행
-      if overlayManager.overlays.last?.type == .popover {
-        overlayManager.pop()
+      // Show confirmation if dirty
+      if editableTodo.isDirty {
+        let title = editableTodo.isNew ? "작성 중인 내용을 폐기하시겠습니까?" : "변경사항을 폐기하시겠습니까?"
+        let message = editableTodo.isNew ? "작성 중인 내용이 사라집니다." : "저장하지 않은 변경사항이 있습니다."
+
+        let confirmationView = ConfirmationView(
+          title: title,
+          message: message,
+          destructiveActionTitle: "폐기",
+          cancelTitle: "취소",
+          destructiveAction: {
+            overlay?.dismissTop()
+            // Dismiss sheet
+            overlay?.dismissTop()
+          },
+          onDismiss: {
+            // Just dismiss confirmation
+            overlay?.dismissTop()
+          },
+        )
+        overlay?.presentCentered {
+          confirmationView
+        }
       } else {
-        overlayManager.popWithConfirmation()
+        overlay?.dismissTop()
       }
     }
   }
@@ -114,7 +130,6 @@ extension TodoSheet {
 
 #Preview {
   TodoSheet(editableTodo: EditableTodo(owner: SessionStore.preview.userId))
-    .environment(OverlayManager())
     .environment(DIContainer.preview)
     .environment(SessionStore.preview)
     .frame(width: 400, height: 300)

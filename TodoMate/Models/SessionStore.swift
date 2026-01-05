@@ -41,6 +41,10 @@ final class SessionStore {
   ) {
     user = userSession.currentUser
     userGroup = userSession.groupMembers
+    // didSet doesn't fire during init, so we must set these explicitly
+    userGroupIds = userSession.groupMembers.map(\.id)
+    userGroupDisplayNames = Dictionary(
+      uniqueKeysWithValues: userSession.groupMembers.map { ($0.id, $0.displayName) })
     signOutUseCase = container.signOutUseCase
     readUserUseCase = container.readUserUseCase
     readUserGroupUseCase = container.readUserGroupUseCase

@@ -5,13 +5,14 @@
 //  Created by agent on 1/5/26.
 //
 
+import SimpleOverlaySystem
 import SwiftUI
 
 struct CalendarContentView: View {
   @Environment(TodoStore.self) private var todoStore
   @Environment(SessionStore.self) private var sessionStore
-  @Environment(OverlayManager.self) private var overlayManager
-  let selection: SidebarSelection
+  @Environment(\.overlayManager) private var overlay
+  let selection: NavigationDestination
   @Binding var currentDate: Date
   @Binding var selectedTask: ViewTodo?
 
@@ -133,7 +134,7 @@ struct CalendarContentView: View {
     else { return }
 
     let editableTodo = EditableTodo(from: originalTodo)
-    overlayManager.presentSheet(editableTodo: editableTodo) {
+    overlay?.presentCentered {
       TodoSheet(editableTodo: editableTodo)
     }
   }
@@ -223,11 +224,10 @@ struct CalendarCell: View {
 
 #Preview {
   CalendarContentView(
-    selection: .todo,
+    selection: .todo(),
     currentDate: .constant(Date()),
     selectedTask: .constant(nil),
   )
   .environment(TodoStore.preview)
   .environment(SessionStore.preview)
-  .environment(OverlayManager())
 }

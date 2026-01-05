@@ -9,12 +9,12 @@ import SwiftUI
 
 struct NewSidebarView: View {
   @Environment(SessionStore.self) private var sessionStore
-  @Binding var selection: SidebarSelection?
+  @Binding var selection: NavigationDestination?
 
   var body: some View {
     List(selection: $selection) {
       Section {
-        NavigationLink(value: SidebarSelection.settings) {
+        NavigationLink(value: NavigationDestination.settings) {
           SidebarProfileView(
             displayName: sessionStore.user.displayName,
             subtitle: "Pro Member",
@@ -25,7 +25,7 @@ struct NewSidebarView: View {
       }
 
       Section {
-        NavigationLink(value: SidebarSelection.todo) {
+        NavigationLink(value: NavigationDestination.todo()) {
           Label {
             Text("Todo")
           } icon: {
@@ -36,7 +36,7 @@ struct NewSidebarView: View {
         }
         .accessibilityIdentifier("sidebar_todo")
 
-        NavigationLink(value: SidebarSelection.memo) {
+        NavigationLink(value: NavigationDestination.memo) {
           Label {
             Text("Memo")
           } icon: {
@@ -50,22 +50,23 @@ struct NewSidebarView: View {
       }
 
       Section {
-        // TODO: Replace with actual groups from sessionStore
-        NavigationLink(value: SidebarSelection.group("design-team")) {
-          Label {
-            Text("Design Team")
-          } icon: {
-            Image(systemName: "briefcase.fill")
-              .foregroundStyle(DesignSystem.Colors.accentIndigo)
+        ForEach(sessionStore.userGroupIds, id: \.self) { groupId in
+          NavigationLink(value: NavigationDestination.group(groupId)) {
+            Label {
+              Text(sessionStore.userGroupDisplayNames[groupId] ?? "Unknown Group")
+            } icon: {
+              Image(systemName: "briefcase.fill")
+                .foregroundStyle(DesignSystem.Colors.accentIndigo)
+            }
           }
+          .accessibilityIdentifier("sidebar_group_\(groupId)")
         }
-        .accessibilityIdentifier("sidebar_group_design-team")
       } header: {
         Text("Groups")
       }
 
       Section {
-        NavigationLink(value: SidebarSelection.noGroups) {
+        NavigationLink(value: NavigationDestination.noGroups) {
           Label {
             Text("No Groups Joined")
               .italic()
@@ -113,7 +114,7 @@ private struct SidebarProfileView: View {
 
 #Preview {
   NavigationSplitView {
-    NewSidebarView(selection: .constant(.todo))
+    NewSidebarView(selection: .constant(.todo()))
       .environment(SessionStore.preview)
   } detail: {
     Text("Detail")

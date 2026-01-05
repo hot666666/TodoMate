@@ -5,52 +5,33 @@
 //  Created by hs on 6/29/25.
 //
 
+import SimpleOverlaySystem
 import SwiftUI
 
 struct TodoStatusButton: View {
-  @Environment(OverlayManager.self) private var overlayManager
+  @Environment(\.overlayManager) private var overlay
   @Binding var status: TodoStatus
-  @State private var buttonFrame: CGRect = .zero
 
   var body: some View {
-    TodoStatusChip(
-      status: status,
-      action: {
-        let anchorPoint = CGPoint(
-          x: buttonFrame.midX,
-          y: buttonFrame.minY,
-        )
-
-        overlayManager.presentPopover(
-          anchorPoint: anchorPoint,
-          popoverType: .status,
-          buttonWidth: buttonFrame.width,
-          buttonHeight: buttonFrame.height,
-        ) {
-          TodoStatusPicker(
-            selectedStatus: status,
-            onStatusSelected: { newStatus in
-              status = newStatus
-              overlayManager.pop()
-            },
-          )
-          .onKeyPress(.escape) {
-            overlayManager.pop()
-            return .handled
-          }
-        }
-      },
-    )
-    .background(
-      GeometryReader { geo in
-        Color.clear
-          .onAppear {
-            buttonFrame = geo.frame(in: .global)
-          }
-          .onChange(of: geo.frame(in: .global)) { _, newFrame in
-            buttonFrame = newFrame
-          }
-      },
-    )
+    AnchoredOverlayButton(
+      placement: .bottom(alignment: .center),
+      dismissPolicy: .tap,
+      barrier: .blockAll,
+    ) {
+      // Use forceInteractive since the button wrapper provides the interaction
+      TodoStatusChip(status: status, action: nil, forceInteractive: true)
+    } content: {
+      TodoStatusPicker(
+        selectedStatus: status,
+        onStatusSelected: { newStatus in
+          status = newStatus
+          overlay?.dismissTop()
+        },
+      )
+      .onKeyPress(.escape) {
+        overlay?.dismissTop()
+        return .handled
+      }
+    }
   }
 }

@@ -7,6 +7,7 @@
 //  Created by agent on 1/5/26.
 //
 
+import SimpleOverlaySystem
 import SwiftUI
 
 struct MainContainer: View {
@@ -23,68 +24,54 @@ private struct AuthenticatedView: View {
   @Environment(TodoStore.self) private var todoStore
   @Environment(MemoStore.self) private var memoStore
   @Environment(MessageStore.self) private var messageStore
-  @Environment(OverlayManager.self) private var overlayManager
+  @Environment(\.overlayManager) private var overlay
 
-  @State private var sidebarSelection: SidebarSelection? = .todo
-  @State private var columnVisibility: NavigationSplitViewVisibility = .all
-  @State private var viewMode: ContentViewMode = .board
+  @State private var navigator = NavigationManager()
   @State private var calendarDate = Date()
   @State private var selectedTask: ViewTodo?
 
   var body: some View {
-    OverlayContainer {
-      NavigationSplitView(columnVisibility: $columnVisibility) {
-        NewSidebarView(selection: $sidebarSelection)
-          .safeAreaInset(edge: .top) {
-            Spacer().frame(height: 8)
-          }
-      } detail: {
-        detailView
-      }
-      .toolbar {
-        // Principal / Leading: Date & Task info + Navigation
-        ToolbarItem(placement: .primaryAction) {
-          if sidebarSelection == .todo, viewMode == .calendar {
-            calendarHeader
-              .padding(.horizontal)
-          }
+    NavigationSplitView(columnVisibility: $navigator.columnVisibility) {
+      NewSidebarView(selection: $navigator.selection)
+        .safeAreaInset(edge: .top) {
+          Spacer().frame(height: 8)
         }
+    } detail: {
+      detailView
+    }
+    .toolbar {
+      // Principal / Leading: Date & Task info + Navigation
+      ToolbarItem(placement: .primaryAction) {
+        if case .todo = navigator.selection, navigator.viewMode == .calendar {
+          calendarHeader
+            .padding(.horizontal)
+        }
+      }
 
-        // Right side: View mode picker and add button
-        ToolbarItemGroup(placement: .primaryAction) {
-          Spacer()
-          if sidebarSelection == .todo {
-            viewModeToolbar
-            addButton
-          }
+      // Right side: View mode picker and add button
+      ToolbarItemGroup(placement: .primaryAction) {
+        Spacer()
+        if case .todo = navigator.selection {
+          viewModeToolbar
+          addButton
         }
-      }
-      .navigationSplitViewStyle(.prominentDetail)
-      .task {
-        await loadData()
       }
     }
+    .navigationSplitViewStyle(.prominentDetail)
+    .task {
+      await loadData()
+    }
+    .environment(navigator)
   }
 
   private func loadData() async {
-    // 1. Refresh Session (User & Group)
-    await sessionStore.refresh()
+    let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+    if isPreview { return }
 
-    // 2. Refresh Todos (Self + Group Members)
-    // Identify who we need to fetch todos for
-    var todoUserIds = [sessionStore.userId]
+    await todoStore.load(for: sessionStore.userGroupIds, currentUserId: sessionStore.userId)
+    await memoStore.load(for: sessionStore.userGroupIds)
     if !sessionStore.userGroupId.isEmpty {
-      todoUserIds.append(contentsOf: sessionStore.userGroupIds)
-    }
-    let uniqueUserIds = Array(Set(todoUserIds))
-    await todoStore.refresh(for: uniqueUserIds, currentUserId: sessionStore.userId)
-
-    // 3. Refresh Memos (Self)
-    await memoStore.refresh(for: [sessionStore.userId])
-
-    // 4. Refresh Messages (Group)
-    if !sessionStore.userGroupId.isEmpty {
-      await messageStore.refresh(groupId: sessionStore.userGroupId)
+      await messageStore.load(groupId: sessionStore.userGroupId)
     }
   }
 
@@ -92,24 +79,27 @@ private struct AuthenticatedView: View {
 
   @ViewBuilder
   private var detailView: some View {
-    if case .noGroups = sidebarSelection {
-      GroupFeedNoGroupView()
-    } else if sidebarSelection == .memo {
-      MemoView()
-    } else if sidebarSelection == .settings {
-      SettingsView()
-    } else if case .group = sidebarSelection {
-      GroupFeedView()
-    } else if let selection = sidebarSelection {
-      switch viewMode {
-      case .board:
-        BoardView(selection: selection)
-      case .calendar:
-        CalendarContentView(
-          selection: selection,
-          currentDate: $calendarDate,
-          selectedTask: $selectedTask,
-        )
+    if let selection = navigator.selection {
+      switch selection {
+      case .noGroups:
+        GroupFeedNoGroupView()
+      case .memo:
+        MemoView()
+      case .settings:
+        SettingsView()
+      case .group:
+        GroupFeedView()
+      case .todo:
+        switch navigator.viewMode {
+        case .board:
+          BoardView(selection: .todo())
+        case .calendar:
+          CalendarContentView(
+            selection: .todo(),
+            currentDate: $calendarDate,
+            selectedTask: $selectedTask,
+          )
+        }
       }
     } else {
       ContentUnavailableView(
@@ -120,19 +110,37 @@ private struct AuthenticatedView: View {
     }
   }
 
-  // MARK: - Calendar Navigation
-
   private var calendarHeader: some View {
-    Text(calendarDate.formatted(.dateTime.year().month(.wide)))
-      .font(.headline)
-      .foregroundStyle(.primary)
-      .fixedSize()
+    HStack(spacing: 16) {
+      Text(calendarDate.formatted(.dateTime.month().year()))
+        .font(.headline)
+
+      HStack(spacing: 20) {
+        Button {
+          withAnimation {
+            calendarDate =
+              Calendar.current.date(byAdding: .month, value: -1, to: calendarDate) ?? calendarDate
+          }
+        } label: {
+          Image(systemName: "chevron.left")
+            .fontWeight(.semibold)
+        }
+
+        Button {
+          withAnimation {
+            calendarDate =
+              Calendar.current.date(byAdding: .month, value: 1, to: calendarDate) ?? calendarDate
+          }
+        } label: {
+          Image(systemName: "chevron.right")
+            .fontWeight(.semibold)
+        }
+      }
+    }
   }
 
-  // MARK: - Toolbar Components
-
   private var viewModeToolbar: some View {
-    Picker("View Mode", selection: $viewMode) {
+    Picker("View Mode", selection: $navigator.viewMode) {
       ForEach(ContentViewMode.allCases) { mode in
         Image(systemName: mode.systemImage)
           .tag(mode)
@@ -147,8 +155,14 @@ private struct AuthenticatedView: View {
   private var addButton: some View {
     Button {
       let newTodo = EditableTodo(owner: sessionStore.userId)
-      overlayManager.presentSheet(editableTodo: newTodo) {
+      // Example usage of SimpleOverlaySystem
+      overlay?.presentCentered {
         TodoSheet(editableTodo: newTodo)
+          .environment(container)
+          .environment(sessionStore)
+          .environment(todoStore)
+          .environment(memoStore)
+          .environment(messageStore)
       }
     } label: {
       Image(systemName: "plus")
@@ -165,5 +179,5 @@ private struct AuthenticatedView: View {
     .environment(TodoStore.preview)
     .environment(MemoStore.preview)
     .environment(MessageStore.preview)
-    .environment(OverlayManager())
+  // .environment(SimpleOverlay.mock) // If mock exists
 }

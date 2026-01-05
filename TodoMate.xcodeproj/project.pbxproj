@@ -14,6 +14,7 @@
 		45A236E12F0B5150006B9A72 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 45A236E02F0B5150006B9A72 /* FirebaseFirestore */; };
 		45A236E42F0B516A006B9A72 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 45A236E32F0B516A006B9A72 /* GoogleSignIn */; };
 		45A238022F0B66D6006B9A72 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 45A238012F0B66D6006B9A72 /* GoogleService-Info.plist */; };
+		45A23AF32F0B901A006B9A72 /* SimpleOverlaySystem in Frameworks */ = {isa = PBXBuildFile; productRef = 45A23AF22F0B901A006B9A72 /* SimpleOverlaySystem */; };
 		45B81D122E21EEB900BB1434 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 45B81D112E21EEB900BB1434 /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
@@ -115,6 +116,7 @@
 				45A236DF2F0B5150006B9A72 /* FirebaseCore in Frameworks */,
 				45B81D122E21EEB900BB1434 /* MarkdownUI in Frameworks */,
 				458B30F82E7E6B0500820E47 /* SwiftUIIntrospect in Frameworks */,
+				45A23AF32F0B901A006B9A72 /* SimpleOverlaySystem in Frameworks */,
 				45A236DD2F0B5150006B9A72 /* FirebaseAuth in Frameworks */,
 				45A236E12F0B5150006B9A72 /* FirebaseFirestore in Frameworks */,
 				45A236E42F0B516A006B9A72 /* GoogleSignIn in Frameworks */,
@@ -198,6 +200,7 @@
 				45A236DE2F0B5150006B9A72 /* FirebaseCore */,
 				45A236E02F0B5150006B9A72 /* FirebaseFirestore */,
 				45A236E32F0B516A006B9A72 /* GoogleSignIn */,
+				45A23AF22F0B901A006B9A72 /* SimpleOverlaySystem */,
 			);
 			productName = TodoMate;
 			productReference = 4525D73E2CA0706500D6C449 /* TodoMate.app */;
@@ -236,6 +239,7 @@
 				458B30F62E7E6B0500820E47 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				45A236DB2F0B5150006B9A72 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				45A236E22F0B516A006B9A72 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				45A23AF12F0B901A006B9A72 /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 45E10B862C69B77300FC31CD;
@@ -639,6 +643,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		45A23AF12F0B901A006B9A72 /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hot666666/SimpleOverlaySystem";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		45B81D102E21EEB900BB1434 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
@@ -679,6 +691,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 45A236E22F0B516A006B9A72 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignIn;
+		};
+		45A23AF22F0B901A006B9A72 /* SimpleOverlaySystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45A23AF12F0B901A006B9A72 /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */;
+			productName = SimpleOverlaySystem;
 		};
 		45B81D112E21EEB900BB1434 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;

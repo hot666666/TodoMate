@@ -1,5 +1,5 @@
 {
-  "originHash" : "e1b2a18a50a2844b15939cb32e4e5ac4c7ff406fc3e02ae823bd564ba5a8cc07",
+  "originHash" : "106f9643e26de1955dbf3c7837573c43d8df5dd7fa9344faa8a8f72425c3a7f2",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -152,6 +152,15 @@
       "state" : {
         "revision" : "540318ecedd63d883069ae7f1ed811a2df00b6ac",
         "version" : "2.4.0"
+      }
+    },
+    {
+      "identity" : "simpleoverlaysystem",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hot666666/SimpleOverlaySystem",
+      "state" : {
+        "branch" : "main",
+        "revision" : "6fd3694cc1e43129f89df6258d8e10be361883a6"
       }
     },
     {

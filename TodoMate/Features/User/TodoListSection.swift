@@ -5,28 +5,34 @@
 //  Created by hs on 6/7/25.
 //
 
+import SimpleOverlaySystem
 import SwiftUI
 
 struct TodoListSection: View {
+  @Environment(DIContainer.self) var container
   @Environment(SessionStore.self) var sessionStore
   @Environment(TodoStore.self) var todoStore
-  @Environment(OverlayManager.self) var overlayManager
+  @Environment(\.overlayManager) private var overlay
   let todos: [Todo]
   let isMine: Bool
 
   func presentTodoAddSheet() {
     let selectedTodo = EditableTodo(owner: sessionStore.userId)
 
-    overlayManager.presentSheet(editableTodo: selectedTodo) {
+    overlay?.presentCentered {
       TodoSheet(editableTodo: selectedTodo)
+        .environment(container)
+        .environment(sessionStore)
     }
   }
 
   private func presentTodoEditSheet(for todo: Todo) {
     let selectedTodo = EditableTodo(from: todo)
 
-    overlayManager.presentSheet(editableTodo: selectedTodo) {
+    overlay?.presentCentered {
       TodoSheet(editableTodo: selectedTodo)
+        .environment(container)
+        .environment(sessionStore)
     }
   }
 
@@ -51,7 +57,6 @@ extension TodoListSection {
               }
           }
         }
-        .id(isMine ? (!overlayManager.overlays.isEmpty ? "overlay" : "none") : "static")
         .safeAreaInset(edge: .top, spacing: 0) {
           Color.clear.frame(height: HomeDesignSystem.Layout.safeAreaInset)
         }
@@ -85,10 +90,11 @@ extension TodoListSection {
   private func deleteButton(for todo: Todo) -> some View {
     DeleteContextMenuButton.withConfirmation(
       todo: todo,
-      overlayManager: overlayManager,
-    ) { todo in
-      todoStore.delete(todo, userId: sessionStore.userId)
-    }
+      overlay: overlay,
+      onConfirmedDelete: { todo in
+        todoStore.delete(todo, userId: sessionStore.userId)
+      },
+    )
   }
 
   @ViewBuilder

@@ -10,8 +10,10 @@ import SwiftUI
 struct TodoStatusChip: View {
   let status: TodoStatus
   var action: (() -> Void)?
+  var forceInteractive: Bool = false
+
   var isInteractive: Bool {
-    action != nil
+    action != nil || forceInteractive
   }
 
   var body: some View {
@@ -39,8 +41,15 @@ struct TodoStatusChip: View {
     .frame(width: HomeDesignSystem.Component.TodoList.StatusChip.width)
     .background(
       Capsule()
-        .fill(status.color.opacity(isInteractive ? HomeDesignSystem.Component.TodoList.StatusChip.interactiveOpacity : HomeDesignSystem.Component.TodoList.StatusChip.readOnlyOpacity))
-        .shadow(color: status.color.opacity(0.2), radius: HomeDesignSystem.Shadow.medium, x: 0, y: 1),
+        .fill(
+          status.color.opacity(
+            isInteractive
+              ? HomeDesignSystem.Component.TodoList.StatusChip.interactiveOpacity
+              : HomeDesignSystem.Component.TodoList.StatusChip.readOnlyOpacity),
+        )
+        .shadow(
+          color: status.color.opacity(0.2), radius: HomeDesignSystem.Shadow.medium, x: 0, y: 1,
+        ),
     )
   }
 }
