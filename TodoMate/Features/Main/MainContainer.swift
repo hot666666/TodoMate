@@ -158,6 +158,11 @@ private struct AuthenticatedView: View {
       // Example usage of SimpleOverlaySystem
       overlay?.presentCentered {
         TodoSheet(editableTodo: newTodo)
+          .environment(container)
+          .environment(sessionStore)
+          .environment(todoStore)
+          .environment(memoStore)
+          .environment(messageStore)
       }
     } label: {
       Image(systemName: "plus")

@@ -9,6 +9,7 @@ import SimpleOverlaySystem
 import SwiftUI
 
 struct TodoListSection: View {
+  @Environment(DIContainer.self) var container
   @Environment(SessionStore.self) var sessionStore
   @Environment(TodoStore.self) var todoStore
   @Environment(\.overlayManager) private var overlay
@@ -20,6 +21,8 @@ struct TodoListSection: View {
 
     overlay?.presentCentered {
       TodoSheet(editableTodo: selectedTodo)
+        .environment(container)
+        .environment(sessionStore)
     }
   }
 
@@ -28,6 +31,8 @@ struct TodoListSection: View {
 
     overlay?.presentCentered {
       TodoSheet(editableTodo: selectedTodo)
+        .environment(container)
+        .environment(sessionStore)
     }
   }
 
