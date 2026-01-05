@@ -56,13 +56,19 @@ extension RootView {
 
   @ViewBuilder
   private func makeMainView(userSession: UserSession) -> some View {
+    let messageStore = MessageStore(container: container)
+
     OverlayContainer {
       MainContainer()
     }
     .environment(SessionStore(container: container, userSession: userSession))
-    .environment(MessageStore(container: container))
+    .environment(messageStore)
     .environment(TodoStore(container: container))
     .environment(MemoStore(container: container))
+    .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) {
+      _ in
+      messageStore.stopObserving()
+    }
   }
 }
 

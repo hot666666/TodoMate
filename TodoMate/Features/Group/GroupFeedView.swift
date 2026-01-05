@@ -28,6 +28,14 @@ struct GroupFeedView: View {
         contentView
       }
     }
+    .onAppear {
+      if !sessionStore.userGroupId.isEmpty {
+        messageStore.startObserving(groupId: sessionStore.userGroupId)
+      }
+    }
+    .onDisappear {
+      messageStore.stopObserving()
+    }
   }
 
   private var contentView: some View {
