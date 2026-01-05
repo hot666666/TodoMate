@@ -13,7 +13,8 @@ final class SessionStore {
 
   private let signOutUseCase: SignOutUseCase
   private let readUserUseCase: ReadUserUseCase
-  private let readUserGroupUseCae: ReadUserGroupUseCase
+  private let readUserGroupUseCase: ReadUserGroupUseCase
+  private let updateUserUseCase: UpdateUserUseCase
 
   // MARK: - State
 
@@ -42,7 +43,8 @@ final class SessionStore {
     userGroup = userSession.groupMembers
     signOutUseCase = container.signOutUseCase
     readUserUseCase = container.readUserUseCase
-    readUserGroupUseCae = container.readUserGroupUseCase
+    readUserGroupUseCase = container.readUserGroupUseCase
+    updateUserUseCase = container.updateUserUseCase
   }
 
   // MARK: - Public Methods
@@ -52,6 +54,19 @@ final class SessionStore {
       try signOutUseCase.run()
     } catch {
       print("[SessionStore] - Sign out error: \(error)")
+    }
+  }
+
+  func leaveGroup() async {
+    var updatedUser = user
+    updatedUser.groupId = ""
+    updatedUser.updatedAt = Date()
+
+    do {
+      try await updateUserUseCase.execute(updatedUser)
+      await refresh()
+    } catch {
+      print("[SessionStore] - Failed to leave group: \(error)")
     }
   }
 
@@ -65,7 +80,7 @@ final class SessionStore {
       }
       user = latestUser
 
-      let latestGroup = try await readUserGroupUseCae.run(
+      let latestGroup = try await readUserGroupUseCase.run(
         groupId: latestUser.groupId, useCache: false,
       )
       userGroup = latestGroup.placingFirst(latestUser)

@@ -24,6 +24,7 @@ final class DIContainer {
   // User
   @ObservationIgnored let readUserUseCase: ReadUserUseCase
   @ObservationIgnored let readUserGroupUseCase: ReadUserGroupUseCase
+  @ObservationIgnored let updateUserUseCase: UpdateUserUseCase
   @ObservationIgnored let loadUserSessionUseCase: LoadUserSessionUseCase
 
   // Todo
@@ -73,6 +74,7 @@ final class DIContainer {
     let readUserGroupUseCase = ReadUserGroupUseCaseImpl(userRepository: userRepository)
     self.readUserUseCase = readUserUseCase
     self.readUserGroupUseCase = readUserGroupUseCase
+    updateUserUseCase = UpdateUserUseCaseImpl(userRepository: userRepository)
     loadUserSessionUseCase = LoadUserSessionUseCaseImpl(
       readUserUseCase: readUserUseCase,
       readUserGroupUseCase: readUserGroupUseCase,

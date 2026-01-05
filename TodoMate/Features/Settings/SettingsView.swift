@@ -37,7 +37,9 @@ struct SettingsView: View {
       titleVisibility: .visible,
     ) {
       Button("Leave", role: .destructive) {
-        // Leave group action
+        Task {
+          await sessionStore.leaveGroup()
+        }
       }
       Button("Cancel", role: .cancel) {}
     } message: {
@@ -51,7 +53,7 @@ struct SettingsView: View {
       titleVisibility: .visible,
     ) {
       Button("Sign Out", role: .destructive) {
-        // Sign out action - integrate with sessionStore
+        sessionStore.signOut()
       }
       Button("Cancel", role: .cancel) {}
     } message: {

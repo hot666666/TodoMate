@@ -10,4 +10,5 @@ protocol UserRepository {
   func read(userId: String, source: DataSource) async throws -> User?
   func readAll(groupId: String, source: DataSource) async throws -> [User]
   func readAll(source: DataSource) async throws -> [User]
+  func update(_ user: User) async throws
 }
