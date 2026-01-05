@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SidebarView: View {
   @Environment(SessionStore.self) private var sessionStore
+  @Environment(NetworkModeManager.self) private var networkManager
   @Binding var selection: NavigationDestination?
 
   var body: some View {
@@ -80,6 +81,36 @@ struct SidebarView: View {
       }
     }
     .listStyle(.sidebar)
+    .safeAreaInset(edge: .bottom) {
+      networkToggle
+        .padding()
+    }
+  }
+
+  // MARK: - Network Toggle
+
+  private var networkToggle: some View {
+    HStack {
+      Image(systemName: networkManager.isOnline ? "wifi" : "wifi.slash")
+      Text(networkManager.isOnline ? "Online" : "Offline")
+      Spacer()
+      Toggle(
+        "",
+        isOn: Binding(
+          get: { networkManager.isOnline },
+          set: { newValue in
+            Task {
+              await networkManager.setOnline(newValue)
+            }
+          },
+        ),
+      )
+      .labelsHidden()
+      .toggleStyle(.switch)
+    }
+    .font(.body)
+    .disabled(networkManager.isTransitioning)
+    .accessibilityIdentifier("network_toggle")
   }
 }
 
@@ -91,13 +122,14 @@ private struct SidebarProfileView: View {
     HStack(spacing: 12) {
       Circle()
         .fill(Color.orange.opacity(0.8))
-        .frame(width: 40, height: 40)
+        .frame(width: 32, height: 32)
         .overlay {
           Image(systemName: "person.fill")
             .foregroundStyle(.white)
+            .font(.caption)
         }
 
-      VStack(alignment: .leading, spacing: 2) {
+      VStack(alignment: .leading, spacing: 0) {
         Text(displayName)
           .font(.subheadline)
           .fontWeight(.semibold)
@@ -116,6 +148,7 @@ private struct SidebarProfileView: View {
   NavigationSplitView {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
+      .environment(NetworkModeManager())
   } detail: {
     Text("Detail")
   }

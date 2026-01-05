@@ -9,7 +9,10 @@ import Foundation
 import Observation
 
 @Observable
+@MainActor
 final class MessageStore {
+  @ObservationIgnored private var task: Task<Void, Never>?
+
   // MARK: - Dependencies
 
   private let createMessageUseCase: CreateMessageUseCase
@@ -35,11 +38,13 @@ final class MessageStore {
 
   // MARK: - Public Methods
 
-  @MainActor
   func refresh(groupId: String) async {
     // Message는 cache 이용말고, 서버로부터 로드
     await load(groupId: groupId, useCache: false)
-    await observe(groupId: groupId)
+    task?.cancel()
+    task = Task {
+      await observe(groupId: groupId)
+    }
   }
 
   func markAllAsRead() {
@@ -80,7 +85,6 @@ final class MessageStore {
     messages.removeAll(where: { $0.id == message.id })
   }
 
-  @MainActor
   func load(groupId: String, useCache: Bool = true) async {
     do {
       messages = try await readMessagesUseCase.run(in: groupId, useCache: useCache)
@@ -91,8 +95,9 @@ final class MessageStore {
     }
   }
 
-  @MainActor
-  func observe(groupId: String) async {
+  // MARK: - Private Methods
+
+  private func observe(groupId: String) async {
     for await event in observeMessagesUseCase.run(in: groupId) {
       switch event {
       case let .added(newMessage):
@@ -102,7 +107,8 @@ final class MessageStore {
         }
 
       case let .modified(updatedMessage):
-        if let index = messages.firstIndex(where: { $0.id == updatedMessage.id }), updatedMessage.updatedAt > messages[index].updatedAt {
+        if let index = messages.firstIndex(where: { $0.id == updatedMessage.id }),
+           updatedMessage.updatedAt > messages[index].updatedAt {
           messages[index] = updatedMessage
         }
 

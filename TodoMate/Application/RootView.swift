@@ -11,6 +11,7 @@ import SwiftUI
 struct RootView: View {
   @Environment(DIContainer.self) private var container
   @State private var authState: AuthState = .loading
+  @State private var networkManager = NetworkModeManager()
 
   @MainActor
   private func authenticate(with uid: String) async {
@@ -63,6 +64,7 @@ extension RootView {
     .environment(MessageStore(container: container))
     .environment(TodoStore(container: container))
     .environment(MemoStore(container: container))
+    .environment(networkManager)
   }
 }
 
