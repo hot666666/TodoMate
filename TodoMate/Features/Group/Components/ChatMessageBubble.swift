@@ -53,8 +53,7 @@ struct ChatMessageBubble: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.bottom, message.text != nil ? 8 : 0)
           } else if let localData = message.localImageData,
-                    let nsImage = NSImage(data: localData)
-          {
+                    let nsImage = NSImage(data: localData) {
             Image(nsImage: nsImage)
               .resizable()
               .aspectRatio(contentMode: .fill)

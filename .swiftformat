@@ -1,4 +1,6 @@
 --indent 2
 --swiftversion 6.1
 --allman false
---exclude Pods,Carthage,**/Generated,**/*.generated.swift,**/Assets.swift,.git,script,FIRESTORE
+--exclude Pods,Carthage,**/Generated,**/*.generated.swift,**/Assets.swift,.git,script
+--disable wrapMultilineStatementBraces
+--commas always

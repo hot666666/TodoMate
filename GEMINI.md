@@ -17,6 +17,20 @@ It is built based on Clean Architecture.
 - Domain layer: Swift
 - Presentation layer: SwiftUI
 
+## Pre-commit Hooks
+
+This project utilizes pre-commit hooks to ensure code quality and consistency. Before a commit is finalized, the following checks are run:
+
+1.  **SwiftFormat**: Enforces code formatting rules.
+2.  **SwiftLint**: Checks for coding style violations and conventions.
+
+If a commit fails due to these checks, you can automatically fix most issues by running:
+
+```bash
+swiftformat .
+swiftlint --config .swiftlint.yml --fix
+```
+
 ## Docs
 You can find useful docs in `docs/`. Some of them are in the below.
 

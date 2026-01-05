@@ -59,7 +59,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		45DA6A302E238B00007183E3 /* Exceptions for "TodoMate" folder in "TodoMate" target */ = {
+		45A242BE2F0BCCD8006B9A72 /* Exceptions for "Resources" folder in "TodoMate" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -80,17 +80,32 @@
 			path = Data;
 			sourceTree = "<group>";
 		};
-		45DA69ED2E238B00007183E3 /* TodoMate */ = {
+		45A2428B2F0BC61F006B9A72 /* Extensions */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				45DA6A302E238B00007183E3 /* Exceptions for "TodoMate" folder in "TodoMate" target */,
-			);
-			path = TodoMate;
+			path = Extensions;
 			sourceTree = "<group>";
 		};
-		45DA6A742E238BEF007183E3 /* Dependency */ = {
+		45A242A72F0BCA50006B9A72 /* DesignSystem */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Dependency;
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		45A242BB2F0BCCCF006B9A72 /* Resources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				45A242BE2F0BCCD8006B9A72 /* Exceptions for "Resources" folder in "TodoMate" target */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		45A242C42F0BCCE8006B9A72 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		45DA69ED2E238B00007183E3 /* TodoMate */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TodoMate;
 			sourceTree = "<group>";
 		};
 		45E0A0E42D78497C000FDC24 /* TodoMateTests */ = {
@@ -133,11 +148,14 @@
 				452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */,
 				452C64D32E21F56600A68B94 /* .swiftformat */,
 				452C64D42E21F56600A68B94 /* .swiftlint.yml */,
+				45A2428B2F0BC61F006B9A72 /* Extensions */,
+				45A242A72F0BCA50006B9A72 /* DesignSystem */,
 				452C66A12E22752500A68B94 /* Data */,
 				452C66822E226FF600A68B94 /* Domain */,
-				45DA6A742E238BEF007183E3 /* Dependency */,
 				45DA69ED2E238B00007183E3 /* TodoMate */,
+				45A242C42F0BCCE8006B9A72 /* Shared */,
 				45E0A0E42D78497C000FDC24 /* TodoMateTests */,
+				45A242BB2F0BCCCF006B9A72 /* Resources */,
 				4525D73E2CA0706500D6C449 /* TodoMate.app */,
 				45E0A0E32D78497C000FDC24 /* TodoMateTests.xctest */,
 				45A238012F0B66D6006B9A72 /* GoogleService-Info.plist */,
@@ -188,8 +206,11 @@
 			fileSystemSynchronizedGroups = (
 				452C66822E226FF600A68B94 /* Domain */,
 				452C66A12E22752500A68B94 /* Data */,
+				45A2428B2F0BC61F006B9A72 /* Extensions */,
+				45A242A72F0BCA50006B9A72 /* DesignSystem */,
+				45A242BB2F0BCCCF006B9A72 /* Resources */,
+				45A242C42F0BCCE8006B9A72 /* Shared */,
 				45DA69ED2E238B00007183E3 /* TodoMate */,
-				45DA6A742E238BEF007183E3 /* Dependency */,
 			);
 			name = TodoMate;
 			packageProductDependencies = (
@@ -489,7 +510,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMateDebug.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/TodoMateDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -501,7 +522,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMate/InfoDebug.plist;
+				INFOPLIST_FILE = Resources/InfoDebug.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -534,7 +555,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
-				CODE_SIGN_ENTITLEMENTS = TodoMate/TodoMate.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/TodoMate.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
@@ -550,7 +571,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TodoMate/Info.plist;
+				INFOPLIST_FILE = Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TodoMate;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
