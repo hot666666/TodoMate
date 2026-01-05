@@ -22,6 +22,7 @@ private struct AuthenticatedView: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(TodoStore.self) private var todoStore
   @Environment(MemoStore.self) private var memoStore
+  @Environment(MessageStore.self) private var messageStore
   @Environment(OverlayManager.self) private var overlayManager
 
   @State private var sidebarSelection: SidebarSelection? = .todo
@@ -59,6 +60,31 @@ private struct AuthenticatedView: View {
         }
       }
       .navigationSplitViewStyle(.prominentDetail)
+      .task {
+        await loadData()
+      }
+    }
+  }
+
+  private func loadData() async {
+    // 1. Refresh Session (User & Group)
+    await sessionStore.refresh()
+
+    // 2. Refresh Todos (Self + Group Members)
+    // Identify who we need to fetch todos for
+    var todoUserIds = [sessionStore.userId]
+    if !sessionStore.userGroupId.isEmpty {
+      todoUserIds.append(contentsOf: sessionStore.userGroupIds)
+    }
+    let uniqueUserIds = Array(Set(todoUserIds))
+    await todoStore.refresh(for: uniqueUserIds, currentUserId: sessionStore.userId)
+
+    // 3. Refresh Memos (Self)
+    await memoStore.refresh(for: [sessionStore.userId])
+
+    // 4. Refresh Messages (Group)
+    if !sessionStore.userGroupId.isEmpty {
+      await messageStore.refresh(groupId: sessionStore.userGroupId)
     }
   }
 
