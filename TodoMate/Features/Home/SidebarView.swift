@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SidebarView: View {
   @Environment(SessionStore.self) private var sessionStore
+  @Environment(NetworkModeManager.self) private var networkManager
   @Binding var selection: NavigationDestination?
 
   var body: some View {
@@ -62,7 +63,11 @@ struct SidebarView: View {
           .accessibilityIdentifier("sidebar_group_\(groupId)")
         }
       } header: {
-        Text("Groups")
+        HStack {
+          Text("Groups")
+          Spacer()
+          networkToggle
+        }
       }
 
       Section {
@@ -80,6 +85,33 @@ struct SidebarView: View {
       }
     }
     .listStyle(.sidebar)
+  }
+
+  // MARK: - Network Toggle
+
+  private var networkToggle: some View {
+    Button {
+      Task {
+        await networkManager.toggle()
+      }
+    } label: {
+      HStack(spacing: 4) {
+        Image(systemName: networkManager.isOnline ? "wifi" : "wifi.slash")
+          .font(.caption2)
+        Text(networkManager.isOnline ? "Online" : "Offline")
+          .font(.caption2)
+      }
+      .foregroundStyle(networkManager.isOnline ? .green : .secondary)
+      .padding(.horizontal, 6)
+      .padding(.vertical, 2)
+      .background(
+        Capsule()
+          .fill(networkManager.isOnline ? Color.green.opacity(0.15) : Color.secondary.opacity(0.1)),
+      )
+    }
+    .buttonStyle(.plain)
+    .disabled(networkManager.isTransitioning)
+    .accessibilityIdentifier("network_toggle")
   }
 }
 
@@ -116,6 +148,7 @@ private struct SidebarProfileView: View {
   NavigationSplitView {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
+      .environment(NetworkModeManager())
   } detail: {
     Text("Detail")
   }

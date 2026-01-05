@@ -11,6 +11,7 @@ import SwiftUI
 struct RootView: View {
   @Environment(DIContainer.self) private var container
   @State private var authState: AuthState = .loading
+  @State private var networkManager = NetworkModeManager()
 
   @MainActor
   private func authenticate(with uid: String) async {
@@ -65,9 +66,15 @@ extension RootView {
     .environment(messageStore)
     .environment(TodoStore(container: container))
     .environment(MemoStore(container: container))
+    .environment(networkManager)
     .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) {
       _ in
+      // Stop message observer
       messageStore.stopObserving()
+      // Disable Firestore network to prevent gRPC timeout on shutdown
+      Task {
+        await networkManager.forceOffline()
+      }
     }
   }
 }
