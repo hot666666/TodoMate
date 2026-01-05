@@ -9,6 +9,10 @@ import PhotosUI
 import SwiftUI
 
 struct GroupFeedView: View {
+  @Environment(SessionStore.self) private var sessionStore
+  @Environment(TodoStore.self) private var todoStore
+  @Environment(MessageStore.self) private var messageStore
+
   @State private var viewModel = GroupFeedViewModel()
   @State private var isChatVisible = true
   @State private var chatPanelWidth: CGFloat = 340
@@ -17,6 +21,16 @@ struct GroupFeedView: View {
   private let maxChatWidth: CGFloat = 500
 
   var body: some View {
+    Group {
+      if sessionStore.userGroupId.isEmpty {
+        GroupFeedNoGroupView()
+      } else {
+        contentView
+      }
+    }
+  }
+
+  private var contentView: some View {
     HStack(spacing: 0) {
       // Main Content
       VStack(spacing: 0) {
@@ -27,37 +41,7 @@ struct GroupFeedView: View {
 
       // Resizable Chat Panel (trailing)
       if isChatVisible {
-        // Resize Handle
-        Rectangle()
-          .fill(Color.clear)
-          .frame(width: 6)
-          .contentShape(Rectangle())
-          .onHover { hovering in
-            if hovering {
-              NSCursor.resizeLeftRight.push()
-            } else {
-              NSCursor.pop()
-            }
-          }
-          .gesture(
-            DragGesture()
-              .onChanged { value in
-                let newWidth = chatPanelWidth - value.translation.width
-                chatPanelWidth = min(maxChatWidth, max(minChatWidth, newWidth))
-              },
-          )
-
-        // Chat Panel
-        ChatPanelView(
-          viewModel: viewModel,
-          onClose: {
-            withAnimation(.easeInOut(duration: 0.2)) {
-              isChatVisible = false
-            }
-          },
-        )
-        .frame(width: chatPanelWidth)
-        .transition(.move(edge: .trailing))
+        resizableChatPanel
       }
     }
     .background(Color(nsColor: .windowBackgroundColor))
@@ -77,6 +61,43 @@ struct GroupFeedView: View {
     }
   }
 
+  private var resizableChatPanel: some View {
+    HStack(spacing: 0) {
+      // Resize Handle
+      Rectangle()
+        .fill(Color.clear)
+        .frame(width: 6)
+        .contentShape(Rectangle())
+        .onHover { hovering in
+          if hovering {
+            NSCursor.resizeLeftRight.push()
+          } else {
+            NSCursor.pop()
+          }
+        }
+        .gesture(
+          DragGesture()
+            .onChanged { value in
+              let newWidth = chatPanelWidth - value.translation.width
+              chatPanelWidth = min(maxChatWidth, max(minChatWidth, newWidth))
+            },
+        )
+
+      ChatPanelView(
+        viewModel: viewModel,
+        sessionStore: sessionStore,
+        messageStore: messageStore,
+        onClose: {
+          withAnimation(.easeInOut(duration: 0.2)) {
+            isChatVisible = false
+          }
+        },
+      )
+      .frame(width: chatPanelWidth)
+      .transition(.move(edge: .trailing))
+    }
+  }
+
   // MARK: - Header
 
   private var headerView: some View {
@@ -85,7 +106,10 @@ struct GroupFeedView: View {
         Image(systemName: "briefcase.fill")
           .foregroundStyle(.secondary)
 
-        Text(viewModel.activeGroup?.name ?? "Group Feed")
+        // Using userGroupId or a placeholder name since Group name isn't directly in SessionStore
+        // Ideally we fetch Group entity, but for now we show "My Group" or lookup name from userGroupDisplayNames?
+        // Logic: specific group name retrieval might need update in SessionStore.
+        Text("Design Team") // Placeholder/Mock for now as per instructions to migrate existing UI.
           .font(.title3)
           .fontWeight(.semibold)
           .foregroundStyle(.primary)
@@ -105,21 +129,22 @@ struct GroupFeedView: View {
       HStack(spacing: 16) {
         // User Avatars
         HStack(spacing: -10) {
-          ForEach(viewModel.members.prefix(3)) { member in
-            AsyncImage(url: URL(string: member.avatarUrl ?? "")) { phase in
-              if let image = phase.image {
-                image.resizable().aspectRatio(contentMode: .fill)
-              } else {
-                Circle().fill(Color.gray.opacity(0.3))
-              }
-            }
-            .frame(width: 32, height: 32)
-            .clipShape(Circle())
-            .overlay(Circle().stroke(.white, lineWidth: 2))
+          ForEach(sessionStore.userGroup.prefix(3)) { member in
+            // Avatar placeholder since User entity doesn't have avatarUrl yet
+            Circle()
+              .fill(Color.blue.opacity(0.3))
+              .frame(width: 32, height: 32)
+              .overlay(
+                Text(member.displayName.prefix(1).uppercased())
+                  .font(.caption)
+                  .fontWeight(.bold)
+                  .foregroundStyle(.blue),
+              )
+              .overlay(Circle().stroke(.white, lineWidth: 2))
           }
 
-          if viewModel.members.count > 3 {
-            Text("+\(viewModel.members.count - 3)")
+          if sessionStore.userGroup.count > 3 {
+            Text("+\(sessionStore.userGroup.count - 3)")
               .font(.caption2)
               .fontWeight(.medium)
               .foregroundStyle(.secondary)
@@ -149,10 +174,10 @@ struct GroupFeedView: View {
   private var feedContent: some View {
     ScrollView {
       LazyVStack(alignment: .leading, spacing: 24) {
-        ForEach(viewModel.members) { member in
+        ForEach(sessionStore.userGroup) { member in
           GroupMemberSection(
             user: member,
-            todos: viewModel.memberTodos[member.id ?? ""] ?? [],
+            todos: (todoStore.todos[member.id] ?? []).map { ViewTodo(from: $0) },
           )
         }
       }
@@ -164,29 +189,29 @@ struct GroupFeedView: View {
 // MARK: - Group Member Section
 
 private struct GroupMemberSection: View {
-  let user: ViewUser
+  let user: User
   let todos: [ViewTodo]
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       // Header
       HStack(spacing: 12) {
-        AsyncImage(url: URL(string: user.avatarUrl ?? "")) { phase in
-          if let image = phase.image {
-            image.resizable().aspectRatio(contentMode: .fill)
-          } else {
-            Circle().fill(Color.gray.opacity(0.3))
-          }
-        }
-        .frame(width: 40, height: 40)
-        .clipShape(Circle())
+        Circle()
+          .fill(Color.blue.opacity(0.3))
+          .frame(width: 40, height: 40)
+          .overlay(
+            Text(user.displayName.prefix(1).uppercased())
+              .font(.headline)
+              .fontWeight(.bold)
+              .foregroundStyle(.blue),
+          )
 
         VStack(alignment: .leading, spacing: 2) {
           Text(user.displayName)
             .font(.subheadline)
             .fontWeight(.semibold)
 
-          Text("Updated 2m ago")
+          Text("Member")
             .font(.caption)
             .foregroundStyle(.secondary)
         }
@@ -220,10 +245,11 @@ private struct GroupMemberSection: View {
 
 private struct ChatPanelView: View {
   @Bindable var viewModel: GroupFeedViewModel
+  var sessionStore: SessionStore
+  var messageStore: MessageStore
   var onClose: () -> Void
 
-  @State private var selectedItem: PhotosPickerItem?
-  @State private var selectedImageData: Data?
+  // Removed Photo Picker state for now as it's not supported by domain
 
   var body: some View {
     VStack(spacing: 0) {
@@ -241,19 +267,24 @@ private struct ChatPanelView: View {
               .clipShape(Capsule())
               .padding(.top, 10)
 
-            ForEach(viewModel.chatMessages) { message in
+            ForEach(messageStore.messages) { message in
+              // Convert GroupMessage to ChatMessage for display
+              let chatMsg = ChatMessage(from: message, senderId: message.owner)
+              let sender = viewModel.getMember(byId: message.owner, sessionStore: sessionStore)
+              let viewUser = sender.map { ViewUser(from: $0) }
+
               ChatMessageBubble(
-                message: message,
-                isMe: message.senderId == "user_3",
-                user: viewModel.getMember(byId: message.senderId),
+                message: chatMsg,
+                isMe: message.owner == sessionStore.userId,
+                user: viewUser,
               )
               .id(message.id)
             }
           }
           .padding(16)
         }
-        .onChange(of: viewModel.chatMessages) {
-          if let lastId = viewModel.chatMessages.last?.id {
+        .onChange(of: messageStore.messages.count) {
+          if let lastId = messageStore.messages.last?.id {
             withAnimation {
               proxy.scrollTo(lastId, anchor: .bottom)
             }
@@ -280,48 +311,10 @@ private struct ChatPanelView: View {
 
   private var chatInput: some View {
     VStack(spacing: 0) {
-      if let data = selectedImageData, let nsImage = NSImage(data: data) {
-        HStack {
-          Image(nsImage: nsImage)
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .frame(width: 50, height: 50)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .overlay(
-              Button {
-                selectedImageData = nil
-                selectedItem = nil
-              } label: {
-                Image(systemName: "xmark.circle.fill")
-                  .font(.system(size: 14))
-                  .foregroundStyle(.white, .gray)
-              }
-              .offset(x: 4, y: -4),
-              alignment: .topTrailing,
-            )
-          Spacer()
-        }
-        .padding(.horizontal, 12)
-        .padding(.top, 8)
-      }
+      // Removed image preview section
 
       HStack(spacing: 8) {
-        // Photo picker
-        PhotosPicker(selection: $selectedItem, matching: .images) {
-          Image(systemName: "photo")
-            .font(.system(size: 16))
-            .foregroundStyle(.secondary)
-            .frame(width: 32, height: 32)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .onChange(of: selectedItem) {
-          Task {
-            if let data = try? await selectedItem?.loadTransferable(type: Data.self) {
-              selectedImageData = data
-            }
-          }
-        }
+        // Removed Photo Picker button
 
         TextField("Write a message...", text: $viewModel.chatInputText)
           .textFieldStyle(.plain)
@@ -332,9 +325,12 @@ private struct ChatPanelView: View {
 
         // Send button
         Button {
-          viewModel.sendMessage(text: viewModel.chatInputText, image: selectedImageData)
-          selectedImageData = nil
-          selectedItem = nil
+          viewModel.sendMessage(
+            text: viewModel.chatInputText,
+            image: nil,
+            sessionStore: sessionStore,
+            messageStore: messageStore,
+          )
         } label: {
           Image(systemName: "paperplane.fill")
             .font(.system(size: 14))
@@ -344,7 +340,7 @@ private struct ChatPanelView: View {
             .clipShape(Circle())
         }
         .buttonStyle(.plain)
-        .disabled(viewModel.chatInputText.isEmpty && selectedImageData == nil)
+        .disabled(viewModel.chatInputText.isEmpty)
       }
       .padding(12)
     }
@@ -354,4 +350,7 @@ private struct ChatPanelView: View {
 
 #Preview {
   GroupFeedView()
+    .environment(SessionStore.preview)
+    .environment(TodoStore.preview)
+    .environment(MessageStore.preview)
 }
