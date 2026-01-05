@@ -38,6 +38,14 @@ enum ViewTodoStatus: String, CaseIterable, Codable {
     case .done: DesignSystem.Colors.accentGreen
     }
   }
+
+  func toDomainStatus() -> TodoStatus {
+    switch self {
+    case .todo: .todo
+    case .inProgress: .inProgress
+    case .done: .complete
+    }
+  }
 }
 
 // MARK: - View Todo

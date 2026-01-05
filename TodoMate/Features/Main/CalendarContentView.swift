@@ -10,6 +10,7 @@ import SwiftUI
 struct CalendarContentView: View {
   @Environment(TodoStore.self) private var todoStore
   @Environment(SessionStore.self) private var sessionStore
+  @Environment(OverlayManager.self) private var overlayManager
   let selection: SidebarSelection
   @Binding var currentDate: Date
   @Binding var selectedTask: ViewTodo?
@@ -70,6 +71,9 @@ struct CalendarContentView: View {
             onDrop: { task in
               moveTask(task, to: date)
             },
+            onTapTask: { task in
+              presentTodoSheet(for: task)
+            },
           )
           .frame(minHeight: 100, maxHeight: .infinity, alignment: .top)
           .frame(height: cellHeight)
@@ -112,8 +116,26 @@ struct CalendarContentView: View {
   }
 
   private func moveTask(_ task: ViewTodo, to date: Date) {
-    // TODO: Implement task move via TodoStore
-    print("Move task \(task.id) to \(date)")
+    guard let userTodos = todoStore.todos[sessionStore.userId],
+          let originalTodo = userTodos.first(where: { $0.id == task.id })
+    else { return }
+
+    var updatedTodo = originalTodo
+    updatedTodo.date = date.startOfDay
+    updatedTodo.updatedAt = Date()
+
+    todoStore.update(updatedTodo, userId: sessionStore.userId)
+  }
+
+  private func presentTodoSheet(for task: ViewTodo) {
+    guard let userTodos = todoStore.todos[sessionStore.userId],
+          let originalTodo = userTodos.first(where: { $0.id == task.id })
+    else { return }
+
+    let editableTodo = EditableTodo(from: originalTodo)
+    overlayManager.presentSheet(editableTodo: editableTodo) {
+      TodoSheet(editableTodo: editableTodo)
+    }
   }
 }
 
@@ -125,6 +147,7 @@ struct CalendarCell: View {
   let tasks: [ViewTodo]
   @Binding var selectedTask: ViewTodo?
   let onDrop: (ViewTodo) -> Void
+  let onTapTask: (ViewTodo) -> Void
 
   private let calendar = Calendar.current
 
@@ -164,7 +187,7 @@ struct CalendarCell: View {
             TaskCard(task: task, style: .compact)
               .draggable(task)
               .onTapGesture {
-                selectedTask = task
+                onTapTask(task)
               }
               .opacity(
                 selectedTask?.id == task.id
@@ -206,4 +229,5 @@ struct CalendarCell: View {
   )
   .environment(TodoStore.preview)
   .environment(SessionStore.preview)
+  .environment(OverlayManager())
 }
