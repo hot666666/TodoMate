@@ -18,7 +18,6 @@ final class DIContainer {
   @ObservationIgnored let memoRepository: MemoRepository
   @ObservationIgnored let authService: AuthService
   @ObservationIgnored let calendarDayService: CalendarDayService
-  @ObservationIgnored let widgetSyncService: WidgetSyncService
   @ObservationIgnored let messageReadTracker: MessageReadTracker
 
   // MARK: - Domain Layer
@@ -66,7 +65,6 @@ final class DIContainer {
     memoRepository: MemoRepository,
     authService: AuthService,
     calendarDayService: CalendarDayService,
-    widgetSyncService: WidgetSyncService,
     messageReadTracker: MessageReadTracker,
   ) {
     // Data Layer
@@ -77,7 +75,6 @@ final class DIContainer {
     self.memoRepository = memoRepository
     self.authService = authService
     self.calendarDayService = calendarDayService
-    self.widgetSyncService = widgetSyncService
     self.messageReadTracker = messageReadTracker
 
     // Domain Layer - User
@@ -135,7 +132,6 @@ extension DIContainer {
     memoRepository: StubMemoRepository(),
     authService: StubAuthService(),
     calendarDayService: CalendarDayServiceImpl(),
-    widgetSyncService: StubWidgetSyncService(),
     messageReadTracker: StubMessageReadTracker(),
   )
 }

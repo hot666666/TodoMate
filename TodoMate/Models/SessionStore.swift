@@ -14,7 +14,6 @@ final class SessionStore {
   private let signOutUseCase: SignOutUseCase
   private let readUserUseCase: ReadUserUseCase
   private let readUserGroupUseCae: ReadUserGroupUseCase
-  private let widgetSyncService: WidgetSyncService
 
   // MARK: - State
 
@@ -27,7 +26,8 @@ final class SessionStore {
   private(set) var userGroup: [User] {
     didSet {
       userGroupIds = userGroup.map(\.id)
-      userGroupDisplayNames = Dictionary(uniqueKeysWithValues: userGroup.map { ($0.id, $0.displayName) })
+      userGroupDisplayNames = Dictionary(
+        uniqueKeysWithValues: userGroup.map { ($0.id, $0.displayName) })
     }
   }
 
@@ -43,7 +43,6 @@ final class SessionStore {
     signOutUseCase = container.signOutUseCase
     readUserUseCase = container.readUserUseCase
     readUserGroupUseCae = container.readUserGroupUseCase
-    widgetSyncService = container.widgetSyncService
   }
 
   // MARK: - Public Methods
@@ -51,11 +50,6 @@ final class SessionStore {
   func signOut() {
     do {
       try signOutUseCase.run()
-
-      // Clear widget database on logout
-      Task {
-        await widgetSyncService.clearAllWidgetTodos()
-      }
     } catch {
       print("[SessionStore] - Sign out error: \(error)")
     }
@@ -71,7 +65,9 @@ final class SessionStore {
       }
       user = latestUser
 
-      let latestGroup = try await readUserGroupUseCae.run(groupId: latestUser.groupId, useCache: false)
+      let latestGroup = try await readUserGroupUseCae.run(
+        groupId: latestUser.groupId, useCache: false,
+      )
       userGroup = latestGroup.placingFirst(latestUser)
     } catch {
       print("[SessionStore] - Failed to refresh session: \(error)")
