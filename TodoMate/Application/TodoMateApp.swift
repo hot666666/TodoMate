@@ -48,7 +48,6 @@ private extension TodoMateApp {
 
     let userRepo = FirestoreUserRepository()
     let todoRepo = FirestoreTodoRepository()
-    let todoOrderRepo = UserDefaultsTodoOrderRepository()
     let messageRepo = FirestoreMessageRepository()
     let memoRepo = FirestoreMemoRepository()
     let authService = FirebaseAuthService()
@@ -58,7 +57,6 @@ private extension TodoMateApp {
     return DIContainer(
       userRepository: userRepo,
       todoRepository: todoRepo,
-      todoOrderRepository: todoOrderRepo,
       messageRepository: messageRepo,
       memoRepository: memoRepo,
       authService: authService,

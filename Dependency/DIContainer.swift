@@ -13,7 +13,6 @@ final class DIContainer {
 
   @ObservationIgnored let userRepository: UserRepository
   @ObservationIgnored let todoRepository: TodoRepository
-  @ObservationIgnored let todoOrderRepository: TodoOrderRepository
   @ObservationIgnored let messageRepository: MessageRepository
   @ObservationIgnored let memoRepository: MemoRepository
   @ObservationIgnored let authService: AuthService
@@ -35,11 +34,6 @@ final class DIContainer {
   @ObservationIgnored let deleteTodoUseCase: DeleteTodoUseCase
   @ObservationIgnored let observeGroupTodoUseCase: ObserveGroupTodoUseCase
 
-  // Todo Order
-  @ObservationIgnored let saveTodoOrderUseCase: SaveTodoOrderUseCase
-  @ObservationIgnored let applyTodoOrderUseCase: ApplyTodoOrderUseCase
-  @ObservationIgnored let reorderTodosUseCase: ReorderTodosUseCase
-
   // Message
   @ObservationIgnored let createMessageUseCase: CreateMessageUseCase
   @ObservationIgnored let readMessagesUseCase: ReadMessageUseCase
@@ -60,7 +54,6 @@ final class DIContainer {
   init(
     userRepository: UserRepository,
     todoRepository: TodoRepository,
-    todoOrderRepository: TodoOrderRepository,
     messageRepository: MessageRepository,
     memoRepository: MemoRepository,
     authService: AuthService,
@@ -70,7 +63,6 @@ final class DIContainer {
     // Data Layer
     self.userRepository = userRepository
     self.todoRepository = todoRepository
-    self.todoOrderRepository = todoOrderRepository
     self.messageRepository = messageRepository
     self.memoRepository = memoRepository
     self.authService = authService
@@ -96,14 +88,6 @@ final class DIContainer {
     deleteTodoUseCase = DeleteTodoUseCaseImpl(repository: todoRepository)
     observeGroupTodoUseCase = ObserveGroupTodoUseCaseImpl(repository: todoRepository)
 
-    // Domain Layer - TodoOrder
-    saveTodoOrderUseCase = SaveTodoOrderUseCaseImpl(orderRepository: todoOrderRepository)
-    applyTodoOrderUseCase = ApplyTodoOrderUseCaseImpl(
-      orderRepository: todoOrderRepository,
-      saveTodoOrderUseCase: saveTodoOrderUseCase,
-    )
-    reorderTodosUseCase = ReorderTodosUseCaseImpl(saveTodoOrderUseCase: saveTodoOrderUseCase)
-
     // Domain Layer - Message
     createMessageUseCase = CreateMessageUseCaseImpl(repository: messageRepository)
     readMessagesUseCase = ReadMessageUseCaseImpl(repository: messageRepository)
@@ -127,7 +111,6 @@ extension DIContainer {
   static let preview: DIContainer = .init(
     userRepository: StubUserRepository(),
     todoRepository: StubTodoRepository(),
-    todoOrderRepository: StubTodoOrderRepository(),
     messageRepository: StubMessageRepository(),
     memoRepository: StubMemoRepository(),
     authService: StubAuthService(),

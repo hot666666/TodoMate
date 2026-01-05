@@ -16,8 +16,6 @@ final class TodoStore {
   private let updateTodoUseCase: UpdateTodoUseCase
   private let deleteTodoUseCase: DeleteTodoUseCase
   private let observeGroupTodoUseCase: ObserveGroupTodoUseCase
-  private let applyTodoOrderUseCase: ApplyTodoOrderUseCase
-  private let reorderTodosUseCase: ReorderTodosUseCase
 
   // MARK: - State
 
@@ -30,8 +28,6 @@ final class TodoStore {
     updateTodoUseCase = container.updateTodoUseCase
     deleteTodoUseCase = container.deleteTodoUseCase
     observeGroupTodoUseCase = container.observeGroupTodoUseCase
-    applyTodoOrderUseCase = container.applyTodoOrderUseCase
-    reorderTodosUseCase = container.reorderTodosUseCase
   }
 
   // MARK: - Public Methods
@@ -43,17 +39,11 @@ final class TodoStore {
   }
 
   @MainActor
-  func load(for userIds: [String], currentUserId: String, useCache: Bool = true) async {
+  func load(for userIds: [String], currentUserId _: String, useCache: Bool = true) async {
     currentDate = .now
 
     do {
       todos = try await readGroupTodoUseCase.run(for: userIds, in: currentDate, useCache: useCache)
-
-      updateUserTodos(for: currentUserId) { userTodos in
-        userTodos = applyTodoOrderUseCase.run(
-          todos: userTodos, currentUserId: currentUserId, currentDate: currentDate,
-        )
-      }
     } catch {
       print("[TodoStore] - Failed to load todos for users \(userIds): \(error)")
       todos = [:]
@@ -113,20 +103,6 @@ final class TodoStore {
       } catch {
         print("[TodoStore] - Failed to delete todo: \(error)")
       }
-    }
-  }
-
-  func reorderTodos(from: Int, to: Int, currentUserId: String) {
-    let currentTodos = todos[currentUserId] ?? []
-
-    updateUserTodos(for: currentUserId) { userTodos in
-      userTodos = reorderTodosUseCase.run(
-        todos: currentTodos,
-        currentUserId: currentUserId,
-        currentDate: currentDate,
-        from: from,
-        to: to,
-      )
     }
   }
 }
