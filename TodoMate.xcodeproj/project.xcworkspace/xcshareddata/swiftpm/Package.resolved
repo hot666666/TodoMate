@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/googleads/google-ads-on-device-conversion-ios-sdk",
       "state" : {
-        "revision" : "428d8bb138e00f9a3f4f61cc6cd8863607524f65",
-        "version" : "2.1.0"
+        "revision" : "a2d0f1f1666de591eb1a811f40b1706f5c63a2ed",
+        "version" : "2.3.0"
       }
     },
     {
