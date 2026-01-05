@@ -42,3 +42,67 @@ body
 ## 3. Git Lock Issues
 - **Scenario**: `.git/index.lock` might remain after a crash or interruption, blocking git commands.
 - **Action**: Run `rm -f .git/index.lock` and retry.
+
+# Merge Strategy & Merge Commit Rules
+Default Merge Strategy
+
+Default behavior: Use --no-ff merge unless explicitly instructed otherwise.
+
+This ensures merge commits are always distinguishable from linear commits and preserve branch context.
+
+Fast-forward merges are allowed only when explicitly requested.
+
+Merge Commit Creation
+
+All merges using --no-ff must result in a merge commit.
+
+Do not squash unless explicitly instructed.
+
+Merge Commit Message Guidelines
+
+Merge commit messages must summarize the core intent and outcome of the merged branch.
+
+The message should:
+
+Focus on high-level changes and goals
+
+Exclude excessive implementation details
+
+Omit minor refactors or low-impact changes unless critical
+
+Merge Commit Message Structure
+merge: <source-branch> into <target-branch>
+
+- Summarize major features or fixes introduced
+- Highlight important architectural or behavioral changes
+
+**Example**
+```
+merge: feature/study-session into main
+
+- Introduced study session flow and persistence
+- Integrated review scheduling logic
+- Improved state synchronization in SwiftUI views
+```
+
+## Merge Preparation Rules
+
+### 1. Branch Synchronization (Required)
+- Before any merge, ensure **all related branches are up to date**.
+- Always fetch the latest remote state first:
+- The base branch (e.g. `main`, `develop`) must be at its latest commit before merging.
+
+### 2. Rebase onto Base Branch
+- Before merging, the feature branch must be **rebased onto the latest base branch**.
+- This keeps history clean and minimizes merge conflicts.
+
+### 3. Rebase Safety Rules
+- Rebase only **private or unmerged feature branches**.
+- Do NOT rebase:
+- Branches already merged
+- Branches shared with others
+- Branches containing merge commits
+
+### 4. After Rebase
+- Resolve conflicts carefully without changing original intent.
+- Run tests to ensure behavior is unchanged.
