@@ -92,9 +92,7 @@ extension TodoListSection {
       todo: todo,
       overlay: overlay,
       onConfirmedDelete: { todo in
-        Task {
-          await todoStore.delete(todo, userId: sessionStore.userId)
-        }
+        todoStore.delete(todo, userId: sessionStore.userId)
       },
     )
   }

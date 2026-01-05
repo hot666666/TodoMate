@@ -12,11 +12,11 @@ import SwiftUI
 @main
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-  @State private var container: DIContainer
+  private let container: DIContainer
 
   init() {
+    // 의존성 주입 컨테이너 생성
     container = TodoMateApp.makeContainer()
-
     // 앱 업데이트 체크 및 처리
     TodoMateApp.checkAndHandleAppUpdate(container: container)
   }
@@ -24,14 +24,13 @@ struct TodoMateApp: App {
   var body: some Scene {
     WindowGroup {
       RootView()
-        .frame(minWidth: 720)
-        .environment(\.colorScheme, .dark)
         .environment(container)
+        .environment(\.colorScheme, .dark)
         .background(Color.customDarkBg)
         .background(.ultraThickMaterial)
+        .frame(minWidth: 720)
     }
     #if os(macOS)
-    .windowToolbarStyle(.unifiedCompact)
     .windowStyle(.hiddenTitleBar)
     #endif
   }

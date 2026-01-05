@@ -26,7 +26,7 @@ extension DeleteContextMenuButton {
     onConfirmedDelete: @escaping (Todo) -> Void,
   ) -> DeleteContextMenuButton {
     DeleteContextMenuButton(todo: todo) { todo in
-      let id = overlay?.presentCentered {
+      overlay?.presentCentered {
         ConfirmationView(
           title: "\(todo.content) 삭제",
           message: "이 할일을 삭제하시겠습니까?",
