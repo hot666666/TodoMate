@@ -53,16 +53,6 @@ final class NetworkModeManager {
     isTransitioning = false
   }
 
-  /// Force offline mode (call on app termination)
-  func forceOffline() async {
-    do {
-      try await Firestore.firestore().disableNetwork()
-      print("[NetworkModeManager] - Network disabled for app termination")
-    } catch {
-      print("[NetworkModeManager] - Failed to disable network: \(error)")
-    }
-  }
-
   // MARK: - Private Methods
 
   private func applyNetworkState() async {

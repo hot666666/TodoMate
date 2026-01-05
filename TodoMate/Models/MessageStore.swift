@@ -25,11 +25,6 @@ final class MessageStore {
   private(set) var messages: [GroupMessage] = []
   private(set) var hasUnreadMessages: Bool = false
 
-  // MARK: - Observer Lifecycle
-
-  private var observeTask: Task<Void, Never>?
-  private var currentGroupId: String?
-
   init(container: DIContainer) {
     createMessageUseCase = container.createMessageUseCase
     updateMessageUseCase = container.updateMessageUseCase
@@ -44,31 +39,9 @@ final class MessageStore {
   func refresh(groupId: String) async {
     // Message는 cache 이용말고, 서버로부터 로드
     await load(groupId: groupId, useCache: false)
-    startObserving(groupId: groupId)
-  }
-
-  /// Starts observing messages for the specified group.
-  /// Automatically stops any existing observation before starting a new one.
-  func startObserving(groupId: String) {
-    // If already observing the same group, don't restart
-    if currentGroupId == groupId, observeTask != nil {
-      return
-    }
-
-    stopObserving()
-    currentGroupId = groupId
-
-    observeTask = Task {
+    Task {
       await observe(groupId: groupId)
     }
-  }
-
-  /// Stops observing messages and cleans up resources.
-  /// Call this when leaving the group view, switching groups, or app termination.
-  func stopObserving() {
-    observeTask?.cancel()
-    observeTask = nil
-    currentGroupId = nil
   }
 
   func markAllAsRead() {
@@ -123,12 +96,6 @@ final class MessageStore {
 
   private func observe(groupId: String) async {
     for await event in observeMessagesUseCase.run(in: groupId) {
-      // Check for cancellation at the start of each iteration
-      guard !Task.isCancelled else {
-        print("[MessageStore] - Observer cancelled for group \(groupId)")
-        break
-      }
-
       switch event {
       case let .added(newMessage):
         if !messages.contains(where: { $0.id == newMessage.id }) {

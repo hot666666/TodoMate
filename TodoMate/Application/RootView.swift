@@ -57,25 +57,14 @@ extension RootView {
 
   @ViewBuilder
   private func makeMainView(userSession: UserSession) -> some View {
-    let messageStore = MessageStore(container: container)
-
     OverlayContainer {
       MainContainer()
     }
     .environment(SessionStore(container: container, userSession: userSession))
-    .environment(messageStore)
+    .environment(MessageStore(container: container))
     .environment(TodoStore(container: container))
     .environment(MemoStore(container: container))
     .environment(networkManager)
-    .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) {
-      _ in
-      // Stop message observer
-      messageStore.stopObserving()
-      // Disable Firestore network to prevent gRPC timeout on shutdown
-      Task {
-        await networkManager.forceOffline()
-      }
-    }
   }
 }
 
