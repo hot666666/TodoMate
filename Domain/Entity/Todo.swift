@@ -24,14 +24,16 @@ enum TodoStatus: String, CaseIterable, Codable {
 }
 
 struct Todo: Identifiable, Codable {
-  let id: String /// DocumentID
+  let id: String
+  /// DocumentID
   var content: String
   var status: TodoStatus
   var detail: String
   var date: Date
   let createdAt: Date
   var updatedAt: Date
-  let owner: String /// UserID
+  let owner: String
+  /// UserID
 
   init(
     id: String = UUID().uuidString,
@@ -118,13 +120,5 @@ extension Todo {
       updatedAt: now,
       owner: todo.owner,
     )
-  }
-}
-
-// MARK: - WidgetTodo->Todo
-
-extension WidgetTodo {
-  static func from(_ todo: Todo) -> WidgetTodo {
-    WidgetTodo(id: todo.id, content: todo.content)
   }
 }

@@ -10,5 +10,4 @@ protocol TodoRepository {
   func update(_ todo: Todo) throws
   func delete(_ todoId: String) async throws
   func readAll(query: TodoQuery, source: DataSource) async throws -> [Todo]
-  func observeAll(query: TodoQuery) -> AsyncStream<RepositoryEvent<Todo>>
 }

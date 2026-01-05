@@ -31,31 +31,6 @@ final class FirestoreTodoRepository: TodoRepository {
     return snapshot.documents.compactMap { try? $0.data(as: Todo.self) }
   }
 
-  func observeAll(query: TodoQuery) -> AsyncStream<RepositoryEvent<Todo>> {
-    let firestoreQuery = buildFirestoreQuery(from: query)
-
-    return AsyncStream { continuation in
-      let listener = firestoreQuery.addSnapshotListener { snapshot, error in
-        if let error { continuation.yield(.error(error)); return }
-        guard let snapshot else { continuation.yield(.error(FirestoreRepositoryError.snapshotNotFound)); return }
-
-        for change in snapshot.documentChanges {
-          guard let todo = try? change.document.data(as: Todo.self) else {
-            continuation.yield(.error(FirestoreRepositoryError.decodingError(documentID: change.document.documentID)))
-            continue
-          }
-          switch change.type {
-          case .added: continuation.yield(.added(todo))
-          case .modified: continuation.yield(.modified(todo))
-          case .removed: continuation.yield(.removed(todo))
-          @unknown default: continuation.yield(.error(FirestoreRepositoryError.unknownChangeType))
-          }
-        }
-      }
-      continuation.onTermination = { @Sendable _ in listener.remove() }
-    }
-  }
-
   private func buildFirestoreQuery(from todoQuery: TodoQuery) -> Query {
     var firestoreQuery: Query = reference.todoCollection()
 
@@ -66,7 +41,8 @@ final class FirestoreTodoRepository: TodoRepository {
       case let .owners(userIds):
         if !userIds.isEmpty { firestoreQuery = firestoreQuery.whereField("owner", in: userIds) }
       case let .dateRange(range):
-        firestoreQuery = firestoreQuery.whereField("date", isGreaterThanOrEqualTo: range.lowerBound).whereField("date", isLessThanOrEqualTo: range.upperBound)
+        firestoreQuery = firestoreQuery.whereField("date", isGreaterThanOrEqualTo: range.lowerBound)
+          .whereField("date", isLessThanOrEqualTo: range.upperBound)
       case let .status(status):
         firestoreQuery = firestoreQuery.whereField("status", isEqualTo: status.rawValue)
       }
@@ -82,5 +58,4 @@ final class StubTodoRepository: TodoRepository {
   func update(_: Todo) throws {}
   func delete(_: String) async throws {}
   func readAll(query _: TodoQuery, source _: DataSource) async throws -> [Todo] { [] }
-  func observeAll(query _: TodoQuery) -> AsyncStream<RepositoryEvent<Todo>> { AsyncStream { $0.finish() } }
 }

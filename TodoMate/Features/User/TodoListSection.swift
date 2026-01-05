@@ -33,15 +33,6 @@ struct TodoListSection: View {
   private func onUpdateTodo(_ todo: Todo) {
     todoStore.update(todo, userId: sessionStore.userId)
   }
-
-  private func moveTodos(from source: IndexSet, to destination: Int) {
-    guard let sourceIndex = source.first, isMine else { return }
-    todoStore.reorderTodos(
-      from: sourceIndex,
-      to: destination,
-      currentUserId: sessionStore.userId,
-    )
-  }
 }
 
 extension TodoListSection {
@@ -59,7 +50,6 @@ extension TodoListSection {
                 }
               }
           }
-          .onMove(perform: isMine ? moveTodos : nil)
         }
         .id(isMine ? (!overlayManager.overlays.isEmpty ? "overlay" : "none") : "static")
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -83,7 +73,6 @@ extension TodoListSection {
     TodoItem(
       todo: todo,
       isInteractive: isMine,
-      showDragHandle: isMine,
       onTap: presentTodoEditSheet,
       onUpdate: isMine ? onUpdateTodo : nil,
     )

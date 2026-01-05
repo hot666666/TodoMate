@@ -20,7 +20,6 @@ struct MainView: View {
   @State private var isMessageScreenPresented: Bool = false
   @State private var selectedSidebar: Sidebar = .profile
   @State private var refreshTrigger: RefreshTrigger = .init()
-  @State private var syncTask: Task<Void, Never>?
 
   enum Action {
     case triggerRefresh
@@ -28,7 +27,6 @@ struct MainView: View {
     case presentAddTodoSheet
     case presentCalendarScreen
     case refreshSession
-    case syncWidget
     case toggleSidebar
   }
 
@@ -60,17 +58,14 @@ struct MainView: View {
           await memoStore.refresh(for: sessionStore.userGroupIds)
         }
         group.addTask {
-          await todoStore.refresh(for: sessionStore.userGroupIds, currentUserId: sessionStore.userId)
+          await todoStore.refresh(
+            for: sessionStore.userGroupIds, currentUserId: sessionStore.userId,
+          )
         }
         group.addTask {
           await messageStore.refresh(groupId: sessionStore.userGroupId)
         }
       }
-
-    case .syncWidget:
-      defer { syncTask = nil }
-      let userTodos = todoStore.todos[sessionStore.userId, default: []]
-      await container.widgetSyncService.sync(with: userTodos)
 
     case .toggleSidebar:
       withAnimation {
@@ -128,12 +123,6 @@ extension MainView {
         setupInitialSidebar()
       }
     }
-    #if os(macOS)
-    .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
-      guard syncTask == nil else { return }
-      syncTask = Task { await perform(.syncWidget) }
-    }
-    #endif
   }
 
   @ViewBuilder
@@ -154,7 +143,6 @@ extension MainView {
     Button("새로고침", systemImage: "arrow.clockwise") {
       Task {
         await perform(.triggerRefresh)
-        await perform(.syncWidget)
       }
     }
     .keyboardShortcut("r", modifiers: .command)

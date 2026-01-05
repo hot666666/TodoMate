@@ -10,7 +10,6 @@ import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
-  var syncWidgetData: (() async -> Void)?
 
   func applicationWillFinishLaunching(_: Notification) {
     /// 새 윈도우 생성 메뉴 삭제

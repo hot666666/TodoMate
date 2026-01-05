@@ -13,12 +13,10 @@ final class DIContainer {
 
   @ObservationIgnored let userRepository: UserRepository
   @ObservationIgnored let todoRepository: TodoRepository
-  @ObservationIgnored let todoOrderRepository: TodoOrderRepository
   @ObservationIgnored let messageRepository: MessageRepository
   @ObservationIgnored let memoRepository: MemoRepository
   @ObservationIgnored let authService: AuthService
   @ObservationIgnored let calendarDayService: CalendarDayService
-  @ObservationIgnored let widgetSyncService: WidgetSyncService
   @ObservationIgnored let messageReadTracker: MessageReadTracker
 
   // MARK: - Domain Layer
@@ -34,12 +32,6 @@ final class DIContainer {
   @ObservationIgnored let readMonthlyTodoUseCase: ReadMonthlyTodoUseCase
   @ObservationIgnored let updateTodoUseCase: UpdateTodoUseCase
   @ObservationIgnored let deleteTodoUseCase: DeleteTodoUseCase
-  @ObservationIgnored let observeGroupTodoUseCase: ObserveGroupTodoUseCase
-
-  // Todo Order
-  @ObservationIgnored let saveTodoOrderUseCase: SaveTodoOrderUseCase
-  @ObservationIgnored let applyTodoOrderUseCase: ApplyTodoOrderUseCase
-  @ObservationIgnored let reorderTodosUseCase: ReorderTodosUseCase
 
   // Message
   @ObservationIgnored let createMessageUseCase: CreateMessageUseCase
@@ -61,23 +53,19 @@ final class DIContainer {
   init(
     userRepository: UserRepository,
     todoRepository: TodoRepository,
-    todoOrderRepository: TodoOrderRepository,
     messageRepository: MessageRepository,
     memoRepository: MemoRepository,
     authService: AuthService,
     calendarDayService: CalendarDayService,
-    widgetSyncService: WidgetSyncService,
     messageReadTracker: MessageReadTracker,
   ) {
     // Data Layer
     self.userRepository = userRepository
     self.todoRepository = todoRepository
-    self.todoOrderRepository = todoOrderRepository
     self.messageRepository = messageRepository
     self.memoRepository = memoRepository
     self.authService = authService
     self.calendarDayService = calendarDayService
-    self.widgetSyncService = widgetSyncService
     self.messageReadTracker = messageReadTracker
 
     // Domain Layer - User
@@ -97,15 +85,6 @@ final class DIContainer {
     readMonthlyTodoUseCase = ReadMonthlyTodoUseCaseImpl(repository: todoRepository)
     updateTodoUseCase = UpdateTodoUseCaseImpl(repository: todoRepository)
     deleteTodoUseCase = DeleteTodoUseCaseImpl(repository: todoRepository)
-    observeGroupTodoUseCase = ObserveGroupTodoUseCaseImpl(repository: todoRepository)
-
-    // Domain Layer - TodoOrder
-    saveTodoOrderUseCase = SaveTodoOrderUseCaseImpl(orderRepository: todoOrderRepository)
-    applyTodoOrderUseCase = ApplyTodoOrderUseCaseImpl(
-      orderRepository: todoOrderRepository,
-      saveTodoOrderUseCase: saveTodoOrderUseCase,
-    )
-    reorderTodosUseCase = ReorderTodosUseCaseImpl(saveTodoOrderUseCase: saveTodoOrderUseCase)
 
     // Domain Layer - Message
     createMessageUseCase = CreateMessageUseCaseImpl(repository: messageRepository)
@@ -130,12 +109,10 @@ extension DIContainer {
   static let preview: DIContainer = .init(
     userRepository: StubUserRepository(),
     todoRepository: StubTodoRepository(),
-    todoOrderRepository: StubTodoOrderRepository(),
     messageRepository: StubMessageRepository(),
     memoRepository: StubMemoRepository(),
     authService: StubAuthService(),
     calendarDayService: CalendarDayServiceImpl(),
-    widgetSyncService: StubWidgetSyncService(),
     messageReadTracker: StubMessageReadTracker(),
   )
 }

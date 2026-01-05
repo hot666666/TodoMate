@@ -12,7 +12,6 @@ struct TodoItem: View {
   let isInteractive: Bool
   let onTap: (Todo) -> Void
   let onUpdate: ((Todo) -> Void)?
-  let showDragHandle: Bool
 
   @State private var todoStatus: TodoStatus
   @State private var isHovering: Bool = false
@@ -20,13 +19,11 @@ struct TodoItem: View {
   init(
     todo: Todo,
     isInteractive: Bool = false,
-    showDragHandle: Bool = false,
     onTap: @escaping (Todo) -> Void,
     onUpdate: ((Todo) -> Void)? = nil,
   ) {
     self.todo = todo
     self.isInteractive = isInteractive
-    self.showDragHandle = showDragHandle
     self.onTap = onTap
     self.onUpdate = onUpdate
     _todoStatus = State(wrappedValue: todo.status)
@@ -34,7 +31,6 @@ struct TodoItem: View {
 
   var body: some View {
     HStack(alignment: .center, spacing: HomeDesignSystem.Component.TodoList.itemHorizontalSpacing) {
-      dragHandleView
       statusSelector
       contentSection
     }
@@ -55,13 +51,6 @@ struct TodoItem: View {
       RoundedRectangle(cornerRadius: 8)
         .fill(isHovering ? Color.secondary.opacity(0.1) : Color.clear),
     )
-  }
-
-  private var dragHandleView: some View {
-    Image(systemName: "line.3.horizontal")
-      .foregroundStyle(.secondary)
-      .opacity(showDragHandle && isHovering ? HomeDesignSystem.Component.TodoList.dragHandleOpacity : 0)
-      .frame(width: HomeDesignSystem.Component.TodoList.dragHandleWidth)
   }
 
   private var statusSelector: some View {
@@ -91,8 +80,8 @@ struct TodoItem: View {
 
 #Preview {
   VStack {
-    TodoItem(todo: .stub, isInteractive: true, showDragHandle: true, onTap: { _ in })
-    TodoItem(todo: .stub, isInteractive: false, showDragHandle: false, onTap: { _ in })
+    TodoItem(todo: .stub, isInteractive: true, onTap: { _ in })
+    TodoItem(todo: .stub, isInteractive: false, onTap: { _ in })
   }
   .frame(width: 400)
 }
