@@ -55,7 +55,7 @@ extension RootView {
 
   @ViewBuilder
   private func makeMainView(userSession: UserSession) -> some View {
-    MainView()
+    MainContainer()
       .environment(SessionStore(container: container, userSession: userSession))
       .environment(MessageStore(container: container))
       .environment(TodoStore(container: container))
