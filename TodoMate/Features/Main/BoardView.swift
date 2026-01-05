@@ -7,13 +7,14 @@
 //  Created by agent on 1/5/26.
 //
 
+import SimpleOverlaySystem
 import SwiftUI
 
 struct BoardView: View {
   @Environment(TodoStore.self) private var todoStore
   @Environment(SessionStore.self) private var sessionStore
-  @Environment(OverlayManager.self) private var overlayManager
-  let selection: SidebarSelection
+  @Environment(\.overlayManager) private var overlay
+  let selection: NavigationDestination
 
   // Computed properties to group tasks by status
   private var viewTodos: [ViewTodo] {
@@ -89,7 +90,7 @@ struct BoardView: View {
     else { return }
 
     let editableTodo = EditableTodo(from: originalTodo)
-    overlayManager.presentSheet(editableTodo: editableTodo) {
+    overlay?.presentCentered {
       TodoSheet(editableTodo: editableTodo)
     }
   }
@@ -166,7 +167,7 @@ private struct TodoColumn: View {
 }
 
 #Preview {
-  BoardView(selection: .todo)
+  BoardView(selection: .todo())
     .environment(TodoStore.preview)
     .environment(SessionStore.preview)
     .environment(OverlayManager())

@@ -27,7 +27,13 @@ struct OtherUserScreen: View {
         isMine: false,
       )
       .padding(.top, 45)
-      .background(.ultraThickMaterial, in: UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 16))
+      .background(
+        .ultraThickMaterial,
+        in: UnevenRoundedRectangle(
+          topLeadingRadius: 16, bottomLeadingRadius: 0, bottomTrailingRadius: 0,
+          topTrailingRadius: 16,
+        ),
+      )
     }
   }
 }
@@ -38,6 +44,5 @@ struct OtherUserScreen: View {
     .environment(SessionStore.preview)
     .environment(MemoStore.preview)
     .environment(TodoStore.preview)
-    .environment(OverlayManager())
     .frame(width: 500, height: 400)
 }

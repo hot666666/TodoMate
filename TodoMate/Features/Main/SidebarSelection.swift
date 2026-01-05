@@ -7,14 +7,22 @@
 
 import SwiftUI
 
-enum SidebarSelection: Hashable, Identifiable {
-  case todo
+enum NavigationDestination: Hashable, Identifiable {
+  case todo(ContentViewMode? = nil)
   case memo
   case settings
   case group(String) // Group ID
   case noGroups
 
-  var id: Self { self }
+  var id: String {
+    switch self {
+    case .todo: "todo"
+    case .memo: "memo"
+    case .settings: "settings"
+    case let .group(id): "group_\(id)"
+    case .noGroups: "noGroups"
+    }
+  }
 
   var title: String {
     switch self {
@@ -24,5 +32,24 @@ enum SidebarSelection: Hashable, Identifiable {
     case let .group(groupId): groupId
     case .noGroups: "No Groups Joined"
     }
+  }
+}
+
+@MainActor
+@Observable
+final class NavigationManager {
+  var selection: NavigationDestination? = .todo()
+  var viewMode: ContentViewMode = .board
+  var columnVisibility: NavigationSplitViewVisibility = .all
+
+  init() {}
+
+  func navigate(to destination: NavigationDestination) {
+    if case let .todo(mode) = destination {
+      if let mode {
+        viewMode = mode
+      }
+    }
+    selection = destination
   }
 }

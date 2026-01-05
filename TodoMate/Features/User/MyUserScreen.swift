@@ -26,7 +26,13 @@ struct MyUserScreen: View {
 
       singleOrGroup
         .padding(.top, 45)
-        .background(.ultraThickMaterial, in: UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 16))
+        .background(
+          .ultraThickMaterial,
+          in: UnevenRoundedRectangle(
+            topLeadingRadius: 16, bottomLeadingRadius: 0, bottomTrailingRadius: 0,
+            topTrailingRadius: 16,
+          ),
+        )
         .overlay(alignment: .topLeading) {
           toggleButton
             .keyboardShortcut("t", modifiers: .command)
@@ -43,7 +49,12 @@ struct MyUserScreen: View {
       )
     } else {
       VStack {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 20), count: min(sessionStore.userGroup.count, 3)), spacing: 16) {
+        LazyVGrid(
+          columns: Array(
+            repeating: GridItem(.flexible(), spacing: 20),
+            count: min(sessionStore.userGroup.count, 3),
+          ), spacing: 16,
+        ) {
           ForEach(sessionStore.userGroup) { member in
             GroupUserTodoCard(
               user: member,
@@ -77,6 +88,5 @@ struct MyUserScreen: View {
     .environment(SessionStore.preview)
     .environment(MemoStore.preview)
     .environment(TodoStore.preview)
-    .environment(OverlayManager())
     .frame(width: 500, height: 400)
 }

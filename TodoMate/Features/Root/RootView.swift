@@ -5,6 +5,7 @@
 //  Created by hs on 6/2/25.
 //
 
+import SimpleOverlaySystem
 import SwiftUI
 
 struct RootView: View {
@@ -55,12 +56,13 @@ extension RootView {
 
   @ViewBuilder
   private func makeMainView(userSession: UserSession) -> some View {
-    MainContainer()
-      .environment(SessionStore(container: container, userSession: userSession))
-      .environment(MessageStore(container: container))
-      .environment(TodoStore(container: container))
-      .environment(MemoStore(container: container))
-      .environment(OverlayManager())
+    OverlayContainer {
+      MainContainer()
+    }
+    .environment(SessionStore(container: container, userSession: userSession))
+    .environment(MessageStore(container: container))
+    .environment(TodoStore(container: container))
+    .environment(MemoStore(container: container))
   }
 }
 
