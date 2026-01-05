@@ -75,6 +75,7 @@ merge: <source-branch> into <target-branch>
 
 - Summarize major features or fixes introduced
 - Highlight important architectural or behavioral changes
+- Prefer message in Korean!
 
 **Example**
 ```
