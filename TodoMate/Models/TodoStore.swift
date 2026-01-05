@@ -15,7 +15,6 @@ final class TodoStore {
   private let readGroupTodoUseCase: ReadGroupTodoUseCase
   private let updateTodoUseCase: UpdateTodoUseCase
   private let deleteTodoUseCase: DeleteTodoUseCase
-  private let observeGroupTodoUseCase: ObserveGroupTodoUseCase
 
   // MARK: - State
 
@@ -27,7 +26,6 @@ final class TodoStore {
     readGroupTodoUseCase = container.readGroupTodoUseCase
     updateTodoUseCase = container.updateTodoUseCase
     deleteTodoUseCase = container.deleteTodoUseCase
-    observeGroupTodoUseCase = container.observeGroupTodoUseCase
   }
 
   // MARK: - Public Methods
@@ -35,7 +33,6 @@ final class TodoStore {
   @MainActor
   func refresh(for userIds: [String], currentUserId: String) async {
     await load(for: userIds, currentUserId: currentUserId, useCache: true)
-    await observe(for: userIds)
   }
 
   @MainActor
@@ -47,22 +44,6 @@ final class TodoStore {
     } catch {
       print("[TodoStore] - Failed to load todos for users \(userIds): \(error)")
       todos = [:]
-    }
-  }
-
-  @MainActor
-  func observe(for userIds: [String]) async {
-    for await event in observeGroupTodoUseCase.run(for: userIds, in: currentDate) {
-      switch event {
-      case let .added(todo):
-        handleTodoAdded(todo)
-      case let .modified(todo):
-        handleTodoModified(todo)
-      case let .removed(todo):
-        handleTodoRemoved(todo)
-      case let .error(error):
-        print("[TodoStore] - Error observing todos for users \(userIds): \(error)")
-      }
     }
   }
 
@@ -114,36 +95,6 @@ extension TodoStore {
     var userTodos = todos[userId, default: []]
     update(&userTodos)
     todos[userId] = userTodos
-  }
-
-  private func handleTodoAdded(_ todo: Todo) {
-    updateUserTodos(for: todo.owner) { userTodos in
-      if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
-        // 이미 존재하는데 업데이트된 경우
-        if todo.updatedAt > userTodos[index].updatedAt {
-          userTodos[index] = todo
-        }
-      } else {
-        // 새로 추가된 경우
-        userTodos.append(todo)
-      }
-    }
-  }
-
-  private func handleTodoModified(_ todo: Todo) {
-    updateUserTodos(for: todo.owner) { userTodos in
-      if let index = userTodos.firstIndex(where: { $0.id == todo.id }),
-         todo.updatedAt > userTodos[index].updatedAt
-      {
-        userTodos[index] = todo
-      }
-    }
-  }
-
-  private func handleTodoRemoved(_ todo: Todo) {
-    updateUserTodos(for: todo.owner) { userTodos in
-      userTodos.removeAll { $0.id == todo.id }
-    }
   }
 }
 

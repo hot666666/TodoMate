@@ -32,7 +32,6 @@ final class DIContainer {
   @ObservationIgnored let readMonthlyTodoUseCase: ReadMonthlyTodoUseCase
   @ObservationIgnored let updateTodoUseCase: UpdateTodoUseCase
   @ObservationIgnored let deleteTodoUseCase: DeleteTodoUseCase
-  @ObservationIgnored let observeGroupTodoUseCase: ObserveGroupTodoUseCase
 
   // Message
   @ObservationIgnored let createMessageUseCase: CreateMessageUseCase
@@ -86,7 +85,6 @@ final class DIContainer {
     readMonthlyTodoUseCase = ReadMonthlyTodoUseCaseImpl(repository: todoRepository)
     updateTodoUseCase = UpdateTodoUseCaseImpl(repository: todoRepository)
     deleteTodoUseCase = DeleteTodoUseCaseImpl(repository: todoRepository)
-    observeGroupTodoUseCase = ObserveGroupTodoUseCaseImpl(repository: todoRepository)
 
     // Domain Layer - Message
     createMessageUseCase = CreateMessageUseCaseImpl(repository: messageRepository)
