@@ -14,14 +14,16 @@ import Foundation
 @MainActor
 final class NetworkModeManager {
   @ObservationIgnored private let userDefaults: UserDefaults
+  @ObservationIgnored private let networkController: NetworkController
 
   // MARK: - State
 
   private(set) var isOnline: Bool = true
   private(set) var isTransitioning: Bool = false
 
-  init(userDefaults: UserDefaults = .standard) {
-    self.userDefaults = userDefaults
+  init(container: DIContainer) {
+    userDefaults = container.userDefaults
+    networkController = container.networkController
 
     // Load saved preference (default: online)
     isOnline = userDefaults.bool(for: .networkModeIsOnline, default: true)
@@ -58,17 +60,20 @@ final class NetworkModeManager {
   // MARK: - Private Methods
 
   private func applyNetworkState() async {
-    let ref = FirestoreReference.shared
     do {
       if isOnline {
-        try await ref.db.enableNetwork()
+        try await networkController.enableNetwork()
         print("[NetworkModeManager] - Network enabled")
       } else {
-        try await ref.db.disableNetwork()
+        try await networkController.disableNetwork()
         print("[NetworkModeManager] - Network disabled (offline mode)")
       }
     } catch {
       print("[NetworkModeManager] - Failed to change network state: \(error)")
     }
   }
+}
+
+extension NetworkModeManager {
+  static let preview = NetworkModeManager(container: .preview)
 }

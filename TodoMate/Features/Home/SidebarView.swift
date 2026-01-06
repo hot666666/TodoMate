@@ -149,7 +149,7 @@ private struct SidebarProfileView: View {
   NavigationSplitView {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
-      .environment(NetworkModeManager())
+      .environment(NetworkModeManager.preview)
   } detail: {
     Text("Detail")
   }

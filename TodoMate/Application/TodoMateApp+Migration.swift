@@ -2,7 +2,7 @@ import SwiftUI
 
 extension TodoMateApp {
   static func checkAndHandleAppUpdate(container: DIContainer) {
-    let userDefaults = UserDefaults.standard
+    let userDefaults = container.userDefaults
 
     let currentVersion =
       Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"

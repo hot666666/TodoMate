@@ -23,6 +23,14 @@ enum UserDefaultsKey: String {
 // MARK: - UserDefaults Extension
 
 extension UserDefaults {
+  /// In-memory UserDefaults for previews/tests
+  static var preview: UserDefaults {
+    let suiteName = "preview"
+    let defaults = UserDefaults(suiteName: suiteName)!
+    defaults.removePersistentDomain(forName: suiteName)
+    return defaults
+  }
+
   func set(_ value: Any?, for key: UserDefaultsKey) {
     set(value, forKey: key.rawValue)
   }

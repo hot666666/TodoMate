@@ -13,15 +13,17 @@ import SwiftUI
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-  // MARK: - Stores (App Lifetime)
+  // MARK: - Dependency Injection Container
+
+  private let container: DIContainer
+
+  // MARK: - Global States (App Lifetime)
 
   @State private var networkManager: NetworkModeManager
   @State private var sessionStore: SessionStore
   @State private var todoStore: TodoStore
   @State private var memoStore: MemoStore
   @State private var messageStore: MessageStore
-
-  private let container: DIContainer
 
   init() {
     // 의존성 주입 컨테이너 생성
@@ -31,15 +33,14 @@ struct TodoMateApp: App {
     // 앱 업데이트 체크 및 처리
     TodoMateApp.checkAndHandleAppUpdate(container: container)
 
-    // NetworkModeManager 초기화
-    _networkManager = State(initialValue: .init())
+    // 앱 전역 상태 초기화
+    _networkManager = State(initialValue: .init(container: container))
 
     let session = SessionStore(container: container)
     let todo = TodoStore(container: container)
     let memo = MemoStore(container: container)
     let message = MessageStore(container: container)
 
-    // State 초기화
     _sessionStore = State(initialValue: session)
     _todoStore = State(initialValue: todo)
     _memoStore = State(initialValue: memo)
@@ -64,7 +65,6 @@ struct TodoMateApp: App {
         .environment(messageStore)
         .environment(networkManager)
         .environment(\.colorScheme, .dark)
-        .background(Color.customDarkBg)
         .background(.ultraThickMaterial)
         .frame(minWidth: 720)
     }
@@ -78,9 +78,13 @@ private extension TodoMateApp {
   static func makeContainer() -> DIContainer {
     guard !isPreview else { return .preview }
 
-    configureFirebase()
-    configureGoogleSignIn()
+    // Firebase 및 Google Sign-In 구성
+    // 만약 Preview에서 FirebaseSDK 관련요소를 쓰는부분이 있다면, 초기화를 안해서 크래시 발생(현재는 전부 격리라 문제없음)
+    // 만약 Preview에서 그냥 config를 수행해버리면, db저장소를 점유하여 런타임에러 발생
+    TodoMateApp.configureFirebase()
+    TodoMateApp.configureGoogleSignIn()
 
+    // 실제 구현체로 리포지토리 및 서비스 초기화
     let userRepo = FirestoreUserRepository()
     let todoRepo = FirestoreTodoRepository()
     let messageRepo = FirestoreMessageRepository()
@@ -88,6 +92,8 @@ private extension TodoMateApp {
     let authService = FirebaseAuthService()
     let calendarDayService = CalendarDayServiceImpl()
     let messageReadTracker = MessageReadTrackerImpl()
+    let networkController = FirestoreNetworkController()
+    let userDefaults = UserDefaults.standard
 
     return DIContainer(
       userRepository: userRepo,
@@ -97,6 +103,8 @@ private extension TodoMateApp {
       authService: authService,
       calendarDayService: calendarDayService,
       messageReadTracker: messageReadTracker,
+      networkController: networkController,
+      userDefaults: userDefaults,
     )
   }
 
