@@ -11,8 +11,6 @@ import Observation
 @Observable
 @MainActor
 final class MessageStore {
-  @ObservationIgnored private var task: Task<Void, Never>?
-
   // MARK: - Dependencies
 
   private let createMessageUseCase: CreateMessageUseCase
@@ -22,10 +20,16 @@ final class MessageStore {
   private let observeMessagesUseCase: ObserveMessageUseCase
   private let readTracker: MessageReadTracker
 
+  // MARK: - Listeners
+
+  @ObservationIgnored private var sessionListener: Task<Void, Never>?
+  @ObservationIgnored private var messageObserver: Task<Void, Never>?
+
   // MARK: - State
 
   private(set) var messages: [GroupMessage] = []
   private(set) var hasUnreadMessages: Bool = false
+  private var currentGroupId: String = ""
 
   init(container: DIContainer) {
     createMessageUseCase = container.createMessageUseCase
@@ -36,13 +40,45 @@ final class MessageStore {
     readTracker = container.messageReadTracker
   }
 
+  // MARK: - Subscriber
+
+  /// SessionStore 이벤트 구독 시작
+  func startListening(to events: AsyncStream<SessionEvent>) {
+    sessionListener?.cancel()
+    sessionListener = Task { [weak self] in
+      for await event in events {
+        guard let self else { return }
+        switch event {
+        case let .loggedIn(_, groupId, _):
+          // groupId는 그룹 채팅방 ID
+          await refresh(groupId: groupId)
+          print("[MessageStore] - Received loggedIn event, loading messages for group: \(groupId)")
+        case .loggedOut:
+          clear()
+          print("[MessageStore] - Received loggedOut event, cleared messages")
+        }
+      }
+    }
+  }
+
+  /// 리스너 정리
+  func cleanup() {
+    sessionListener?.cancel()
+    sessionListener = nil
+    messageObserver?.cancel()
+    messageObserver = nil
+  }
+
   // MARK: - Public Methods
 
   func refresh(groupId: String) async {
-    // Message는 cache 이용말고, 서버로부터 로드
+    currentGroupId = groupId
+    // Cache-first: 먼저 캐시에서 빠르게 로드 (오프라인 지원)
+    await load(groupId: groupId, useCache: true)
+    // 그 다음 서버에서 최신 데이터로 업데이트
     await load(groupId: groupId, useCache: false)
-    task?.cancel()
-    task = Task {
+    messageObserver?.cancel()
+    messageObserver = Task {
       await observe(groupId: groupId)
     }
   }
@@ -93,6 +129,13 @@ final class MessageStore {
     } catch {
       print("[MessageStore] - Failed to load messages for group \(groupId): \(error)")
     }
+  }
+
+  func clear() {
+    messageObserver?.cancel()
+    messages = []
+    hasUnreadMessages = false
+    currentGroupId = ""
   }
 
   // MARK: - Private Methods
