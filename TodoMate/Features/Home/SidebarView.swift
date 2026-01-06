@@ -51,7 +51,7 @@ struct SidebarView: View {
       }
 
       Section {
-        NavigationLink(value: NavigationDestination.noGroups) {
+        if sessionStore.userGroupId.isEmpty {
           Label {
             Text("No Groups Joined")
               .italic()
@@ -60,19 +60,18 @@ struct SidebarView: View {
             Image(systemName: "person.2.fill")
               .foregroundStyle(.secondary)
           }
-        }
-        .accessibilityIdentifier("sidebar_noGroups")
-
-        ForEach(sessionStore.userGroupIds, id: \.self) { groupId in
-          NavigationLink(value: NavigationDestination.group(groupId)) {
+          .accessibilityIdentifier("sidebar_noGroups")
+        } else {
+          NavigationLink(value: NavigationDestination.group(sessionStore.userGroupId)) {
             Label {
-              Text(sessionStore.userGroupDisplayNames[groupId] ?? "Unknown Group")
+              // TODO: 그룹 이름을 별도로 관리하거나, 서버에서 가져와야 함
+              Text("Design Team")
             } icon: {
               Image(systemName: "briefcase.fill")
                 .foregroundStyle(DesignSystem.Colors.accentIndigo)
             }
           }
-          .accessibilityIdentifier("sidebar_group_\(groupId)")
+          .accessibilityIdentifier("sidebar_group_\(sessionStore.userGroupId)")
         }
       } header: {
         Text("Groups")

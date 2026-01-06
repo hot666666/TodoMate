@@ -36,6 +36,6 @@ final class GroupFeedViewModel {
   }
 
   func getMember(byId id: String, sessionStore: SessionStore) -> User? {
-    sessionStore.userGroup.first(where: { $0.id == id })
+    sessionStore.groupMembers.first(where: { $0.id == id })
   }
 }

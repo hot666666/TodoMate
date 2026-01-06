@@ -25,7 +25,8 @@ final class SessionStore {
   @ObservationIgnored private var authListener: Task<Void, Never>?
 
   /// 구독자 관리: UUID를 키로 사용하여 여러 구독자에게 동시에 이벤트 전송
-  @ObservationIgnored private var continuations: [UUID: AsyncStream<SessionEvent>.Continuation] = [:]
+  @ObservationIgnored private var continuations: [UUID: AsyncStream<SessionEvent>.Continuation] =
+    [:]
 
   // MARK: - Auth State
 
@@ -48,16 +49,16 @@ final class SessionStore {
   var userId: String { user?.id ?? "" }
   var userGroupId: String { user?.groupId ?? "" }
 
-  private(set) var userGroup: [User] = [] {
+  private(set) var groupMembers: [User] = [] {
     didSet {
-      userGroupIds = userGroup.map(\.id)
-      userGroupDisplayNames = Dictionary(
-        uniqueKeysWithValues: userGroup.map { ($0.id, $0.displayName) })
+      groupMemberIds = groupMembers.map(\.id)
+      groupMemberDisplayNames = Dictionary(
+        uniqueKeysWithValues: groupMembers.map { ($0.id, $0.displayName) })
     }
   }
 
-  private(set) var userGroupIds: [String] = []
-  private(set) var userGroupDisplayNames: [String: String] = [:]
+  private(set) var groupMemberIds: [String] = []
+  private(set) var groupMemberDisplayNames: [String: String] = [:]
 
   // MARK: - Init
 
@@ -101,16 +102,16 @@ final class SessionStore {
     do {
       let session = try await loadUserSessionUseCase.run(for: uid, phase: .initial)
       user = session.currentUser
-      userGroup = session.groupMembers
-      userGroupIds = session.groupMembers.map(\.id)
-      userGroupDisplayNames = Dictionary(
+      groupMembers = session.groupMembers
+      groupMemberIds = session.groupMembers.map(\.id)
+      groupMemberDisplayNames = Dictionary(
         uniqueKeysWithValues: session.groupMembers.map { ($0.id, $0.displayName) })
 
       authState = .authenticated
       emit(
         .loggedIn(
           userId: session.currentUser.id, groupId: session.currentUser.groupId,
-          memberIds: userGroupIds,
+          memberIds: groupMemberIds,
         ))
       print("[SessionStore] - Authenticated: \(session.currentUser.displayName)")
     } catch {
@@ -121,9 +122,9 @@ final class SessionStore {
 
   private func handleLogout() {
     user = nil
-    userGroup = []
-    userGroupIds = []
-    userGroupDisplayNames = [:]
+    groupMembers = []
+    groupMemberIds = []
+    groupMemberDisplayNames = [:]
     authState = .unauthenticated
     emit(.loggedOut)
     print("[SessionStore] - Logged out")
@@ -142,7 +143,7 @@ final class SessionStore {
       if case .authenticated = self.authState, let currentUser = self.user {
         continuation.yield(
           .loggedIn(
-            userId: currentUser.id, groupId: currentUser.groupId, memberIds: self.userGroupIds,
+            userId: currentUser.id, groupId: currentUser.groupId, memberIds: self.groupMemberIds,
           ))
       } else if case .unauthenticated = self.authState {
         continuation.yield(.loggedOut)
@@ -202,7 +203,7 @@ final class SessionStore {
       let latestGroup = try await readUserGroupUseCase.run(
         groupId: latestUser.groupId, useCache: false,
       )
-      userGroup = latestGroup.placingFirst(latestUser)
+      groupMembers = latestGroup.placingFirst(latestUser)
     } catch {
       print("[SessionStore] - Failed to refresh session: \(error)")
     }
@@ -213,8 +214,8 @@ extension SessionStore {
   static let preview: SessionStore = {
     let store = SessionStore(container: .preview)
     store.user = .stub
-    store.userGroup = [.stub]
-    store.userGroupIds = [User.stub.id]
+    store.groupMembers = [.stub]
+    store.groupMemberIds = [User.stub.id]
     store.authState = .authenticated
     return store
   }()
