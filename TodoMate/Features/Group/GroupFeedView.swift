@@ -269,7 +269,7 @@ private struct ChatPanelView: View {
 
             ForEach(messageStore.messages) { message in
               // Convert GroupMessage to ChatMessage for display
-              let chatMsg = ChatMessage(from: message, senderId: message.owner)
+              let chatMsg = ViewGroupMessage(from: message, senderId: message.owner)
               let sender = viewModel.getMember(byId: message.owner, sessionStore: sessionStore)
               let viewUser = sender.map { ViewUser(from: $0) }
 

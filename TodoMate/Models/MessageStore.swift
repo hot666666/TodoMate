@@ -1,24 +1,23 @@
 //
 //  MessageStore.swift
-//  Todo
+//  TodoMate
 //
 //  Created by hs on 6/9/25.
 //
 
-import Foundation
-import Observation
+import SwiftUI
 
 @Observable
 @MainActor
 final class MessageStore {
   // MARK: - Dependencies
 
-  private let createMessageUseCase: CreateMessageUseCase
-  private let updateMessageUseCase: UpdateMessageUseCase
-  private let deleteMessageUseCase: DeleteMessageUseCase
-  private let readMessagesUseCase: ReadMessageUseCase
-  private let observeMessagesUseCase: ObserveMessageUseCase
-  private let readTracker: MessageReadTracker
+  @ObservationIgnored private let createMessageUseCase: CreateMessageUseCase
+  @ObservationIgnored private let updateMessageUseCase: UpdateMessageUseCase
+  @ObservationIgnored private let deleteMessageUseCase: DeleteMessageUseCase
+  @ObservationIgnored private let readMessagesUseCase: ReadMessageUseCase
+  @ObservationIgnored private let observeMessagesUseCase: ObserveMessageUseCase
+  @ObservationIgnored private let readTracker: MessageReadTracker
 
   // MARK: - Listeners
 

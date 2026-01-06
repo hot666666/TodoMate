@@ -90,7 +90,7 @@ struct SidebarView: View {
   // MARK: - Network Toggle
 
   private var networkToggle: some View {
-    HStack {
+    HStack(alignment: .center) {
       Image(systemName: networkManager.isOnline ? "wifi" : "wifi.slash")
       Text(networkManager.isOnline ? "Online" : "Offline")
       Spacer()
@@ -108,11 +108,12 @@ struct SidebarView: View {
       .labelsHidden()
       .toggleStyle(.switch)
     }
-    .font(.body)
     .disabled(networkManager.isTransitioning)
     .accessibilityIdentifier("network_toggle")
   }
 }
+
+// MARK: - SidebarProfileView
 
 private struct SidebarProfileView: View {
   let displayName: String

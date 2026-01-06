@@ -1,6 +1,6 @@
 //
 //  SessionStore.swift
-//  Todo
+//  TodoMate
 //
 //  Created by hs on 6/8/25.
 //
@@ -12,20 +12,20 @@ import SwiftUI
 final class SessionStore {
   // MARK: - Dependencies
 
-  private let container: DIContainer
-  private let loadUserSessionUseCase: LoadUserSessionUseCase
-  private let signOutUseCase: SignOutUseCase
-  private let readUserUseCase: ReadUserUseCase
-  private let readUserGroupUseCase: ReadUserGroupUseCase
-  private let updateUserUseCase: UpdateUserUseCase
+  @ObservationIgnored private let listenAuthStateUseCase: ListenAuthStateUseCase
+  @ObservationIgnored private let loadUserSessionUseCase: LoadUserSessionUseCase
+  @ObservationIgnored private let signOutUseCase: SignOutUseCase
+  @ObservationIgnored private let readUserUseCase: ReadUserUseCase
+  @ObservationIgnored private let readUserGroupUseCase: ReadUserGroupUseCase
+  @ObservationIgnored private let updateUserUseCase: UpdateUserUseCase
 
-  // MARK: - Publisher State
+  // MARK: - Listenter & Publisher
+
+  /// Firebase Auth 상태 변화를 비동기적으로 감지하는 리스너 태스크
+  @ObservationIgnored private var authListener: Task<Void, Never>?
 
   /// 구독자 관리: UUID를 키로 사용하여 여러 구독자에게 동시에 이벤트 전송
-  private var continuations: [UUID: AsyncStream<SessionEvent>.Continuation] = [:]
-
-  /// Auth 상태 리스너 Task
-  @ObservationIgnored private var authListener: Task<Void, Never>?
+  @ObservationIgnored private var continuations: [UUID: AsyncStream<SessionEvent>.Continuation] = [:]
 
   // MARK: - Auth State
 
@@ -62,7 +62,7 @@ final class SessionStore {
   // MARK: - Init
 
   init(container: DIContainer) {
-    self.container = container
+    listenAuthStateUseCase = container.listenAuthStateUseCase
     loadUserSessionUseCase = container.loadUserSessionUseCase
     signOutUseCase = container.signOutUseCase
     readUserUseCase = container.readUserUseCase
@@ -76,7 +76,7 @@ final class SessionStore {
   func startListeningToAuthChanges() {
     authListener?.cancel()
     authListener = Task {
-      for await storedUid in container.listenAuthStateUseCase.run() {
+      for await storedUid in listenAuthStateUseCase.run() {
         if let uid = storedUid {
           await authenticate(with: uid)
         } else {

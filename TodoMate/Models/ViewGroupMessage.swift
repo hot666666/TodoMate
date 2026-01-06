@@ -1,16 +1,16 @@
 //
-//  ChatMessage.swift
+//  ViewGroupMessage.swift
 //  TodoMate
 //
 //  Presentation layer model for chat messages.
 //
-//  Created by agent on 1/5/26.
+//  Created by hs on 1/5/26.
 //
 
 import Foundation
 
 /// Presentation layer model for Chat Messages
-struct ChatMessage: Identifiable, Equatable {
+struct ViewGroupMessage: Identifiable, Equatable {
   let id: String
   let senderId: String
   var text: String?
@@ -47,24 +47,24 @@ struct ChatMessage: Identifiable, Equatable {
 
 // MARK: - Mock Data
 
-extension ChatMessage {
-  static let mockMessages: [ChatMessage] = [
-    ChatMessage(
+extension ViewGroupMessage {
+  static let mockMessages: [ViewGroupMessage] = [
+    ViewGroupMessage(
       id: "1",
       senderId: "user_1",
       text: "Hey team, how's the project going?",
     ),
-    ChatMessage(
+    ViewGroupMessage(
       id: "2",
       senderId: "user_2",
       text: "Going well! Just finished the UI mockups.",
     ),
-    ChatMessage(
+    ViewGroupMessage(
       id: "3",
       senderId: "user_3",
       text: "Great work everyone! 🎉",
     ),
-    ChatMessage(
+    ViewGroupMessage(
       id: "4",
       senderId: "user_1",
       text: "Let's sync up tomorrow at 10am.",

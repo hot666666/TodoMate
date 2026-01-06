@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ChatMessageBubble: View {
-  let message: ChatMessage
+  let message: ViewGroupMessage
   let isMe: Bool
   let user: ViewUser?
 
@@ -118,12 +118,12 @@ struct ChatMessageBubble: View {
 #Preview {
   VStack(spacing: 16) {
     ChatMessageBubble(
-      message: ChatMessage(senderId: "user_1", text: "Hello!"),
+      message: ViewGroupMessage(senderId: "user_1", text: "Hello!"),
       isMe: false,
       user: ViewUser(id: "user_1", displayName: "Sarah"),
     )
     ChatMessageBubble(
-      message: ChatMessage(senderId: "user_3", text: "Hi there!"),
+      message: ViewGroupMessage(senderId: "user_3", text: "Hi there!"),
       isMe: true,
       user: ViewUser(id: "user_3", displayName: "Me"),
     )

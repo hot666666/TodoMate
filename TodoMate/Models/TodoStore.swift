@@ -1,6 +1,6 @@
 //
 //  TodoStore.swift
-//  Todo
+//  TodoMate
 //
 //  Created by hs on 7/9/25.
 //
