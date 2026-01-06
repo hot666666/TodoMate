@@ -35,6 +35,25 @@ test-ui: start-emulator
 # 전체 테스트 (유닛 → Firebase → UI 순서)
 test-all: test-unit test-firebase test-ui
 
+# UI 스크린샷 캡처 (특정 화면만 캡처하려면: SCREENSHOT_SCREENS=personal_board,memo just ui-screenshots)
+ui-screenshots SCREENS="":
+    @mkdir -p screenshots
+    @rm -rf screenshots.xcresult
+    @echo "Testing screens: {{ if SCREENS == "" { "ALL" } else { SCREENS } }}"
+    set -o pipefail && xcodebuild test \
+        -scheme TodoMate \
+        -destination 'platform=macOS' \
+        $(python3 script/generate_screenshot_test_args.py "{{SCREENS}}") \
+        -resultBundlePath ./screenshots.xcresult \
+        2>&1 | xcbeautify
+    @xcrun xcresulttool export attachments \
+        --path ./screenshots.xcresult \
+        --manifest ./screenshots/manifest.json \
+        --output-path ./screenshots/
+    @python3 script/rename_screenshots.py ./screenshots
+    @echo "📸 Screenshots saved to ./screenshots/"
+
+
 # 에뮬레이터 시작
 start-emulator:
     @echo "🔥 Starting Firebase emulator..."
