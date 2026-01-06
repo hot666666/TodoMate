@@ -81,14 +81,14 @@ struct SettingView: View {
           )
           .frame(width: 64, height: 64)
           .overlay(
-            Text(sessionStore.user.displayName.prefix(2).uppercased())
+            Text((sessionStore.user?.displayName ?? "?").prefix(2).uppercased())
               .font(.title2)
               .fontWeight(.semibold)
               .foregroundStyle(.white),
           )
 
         VStack(alignment: .leading, spacing: 4) {
-          Text(sessionStore.user.displayName)
+          Text(sessionStore.user?.displayName ?? "Guest")
             .font(.title3)
             .fontWeight(.semibold)
           Text("user@example.com")

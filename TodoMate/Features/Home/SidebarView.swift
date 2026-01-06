@@ -17,7 +17,7 @@ struct SidebarView: View {
       Section {
         NavigationLink(value: NavigationDestination.settings) {
           SidebarProfileView(
-            displayName: sessionStore.user.displayName,
+            displayName: sessionStore.user?.displayName ?? "Guest",
             subtitle: "Pro Member",
           )
         }

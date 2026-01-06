@@ -58,21 +58,7 @@ private struct AuthenticatedView: View {
       }
     }
     .navigationSplitViewStyle(.prominentDetail)
-    .task {
-      await loadData()
-    }
     .environment(navigator)
-  }
-
-  private func loadData() async {
-    let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
-    if isPreview { return }
-
-    await todoStore.load(for: sessionStore.userGroupIds, currentUserId: sessionStore.userId)
-    await memoStore.load(for: sessionStore.userGroupIds)
-    if !sessionStore.userGroupId.isEmpty {
-      await messageStore.load(groupId: sessionStore.userGroupId)
-    }
   }
 
   // MARK: - Detail View
