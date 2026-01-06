@@ -18,6 +18,10 @@ It is built based on Clean Architecture.
 - Presentation layer: SwiftUI
 - Test: XCTest, Swift Testing
 
+### Target
+
+- macOS26
+
 ## Architecture
 
 ### Layer Structure
