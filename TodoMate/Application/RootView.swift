@@ -9,70 +9,46 @@ import SimpleOverlaySystem
 import SwiftUI
 
 struct RootView: View {
-  @Environment(DIContainer.self) private var container
-  @State private var authState: AuthState = .loading
-  @State private var networkManager = NetworkModeManager()
+  @Environment(SessionStore.self) private var sessionStore
+  @Environment(TodoStore.self) private var todoStore
+  @Environment(MemoStore.self) private var memoStore
+  @Environment(MessageStore.self) private var messageStore
 
-  @MainActor
-  private func authenticate(with uid: String) async {
-    authState = .loading
-    do {
-      let session = try await container.loadUserSessionUseCase.run(for: uid, phase: .initial)
-      authState = .authenticated(session)
-    } catch {
-      print("[RootView] - Failed to load user: \(error)")
-      authState = .unauthenticated
-    }
-  }
-}
-
-extension RootView {
   var body: some View {
     content
       .task {
-        for await storedUid in container.listenAuthStateUseCase.run() {
-          if let uid = storedUid {
-            await authenticate(with: uid)
-          } else {
-            authState = .unauthenticated
-          }
-        }
+        // 1. 먼저 각 Store가 SessionStore의 이벤트를 구독
+        todoStore.startListening(to: sessionStore.events())
+        memoStore.startListening(to: sessionStore.events())
+        messageStore.startListening(to: sessionStore.events())
+
+        // 2. 그 다음 Auth 상태 변화 감지 시작
+        sessionStore.startListeningToAuthChanges()
+      }
+      .onDisappear {
+        // View 사라질 때 모든 리스너 정리
+        sessionStore.cleanup()
+        todoStore.cleanup()
+        memoStore.cleanup()
+        messageStore.cleanup()
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 
   @ViewBuilder
   private var content: some View {
-    switch authState {
+    switch sessionStore.authState {
     case .loading:
       ProgressView()
         .font(.callout)
         .opacity(0.5)
-    case let .authenticated(userSession):
-      makeMainView(userSession: userSession)
+    case .authenticated:
+      OverlayContainer {
+        MainContainer()
+      }
     case .unauthenticated:
       LoginView()
     }
-  }
-
-  @ViewBuilder
-  private func makeMainView(userSession: UserSession) -> some View {
-    OverlayContainer {
-      MainContainer()
-    }
-    .environment(SessionStore(container: container, userSession: userSession))
-    .environment(MessageStore(container: container))
-    .environment(TodoStore(container: container))
-    .environment(MemoStore(container: container))
-    .environment(networkManager)
-  }
-}
-
-extension RootView {
-  private enum AuthState {
-    case loading
-    case authenticated(UserSession)
-    case unauthenticated
   }
 }
 
@@ -80,4 +56,8 @@ extension RootView {
   RootView()
     .frame(width: 300, height: 400)
     .environment(DIContainer.preview)
+    .environment(SessionStore.preview)
+    .environment(TodoStore.preview)
+    .environment(MemoStore.preview)
+    .environment(MessageStore.preview)
 }

@@ -12,19 +12,55 @@ import SwiftUI
 @main
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+  // MARK: - Stores (App Lifetime)
+
+  @State private var sessionStore: SessionStore
+  @State private var todoStore: TodoStore
+  @State private var memoStore: MemoStore
+  @State private var messageStore: MessageStore
+  @State private var networkManager = NetworkModeManager()
+
   private let container: DIContainer
 
   init() {
     // 의존성 주입 컨테이너 생성
-    container = TodoMateApp.makeContainer()
+    let container = TodoMateApp.makeContainer()
+    self.container = container
+
     // 앱 업데이트 체크 및 처리
     TodoMateApp.checkAndHandleAppUpdate(container: container)
+
+    // Store 생성
+    let session = SessionStore(container: container)
+    let todo = TodoStore(container: container)
+    let memo = MemoStore(container: container)
+    let message = MessageStore(container: container)
+
+    // State 초기화
+    _sessionStore = State(initialValue: session)
+    _todoStore = State(initialValue: todo)
+    _memoStore = State(initialValue: memo)
+    _messageStore = State(initialValue: message)
+
+    // AppDelegate에 cleanup 핸들러 등록 (앱 종료 시 gRPC timeout 방지)
+    appDelegate.cleanupHandler = { [session, todo, memo, message] in
+      session.cleanup()
+      todo.cleanup()
+      memo.cleanup()
+      message.cleanup()
+    }
   }
 
   var body: some Scene {
     WindowGroup {
       RootView()
         .environment(container)
+        .environment(sessionStore)
+        .environment(todoStore)
+        .environment(memoStore)
+        .environment(messageStore)
+        .environment(networkManager)
         .environment(\.colorScheme, .dark)
         .background(Color.customDarkBg)
         .background(.ultraThickMaterial)
