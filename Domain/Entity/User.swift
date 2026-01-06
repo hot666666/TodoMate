@@ -60,3 +60,11 @@ extension User {
     User(displayName: "jy", groupId: EntityConstant.UserGroup.stubId),
   ]
 }
+
+// MARK: - Array Extension
+
+extension [User] {
+  func placingFirst(_ user: User) -> [User] {
+    [user] + filter { $0.id != user.id }
+  }
+}
