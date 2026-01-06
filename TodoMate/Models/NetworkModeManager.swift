@@ -63,13 +63,13 @@ final class NetworkModeManager {
     do {
       if isOnline {
         try await networkController.enableNetwork()
-        print("[NetworkModeManager] - Network enabled")
+        Log.info("Network enabled", category: .network)
       } else {
         try await networkController.disableNetwork()
-        print("[NetworkModeManager] - Network disabled (offline mode)")
+        Log.info("Network disabled (offline mode)", category: .network)
       }
     } catch {
-      print("[NetworkModeManager] - Failed to change network state: \(error)")
+      Log.error("Failed to change network state: \(error)", category: .network)
     }
   }
 }

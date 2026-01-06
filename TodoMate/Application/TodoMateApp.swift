@@ -118,7 +118,7 @@ private extension TodoMateApp {
 
   static func configureGoogleSignIn() {
     guard let clientId = FirebaseApp.app()?.options.clientID else {
-      print("[TodoMateApp] - Firebase client ID is not configured.")
+      Log.warning("Firebase client ID is not configured.")
       return
     }
     GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
