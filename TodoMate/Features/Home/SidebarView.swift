@@ -64,8 +64,8 @@ struct SidebarView: View {
         } else {
           NavigationLink(value: NavigationDestination.group(sessionStore.userGroupId)) {
             Label {
-              // TODO: 그룹 이름을 별도로 관리하거나, 서버에서 가져와야 함
-              Text("Design Team")
+              // TODO: 그룹 메타데이터(이름)를 저장하는 모델/DB 구조가 없음. 추후 UserGroup 엔티티 도입 시 수정 필요.
+              Text("My Group")
             } icon: {
               Image(systemName: "briefcase.fill")
                 .foregroundStyle(DesignSystem.Colors.accentIndigo)

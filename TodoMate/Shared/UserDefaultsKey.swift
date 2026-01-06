@@ -18,6 +18,11 @@ enum UserDefaultsKey: String {
 
   /// 네트워크 모드 (온라인/오프라인)
   case networkModeIsOnline = "network_mode_is_online"
+
+  // MARK: - UI Preference
+
+  /// 사이드바 표시 상태
+  case sidebarVisibility = "sidebar_visibility"
 }
 
 // MARK: - UserDefaults Extension
@@ -41,5 +46,9 @@ extension UserDefaults {
 
   func bool(for key: UserDefaultsKey, default defaultValue: Bool = false) -> Bool {
     object(forKey: key.rawValue) as? Bool ?? defaultValue
+  }
+
+  func data(for key: UserDefaultsKey) -> Data? {
+    data(forKey: key.rawValue)
   }
 }
