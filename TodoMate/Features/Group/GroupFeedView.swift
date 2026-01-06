@@ -129,7 +129,7 @@ struct GroupFeedView: View {
       HStack(spacing: 16) {
         // User Avatars
         HStack(spacing: -10) {
-          ForEach(sessionStore.userGroup.prefix(3)) { member in
+          ForEach(sessionStore.groupMembers.prefix(3)) { member in
             // Avatar placeholder since User entity doesn't have avatarUrl yet
             Circle()
               .fill(Color.blue.opacity(0.3))
@@ -143,8 +143,8 @@ struct GroupFeedView: View {
               .overlay(Circle().stroke(.white, lineWidth: 2))
           }
 
-          if sessionStore.userGroup.count > 3 {
-            Text("+\(sessionStore.userGroup.count - 3)")
+          if sessionStore.groupMembers.count > 3 {
+            Text("+\(sessionStore.groupMembers.count - 3)")
               .font(.caption2)
               .fontWeight(.medium)
               .foregroundStyle(.secondary)
@@ -174,7 +174,7 @@ struct GroupFeedView: View {
   private var feedContent: some View {
     ScrollView {
       LazyVStack(alignment: .leading, spacing: 24) {
-        ForEach(sessionStore.userGroup) { member in
+        ForEach(sessionStore.groupMembers) { member in
           GroupMemberSection(
             user: member,
             todos: (todoStore.todos[member.id] ?? []).map { ViewTodo(from: $0) },
@@ -269,7 +269,7 @@ private struct ChatPanelView: View {
 
             ForEach(messageStore.messages) { message in
               // Convert GroupMessage to ChatMessage for display
-              let chatMsg = ChatMessage(from: message, senderId: message.owner)
+              let chatMsg = ViewGroupMessage(from: message, senderId: message.owner)
               let sender = viewModel.getMember(byId: message.owner, sessionStore: sessionStore)
               let viewUser = sender.map { ViewUser(from: $0) }
 

@@ -12,21 +12,59 @@ import SwiftUI
 @main
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
+  // MARK: - Dependency Injection Container
+
   private let container: DIContainer
+
+  // MARK: - Global States (App Lifetime)
+
+  @State private var networkManager: NetworkModeManager
+  @State private var sessionStore: SessionStore
+  @State private var todoStore: TodoStore
+  @State private var memoStore: MemoStore
+  @State private var messageStore: MessageStore
 
   init() {
     // 의존성 주입 컨테이너 생성
-    container = TodoMateApp.makeContainer()
+    let container = TodoMateApp.makeContainer()
+    self.container = container
+
     // 앱 업데이트 체크 및 처리
     TodoMateApp.checkAndHandleAppUpdate(container: container)
+
+    // 앱 전역 상태 초기화
+    _networkManager = State(initialValue: .init(container: container))
+
+    let session = SessionStore(container: container)
+    let todo = TodoStore(container: container)
+    let memo = MemoStore(container: container)
+    let message = MessageStore(container: container)
+
+    _sessionStore = State(initialValue: session)
+    _todoStore = State(initialValue: todo)
+    _memoStore = State(initialValue: memo)
+    _messageStore = State(initialValue: message)
+
+    // AppDelegate에 cleanup 핸들러 등록 (앱 종료 시 gRPC timeout 방지)
+    appDelegate.cleanupHandler = { [session, todo, memo, message] in
+      session.cleanup()
+      todo.cleanup()
+      memo.cleanup()
+      message.cleanup()
+    }
   }
 
   var body: some Scene {
     WindowGroup {
       RootView()
         .environment(container)
+        .environment(sessionStore)
+        .environment(todoStore)
+        .environment(memoStore)
+        .environment(messageStore)
+        .environment(networkManager)
         .environment(\.colorScheme, .dark)
-        .background(Color.customDarkBg)
         .background(.ultraThickMaterial)
         .frame(minWidth: 720)
     }
@@ -38,13 +76,15 @@ struct TodoMateApp: App {
 
 private extension TodoMateApp {
   static func makeContainer() -> DIContainer {
-    if isPreview {
-      return .preview
-    }
+    guard !isPreview else { return .preview }
 
-    configureFirebase()
-    configureGoogleSignIn()
+    // Firebase 및 Google Sign-In 구성
+    // 만약 Preview에서 FirebaseSDK 관련요소를 쓰는부분이 있다면, 초기화를 안해서 크래시 발생(현재는 전부 격리라 문제없음)
+    // 만약 Preview에서 그냥 config를 수행해버리면, db저장소를 점유하여 런타임에러 발생
+    TodoMateApp.configureFirebase()
+    TodoMateApp.configureGoogleSignIn()
 
+    // 실제 구현체로 리포지토리 및 서비스 초기화
     let userRepo = FirestoreUserRepository()
     let todoRepo = FirestoreTodoRepository()
     let messageRepo = FirestoreMessageRepository()
@@ -52,6 +92,8 @@ private extension TodoMateApp {
     let authService = FirebaseAuthService()
     let calendarDayService = CalendarDayServiceImpl()
     let messageReadTracker = MessageReadTrackerImpl()
+    let networkController = FirestoreNetworkController()
+    let userDefaults = UserDefaults.standard
 
     return DIContainer(
       userRepository: userRepo,
@@ -61,6 +103,8 @@ private extension TodoMateApp {
       authService: authService,
       calendarDayService: calendarDayService,
       messageReadTracker: messageReadTracker,
+      networkController: networkController,
+      userDefaults: userDefaults,
     )
   }
 
@@ -78,30 +122,5 @@ private extension TodoMateApp {
       return
     }
     GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
-  }
-
-  static func checkAndHandleAppUpdate(container: DIContainer) {
-    let userDefaults = UserDefaults.standard
-
-    let currentVersion =
-      Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-    let lastVersion = userDefaults.string(forKey: "app_last_version")
-
-    print(
-      "[TodoMateApp] - Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
-
-    // 업데이트 기록이 존재하면 작업 x -> 3.0.0 이전버전에서 업데이트 시, 수행
-    if lastVersion == nil {
-      print("[TodoMateApp] - First launch detected. Initializing app state...")
-      try? container.authService.signOut()
-
-      // 앱의 모든 UserDefaults 데이터 삭제
-      if let bundleIdentifier = Bundle.main.bundleIdentifier {
-        userDefaults.removePersistentDomain(forName: bundleIdentifier)
-      }
-    }
-
-    // 현재 버전 저장
-    userDefaults.set(currentVersion, forKey: "app_last_version")
   }
 }

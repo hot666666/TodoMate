@@ -16,7 +16,6 @@ final class DIContainer {
   @ObservationIgnored let messageRepository: MessageRepository
   @ObservationIgnored let memoRepository: MemoRepository
   @ObservationIgnored let authService: AuthService
-  @ObservationIgnored let calendarDayService: CalendarDayService
   @ObservationIgnored let messageReadTracker: MessageReadTracker
 
   // MARK: - Domain Layer
@@ -51,6 +50,14 @@ final class DIContainer {
   @ObservationIgnored let signOutUseCase: SignOutUseCase
   @ObservationIgnored let listenAuthStateUseCase: ListenAuthStateUseCase
 
+  // Network
+  @ObservationIgnored let networkController: NetworkController
+
+  // System
+  @ObservationIgnored let userDefaults: UserDefaults
+  // TODO: 이동분류
+  @ObservationIgnored let calendarDayService: CalendarDayService
+
   init(
     userRepository: UserRepository,
     todoRepository: TodoRepository,
@@ -59,6 +66,8 @@ final class DIContainer {
     authService: AuthService,
     calendarDayService: CalendarDayService,
     messageReadTracker: MessageReadTracker,
+    networkController: NetworkController,
+    userDefaults: UserDefaults,
   ) {
     // Data Layer
     self.userRepository = userRepository
@@ -68,6 +77,8 @@ final class DIContainer {
     self.authService = authService
     self.calendarDayService = calendarDayService
     self.messageReadTracker = messageReadTracker
+    self.networkController = networkController
+    self.userDefaults = userDefaults
 
     // Domain Layer - User
     let readUserUseCase = ReadUserUseCaseImpl(userRepository: userRepository)
@@ -116,5 +127,7 @@ extension DIContainer {
     authService: StubAuthService(),
     calendarDayService: CalendarDayServiceImpl(),
     messageReadTracker: StubMessageReadTracker(),
+    networkController: StubNetworkController(),
+    userDefaults: .preview,
   )
 }

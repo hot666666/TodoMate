@@ -5,26 +5,28 @@
 //  Manages Firestore network mode (online/offline).
 //  Uses Firestore's built-in disableNetwork/enableNetwork APIs.
 //
-//  Created by agent on 1/5/26.
+//  Created by hs on 1/5/26.
 //
 
-import FirebaseFirestore
 import Foundation
 
 @Observable
 @MainActor
 final class NetworkModeManager {
+  @ObservationIgnored private let userDefaults: UserDefaults
+  @ObservationIgnored private let networkController: NetworkController
+
   // MARK: - State
 
   private(set) var isOnline: Bool = true
   private(set) var isTransitioning: Bool = false
 
-  // Persist user preference
-  private let userDefaultsKey = "network_mode_is_online"
+  init(container: DIContainer) {
+    userDefaults = container.userDefaults
+    networkController = container.networkController
 
-  init() {
     // Load saved preference (default: online)
-    isOnline = UserDefaults.standard.object(forKey: userDefaultsKey) as? Bool ?? true
+    isOnline = userDefaults.bool(for: .networkModeIsOnline, default: true)
 
     // Apply saved state on init
     Task {
@@ -43,14 +45,16 @@ final class NetworkModeManager {
   func setOnline(_ online: Bool) async {
     guard !isTransitioning else { return }
 
+    // UI
+    defer { isTransitioning = false }
     isTransitioning = true
     isOnline = online
 
-    // Save preference
-    UserDefaults.standard.set(online, forKey: userDefaultsKey)
+    // User Defaults
+    userDefaults.set(online, for: .networkModeIsOnline)
 
+    // Firestore
     await applyNetworkState()
-    isTransitioning = false
   }
 
   // MARK: - Private Methods
@@ -58,14 +62,18 @@ final class NetworkModeManager {
   private func applyNetworkState() async {
     do {
       if isOnline {
-        try await Firestore.firestore().enableNetwork()
+        try await networkController.enableNetwork()
         print("[NetworkModeManager] - Network enabled")
       } else {
-        try await Firestore.firestore().disableNetwork()
+        try await networkController.disableNetwork()
         print("[NetworkModeManager] - Network disabled (offline mode)")
       }
     } catch {
       print("[NetworkModeManager] - Failed to change network state: \(error)")
     }
   }
+}
+
+extension NetworkModeManager {
+  static let preview = NetworkModeManager(container: .preview)
 }

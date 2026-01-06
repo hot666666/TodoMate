@@ -1,6 +1,6 @@
 //
 //  TodoStore.swift
-//  Todo
+//  TodoMate
 //
 //  Created by hs on 7/9/25.
 //
@@ -8,6 +8,7 @@
 import SwiftUI
 
 @Observable
+@MainActor
 final class TodoStore {
   // MARK: - Dependencies
 
@@ -16,10 +17,15 @@ final class TodoStore {
   private let updateTodoUseCase: UpdateTodoUseCase
   private let deleteTodoUseCase: DeleteTodoUseCase
 
+  // MARK: - Listener
+
+  @ObservationIgnored private var listener: Task<Void, Never>?
+
   // MARK: - State
 
   private(set) var todos: [String: [Todo]] = [:]
   private var currentDate: Date = .now
+  private var currentUserId: String = ""
 
   init(container: DIContainer) {
     createTodoUseCase = container.createTodoUseCase
@@ -28,15 +34,43 @@ final class TodoStore {
     deleteTodoUseCase = container.deleteTodoUseCase
   }
 
-  // MARK: - Public Methods
+  // MARK: - Subscriber
 
-  @MainActor
-  func refresh(for userIds: [String], currentUserId: String) async {
-    await load(for: userIds, currentUserId: currentUserId, useCache: true)
+  /// SessionStore 이벤트 구독 시작
+  func startListening(to events: AsyncStream<SessionEvent>) {
+    listener?.cancel()
+    listener = Task { [weak self] in
+      for await event in events {
+        guard let self else { return }
+        switch event {
+        case let .loggedIn(userId, _, memberIds):
+          currentUserId = userId
+          // Cache-first: 먼저 캐시에서 빠르게 로드 (오프라인 지원)
+          await load(for: memberIds, useCache: true)
+          // 그 다음 서버에서 최신 데이터로 업데이트
+          await load(for: memberIds, useCache: false)
+          print("[TodoStore] - Received loggedIn event, loaded todos for \(memberIds.count) users")
+        case .loggedOut:
+          clear()
+          print("[TodoStore] - Received loggedOut event, cleared todos")
+        }
+      }
+    }
   }
 
-  @MainActor
-  func load(for userIds: [String], currentUserId _: String, useCache: Bool = true) async {
+  /// 리스너 정리
+  func cleanup() {
+    listener?.cancel()
+    listener = nil
+  }
+
+  // MARK: - Public Methods
+
+  func refresh(for userIds: [String]) async {
+    await load(for: userIds, useCache: true)
+  }
+
+  func load(for userIds: [String], useCache: Bool = true) async {
     currentDate = .now
 
     do {
@@ -85,6 +119,11 @@ final class TodoStore {
         print("[TodoStore] - Failed to delete todo: \(error)")
       }
     }
+  }
+
+  func clear() {
+    todos = [:]
+    currentUserId = ""
   }
 }
 

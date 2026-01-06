@@ -17,7 +17,7 @@ struct SidebarView: View {
       Section {
         NavigationLink(value: NavigationDestination.settings) {
           SidebarProfileView(
-            displayName: sessionStore.user.displayName,
+            displayName: sessionStore.user?.displayName ?? "Guest",
             subtitle: "Pro Member",
           )
         }
@@ -51,23 +51,7 @@ struct SidebarView: View {
       }
 
       Section {
-        ForEach(sessionStore.userGroupIds, id: \.self) { groupId in
-          NavigationLink(value: NavigationDestination.group(groupId)) {
-            Label {
-              Text(sessionStore.userGroupDisplayNames[groupId] ?? "Unknown Group")
-            } icon: {
-              Image(systemName: "briefcase.fill")
-                .foregroundStyle(DesignSystem.Colors.accentIndigo)
-            }
-          }
-          .accessibilityIdentifier("sidebar_group_\(groupId)")
-        }
-      } header: {
-        Text("Groups")
-      }
-
-      Section {
-        NavigationLink(value: NavigationDestination.noGroups) {
+        if sessionStore.userGroupId.isEmpty {
           Label {
             Text("No Groups Joined")
               .italic()
@@ -76,10 +60,24 @@ struct SidebarView: View {
             Image(systemName: "person.2.fill")
               .foregroundStyle(.secondary)
           }
+          .accessibilityIdentifier("sidebar_noGroups")
+        } else {
+          NavigationLink(value: NavigationDestination.group(sessionStore.userGroupId)) {
+            Label {
+              // TODO: 그룹 메타데이터(이름)를 저장하는 모델/DB 구조가 없음. 추후 UserGroup 엔티티 도입 시 수정 필요.
+              Text("My Group")
+            } icon: {
+              Image(systemName: "briefcase.fill")
+                .foregroundStyle(DesignSystem.Colors.accentIndigo)
+            }
+          }
+          .accessibilityIdentifier("sidebar_group_\(sessionStore.userGroupId)")
         }
-        .accessibilityIdentifier("sidebar_noGroups")
+      } header: {
+        Text("Groups")
       }
     }
+    .frame(minWidth: 200)
     .listStyle(.sidebar)
     .safeAreaInset(edge: .bottom) {
       networkToggle
@@ -90,7 +88,7 @@ struct SidebarView: View {
   // MARK: - Network Toggle
 
   private var networkToggle: some View {
-    HStack {
+    HStack(alignment: .center) {
       Image(systemName: networkManager.isOnline ? "wifi" : "wifi.slash")
       Text(networkManager.isOnline ? "Online" : "Offline")
       Spacer()
@@ -108,11 +106,12 @@ struct SidebarView: View {
       .labelsHidden()
       .toggleStyle(.switch)
     }
-    .font(.body)
     .disabled(networkManager.isTransitioning)
     .accessibilityIdentifier("network_toggle")
   }
 }
+
+// MARK: - SidebarProfileView
 
 private struct SidebarProfileView: View {
   let displayName: String
@@ -148,7 +147,7 @@ private struct SidebarProfileView: View {
   NavigationSplitView {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
-      .environment(NetworkModeManager())
+      .environment(NetworkModeManager.preview)
   } detail: {
     Text("Detail")
   }

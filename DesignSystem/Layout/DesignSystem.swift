@@ -63,6 +63,7 @@ enum DesignSystem {
     static let cornerRadiusXL: CGFloat = 24
     static let sidebarWidth: CGFloat = 256
     static let columnWidth: CGFloat = 320
+    static let chatWidth: CGFloat = 320
     static let cardSpacing: CGFloat = 12
     static let headerHeight: CGFloat = 56
   }

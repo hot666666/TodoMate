@@ -1,38 +1,34 @@
 //
-//  MainContainer.swift
+//  AuthenticatedView.swift
 //  TodoMate
 //
 //  Root container view with navigation structure.
 //
-//  Created by agent on 1/5/26.
+//  Created by hs on 1/5/26.
 //
 
 import SimpleOverlaySystem
 import SwiftUI
 
-struct MainContainer: View {
-  var body: some View {
-    AuthenticatedView()
-  }
-}
-
-// MARK: - Authenticated View
-
-private struct AuthenticatedView: View {
+struct AuthenticatedView: View {
+  @Environment(\.overlayManager) private var overlay
   @Environment(DIContainer.self) private var container
   @Environment(SessionStore.self) private var sessionStore
   @Environment(TodoStore.self) private var todoStore
   @Environment(MemoStore.self) private var memoStore
   @Environment(MessageStore.self) private var messageStore
-  @Environment(\.overlayManager) private var overlay
-
-  @State private var navigator = NavigationManager()
+  @State private var naviManager: NavigationManager
   @State private var calendarDate = Date()
   @State private var selectedTask: ViewTodo?
 
+  init(naviManager: NavigationManager) {
+    self.naviManager = naviManager
+  }
+
   var body: some View {
-    NavigationSplitView(columnVisibility: $navigator.columnVisibility) {
-      SidebarView(selection: $navigator.selection)
+    @Bindable var naviManager = naviManager
+    NavigationSplitView(columnVisibility: $naviManager.columnVisibility) {
+      SidebarView(selection: $naviManager.selection)
         .safeAreaInset(edge: .top) {
           Spacer().frame(height: 8)
         }
@@ -42,7 +38,7 @@ private struct AuthenticatedView: View {
     .toolbar {
       // Principal / Leading: Date & Task info + Navigation
       ToolbarItem(placement: .primaryAction) {
-        if case .todo = navigator.selection, navigator.viewMode == .calendar {
+        if case .todo = naviManager.selection, naviManager.viewMode == .calendar {
           calendarHeader
             .padding(.horizontal)
         }
@@ -51,35 +47,21 @@ private struct AuthenticatedView: View {
       // Right side: View mode picker and add button
       ToolbarItemGroup(placement: .primaryAction) {
         Spacer()
-        if case .todo = navigator.selection {
+        if case .todo = naviManager.selection {
           viewModeToolbar
           addButton
         }
       }
     }
     .navigationSplitViewStyle(.prominentDetail)
-    .task {
-      await loadData()
-    }
-    .environment(navigator)
-  }
-
-  private func loadData() async {
-    let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
-    if isPreview { return }
-
-    await todoStore.load(for: sessionStore.userGroupIds, currentUserId: sessionStore.userId)
-    await memoStore.load(for: sessionStore.userGroupIds)
-    if !sessionStore.userGroupId.isEmpty {
-      await messageStore.load(groupId: sessionStore.userGroupId)
-    }
+    .environment(naviManager)
   }
 
   // MARK: - Detail View
 
   @ViewBuilder
   private var detailView: some View {
-    if let selection = navigator.selection {
+    if let selection = naviManager.selection {
       switch selection {
       case .noGroups:
         GroupFeedNoGroupView()
@@ -90,7 +72,7 @@ private struct AuthenticatedView: View {
       case .group:
         GroupFeedView()
       case .todo:
-        switch navigator.viewMode {
+        switch naviManager.viewMode {
         case .board:
           BoardView(selection: .todo)
         case .calendar:
@@ -140,7 +122,8 @@ private struct AuthenticatedView: View {
   }
 
   private var viewModeToolbar: some View {
-    Picker("View Mode", selection: $navigator.viewMode) {
+    @Bindable var naviManager = naviManager
+    return Picker("View Mode", selection: $naviManager.viewMode) {
       ForEach(HomeMode.allCases) { mode in
         Image(systemName: mode.systemImage)
           .tag(mode)
@@ -173,11 +156,12 @@ private struct AuthenticatedView: View {
 }
 
 #Preview {
-  MainContainer()
-    .environment(DIContainer.preview)
-    .environment(SessionStore.preview)
-    .environment(TodoStore.preview)
-    .environment(MemoStore.preview)
-    .environment(MessageStore.preview)
-  // .environment(SimpleOverlay.mock) // If mock exists
+  OverlayContainer {
+    AuthenticatedView(naviManager: .preview)
+      .environment(DIContainer.preview)
+      .environment(SessionStore.preview)
+      .environment(TodoStore.preview)
+      .environment(MemoStore.preview)
+      .environment(MessageStore.preview)
+  }
 }
