@@ -38,7 +38,7 @@ test-all: test-unit test-firebase test-ui
 # 에뮬레이터 시작 (내부용)
 _start-emulator:
     @echo "Starting Firebase emulator..."
-    @firebase emulators:start --only firestore &
+    @firebase emulators:start --only firestore --config FirebaseEmulator/firebase.json &
     @sleep 5
     @nc -z localhost 8080 && echo "✓ Emulator ready on port 8080"
 
