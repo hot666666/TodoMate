@@ -15,11 +15,11 @@ struct TodoMateApp: App {
 
   // MARK: - Stores (App Lifetime)
 
+  @State private var networkManager: NetworkModeManager
   @State private var sessionStore: SessionStore
   @State private var todoStore: TodoStore
   @State private var memoStore: MemoStore
   @State private var messageStore: MessageStore
-  @State private var networkManager = NetworkModeManager()
 
   private let container: DIContainer
 
@@ -31,7 +31,9 @@ struct TodoMateApp: App {
     // 앱 업데이트 체크 및 처리
     TodoMateApp.checkAndHandleAppUpdate(container: container)
 
-    // Store 생성
+    // NetworkModeManager 초기화
+    _networkManager = State(initialValue: .init())
+
     let session = SessionStore(container: container)
     let todo = TodoStore(container: container)
     let memo = MemoStore(container: container)
@@ -74,9 +76,7 @@ struct TodoMateApp: App {
 
 private extension TodoMateApp {
   static func makeContainer() -> DIContainer {
-    if isPreview {
-      return .preview
-    }
+    guard !isPreview else { return .preview }
 
     configureFirebase()
     configureGoogleSignIn()
@@ -114,30 +114,5 @@ private extension TodoMateApp {
       return
     }
     GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
-  }
-
-  static func checkAndHandleAppUpdate(container: DIContainer) {
-    let userDefaults = UserDefaults.standard
-
-    let currentVersion =
-      Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-    let lastVersion = userDefaults.string(forKey: "app_last_version")
-
-    print(
-      "[TodoMateApp] - Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
-
-    // 업데이트 기록이 존재하면 작업 x -> 3.0.0 이전버전에서 업데이트 시, 수행
-    if lastVersion == nil {
-      print("[TodoMateApp] - First launch detected. Initializing app state...")
-      try? container.authService.signOut()
-
-      // 앱의 모든 UserDefaults 데이터 삭제
-      if let bundleIdentifier = Bundle.main.bundleIdentifier {
-        userDefaults.removePersistentDomain(forName: bundleIdentifier)
-      }
-    }
-
-    // 현재 버전 저장
-    userDefaults.set(currentVersion, forKey: "app_last_version")
   }
 }
