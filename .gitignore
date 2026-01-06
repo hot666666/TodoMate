@@ -65,6 +65,12 @@ fastlane/test_output
 GoogleService-Info.plist
 FirebaseConfig/
 
+# Firebase Emulator
+FirebaseEmulator/.firebase/
+FirebaseEmulator/firebase-debug.log
+FirebaseEmulator/firestore-debug.log
+FirebaseEmulator/ui-debug.log
+
 # Certificate & Profile
 private/
 
