@@ -59,6 +59,7 @@ struct GroupFeedView: View {
         }
       }
     }
+    .accessibilityIdentifier("groupFeedView")
   }
 
   private var resizableChatPanel: some View {

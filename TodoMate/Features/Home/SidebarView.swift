@@ -52,15 +52,18 @@ struct SidebarView: View {
 
       Section {
         if sessionStore.userGroupId.isEmpty {
-          Label {
-            Text("No Groups Joined")
-              .italic()
-              .foregroundStyle(.secondary)
-          } icon: {
-            Image(systemName: "person.2.fill")
-              .foregroundStyle(.secondary)
+          NavigationLink(value: NavigationDestination.noGroups) {
+            Label {
+              Text("No Groups Joined")
+                .italic()
+                .foregroundStyle(.secondary)
+            } icon: {
+              Image(systemName: "person.2.fill")
+                .foregroundStyle(.secondary)
+            }
           }
           .accessibilityIdentifier("sidebar_noGroups")
+
         } else {
           NavigationLink(value: NavigationDestination.group(sessionStore.userGroupId)) {
             Label {
@@ -71,7 +74,7 @@ struct SidebarView: View {
                 .foregroundStyle(DesignSystem.Colors.accentIndigo)
             }
           }
-          .accessibilityIdentifier("sidebar_group_\(sessionStore.userGroupId)")
+          .accessibilityIdentifier("sidebar_group")
         }
       } header: {
         Text("Groups")

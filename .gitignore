@@ -76,3 +76,6 @@ private/
 
 # memo
 taskmemo.md
+
+# test result
+*.xcresult
