@@ -132,3 +132,14 @@ You can find useful docs in `docs/`. Some of them are in the below.
 | `just test-all` | 유닛 → Firebase → UI 순서로 실행 | ✅ |
 
 > Firebase 에뮬레이터가 필요한 테스트는 자동으로 에뮬레이터를 시작/종료합니다.
+
+## UI Screens
+
+현재 UI 스크린샷 테스팅이 가능한 화면 목록입니다. 새로운 화면이 추가되거나 화면 구성이 변경되면 이 목록을 업데이트해주세요.
+
+- **Personal Board**: 개인 할 일 보드 (`personal_board.png`)
+- **Personal Calendar**: 개인 할 일 캘린더 (`personal_calendar.png`)
+- **Memo**: 메모 목록 (`memo.png`)
+- **Group Feed**: 그룹 피드 (`group_feed.png`)
+- **No Groups**: 그룹이 없는 경우의 피드 화면 (`no_groups.png`)
+- **Settings**: 설정 화면 (`settings.png`)

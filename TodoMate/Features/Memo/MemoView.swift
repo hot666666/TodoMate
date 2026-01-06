@@ -100,6 +100,7 @@ struct MemoView: View {
         }
       }
     }
+    .accessibilityIdentifier("memoView")
   }
 }
 

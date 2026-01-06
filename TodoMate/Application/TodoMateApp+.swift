@@ -25,4 +25,18 @@ extension TodoMateApp {
     // 현재 버전 저장
     userDefaults.set(currentVersion, for: .appLastVersion)
   }
+
+  static func parseSenarioFromArguments() -> String {
+    var scenario = "group_user" // Default
+
+    Log.debug("Arguments: \(CommandLine.arguments)")
+
+    if let index = CommandLine.arguments.firstIndex(of: "-scenario"),
+       index + 1 < CommandLine.arguments.count {
+      scenario = CommandLine.arguments[index + 1]
+    }
+
+    Log.debug("Selected Scenario: \(scenario)")
+    return scenario
+  }
 }

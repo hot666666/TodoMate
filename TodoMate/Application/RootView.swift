@@ -24,8 +24,10 @@ struct RootView: View {
           memoStore.startListening(to: sessionStore.events())
           messageStore.startListening(to: sessionStore.events())
 
-          // 2. 그 다음 Auth 상태 변화 감지 시작
-          sessionStore.startListeningToAuthChanges()
+          // 2. Auth 상태 변화 감지 시작 (UI 테스트에서는 건너뜀 - mock이 이미 인증됨)
+          if !ProcessInfo.processInfo.arguments.contains("--ui-testing") {
+            sessionStore.startListeningToAuthChanges()
+          }
         }
     }
   }
