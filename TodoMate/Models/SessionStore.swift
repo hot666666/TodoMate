@@ -8,23 +8,47 @@
 import SwiftUI
 
 @Observable
+@MainActor
 final class SessionStore {
   // MARK: - Dependencies
 
+  private let container: DIContainer
+  private let loadUserSessionUseCase: LoadUserSessionUseCase
   private let signOutUseCase: SignOutUseCase
   private let readUserUseCase: ReadUserUseCase
   private let readUserGroupUseCase: ReadUserGroupUseCase
   private let updateUserUseCase: UpdateUserUseCase
 
-  // MARK: - State
+  // MARK: - Publisher State
 
-  // User
-  private(set) var user: User
-  var userId: String { user.id }
-  var userGroupId: String { user.groupId }
+  /// 구독자 관리: UUID를 키로 사용하여 여러 구독자에게 동시에 이벤트 전송
+  private var continuations: [UUID: AsyncStream<SessionEvent>.Continuation] = [:]
 
-  // UserGroup
-  private(set) var userGroup: [User] {
+  /// Auth 상태 리스너 Task
+  @ObservationIgnored private var authListener: Task<Void, Never>?
+
+  // MARK: - Auth State
+
+  private(set) var authState: AuthState = .loading
+
+  enum AuthState {
+    case loading
+    case authenticated
+    case unauthenticated
+  }
+
+  var isAuthenticated: Bool {
+    if case .authenticated = authState { return true }
+    return false
+  }
+
+  // MARK: - Session State
+
+  private(set) var user: User?
+  var userId: String { user?.id ?? "" }
+  var userGroupId: String { user?.groupId ?? "" }
+
+  private(set) var userGroup: [User] = [] {
     didSet {
       userGroupIds = userGroup.map(\.id)
       userGroupDisplayNames = Dictionary(
@@ -35,20 +59,110 @@ final class SessionStore {
   private(set) var userGroupIds: [String] = []
   private(set) var userGroupDisplayNames: [String: String] = [:]
 
-  init(
-    container: DIContainer,
-    userSession: UserSession,
-  ) {
-    user = userSession.currentUser
-    userGroup = userSession.groupMembers
-    // didSet doesn't fire during init, so we must set these explicitly
-    userGroupIds = userSession.groupMembers.map(\.id)
-    userGroupDisplayNames = Dictionary(
-      uniqueKeysWithValues: userSession.groupMembers.map { ($0.id, $0.displayName) })
+  // MARK: - Init
+
+  init(container: DIContainer) {
+    self.container = container
+    loadUserSessionUseCase = container.loadUserSessionUseCase
     signOutUseCase = container.signOutUseCase
     readUserUseCase = container.readUserUseCase
     readUserGroupUseCase = container.readUserGroupUseCase
     updateUserUseCase = container.updateUserUseCase
+  }
+
+  // MARK: - Auth Listening
+
+  /// Firebase Auth 상태 변화를 감지하고 자동으로 이벤트 방출
+  func startListeningToAuthChanges() {
+    authListener?.cancel()
+    authListener = Task {
+      for await storedUid in container.listenAuthStateUseCase.run() {
+        if let uid = storedUid {
+          await authenticate(with: uid)
+        } else {
+          handleLogout()
+        }
+      }
+    }
+  }
+
+  /// 모든 리스너 및 continuation 정리
+  func cleanup() {
+    authListener?.cancel()
+    authListener = nil
+    for continuation in continuations.values {
+      continuation.finish()
+    }
+    continuations.removeAll()
+  }
+
+  private func authenticate(with uid: String) async {
+    authState = .loading
+    do {
+      let session = try await loadUserSessionUseCase.run(for: uid, phase: .initial)
+      user = session.currentUser
+      userGroup = session.groupMembers
+      userGroupIds = session.groupMembers.map(\.id)
+      userGroupDisplayNames = Dictionary(
+        uniqueKeysWithValues: session.groupMembers.map { ($0.id, $0.displayName) })
+
+      authState = .authenticated
+      emit(
+        .loggedIn(
+          userId: session.currentUser.id, groupId: session.currentUser.groupId,
+          memberIds: userGroupIds,
+        ))
+      print("[SessionStore] - Authenticated: \(session.currentUser.displayName)")
+    } catch {
+      print("[SessionStore] - Failed to authenticate: \(error)")
+      authState = .unauthenticated
+    }
+  }
+
+  private func handleLogout() {
+    user = nil
+    userGroup = []
+    userGroupIds = []
+    userGroupDisplayNames = [:]
+    authState = .unauthenticated
+    emit(.loggedOut)
+    print("[SessionStore] - Logged out")
+  }
+
+  // MARK: - Publisher Methods
+
+  /// 새로운 이벤트 스트림 생성 - 구독자가 세션 이벤트를 받을 수 있음
+  /// 구독 시작 시 현재 인증 상태를 즉시 전송 (Replay 패턴)
+  func events() -> AsyncStream<SessionEvent> {
+    let id = UUID()
+    return AsyncStream { continuation in
+      self.continuations[id] = continuation
+
+      // 현재 인증 상태를 새 구독자에게 즉시 전파
+      if case .authenticated = self.authState, let currentUser = self.user {
+        continuation.yield(
+          .loggedIn(
+            userId: currentUser.id, groupId: currentUser.groupId, memberIds: self.userGroupIds,
+          ))
+      } else if case .unauthenticated = self.authState {
+        continuation.yield(.loggedOut)
+      }
+      // .loading 상태면 아무것도 보내지 않음 - 나중에 실제 인증 결과가 emit됨
+
+      // 구독 종료 시 딕셔너리에서 제거 (메모리 누수 방지)
+      continuation.onTermination = { [weak self] _ in
+        Task { @MainActor [weak self] in
+          self?.continuations.removeValue(forKey: id)
+        }
+      }
+    }
+  }
+
+  /// 모든 활성 구독자에게 이벤트 전파 (Fan-out)
+  private func emit(_ event: SessionEvent) {
+    for continuation in continuations.values {
+      continuation.yield(event)
+    }
   }
 
   // MARK: - Public Methods
@@ -56,13 +170,14 @@ final class SessionStore {
   func signOut() {
     do {
       try signOutUseCase.run()
+      // Auth listener will handle the logout event
     } catch {
       print("[SessionStore] - Sign out error: \(error)")
     }
   }
 
   func leaveGroup() async {
-    var updatedUser = user
+    guard var updatedUser = user else { return }
     updatedUser.groupId = ""
     updatedUser.updatedAt = Date()
 
@@ -74,11 +189,11 @@ final class SessionStore {
     }
   }
 
-  @MainActor
   func refresh() async {
-    // User -> UserGroup 순으로 서버로부터 최신화
+    guard let currentUser = user else { return }
     do {
-      guard let latestUser = try await readUserUseCase.run(for: user.id, useCache: false) else {
+      guard let latestUser = try await readUserUseCase.run(for: currentUser.id, useCache: false)
+      else {
         signOut()
         return
       }
@@ -95,8 +210,12 @@ final class SessionStore {
 }
 
 extension SessionStore {
-  static let preview: SessionStore = .init(
-    container: .preview,
-    userSession: .stub,
-  )
+  static let preview: SessionStore = {
+    let store = SessionStore(container: .preview)
+    store.user = .stub
+    store.userGroup = [.stub]
+    store.userGroupIds = [User.stub.id]
+    store.authState = .authenticated
+    return store
+  }()
 }
