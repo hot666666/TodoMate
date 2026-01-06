@@ -51,10 +51,12 @@ final class MessageStore {
         case let .loggedIn(_, groupId, _):
           // groupId는 그룹 채팅방 ID
           await refresh(groupId: groupId)
-          print("[MessageStore] - Received loggedIn event, loading messages for group: \(groupId)")
+          Log.info(
+            "Received loggedIn event, loading messages for group: \(groupId)", category: .data,
+          )
         case .loggedOut:
           clear()
-          print("[MessageStore] - Received loggedOut event, cleared messages")
+          Log.info("Received loggedOut event, cleared messages", category: .data)
         }
       }
     }
@@ -94,7 +96,7 @@ final class MessageStore {
       // 내가 보낸 메시지는 항상 읽음 처리
       markAllAsRead()
     } catch {
-      print("[MessageStore] - Failed to add message \(message.id): \(error)")
+      Log.error("Failed to add message \(message.id): \(error)", category: .data)
     }
   }
 
@@ -105,7 +107,7 @@ final class MessageStore {
         messages[index] = message
       }
     } catch {
-      print("[MessageStore] - Failed to update message \(message.id): \(error)")
+      Log.error("Failed to update message \(message.id): \(error)", category: .data)
     }
   }
 
@@ -114,7 +116,7 @@ final class MessageStore {
       do {
         try await deleteMessageUseCase.run(for: userId, message)
       } catch {
-        print("[MessageStore] - Failed to delete message \(message.id): \(error)")
+        Log.error("Failed to delete message \(message.id): \(error)", category: .data)
       }
     }
     messages.removeAll(where: { $0.id == message.id })
@@ -126,7 +128,7 @@ final class MessageStore {
       // 로드 후 읽지 않은 메시지 확인
       hasUnreadMessages = readTracker.hasUnreadMessages(in: messages)
     } catch {
-      print("[MessageStore] - Failed to load messages for group \(groupId): \(error)")
+      Log.error("Failed to load messages for group \(groupId): \(error)", category: .data)
     }
   }
 
@@ -158,7 +160,7 @@ final class MessageStore {
         messages.removeAll(where: { $0.id == removedMessage.id })
 
       case let .error(error):
-        print("[MessageStore] - Error observing messages: \(error)")
+        Log.error("Error observing messages: \(error)", category: .data)
       }
     }
   }

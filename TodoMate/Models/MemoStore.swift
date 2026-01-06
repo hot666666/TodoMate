@@ -44,10 +44,10 @@ final class MemoStore {
           await load(for: memberIds, useCache: true)
           // 그 다음 서버에서 최신 데이터로 업데이트
           await load(for: memberIds, useCache: false)
-          print("[MemoStore] - Received loggedIn event, loaded memos")
+          Log.info("Received loggedIn event, loaded memos", category: .data)
         case .loggedOut:
           clear()
-          print("[MemoStore] - Received loggedOut event, cleared memos")
+          Log.info("Received loggedOut event, cleared memos", category: .data)
         }
       }
     }
@@ -76,7 +76,7 @@ final class MemoStore {
         }
       }
     } catch {
-      print("[MemoStore] - Failed to load memos for users \(userIds): \(error)")
+      Log.error("Failed to load memos for users \(userIds): \(error)", category: .data)
     }
   }
 
@@ -98,7 +98,7 @@ final class MemoStore {
       // Optimistic update
       memos[currentUserId] = memo
     } catch {
-      print("[MemoStore] - Failed to save memo for user \(currentUserId): \(error)")
+      Log.error("Failed to save memo for user \(currentUserId): \(error)", category: .data)
     }
   }
 

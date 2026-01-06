@@ -113,9 +113,9 @@ final class SessionStore {
           userId: session.currentUser.id, groupId: session.currentUser.groupId,
           memberIds: groupMemberIds,
         ))
-      print("[SessionStore] - Authenticated: \(session.currentUser.displayName)")
+      Log.info("Authenticated: \(session.currentUser.displayName)", category: .auth)
     } catch {
-      print("[SessionStore] - Failed to authenticate: \(error)")
+      Log.error("Failed to authenticate: \(error)", category: .auth)
       authState = .unauthenticated
     }
   }
@@ -127,7 +127,7 @@ final class SessionStore {
     groupMemberDisplayNames = [:]
     authState = .unauthenticated
     emit(.loggedOut)
-    print("[SessionStore] - Logged out")
+    Log.info("Logged out", category: .auth)
   }
 
   // MARK: - Publisher Methods
@@ -173,7 +173,7 @@ final class SessionStore {
       try signOutUseCase.run()
       // Auth listener will handle the logout event
     } catch {
-      print("[SessionStore] - Sign out error: \(error)")
+      Log.error("Sign out error: \(error)", category: .auth)
     }
   }
 
@@ -186,7 +186,7 @@ final class SessionStore {
       try await updateUserUseCase.execute(updatedUser)
       await refresh()
     } catch {
-      print("[SessionStore] - Failed to leave group: \(error)")
+      Log.error("Failed to leave group: \(error)", category: .auth)
     }
   }
 
@@ -205,7 +205,7 @@ final class SessionStore {
       )
       groupMembers = latestGroup.placingFirst(latestUser)
     } catch {
-      print("[SessionStore] - Failed to refresh session: \(error)")
+      Log.error("Failed to refresh session: \(error)", category: .auth)
     }
   }
 }

@@ -49,10 +49,12 @@ final class TodoStore {
           await load(for: memberIds, useCache: true)
           // 그 다음 서버에서 최신 데이터로 업데이트
           await load(for: memberIds, useCache: false)
-          print("[TodoStore] - Received loggedIn event, loaded todos for \(memberIds.count) users")
+          Log.info(
+            "Received loggedIn event, loaded todos for \(memberIds.count) users", category: .data,
+          )
         case .loggedOut:
           clear()
-          print("[TodoStore] - Received loggedOut event, cleared todos")
+          Log.info("Received loggedOut event, cleared todos", category: .data)
         }
       }
     }
@@ -76,7 +78,7 @@ final class TodoStore {
     do {
       todos = try await readGroupTodoUseCase.run(for: userIds, in: currentDate, useCache: useCache)
     } catch {
-      print("[TodoStore] - Failed to load todos for users \(userIds): \(error)")
+      Log.error("Failed to load todos for users \(userIds): \(error)", category: .data)
       todos = [:]
     }
   }
@@ -89,7 +91,7 @@ final class TodoStore {
         userTodos.append(todo)
       }
     } catch {
-      print("[TodoStore] - Failed to add todo: \(error)")
+      Log.error("Failed to add todo: \(error)", category: .data)
     }
   }
 
@@ -103,7 +105,7 @@ final class TodoStore {
         }
       }
     } catch {
-      print("[TodoStore] - Failed to update todo: \(error)")
+      Log.error("Failed to update todo: \(error)", category: .data)
     }
   }
 
@@ -116,7 +118,7 @@ final class TodoStore {
           userTodos.removeAll { $0.id == todo.id }
         }
       } catch {
-        print("[TodoStore] - Failed to delete todo: \(error)")
+        Log.error("Failed to delete todo: \(error)", category: .data)
       }
     }
   }
