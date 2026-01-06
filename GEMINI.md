@@ -118,5 +118,13 @@ You can find useful docs in `docs/`. Some of them are in the below.
 
 ## Commands
 
-- **Build**: `just build`
-- **Test**: `just test`
+| 명령어 | 설명 | 에뮬레이터 |
+|--------|------|:----------:|
+| `just build` | 프로젝트 빌드 | ❌ |
+| `just test` | 전체 테스트 | ❌ |
+| `just test-unit` | Firebase 폴더 제외 유닛 테스트 | ❌ |
+| `just test-firebase` | `TodoMateTests/Firebase` 테스트만 | ✅ |
+| `just test-ui` | `TodoMateUITests` 테스트만 | ✅ |
+| `just test-all` | 유닛 → Firebase → UI 순서로 실행 | ✅ |
+
+> Firebase 에뮬레이터가 필요한 테스트는 자동으로 에뮬레이터를 시작/종료합니다.
