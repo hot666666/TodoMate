@@ -51,6 +51,18 @@ struct SidebarView: View {
       }
 
       Section {
+        NavigationLink(value: NavigationDestination.noGroups) {
+          Label {
+            Text("No Groups Joined")
+              .italic()
+              .foregroundStyle(.secondary)
+          } icon: {
+            Image(systemName: "person.2.fill")
+              .foregroundStyle(.secondary)
+          }
+        }
+        .accessibilityIdentifier("sidebar_noGroups")
+
         ForEach(sessionStore.userGroupIds, id: \.self) { groupId in
           NavigationLink(value: NavigationDestination.group(groupId)) {
             Label {
@@ -65,21 +77,8 @@ struct SidebarView: View {
       } header: {
         Text("Groups")
       }
-
-      Section {
-        NavigationLink(value: NavigationDestination.noGroups) {
-          Label {
-            Text("No Groups Joined")
-              .italic()
-              .foregroundStyle(.secondary)
-          } icon: {
-            Image(systemName: "person.2.fill")
-              .foregroundStyle(.secondary)
-          }
-        }
-        .accessibilityIdentifier("sidebar_noGroups")
-      }
     }
+    .frame(minWidth: 200)
     .listStyle(.sidebar)
     .safeAreaInset(edge: .bottom) {
       networkToggle
