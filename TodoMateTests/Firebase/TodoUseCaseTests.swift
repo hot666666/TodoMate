@@ -18,9 +18,13 @@ struct TodoUseCaseTests {
   let readUseCase: ReadMonthlyTodoUseCase
   let deleteUseCase: DeleteTodoUseCase
 
-  let testUserId = "test-user-\(UUID().uuidString)"
+  let testUserId = "test-user"
 
-  init() {
+  init() async throws {
+    #if USE_FIREBASE_EMULATOR
+      // 각 테스트 전에 모든 컬렉션 리셋
+      try await FirestoreReference.shared.resetAllCollections()
+    #endif
     repository = FirestoreTodoRepository()
     createUseCase = CreateTodoUseCaseImpl(repository: repository)
     readUseCase = ReadMonthlyTodoUseCaseImpl(repository: repository)
@@ -44,9 +48,6 @@ struct TodoUseCaseTests {
     #expect(found != nil)
     #expect(found?.content == "테스트 할일")
     #expect(found?.detail == "상세 내용")
-
-    // Cleanup
-    try await deleteUseCase.run(for: testUserId, todo)
   }
 
   // MARK: - Read
@@ -69,16 +70,12 @@ struct TodoUseCaseTests {
     let foundIds = Set(todos.map(\.id))
     #expect(foundIds.contains(todo1.id))
     #expect(foundIds.contains(todo2.id))
-
-    // Cleanup
-    try await deleteUseCase.run(for: testUserId, todo1)
-    try await deleteUseCase.run(for: testUserId, todo2)
   }
 
   @Test("다른 사용자의 Todo는 조회되지 않음")
   func readOnlyOwnTodos() async throws {
     // Given
-    let otherUserId = "other-user-\(UUID().uuidString)"
+    let otherUserId = "other-user"
     let myTodo = Todo(owner: testUserId, content: "내 할일")
     let otherTodo = Todo(owner: otherUserId, content: "다른 사람 할일")
 
@@ -93,10 +90,6 @@ struct TodoUseCaseTests {
     let ids = Set(myTodos.map(\.id))
     #expect(ids.contains(myTodo.id))
     #expect(!ids.contains(otherTodo.id))
-
-    // Cleanup
-    try await deleteUseCase.run(for: testUserId, myTodo)
-    try await deleteUseCase.run(for: otherUserId, otherTodo)
   }
 
   // MARK: - Delete
@@ -126,7 +119,7 @@ struct TodoUseCaseTests {
   @Test("다른 사용자의 Todo 삭제 시도하면 에러 발생")
   func deleteOtherUserTodoFails() async throws {
     // Given
-    let otherUserId = "other-user-\(UUID().uuidString)"
+    let otherUserId = "other-user"
     let otherTodo = Todo(owner: otherUserId, content: "다른 사람 할일")
     try createUseCase.run(for: otherUserId, otherTodo)
 
@@ -134,8 +127,5 @@ struct TodoUseCaseTests {
     await #expect(throws: TodoUseCaseError.userNotAuthorized) {
       try await deleteUseCase.run(for: testUserId, otherTodo)
     }
-
-    // Cleanup
-    try await deleteUseCase.run(for: otherUserId, otherTodo)
   }
 }

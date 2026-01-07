@@ -118,6 +118,7 @@ You can find useful docs in `docs/`. Some of them are in the below.
 - [Liquid Glass](docs/liquid-glass-guide.md)
 - [MV Architecture](docs/mv-patterns.md)
 - [Latest Swift Concurrency Usage](docs/mediator-with-swift-concurrency.md)
+- [Swift Testing Guide](docs/swift-testing-guide.md)
 
 
 ## Commands

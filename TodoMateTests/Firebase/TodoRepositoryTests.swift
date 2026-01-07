@@ -14,10 +14,13 @@ import Testing
 @Suite("Todo Repository Integration Tests")
 struct TodoRepositoryTests {
   let repository: TodoRepository
-  let testUserId = "repo-test-user-\(UUID().uuidString)"
+  let testUserId = "test-user"
 
-  init() {
-    // FirestoreReference.shared가 USE_FIREBASE_EMULATOR 조건에 의해 에뮬레이터를 사용함
+  init() async throws {
+    #if USE_FIREBASE_EMULATOR
+      // 각 테스트 전에 모든 컬렉션 리셋
+      try await FirestoreReference.shared.resetAllCollections()
+    #endif
     repository = FirestoreTodoRepository()
   }
 
@@ -39,9 +42,6 @@ struct TodoRepositoryTests {
     #expect(found != nil)
     #expect(found?.content == "Repository 테스트")
     #expect(found?.owner == testUserId)
-
-    // Cleanup
-    try await repository.delete(todo.id)
   }
 
   // MARK: - Update
@@ -64,9 +64,6 @@ struct TodoRepositoryTests {
 
     #expect(updated?.content == "수정 후")
     #expect(updated?.status == .complete)
-
-    // Cleanup
-    try await repository.delete(todo.id)
   }
 
   // MARK: - Delete
@@ -91,7 +88,7 @@ struct TodoRepositoryTests {
   @Test("다중 소유자(owners) 필터 테스트")
   func queryByOwners() async throws {
     // Given
-    let otherUserId = "other-user-\(UUID().uuidString)"
+    let otherUserId = "other-user"
     let todo1 = Todo(owner: testUserId, content: "내 할일")
     let todo2 = Todo(owner: otherUserId, content: "다른 사람 할일")
     let todo3 = Todo(owner: "random-user", content: "무관한 할일")
@@ -109,11 +106,6 @@ struct TodoRepositoryTests {
     #expect(ids.contains(todo1.id))
     #expect(ids.contains(todo2.id))
     #expect(!ids.contains(todo3.id))
-
-    // Cleanup
-    try await repository.delete(todo1.id)
-    try await repository.delete(todo2.id)
-    try await repository.delete(todo3.id)
   }
 
   @Test("날짜 범위(dateRange) 필터 테스트")
@@ -137,10 +129,6 @@ struct TodoRepositoryTests {
     // Then
     #expect(results.count == 1)
     #expect(results.first?.id == todoToday.id)
-
-    // Cleanup
-    try await repository.delete(todoToday.id)
-    try await repository.delete(todoTomorrow.id)
   }
 
   @Test("상태(status) 필터 테스트")
@@ -162,9 +150,5 @@ struct TodoRepositoryTests {
     #expect(results.count == 1)
     #expect(results.first?.id == todo1.id)
     #expect(results.first?.status == .complete)
-
-    // Cleanup
-    try await repository.delete(todo1.id)
-    try await repository.delete(todo2.id)
   }
 }
