@@ -13,8 +13,8 @@ struct CalendarView: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(\.overlayManager) private var overlay
   let selection: NavigationDestination
-  @Binding var currentDate: Date
-  @Binding var selectedTask: ViewTodo?
+  @State private var currentDate = Date()
+  @State private var selectedTask: ViewTodo?
 
   private let calendar = Calendar.current
   private let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
@@ -36,6 +36,38 @@ struct CalendarView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("personalCalendarView")
+    .toolbar {
+      ToolbarItemGroup(placement: .primaryAction) {
+        calendarHeader
+      }
+      HomeToolbarContent()
+    }
+  }
+
+  // MARK: - Calendar Header
+
+  private var calendarHeader: some View {
+    HStack {
+      Text(currentDate.formatted(.dateTime.month().year()))
+        .font(.headline)
+
+      HStack(spacing: 20) {
+        Button {
+          currentDate = calendar.date(byAdding: .month, value: -1, to: currentDate) ?? currentDate
+        } label: {
+          Image(systemName: "chevron.left")
+            .fontWeight(.semibold)
+        }
+
+        Button {
+          currentDate = calendar.date(byAdding: .month, value: 1, to: currentDate) ?? currentDate
+        } label: {
+          Image(systemName: "chevron.right")
+            .fontWeight(.semibold)
+        }
+      }
+    }
+    .padding(.horizontal)
   }
 
   // MARK: - Weekday Header
@@ -223,11 +255,10 @@ struct CalendarCell: View {
 }
 
 #Preview {
-  CalendarView(
-    selection: .todo,
-    currentDate: .constant(Date()),
-    selectedTask: .constant(nil),
-  )
-  .environment(TodoStore.preview)
-  .environment(SessionStore.preview)
+  CalendarView(selection: .todo)
+    .environment(NavigationManager.preview)
+    .environment(TodoStore.preview)
+    .environment(SessionStore.preview)
+    .environment(MemoStore.preview)
+    .environment(MessageStore.preview)
 }
