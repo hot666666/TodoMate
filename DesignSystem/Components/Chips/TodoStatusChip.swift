@@ -38,17 +38,18 @@ struct TodoStatusChip: View {
     }
     .padding(.horizontal, 8)
     .padding(.vertical, 4)
-    .frame(width: HomeDesignSystem.Component.TodoList.StatusChip.width)
+    .frame(width: DesignSystem.StatusChip.width)
     .background(
       Capsule()
         .fill(
           status.color.opacity(
             isInteractive
-              ? HomeDesignSystem.Component.TodoList.StatusChip.interactiveOpacity
-              : HomeDesignSystem.Component.TodoList.StatusChip.readOnlyOpacity),
+              ? DesignSystem.StatusChip.interactiveOpacity
+              : DesignSystem.StatusChip.readOnlyOpacity),
         )
         .shadow(
-          color: status.color.opacity(0.2), radius: HomeDesignSystem.Shadow.medium, x: 0, y: 1,
+          color: status.color.opacity(0.2), radius: DesignSystem.StatusChip.shadowRadius, x: 0,
+          y: 1,
         ),
     )
   }

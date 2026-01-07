@@ -19,13 +19,13 @@ struct TodoDateButton: View {
       barrier: .blockAll,
     ) {
       Text(date.yearMonthDay)
-        .font(TodoSheetDesignSystem.Component.Typography.captionFont)
+        .font(DesignSystem.TodoSheet.Typography.captionFont)
         .fontWeight(.medium)
         .foregroundColor(.primary)
-        .padding(.horizontal, TodoSheetDesignSystem.Padding.small)
-        .padding(.vertical, TodoSheetDesignSystem.Padding.xSmall)
+        .padding(.horizontal, DesignSystem.TodoSheet.Padding.small)
+        .padding(.vertical, DesignSystem.TodoSheet.Padding.xSmall)
         .background(Color.black.opacity(0.5))
-        .cornerRadius(TodoSheetDesignSystem.CornerRadius.small)
+        .cornerRadius(DesignSystem.TodoSheet.CornerRadius.small)
     } content: {
       TodoDatePicker(date: $date)
     }

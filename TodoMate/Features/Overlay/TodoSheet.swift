@@ -80,7 +80,7 @@ struct TodoSheet: View {
 
 extension TodoSheet {
   var body: some View {
-    VStack(spacing: TodoSheetDesignSystem.Spacing.small) {
+    VStack(spacing: DesignSystem.TodoSheet.Spacing.small) {
       TodoContentTextField(
         content: $editableTodo.content,
         focusedField: $focusedField,
@@ -106,7 +106,7 @@ extension TodoSheet {
         .opacity(isEditable ? 1 : 0)
         .disabled(isSubmitDisabled)
       }
-      .padding(.top, TodoSheetDesignSystem.Padding.medium)
+      .padding(.top, DesignSystem.TodoSheet.Padding.medium)
     }
     .disabled(!isEditable)
     .onAppear {
@@ -116,8 +116,8 @@ extension TodoSheet {
     .onKeyPress(keyCode: 53) {
       perform(.dismissWithConfirmation)
     }
-    .padding(TodoSheetDesignSystem.Layout.sheetPadding)
-    .frame(maxWidth: TodoSheetDesignSystem.Layout.maxWidth)
+    .padding(DesignSystem.TodoSheet.Layout.sheetPadding)
+    .frame(maxWidth: DesignSystem.TodoSheet.Layout.maxWidth)
     .coordinateSpace(name: "TodoSheet")
   }
 }

@@ -92,7 +92,7 @@ struct CalendarView: View {
   private var calendarGrid: some View {
     GeometryReader { geometry in
       let days = daysInMonth()
-      let cellHeight = geometry.size.height / CGFloat(LayoutConstants.rowCount)
+      let cellHeight = geometry.size.height / CGFloat(DesignSystem.Layout.calendarRowCount)
 
       LazyVGrid(columns: columns, spacing: 0) {
         ForEach(days, id: \.self) { date in
@@ -117,10 +117,6 @@ struct CalendarView: View {
 
   // MARK: - Logic
 
-  private enum LayoutConstants {
-    static let rowCount = 6
-  }
-
   private func daysInMonth() -> [Date] {
     guard let monthInterval = calendar.dateInterval(of: .month, for: currentDate) else {
       return []
@@ -138,7 +134,7 @@ struct CalendarView: View {
     else { return [] }
 
     // Always 42 days (6 rows * 7 cols) to keep layout stable
-    let totalDays = LayoutConstants.rowCount * 7
+    let totalDays = DesignSystem.Layout.calendarRowCount * 7
     return (0 ..< totalDays).compactMap { dayOffset in
       calendar.date(byAdding: .day, value: dayOffset, to: startDisplayDate)
     }
@@ -184,11 +180,6 @@ struct CalendarCell: View {
 
   private let calendar = Calendar.current
 
-  private enum Metrics {
-    static let headerHeight: CGFloat = 30.0
-    static let itemHeight: CGFloat = 26.0
-  }
-
   private var isCurrentMonth: Bool {
     calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
   }
@@ -199,8 +190,8 @@ struct CalendarCell: View {
 
   var body: some View {
     GeometryReader { geometry in
-      let availableHeight = geometry.size.height - Metrics.headerHeight
-      let itemHeight = Metrics.itemHeight
+      let availableHeight = geometry.size.height - DesignSystem.Layout.calendarCellHeaderHeight
+      let itemHeight = DesignSystem.Layout.calendarCellItemHeight
       let maxItems = max(0, Int(availableHeight / itemHeight))
       let showMore = tasks.count > maxItems
       let visibleCount = showMore ? max(0, maxItems - 1) : tasks.count

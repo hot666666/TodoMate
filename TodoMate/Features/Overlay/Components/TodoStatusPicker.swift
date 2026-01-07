@@ -16,15 +16,21 @@ struct TodoStatusPicker: View {
   }
 
   var body: some View {
-    VStack(spacing: TodoSheetDesignSystem.Spacing.small) {
+    VStack(spacing: DesignSystem.TodoSheet.Spacing.small) {
       ForEach(statuses, id: \.self) { status in
-        TodoStatusChip(status: status, action: {
-          onStatusSelected(status)
-        })
+        TodoStatusChip(
+          status: status,
+          action: {
+            onStatusSelected(status)
+          },
+        )
       }
     }
-    .padding(TodoSheetDesignSystem.Padding.small)
-    .frame(width: TodoSheetDesignSystem.Component.StatusPicker.width, height: TodoSheetDesignSystem.Component.StatusPicker.height)
+    .padding(DesignSystem.TodoSheet.Padding.small)
+    .frame(
+      width: DesignSystem.TodoSheet.StatusPicker.width,
+      height: DesignSystem.TodoSheet.StatusPicker.height,
+    )
   }
 }
 

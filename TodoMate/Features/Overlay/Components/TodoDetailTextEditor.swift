@@ -27,7 +27,10 @@ struct TodoDetailTextEditor: View {
             .allowsHitTesting(false)
         }
       }
-      .frame(minHeight: TodoSheetDesignSystem.Component.TextEditor.minHeight, maxHeight: TodoSheetDesignSystem.Component.TextEditor.maxHeight, alignment: .top)
+      .frame(
+        minHeight: DesignSystem.TodoSheet.TextEditor.minHeight,
+        maxHeight: DesignSystem.TodoSheet.TextEditor.maxHeight, alignment: .top,
+      )
       .fixedSize(horizontal: false, vertical: true)
       .introspect(.textEditor, on: .macOS(.v26)) { textView in
         textView.drawsBackground = false

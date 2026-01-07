@@ -18,8 +18,11 @@ struct TodoDatePicker: View {
 
   var body: some View {
     PopoverView(date: $date, calendarDayService: calendarDayService)
-      .padding(TodoSheetDesignSystem.Component.DatePicker.padding)
-      .frame(width: TodoSheetDesignSystem.Component.DatePicker.width, height: TodoSheetDesignSystem.Component.DatePicker.height)
+      .padding(DesignSystem.TodoSheet.DatePicker.padding)
+      .frame(
+        width: DesignSystem.TodoSheet.DatePicker.width,
+        height: DesignSystem.TodoSheet.DatePicker.height,
+      )
   }
 }
 
@@ -35,14 +38,16 @@ private struct PopoverView: View {
     dateService = calendarDayService
     // 월의 첫날로 정규화하여 일관된 월 이동 보장
     let calendar = Calendar.current
-    let normalizedMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date.wrappedValue)) ?? date.wrappedValue
+    let normalizedMonth =
+      calendar.date(from: calendar.dateComponents([.year, .month], from: date.wrappedValue))
+        ?? date.wrappedValue
     _displayMonth = State(initialValue: normalizedMonth)
   }
 
   var body: some View {
     VStack(spacing: 0) {
       header
-        .padding(.bottom, TodoSheetDesignSystem.Spacing.small)
+        .padding(.bottom, DesignSystem.TodoSheet.Spacing.small)
       CalendarWeekday()
       daysGrid
         .padding(.top, 5)
@@ -80,7 +85,10 @@ private struct PopoverView: View {
 
   private var daysGrid: some View {
     let calendarDays = dateService.getCalendarDays(in: displayMonth)
-    return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: TodoSheetDesignSystem.Spacing.small) {
+    return LazyVGrid(
+      columns: Array(repeating: GridItem(.flexible()), count: 7),
+      spacing: DesignSystem.TodoSheet.Spacing.small,
+    ) {
       ForEach(calendarDays) { calendarDay in
         DayCell(
           calendarDay: calendarDay,
