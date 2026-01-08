@@ -1,5 +1,5 @@
 //
-//  TodoUseCaseTests.swift
+//  TodoUseCaseIntegrationTests.swift
 //  TodoMateTests
 //
 //  Created by hs on 2026/01/06.
@@ -11,8 +11,8 @@ import Testing
 @testable import TodoMate
 
 /// Firebase 에뮬레이터를 사용한 Todo UseCase 테스트
-@Suite("Todo UseCase Integration Tests")
-struct TodoUseCaseTests {
+@Suite("Todo UseCase Integration Tests", .serialized)
+struct TodoUseCaseIntegrationTests {
   let repository: TodoRepository
   let createUseCase: CreateTodoUseCase
   let readUseCase: ReadMonthlyTodoUseCase

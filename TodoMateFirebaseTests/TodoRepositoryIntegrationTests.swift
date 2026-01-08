@@ -1,5 +1,5 @@
 //
-//  TodoRepositoryTests.swift
+//  TodoRepositoryIntegrationTests.swift
 //  TodoMateTests
 //
 //  Created by hs on 2026/01/06.
@@ -10,10 +10,10 @@ import Testing
 
 @testable import TodoMate
 
-/// Firebase 에뮬레이터를 사용한 TodoRepository 테스트
+/// Firebase 에뮬레이터를 사용한 TodoRepository 통합 테스트
 /// .serialized: 병렬 실행 시 resetAllCollections()가 다른 테스트 데이터를 삭제할 수 있어 직렬 실행 필수
 @Suite("Todo Repository Integration Tests", .serialized)
-struct TodoRepositoryTests {
+struct TodoRepositoryIntegrationTests {
   let repository: TodoRepository
   let testUserId = "test-user"
 
