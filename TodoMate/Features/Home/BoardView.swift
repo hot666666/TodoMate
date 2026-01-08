@@ -140,69 +140,77 @@ struct BoardView: View {
       .padding(.horizontal)
 
       // Horizontal scroll with 4 columns
-      ScrollView(.horizontal) {
-        HStack(alignment: .top, spacing: 16) {
-          TodoColumn(
-            title: "To Do",
-            count: todoTasks.count,
-            color: .gray,
-            tasks: todoTasks,
-            isToday: isToday,
-            onTapTask: presentTodoSheet,
-            onStatusClick: { task in cycleStatus(task) },
-            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
-            onDropTask: { task in updateTaskStatus(task, to: .todo) },
-          )
-          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
-          .id(BoardScrollPosition.leading)
+      GeometryReader { proxy in
+        let spacing: CGFloat = 16
+        let horizontalMargin: CGFloat = 16
+        let totalSpacing = spacing * 2 // 3 visible columns -> 2 spaces
+        let visibleWidth = proxy.size.width - (horizontalMargin * 2)
+        let columnWidth = floor((visibleWidth - totalSpacing) / 3)
 
-          TodoColumn(
-            title: "In Progress",
-            count: inProgressTasks.count,
-            color: DesignSystem.Colors.accentCyan,
-            tasks: inProgressTasks,
-            isToday: isToday,
-            onTapTask: presentTodoSheet,
-            onStatusClick: { task in cycleStatus(task) },
-            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
-            onDropTask: { task in updateTaskStatus(task, to: .inProgress) },
-          )
-          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
+        ScrollView(.horizontal) {
+          HStack(alignment: .top, spacing: spacing) {
+            TodoColumn(
+              title: "To Do",
+              count: todoTasks.count,
+              color: .gray,
+              tasks: todoTasks,
+              isToday: isToday,
+              onTapTask: presentTodoSheet,
+              onStatusClick: { task in cycleStatus(task) },
+              onStatusChange: { task, status in updateTaskStatus(task, to: status) },
+              onDropTask: { task in updateTaskStatus(task, to: .todo) },
+            )
+            .frame(width: columnWidth)
+            .id(BoardScrollPosition.leading)
 
-          TodoColumn(
-            title: "Done",
-            count: doneTasks.count,
-            color: DesignSystem.Colors.accentGreen,
-            tasks: doneTasks,
-            isToday: isToday,
-            onTapTask: presentTodoSheet,
-            onStatusClick: { task in cycleStatus(task) },
-            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
-            onDropTask: { task in updateTaskStatus(task, to: .done) },
-          )
-          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
+            TodoColumn(
+              title: "In Progress",
+              count: inProgressTasks.count,
+              color: DesignSystem.Colors.accentCyan,
+              tasks: inProgressTasks,
+              isToday: isToday,
+              onTapTask: presentTodoSheet,
+              onStatusClick: { task in cycleStatus(task) },
+              onStatusChange: { task, status in updateTaskStatus(task, to: status) },
+              onDropTask: { task in updateTaskStatus(task, to: .inProgress) },
+            )
+            .frame(width: columnWidth)
 
-          TodoColumn(
-            title: "Incomplete",
-            count: inCompleteTasks.count,
-            color: DesignSystem.Colors.accentRed,
-            tasks: inCompleteTasks,
-            isToday: isToday,
-            onTapTask: presentTodoSheet,
-            onStatusClick: { task in cycleStatus(task) },
-            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
-            onDropTask: { task in updateTaskStatus(task, to: .inComplete) },
-          )
-          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
-          .id(BoardScrollPosition.trailing)
+            TodoColumn(
+              title: "Done",
+              count: doneTasks.count,
+              color: DesignSystem.Colors.accentGreen,
+              tasks: doneTasks,
+              isToday: isToday,
+              onTapTask: presentTodoSheet,
+              onStatusClick: { task in cycleStatus(task) },
+              onStatusChange: { task, status in updateTaskStatus(task, to: status) },
+              onDropTask: { task in updateTaskStatus(task, to: .done) },
+            )
+            .frame(width: columnWidth)
+
+            TodoColumn(
+              title: "Incomplete",
+              count: inCompleteTasks.count,
+              color: DesignSystem.Colors.accentRed,
+              tasks: inCompleteTasks,
+              isToday: isToday,
+              onTapTask: presentTodoSheet,
+              onStatusClick: { task in cycleStatus(task) },
+              onStatusChange: { task, status in updateTaskStatus(task, to: status) },
+              onDropTask: { task in updateTaskStatus(task, to: .inComplete) },
+            )
+            .frame(width: columnWidth)
+            .id(BoardScrollPosition.trailing)
+          }
+          .scrollTargetLayout()
+          .padding(.vertical, 1) // Prevent top/bottom clipping
         }
-        .scrollTargetLayout()
-        .padding(.vertical, 1) // Prevent top/bottom clipping
+        .contentMargins(.horizontal, horizontalMargin, for: .scrollContent)
+        .scrollTargetBehavior(.viewAligned)
+        .scrollPosition(id: $scrollPosition, anchor: .leading)
+        .scrollIndicators(.hidden)
       }
-      .safeAreaPadding(.horizontal, 16)
-      .scrollTargetBehavior(.viewAligned)
-      .scrollPosition(id: $scrollPosition, anchor: .leading)
-      .scrollIndicators(.hidden)
     }
     .padding(.top)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
