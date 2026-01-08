@@ -4,20 +4,20 @@ build:
 test:
     set -o pipefail && xcodebuild test -scheme TodoMate -destination 'platform=macOS' 2>&1 | xcbeautify
 
-# Firebase 에뮬레이터 없이 유닛 테스트만 실행
+# TodoMateTests 내 테스트만 실행 (Firebase 테스트는 별도 타겟)
 test-unit:
     set -o pipefail && xcodebuild test \
         -scheme TodoMate \
         -destination 'platform=macOS' \
-        -skip-testing:TodoMateTests/Firebase \
+        -only-testing:TodoMateTests \
         2>&1 | xcbeautify
 
-# Firebase 에뮬레이터와 함께 Firebase 유닛 테스트만 실행
-test-firebase: start-emulator
+# Firebase 에뮬레이터와 함께 통합 테스트 실행
+test-integration: start-emulator
     set -o pipefail && xcodebuild test \
         -scheme TodoMate \
         -destination 'platform=macOS' \
-        -only-testing:TodoMateTests/Firebase \
+        -only-testing:TodoMateFirebaseTests \
         SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) USE_FIREBASE_EMULATOR' \
         2>&1 | xcbeautify; \
     just stop-emulator
@@ -34,7 +34,7 @@ test-ui: start-emulator
     just stop-emulator
 
 # 전체 테스트 (유닛 → Firebase → UI 순서)
-test-all: test-unit test-firebase test-ui
+test-all: test-unit test-integration test-ui
 
 # UI 스크린샷 캡처 (특정 화면만 캡처하려면: SCREENSHOT_SCREENS=personal_board,memo just ui-screenshots)
 ui-screenshots SCREENS="":

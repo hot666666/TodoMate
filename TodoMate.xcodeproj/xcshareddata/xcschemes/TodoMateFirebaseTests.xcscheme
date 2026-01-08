@@ -19,28 +19,6 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "45E0A0E22D78497C000FDC24"
-               BuildableName = "TodoMateTests.xctest"
-               BlueprintName = "TodoMateTests"
-               ReferencedContainer = "container:TodoMate.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "45E45A022F0CE76000BFEF01"
-               BuildableName = "TodoMateUITests.xctest"
-               BlueprintName = "TodoMateUITests"
-               ReferencedContainer = "container:TodoMate.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "45B526AF2F0F8A450095C87F"
                BuildableName = "TodoMateFirebaseTests.xctest"
                BlueprintName = "TodoMateFirebaseTests"
