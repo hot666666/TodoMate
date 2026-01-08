@@ -44,7 +44,7 @@ enum ViewTodoStatus: String, CaseIterable, Codable {
   var iconName: String {
     switch self {
     case .todo: "circle"
-    case .inProgress: "circle"
+    case .inProgress: "circle.inset.filled"
     case .done: "checkmark.circle.fill"
     case .inComplete: "xmark.circle.fill"
     }

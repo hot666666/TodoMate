@@ -27,7 +27,7 @@ enum TodoStatus: String, CaseIterable, Codable, CustomStringConvertible {
   var iconName: String {
     switch self {
     case .todo: "circle"
-    case .inProgress: "circle.lefthalf.filled"
+    case .inProgress: "circle.inset.filled"
     case .complete: "checkmark.circle.fill"
     case .inComplete: "xmark.circle.fill"
     }

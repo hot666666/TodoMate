@@ -18,7 +18,7 @@ struct TagButtonStyle: ViewModifier {
       .foregroundStyle(isActive ? activeColor : .secondary)
       .padding(.horizontal, 10)
       .padding(.vertical, 5)
-      .frame(maxWidth: isExpanded ? .infinity : nil)
+      .frame(maxWidth: isExpanded ? .infinity : nil, alignment: .leading)
       .background {
         if isActive {
           Capsule()
