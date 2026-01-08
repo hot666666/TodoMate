@@ -1,6 +1,7 @@
 --indent 2
---swiftversion 6.1
+--swiftversion 6.2
 --allman false
 --exclude Pods,Carthage,**/Generated,**/*.generated.swift,**/Assets.swift,.git,script
 --disable wrapMultilineStatementBraces
 --commas always
+--extension-acl on-extension
