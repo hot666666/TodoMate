@@ -11,7 +11,8 @@ import Testing
 @testable import TodoMate
 
 /// Firebase 에뮬레이터를 사용한 TodoRepository 테스트
-@Suite("Todo Repository Integration Tests")
+/// .serialized: 병렬 실행 시 resetAllCollections()가 다른 테스트 데이터를 삭제할 수 있어 직렬 실행 필수
+@Suite("Todo Repository Integration Tests", .serialized)
 struct TodoRepositoryTests {
   let repository: TodoRepository
   let testUserId = "test-user"
