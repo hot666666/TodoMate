@@ -17,6 +17,8 @@ struct TaskCard: View {
 
   let task: ViewTodo
   var style: TaskCardStyle = .normal
+  var onStatusClick: (() -> Void)?
+  var onStatusRightClick: (() -> Void)?
 
   private var tagColor: Color {
     guard let firstTag = task.tags.first?.lowercased() else {
@@ -89,14 +91,24 @@ struct TaskCard: View {
         HStack {
           Image(systemName: "calendar")
             .font(.caption2)
-          Text(task.date.formatted(.dateTime.month(.abbreviated).day()))
+          Text(task.date.formatted(.dateTime.year().month(.abbreviated).day()))
             .font(.caption)
 
           Spacer()
 
-          Circle()
-            .fill(Color.secondary.opacity(0.3))
-            .frame(width: 24, height: 24)
+          Button {
+            onStatusClick?()
+          } label: {
+            Image(systemName: task.status.iconName)
+              .foregroundStyle(task.status.displayColor)
+          }
+          .buttonStyle(.plain)
+          .contextMenu {
+            Button("미완료로 이동", systemImage: "xmark.circle") {
+              onStatusRightClick?()
+            }
+          }
+          .frame(width: 24, height: 24)
         }
         .foregroundStyle(.secondary)
       }

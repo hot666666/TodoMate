@@ -10,6 +10,7 @@ import SwiftUI
 
 struct TodoSheet: View {
   @Environment(DIContainer.self) private var container
+  @Environment(TodoStore.self) private var todoStore
   @Environment(SessionStore.self) private var sessionStore
   @Environment(\.overlayManager) private var overlay
 
@@ -40,10 +41,13 @@ struct TodoSheet: View {
     case .submitAndDismiss:
       guard isEditable else { return }
 
-      // Dismiss logic - SimpleOverlay handles stack
       if editableTodo.isDirty {
-        let updatedTodo = Todo.from(editableTodo)
-        try? container.updateTodoUseCase.run(for: sessionStore.userId, updatedTodo)
+        let todo = Todo.from(editableTodo)
+        if editableTodo.isNew {
+          todoStore.add(todo, userId: sessionStore.userId)
+        } else {
+          todoStore.update(todo, userId: sessionStore.userId)
+        }
       }
       overlay?.dismissTop()
 

@@ -9,8 +9,16 @@ import SwiftUI
 
 struct SidebarView: View {
   @Environment(SessionStore.self) private var sessionStore
+  @Environment(TodoStore.self) private var todoStore
   @Environment(NetworkModeManager.self) private var networkManager
   @Binding var selection: NavigationDestination?
+
+  private var todayTodoCount: Int {
+    let calendar = Calendar.current
+    let today = calendar.startOfDay(for: .now)
+    let todos = todoStore.todos[sessionStore.userId] ?? []
+    return todos.count(where: { calendar.startOfDay(for: $0.date) == today })
+  }
 
   var body: some View {
     List(selection: $selection) {
@@ -33,7 +41,7 @@ struct SidebarView: View {
             Image(systemName: "checkmark.circle.fill")
               .foregroundStyle(DesignSystem.Colors.primary)
           }
-          .badge(12)
+          .badge(todayTodoCount)
         }
         .accessibilityIdentifier("sidebar_todo")
 
@@ -150,6 +158,7 @@ private struct SidebarProfileView: View {
   NavigationSplitView {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
+      .environment(TodoStore.preview)
       .environment(NetworkModeManager.preview)
   } detail: {
     Text("Detail")
