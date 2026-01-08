@@ -15,7 +15,7 @@ struct TodoContentTextField: View {
   var body: some View {
     TextField("이름없음", text: $content)
       .textFieldStyle(.plain)
-      .font(TodoSheetDesignSystem.Component.Typography.titleFont)
+      .font(DesignSystem.TodoSheet.Typography.titleFont)
       .bold()
       .focused($focusedField, equals: .content)
       .submitLabel(.done)

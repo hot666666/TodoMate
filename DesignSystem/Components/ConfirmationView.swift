@@ -16,8 +16,8 @@ struct ConfirmationView: View {
   let onDismiss: () -> Void
 
   var body: some View {
-    VStack(spacing: OverlayDesignSystem.Confirmation.spacing) {
-      VStack(spacing: OverlayDesignSystem.Confirmation.titleSpacing) {
+    VStack(spacing: DesignSystem.Confirmation.spacing) {
+      VStack(spacing: DesignSystem.Confirmation.titleSpacing) {
         Text(title)
           .fontWeight(.medium)
           .multilineTextAlignment(.center)
@@ -30,7 +30,7 @@ struct ConfirmationView: View {
         }
       }
 
-      VStack(spacing: OverlayDesignSystem.Confirmation.buttonSpacing) {
+      VStack(spacing: DesignSystem.Confirmation.buttonSpacing) {
         Button(action: {
           destructiveAction()
           onDismiss()
@@ -52,14 +52,19 @@ struct ConfirmationView: View {
         .controlSize(.large)
       }
     }
-    .padding(OverlayDesignSystem.Confirmation.padding)
-    .frame(maxWidth: OverlayDesignSystem.Confirmation.width)
-    .background(.ultraThickMaterial, in: .rect(cornerRadius: OverlayDesignSystem.Confirmation.cornerRadius))
-    .overlay(
-      RoundedRectangle(cornerRadius: OverlayDesignSystem.Confirmation.cornerRadius)
-        .stroke(.secondary.opacity(OverlayDesignSystem.Confirmation.strokeOpacity), lineWidth: OverlayDesignSystem.Confirmation.strokeWidth),
+    .padding(DesignSystem.Confirmation.padding)
+    .frame(maxWidth: DesignSystem.Confirmation.width)
+    .background(
+      .ultraThickMaterial, in: .rect(cornerRadius: DesignSystem.Confirmation.cornerRadius),
     )
-    .shadow(radius: OverlayDesignSystem.Confirmation.shadowRadius)
+    .overlay(
+      RoundedRectangle(cornerRadius: DesignSystem.Confirmation.cornerRadius)
+        .stroke(
+          .secondary.opacity(DesignSystem.Confirmation.strokeOpacity),
+          lineWidth: DesignSystem.Confirmation.strokeWidth,
+        ),
+    )
+    .shadow(radius: DesignSystem.Confirmation.shadowRadius)
     .onKeyPress(.escape) {
       onDismiss()
       return .handled

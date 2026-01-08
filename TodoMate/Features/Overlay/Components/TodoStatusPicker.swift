@@ -1,39 +1,38 @@
 //
 //  TodoStatusPicker.swift
-//  Todo
+//  TodoMate
 //
-//  Created by hs on 6/29/25.
+//  Created by hs on 11/14/24.
 //
 
 import SwiftUI
 
 struct TodoStatusPicker: View {
   let selectedStatus: TodoStatus
-  let onStatusSelected: (TodoStatus) -> Void
-
-  private var statuses: [TodoStatus] {
-    TodoStatus.allCases.filter { $0 != selectedStatus }
-  }
+  let onSelect: (TodoStatus) -> Void
 
   var body: some View {
-    VStack(spacing: TodoSheetDesignSystem.Spacing.small) {
-      ForEach(statuses, id: \.self) { status in
-        TodoStatusChip(status: status, action: {
-          onStatusSelected(status)
-        })
+    VStack(spacing: 8) {
+      ForEach(filteredStatuses, id: \.self) { status in
+        TodoStatusChip(
+          status: status,
+          action: { onSelect(status) },
+          isExpanded: true,
+        )
       }
     }
-    .padding(TodoSheetDesignSystem.Padding.small)
-    .frame(width: TodoSheetDesignSystem.Component.StatusPicker.width, height: TodoSheetDesignSystem.Component.StatusPicker.height)
+    .padding(8)
+    .background(.ultraThinMaterial)
+    .clipShape(RoundedRectangle(cornerRadius: 12))
+  }
+
+  private var filteredStatuses: [TodoStatus] {
+    TodoStatus.allCases.filter { $0 != selectedStatus }
   }
 }
 
 #Preview {
-  TodoStatusPicker(
-    selectedStatus: .todo,
-    onStatusSelected: { status in
-      print("Selected: \(status)")
-    },
-  )
-  .frame(width: 100, height: 200)
+  TodoStatusPicker(selectedStatus: .todo) { _ in }
+    .padding()
+    .background(Color.blue)
 }

@@ -66,7 +66,7 @@ struct TodoMateApp: App {
         .environment(networkManager)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
-        .frame(minWidth: 720)
+        .frame(minWidth: 720, minHeight: 540)
     }
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)

@@ -22,12 +22,13 @@ test-firebase: start-emulator
         2>&1 | xcbeautify; \
     just stop-emulator
 
-# UI 테스트 (에뮬레이터 필요)
+# UI 테스트 (에뮬레이터 필요, 스크린샷 테스트 제외)
 test-ui: start-emulator
     set -o pipefail && xcodebuild test \
         -scheme TodoMate \
         -destination 'platform=macOS' \
         -only-testing:TodoMateUITests \
+        -skip-testing:TodoMateUITests/ScreenshotTests \
         SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) USE_FIREBASE_EMULATOR' \
         2>&1 | xcbeautify; \
     just stop-emulator

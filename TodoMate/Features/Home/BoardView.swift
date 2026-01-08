@@ -80,6 +80,9 @@ struct BoardView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("personalBoardView")
+    .toolbar {
+      HomeToolbarContent()
+    }
   }
 
   // MARK: - Actions
@@ -90,7 +93,10 @@ struct BoardView: View {
     else { return }
 
     let editableTodo = EditableTodo(from: originalTodo)
-    overlay?.presentCentered {
+    overlay?.presentCentered(
+      backdropOpacity: 0,
+      offset: CGPoint(x: 0, y: -120),
+    ) {
       TodoSheet(editableTodo: editableTodo)
     }
   }

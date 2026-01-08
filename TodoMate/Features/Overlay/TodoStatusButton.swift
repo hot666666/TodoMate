@@ -14,16 +14,15 @@ struct TodoStatusButton: View {
 
   var body: some View {
     AnchoredOverlayButton(
-      placement: .bottom(alignment: .center),
+      placement: .bottom(spacing: 4, alignment: .center),
       dismissPolicy: .tap,
       barrier: .blockAll,
     ) {
-      // Use forceInteractive since the button wrapper provides the interaction
-      TodoStatusChip(status: status, action: nil, forceInteractive: true)
+      TodoStatusChip(status: status)
     } content: {
       TodoStatusPicker(
         selectedStatus: status,
-        onStatusSelected: { newStatus in
+        onSelect: { newStatus in
           status = newStatus
           overlay?.dismissTop()
         },
@@ -33,5 +32,6 @@ struct TodoStatusButton: View {
         return .handled
       }
     }
+    .buttonStyle(.plain)
   }
 }

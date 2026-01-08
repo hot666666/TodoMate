@@ -7,18 +7,29 @@
 
 import SwiftUI
 
-enum TodoStatus: String, CaseIterable, Codable {
+enum TodoStatus: String, CaseIterable, Codable, CustomStringConvertible {
   case inComplete = "미완료"
   case todo = "시작 전"
   case inProgress = "진행 중"
   case complete = "완료"
 
+  var description: String { rawValue }
+
   var color: Color {
     switch self {
-    case .todo: .customGray
-    case .inProgress: .customBlue
-    case .complete: .customGreen
-    case .inComplete: .customRed
+    case .todo: .gray
+    case .inProgress: .blue
+    case .complete: .green
+    case .inComplete: .red
+    }
+  }
+
+  var iconName: String {
+    switch self {
+    case .todo: "circle"
+    case .inProgress: "circle.lefthalf.filled"
+    case .complete: "checkmark.circle.fill"
+    case .inComplete: "xmark.circle.fill"
     }
   }
 }
@@ -49,7 +60,7 @@ struct Todo: Identifiable, Codable {
     self.content = content
     self.status = status
     self.detail = detail
-    self.date = date.startOfDay
+    self.date = Calendar.current.startOfDay(for: date)
     self.createdAt = createdAt
     self.updatedAt = updatedAt
     self.owner = owner
@@ -62,7 +73,7 @@ struct Todo: Identifiable, Codable {
       content: content,
       status: .todo,
       detail: detail,
-      date: now.startOfDay,
+      date: Calendar.current.startOfDay(for: now),
       createdAt: now,
       updatedAt: now,
       owner: owner,
@@ -105,7 +116,7 @@ extension Todo {
     date: .now,
     createdAt: .now,
     updatedAt: .now,
-    owner: EntityConstant.User.stubId,
+    owner: "stubUser",
   )
 
   static func copy(from todo: Todo) -> Todo {

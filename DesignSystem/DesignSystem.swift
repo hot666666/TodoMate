@@ -66,6 +66,78 @@ enum DesignSystem {
     static let chatWidth: CGFloat = 320
     static let cardSpacing: CGFloat = 12
     static let headerHeight: CGFloat = 56
+
+    // Calendar
+    static let calendarRowCount = 6
+    static let calendarCellHeaderHeight: CGFloat = 30
+    static let calendarCellItemHeight: CGFloat = 26
+  }
+
+  // MARK: - TodoSheet
+
+  enum TodoSheet {
+    enum Layout {
+      static let sheetPadding: CGFloat = 20
+      static let maxWidth: CGFloat = 552
+    }
+
+    enum Padding {
+      static let medium: CGFloat = 12
+      static let small: CGFloat = 8
+      static let xSmall: CGFloat = 4
+    }
+
+    enum Spacing {
+      static let small: CGFloat = 8
+    }
+
+    enum CornerRadius {
+      static let small: CGFloat = 6
+    }
+
+    enum DatePicker {
+      static let width: CGFloat = 250
+      static let height: CGFloat = 300
+      static let padding: CGFloat = 16
+    }
+
+    enum StatusPicker {
+      static let height: CGFloat = 100
+      static let width: CGFloat = 80
+    }
+
+    enum TextEditor {
+      static let minHeight: CGFloat = 20
+      static let maxHeight: CGFloat = 100
+    }
+
+    enum Typography {
+      static let titleFont: Font = .title
+      static let captionFont: Font = .caption
+    }
+  }
+
+  // MARK: - Confirmation Overlay
+
+  enum Confirmation {
+    static let width: CGFloat = 240
+    static let padding: CGFloat = 20
+    static let spacing: CGFloat = 50
+    static let titleSpacing: CGFloat = 8
+    static let buttonSpacing: CGFloat = 8
+    static let cornerRadius: CGFloat = 12
+    static let shadowRadius: CGFloat = 8
+    static let strokeOpacity: CGFloat = 0.3
+    static let strokeWidth: CGFloat = 0.5
+  }
+
+  // MARK: - StatusChip
+
+  enum StatusChip {
+    static let width: CGFloat = 70
+    static let interactiveOpacity: CGFloat = 1.0
+    static let readOnlyOpacity: CGFloat = 0.7
+    static let shadowRadius: CGFloat = 2
   }
 }
 

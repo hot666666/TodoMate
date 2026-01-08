@@ -13,8 +13,8 @@ struct CalendarView: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(\.overlayManager) private var overlay
   let selection: NavigationDestination
-  @Binding var currentDate: Date
-  @Binding var selectedTask: ViewTodo?
+  @State private var currentDate = Date()
+  @State private var selectedTask: ViewTodo?
 
   private let calendar = Calendar.current
   private let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
@@ -36,6 +36,38 @@ struct CalendarView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("personalCalendarView")
+    .toolbar {
+      ToolbarItemGroup(placement: .primaryAction) {
+        calendarHeader
+      }
+      HomeToolbarContent()
+    }
+  }
+
+  // MARK: - Calendar Header
+
+  private var calendarHeader: some View {
+    HStack {
+      Text(currentDate.formatted(.dateTime.month().year()))
+        .font(.headline)
+
+      HStack(spacing: 20) {
+        Button {
+          currentDate = calendar.date(byAdding: .month, value: -1, to: currentDate) ?? currentDate
+        } label: {
+          Image(systemName: "chevron.left")
+            .fontWeight(.semibold)
+        }
+
+        Button {
+          currentDate = calendar.date(byAdding: .month, value: 1, to: currentDate) ?? currentDate
+        } label: {
+          Image(systemName: "chevron.right")
+            .fontWeight(.semibold)
+        }
+      }
+    }
+    .padding(.horizontal)
   }
 
   // MARK: - Weekday Header
@@ -60,7 +92,7 @@ struct CalendarView: View {
   private var calendarGrid: some View {
     GeometryReader { geometry in
       let days = daysInMonth()
-      let cellHeight = geometry.size.height / CGFloat(LayoutConstants.rowCount)
+      let cellHeight = geometry.size.height / CGFloat(DesignSystem.Layout.calendarRowCount)
 
       LazyVGrid(columns: columns, spacing: 0) {
         ForEach(days, id: \.self) { date in
@@ -75,6 +107,9 @@ struct CalendarView: View {
             onTapTask: { task in
               presentTodoSheet(for: task)
             },
+            onTapMore: { date, todos in
+              presentDayTodoList(for: date, todos: todos)
+            },
           )
           .frame(minHeight: 100, maxHeight: .infinity, alignment: .top)
           .frame(height: cellHeight)
@@ -84,10 +119,6 @@ struct CalendarView: View {
   }
 
   // MARK: - Logic
-
-  private enum LayoutConstants {
-    static let rowCount = 6
-  }
 
   private func daysInMonth() -> [Date] {
     guard let monthInterval = calendar.dateInterval(of: .month, for: currentDate) else {
@@ -106,7 +137,7 @@ struct CalendarView: View {
     else { return [] }
 
     // Always 42 days (6 rows * 7 cols) to keep layout stable
-    let totalDays = LayoutConstants.rowCount * 7
+    let totalDays = DesignSystem.Layout.calendarRowCount * 7
     return (0 ..< totalDays).compactMap { dayOffset in
       calendar.date(byAdding: .day, value: dayOffset, to: startDisplayDate)
     }
@@ -134,8 +165,26 @@ struct CalendarView: View {
     else { return }
 
     let editableTodo = EditableTodo(from: originalTodo)
-    overlay?.presentCentered {
+    overlay?.presentCentered(
+      backdropOpacity: 0,
+      offset: CGPoint(x: 0, y: -120),
+    ) {
       TodoSheet(editableTodo: editableTodo)
+    }
+  }
+
+  private func presentDayTodoList(for date: Date, todos: [ViewTodo]) {
+    overlay?.presentCentered(
+      backdropOpacity: 0,
+    ) {
+      DayTodoListView(
+        date: date,
+        todos: todos,
+        onTapTodo: { task in
+          overlay?.dismissTop()
+          presentTodoSheet(for: task)
+        },
+      )
     }
   }
 }
@@ -149,13 +198,9 @@ struct CalendarCell: View {
   @Binding var selectedTask: ViewTodo?
   let onDrop: (ViewTodo) -> Void
   let onTapTask: (ViewTodo) -> Void
+  let onTapMore: (Date, [ViewTodo]) -> Void
 
   private let calendar = Calendar.current
-
-  private enum Metrics {
-    static let headerHeight: CGFloat = 30.0
-    static let itemHeight: CGFloat = 26.0
-  }
 
   private var isCurrentMonth: Bool {
     calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
@@ -167,8 +212,8 @@ struct CalendarCell: View {
 
   var body: some View {
     GeometryReader { geometry in
-      let availableHeight = geometry.size.height - Metrics.headerHeight
-      let itemHeight = Metrics.itemHeight
+      let availableHeight = geometry.size.height - DesignSystem.Layout.calendarCellHeaderHeight
+      let itemHeight = DesignSystem.Layout.calendarCellItemHeight
       let maxItems = max(0, Int(availableHeight / itemHeight))
       let showMore = tasks.count > maxItems
       let visibleCount = showMore ? max(0, maxItems - 1) : tasks.count
@@ -196,10 +241,15 @@ struct CalendarCell: View {
           }
 
           if showMore {
-            Text("+\(tasks.count - visibleCount) more")
-              .font(.caption2)
-              .foregroundStyle(.secondary)
-              .padding(.horizontal, 4)
+            Button {
+              onTapMore(date, tasks)
+            } label: {
+              Text("+\(tasks.count - visibleCount) more")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+            }
+            .buttonStyle(.plain)
           }
         }
         .padding(.horizontal, 2)
@@ -223,11 +273,10 @@ struct CalendarCell: View {
 }
 
 #Preview {
-  CalendarView(
-    selection: .todo,
-    currentDate: .constant(Date()),
-    selectedTask: .constant(nil),
-  )
-  .environment(TodoStore.preview)
-  .environment(SessionStore.preview)
+  CalendarView(selection: .todo)
+    .environment(NavigationManager.preview)
+    .environment(TodoStore.preview)
+    .environment(SessionStore.preview)
+    .environment(MemoStore.preview)
+    .environment(MessageStore.preview)
 }
