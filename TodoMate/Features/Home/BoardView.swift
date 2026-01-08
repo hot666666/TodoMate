@@ -98,18 +98,18 @@ struct BoardView: View {
             Button {
               dateFilter = filter
             } label: {
-              if filter == dateFilter {
-                Label(filter.rawValue, systemImage: "checkmark")
-              } else {
-                Text(filter.rawValue)
-              }
+              Text(filter.rawValue)
             }
           }
         } label: {
-          Image(systemName: "line.3.horizontal.decrease.circle")
-            .font(.title3)
-            .foregroundStyle(dateFilter == .today ? .secondary : DesignSystem.Colors.primary)
-            .symbolEffect(.pulse, options: .repeat(1), isActive: dateFilter != .today)
+          Image(
+            systemName: dateFilter == .today
+              ? "line.3.horizontal.decrease.circle"
+              : "line.3.horizontal.decrease.circle.fill",
+          )
+          .font(.title3)
+          .foregroundStyle(dateFilter == .today ? .secondary : DesignSystem.Colors.primary)
+          .contentTransition(.symbolEffect(.replace))
         }
         .menuStyle(.borderlessButton)
 
@@ -150,7 +150,7 @@ struct BoardView: View {
             isToday: isToday,
             onTapTask: presentTodoSheet,
             onStatusClick: { task in cycleStatus(task) },
-            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
             onDropTask: { task in updateTaskStatus(task, to: .todo) },
           )
           .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
@@ -164,7 +164,7 @@ struct BoardView: View {
             isToday: isToday,
             onTapTask: presentTodoSheet,
             onStatusClick: { task in cycleStatus(task) },
-            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
             onDropTask: { task in updateTaskStatus(task, to: .inProgress) },
           )
           .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
@@ -177,7 +177,7 @@ struct BoardView: View {
             isToday: isToday,
             onTapTask: presentTodoSheet,
             onStatusClick: { task in cycleStatus(task) },
-            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
             onDropTask: { task in updateTaskStatus(task, to: .done) },
           )
           .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
@@ -190,7 +190,7 @@ struct BoardView: View {
             isToday: isToday,
             onTapTask: presentTodoSheet,
             onStatusClick: { task in cycleStatus(task) },
-            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
             onDropTask: { task in updateTaskStatus(task, to: .inComplete) },
           )
           .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
@@ -198,6 +198,7 @@ struct BoardView: View {
         }
         .scrollTargetLayout()
         .padding(.horizontal)
+        .safeAreaPadding(.trailing, 16)
       }
       .scrollTargetBehavior(.viewAligned)
       .scrollPosition(id: $scrollPosition, anchor: .leading)
@@ -262,7 +263,7 @@ private struct TodoColumn: View {
   let isToday: (Date) -> Bool
   let onTapTask: (ViewTodo) -> Void
   let onStatusClick: (ViewTodo) -> Void
-  let onStatusRightClick: (ViewTodo) -> Void
+  let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
   let onDropTask: (ViewTodo) -> Void
 
   var body: some View {
@@ -276,9 +277,9 @@ private struct TodoColumn: View {
             TaskCard(
               task: task,
               onStatusClick: { onStatusClick(task) },
-              onStatusRightClick: { onStatusRightClick(task) },
+              onStatusChange: { status in onStatusChange(task, status) },
             )
-            .opacity(isToday(task.date) ? 1.0 : 0.65)
+            .opacity(isToday(task.date) ? 1.0 : 0.3)
             .draggable(task)
             .onTapGesture {
               onTapTask(task)

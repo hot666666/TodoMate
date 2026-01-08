@@ -18,7 +18,7 @@ struct TaskCard: View {
   let task: ViewTodo
   var style: TaskCardStyle = .normal
   var onStatusClick: (() -> Void)?
-  var onStatusRightClick: (() -> Void)?
+  var onStatusChange: ((ViewTodoStatus) -> Void)?
 
   private var tagColor: Color {
     guard let firstTag = task.tags.first?.lowercased() else {
@@ -101,11 +101,16 @@ struct TaskCard: View {
           } label: {
             Image(systemName: task.status.iconName)
               .foregroundStyle(task.status.displayColor)
+              .fontWeight(task.status == .inProgress ? .bold : .regular)
           }
           .buttonStyle(.plain)
           .contextMenu {
-            Button("미완료로 이동", systemImage: "xmark.circle") {
-              onStatusRightClick?()
+            ForEach(ViewTodoStatus.allCases, id: \.self) { status in
+              if status != task.status {
+                Button(status.displayName, systemImage: status.iconName) {
+                  onStatusChange?(status)
+                }
+              }
             }
           }
           .frame(width: 24, height: 24)
