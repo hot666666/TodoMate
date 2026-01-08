@@ -112,6 +112,7 @@ struct BoardView: View {
           .contentTransition(.symbolEffect(.replace))
         }
         .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden) // Hide the 'v' indicator
 
         Spacer()
 
@@ -197,9 +198,8 @@ struct BoardView: View {
           .id(BoardScrollPosition.trailing)
         }
         .scrollTargetLayout()
-        .padding(.horizontal)
-        .safeAreaPadding(.trailing, 16)
       }
+      .contentMargins(.horizontal, 16, for: .scrollContent) // Use contentMargins instead of padding
       .scrollTargetBehavior(.viewAligned)
       .scrollPosition(id: $scrollPosition, anchor: .leading)
       .scrollIndicators(.hidden)

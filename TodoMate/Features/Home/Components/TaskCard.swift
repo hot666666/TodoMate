@@ -99,9 +99,14 @@ struct TaskCard: View {
           Button {
             onStatusClick?()
           } label: {
-            Image(systemName: task.status.iconName)
-              .foregroundStyle(task.status.displayColor)
-              .fontWeight(task.status == .inProgress ? .bold : .regular)
+            if task.status == .inProgress {
+              Circle()
+                .strokeBorder(task.status.displayColor, lineWidth: 2)
+                .frame(width: 14, height: 14)
+            } else {
+              Image(systemName: task.status.iconName)
+                .foregroundStyle(task.status.displayColor)
+            }
           }
           .buttonStyle(.plain)
           .contextMenu {
