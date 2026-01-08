@@ -10,47 +10,26 @@ import SwiftUI
 struct TodoStatusChip: View {
   let status: TodoStatus
   var action: (() -> Void)?
-  var forceInteractive: Bool = false
-
-  var isInteractive: Bool {
-    action != nil || forceInteractive
-  }
+  var isExpanded: Bool = false
 
   var body: some View {
     if let action {
       Button(action: action) {
-        chipContent
+        label
       }
       .buttonStyle(.plain)
     } else {
-      chipContent
+      label
     }
   }
 
-  private var chipContent: some View {
-    HStack {
-      Spacer()
-      Text(status.rawValue)
-        .foregroundColor(isInteractive ? .primary : .secondary)
-        .font(.caption)
-        .fontWeight(.medium)
-      Spacer()
-    }
-    .padding(.horizontal, 8)
-    .padding(.vertical, 4)
-    .frame(width: DesignSystem.StatusChip.width)
-    .background(
-      Capsule()
-        .fill(
-          status.color.opacity(
-            isInteractive
-              ? DesignSystem.StatusChip.interactiveOpacity
-              : DesignSystem.StatusChip.readOnlyOpacity),
-        )
-        .shadow(
-          color: status.color.opacity(0.2), radius: DesignSystem.StatusChip.shadowRadius, x: 0,
-          y: 1,
-        ),
+  private var label: some View {
+    TagButtonLabel(
+      icon: status.iconName,
+      text: status.description,
+      isActive: status != .todo,
+      activeColor: status.color,
+      isExpanded: isExpanded,
     )
   }
 }
@@ -62,6 +41,7 @@ struct TodoStatusChip: View {
 
     Text("Read-only")
     TodoStatusChip(status: .complete)
+    TodoStatusChip(status: .inProgress, isExpanded: true)
   }
   .frame(width: 200, height: 200)
 }
