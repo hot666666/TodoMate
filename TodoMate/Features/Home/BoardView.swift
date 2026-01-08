@@ -139,7 +139,6 @@ struct BoardView: View {
       }
       .padding(.horizontal)
 
-      // Horizontal scroll with 4 columns
       GeometryReader { proxy in
         let spacing: CGFloat = 16
         let horizontalMargin: CGFloat = 16
@@ -147,8 +146,8 @@ struct BoardView: View {
         let visibleWidth = proxy.size.width - (horizontalMargin * 2)
         let columnWidth = floor((visibleWidth - totalSpacing) / 3)
 
-        ScrollView(.horizontal) {
-          HStack(alignment: .top, spacing: spacing) {
+        HStack(alignment: .top, spacing: spacing) {
+          if scrollPosition == .leading {
             TodoColumn(
               title: "To Do",
               count: todoTasks.count,
@@ -161,34 +160,36 @@ struct BoardView: View {
               onDropTask: { task in updateTaskStatus(task, to: .todo) },
             )
             .frame(width: columnWidth)
-            .id(BoardScrollPosition.leading)
+            .transition(.move(edge: .leading).combined(with: .opacity))
+          }
 
-            TodoColumn(
-              title: "In Progress",
-              count: inProgressTasks.count,
-              color: DesignSystem.Colors.accentCyan,
-              tasks: inProgressTasks,
-              isToday: isToday,
-              onTapTask: presentTodoSheet,
-              onStatusClick: { task in cycleStatus(task) },
-              onStatusChange: { task, status in updateTaskStatus(task, to: status) },
-              onDropTask: { task in updateTaskStatus(task, to: .inProgress) },
-            )
-            .frame(width: columnWidth)
+          TodoColumn(
+            title: "In Progress",
+            count: inProgressTasks.count,
+            color: DesignSystem.Colors.accentCyan,
+            tasks: inProgressTasks,
+            isToday: isToday,
+            onTapTask: presentTodoSheet,
+            onStatusClick: { task in cycleStatus(task) },
+            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
+            onDropTask: { task in updateTaskStatus(task, to: .inProgress) },
+          )
+          .frame(width: columnWidth)
 
-            TodoColumn(
-              title: "Done",
-              count: doneTasks.count,
-              color: DesignSystem.Colors.accentGreen,
-              tasks: doneTasks,
-              isToday: isToday,
-              onTapTask: presentTodoSheet,
-              onStatusClick: { task in cycleStatus(task) },
-              onStatusChange: { task, status in updateTaskStatus(task, to: status) },
-              onDropTask: { task in updateTaskStatus(task, to: .done) },
-            )
-            .frame(width: columnWidth)
+          TodoColumn(
+            title: "Done",
+            count: doneTasks.count,
+            color: DesignSystem.Colors.accentGreen,
+            tasks: doneTasks,
+            isToday: isToday,
+            onTapTask: presentTodoSheet,
+            onStatusClick: { task in cycleStatus(task) },
+            onStatusChange: { task, status in updateTaskStatus(task, to: status) },
+            onDropTask: { task in updateTaskStatus(task, to: .done) },
+          )
+          .frame(width: columnWidth)
 
+          if scrollPosition == .trailing {
             TodoColumn(
               title: "Incomplete",
               count: inCompleteTasks.count,
@@ -201,19 +202,12 @@ struct BoardView: View {
               onDropTask: { task in updateTaskStatus(task, to: .inComplete) },
             )
             .frame(width: columnWidth)
-            .id(BoardScrollPosition.trailing)
+            .transition(.move(edge: .trailing).combined(with: .opacity))
           }
-          .scrollTargetLayout()
-          .padding(.vertical, 1) // Prevent top/bottom clipping
         }
-        .contentMargins(.horizontal, horizontalMargin, for: .scrollContent)
-        .scrollTargetBehavior(.viewAligned)
-        .scrollPosition(id: $scrollPosition, anchor: .leading)
-        .scrollIndicators(.hidden)
+        .padding(.horizontal, horizontalMargin)
       }
     }
-    .padding(.top)
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("personalBoardView")
     .toolbar {
