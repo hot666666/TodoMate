@@ -94,20 +94,12 @@ struct BoardView: View {
 
         // Filter Menu - icon only, right next to date
         Menu {
-          ForEach(DateFilter.allCases, id: \.self) { filter in
-            Button {
-              dateFilter = filter
-            } label: {
-              Text(filter.rawValue)
-              HStack {
-                Text(filter.rawValue)
-                Spacer()
-                if dateFilter == filter {
-                  Image(systemName: "checkmark")
-                }
-              }
+          Picker("Date Filter", selection: $dateFilter) {
+            ForEach(DateFilter.allCases, id: \.self) { filter in
+              Text(filter.rawValue).tag(filter)
             }
           }
+          .pickerStyle(.inline)
         } label: {
           Image(
             systemName: dateFilter == .today
@@ -205,9 +197,8 @@ struct BoardView: View {
           .id(BoardScrollPosition.trailing)
         }
         .scrollTargetLayout()
-        .padding(.horizontal, 16) // Revert to padding
-        .padding(.trailing, 20) // Extra trailing padding to fix clipping
       }
+      .contentMargins(.horizontal, 16, for: .scrollContent)
       .scrollTargetBehavior(.viewAligned)
       .scrollPosition(id: $scrollPosition, anchor: .leading)
       .scrollIndicators(.hidden)
