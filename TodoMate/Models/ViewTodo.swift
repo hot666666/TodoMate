@@ -17,6 +17,7 @@ enum ViewTodoStatus: String, CaseIterable, Codable {
   case todo
   case inProgress
   case done
+  case inComplete
 
   init(from status: TodoStatus) {
     switch status {
@@ -27,7 +28,7 @@ enum ViewTodoStatus: String, CaseIterable, Codable {
     case .complete:
       self = .done
     case .inComplete:
-      self = .todo // Treat incomplete as todo for display
+      self = .inComplete
     }
   }
 
@@ -36,6 +37,16 @@ enum ViewTodoStatus: String, CaseIterable, Codable {
     case .todo: .gray
     case .inProgress: DesignSystem.Colors.accentCyan
     case .done: DesignSystem.Colors.accentGreen
+    case .inComplete: DesignSystem.Colors.accentRed
+    }
+  }
+
+  var iconName: String {
+    switch self {
+    case .todo: "circle"
+    case .inProgress: "circle.lefthalf.filled"
+    case .done: "checkmark.circle.fill"
+    case .inComplete: "xmark.circle.fill"
     }
   }
 
@@ -44,6 +55,7 @@ enum ViewTodoStatus: String, CaseIterable, Codable {
     case .todo: .todo
     case .inProgress: .inProgress
     case .done: .complete
+    case .inComplete: .inComplete
     }
   }
 }
@@ -155,5 +167,9 @@ extension ViewTodo {
 
   static var doneTasks: [ViewTodo] {
     mockTodos.filter { $0.status == .done }
+  }
+
+  static var inCompleteTasks: [ViewTodo] {
+    mockTodos.filter { $0.status == .inComplete }
   }
 }

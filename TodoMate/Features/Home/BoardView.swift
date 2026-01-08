@@ -10,16 +10,62 @@
 import SimpleOverlaySystem
 import SwiftUI
 
+// MARK: - Date Filter
+
+enum DateFilter: String, CaseIterable {
+  case today = "오늘"
+  case lastWeek = "최근 1주"
+  case lastMonth = "최근 1달"
+
+  var dateRange: ClosedRange<Date> {
+    let calendar = Calendar.current
+    let today = calendar.startOfDay(for: .now)
+    let endOfToday = calendar.date(byAdding: .day, value: 1, to: today)!
+
+    switch self {
+    case .today:
+      return today ... endOfToday
+    case .lastWeek:
+      let weekAgo = calendar.date(byAdding: .day, value: -7, to: today)!
+      return weekAgo ... endOfToday
+    case .lastMonth:
+      let monthAgo = calendar.date(byAdding: .month, value: -1, to: today)!
+      return monthAgo ... endOfToday
+    }
+  }
+}
+
+// MARK: - Scroll Position
+
+private enum BoardScrollPosition: String, Hashable {
+  case leading
+  case trailing
+}
+
+// MARK: - BoardView
+
 struct BoardView: View {
   @Environment(TodoStore.self) private var todoStore
   @Environment(SessionStore.self) private var sessionStore
   @Environment(\.overlayManager) private var overlay
   let selection: NavigationDestination
 
+  @State private var dateFilter: DateFilter = .today
+  @State private var scrollPosition: BoardScrollPosition? = .leading
+
   // Computed properties to group tasks by status
   private var viewTodos: [ViewTodo] {
     let todos = todoStore.todos[sessionStore.userId] ?? []
-    return todos.map { ViewTodo(from: $0) }
+    let range = dateFilter.dateRange
+    return
+      todos
+        .filter { range.contains($0.date) }
+        .map { ViewTodo(from: $0) }
+        .sorted { $0.date > $1.date }
+  }
+
+  private func isToday(_ date: Date) -> Bool {
+    Calendar.current.isDateInToday(date)
   }
 
   private var todoTasks: [ViewTodo] {
@@ -34,47 +80,128 @@ struct BoardView: View {
     viewTodos.filter { $0.status == .done }
   }
 
+  private var inCompleteTasks: [ViewTodo] {
+    viewTodos.filter { $0.status == .inComplete }
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
-      // Date Header
-      Text(Date().formatted(.dateTime.year().month().day().weekday(.wide)))
-        .font(.title2)
-        .fontWeight(.semibold)
-        .padding(.horizontal)
+      // Date Header with Filter
+      HStack {
+        Text(Date().formatted(.dateTime.year().month().day().weekday(.wide)))
+          .font(.title2)
+          .fontWeight(.semibold)
 
-      // Simple HStack - each column takes equal width via frame(maxWidth: .infinity)
-      HStack(alignment: .top, spacing: 16) {
-        TodoColumn(
-          title: "To Do",
-          count: todoTasks.count,
-          color: .gray,
-          tasks: todoTasks,
-          onTapTask: presentTodoSheet,
-          onDropTask: { task in updateTaskStatus(task, to: .todo) },
-        )
-        .frame(maxWidth: .infinity)
+        // Filter Menu - icon only, right next to date
+        Menu {
+          ForEach(DateFilter.allCases, id: \.self) { filter in
+            Button {
+              dateFilter = filter
+            } label: {
+              if filter == dateFilter {
+                Label(filter.rawValue, systemImage: "checkmark")
+              } else {
+                Text(filter.rawValue)
+              }
+            }
+          }
+        } label: {
+          Image(systemName: "line.3.horizontal.decrease.circle")
+            .font(.title3)
+            .foregroundStyle(dateFilter == .today ? .secondary : DesignSystem.Colors.primary)
+            .symbolEffect(.pulse, options: .repeat(1), isActive: dateFilter != .today)
+        }
+        .menuStyle(.borderlessButton)
 
-        TodoColumn(
-          title: "In Progress",
-          count: inProgressTasks.count,
-          color: DesignSystem.Colors.accentCyan,
-          tasks: inProgressTasks,
-          onTapTask: presentTodoSheet,
-          onDropTask: { task in updateTaskStatus(task, to: .inProgress) },
-        )
-        .frame(maxWidth: .infinity)
+        Spacer()
 
-        TodoColumn(
-          title: "Done",
-          count: doneTasks.count,
-          color: DesignSystem.Colors.accentGreen,
-          tasks: doneTasks,
-          onTapTask: presentTodoSheet,
-          onDropTask: { task in updateTaskStatus(task, to: .done) },
-        )
-        .frame(maxWidth: .infinity)
+        // Scroll Navigation Buttons
+        HStack(spacing: 8) {
+          Button {
+            withAnimation(.smooth) {
+              scrollPosition = .leading
+            }
+          } label: {
+            Image(systemName: "chevron.left.2")
+          }
+          .disabled(scrollPosition == .leading)
+
+          Button {
+            withAnimation(.smooth) {
+              scrollPosition = .trailing
+            }
+          } label: {
+            Image(systemName: "chevron.right.2")
+          }
+          .disabled(scrollPosition == .trailing)
+        }
+        .buttonStyle(.borderless)
       }
       .padding(.horizontal)
+
+      // Horizontal scroll with 4 columns
+      ScrollView(.horizontal) {
+        HStack(alignment: .top, spacing: 16) {
+          TodoColumn(
+            title: "To Do",
+            count: todoTasks.count,
+            color: .gray,
+            tasks: todoTasks,
+            isToday: isToday,
+            onTapTask: presentTodoSheet,
+            onStatusClick: { task in cycleStatus(task) },
+            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onDropTask: { task in updateTaskStatus(task, to: .todo) },
+          )
+          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
+          .id(BoardScrollPosition.leading)
+
+          TodoColumn(
+            title: "In Progress",
+            count: inProgressTasks.count,
+            color: DesignSystem.Colors.accentCyan,
+            tasks: inProgressTasks,
+            isToday: isToday,
+            onTapTask: presentTodoSheet,
+            onStatusClick: { task in cycleStatus(task) },
+            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onDropTask: { task in updateTaskStatus(task, to: .inProgress) },
+          )
+          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
+
+          TodoColumn(
+            title: "Done",
+            count: doneTasks.count,
+            color: DesignSystem.Colors.accentGreen,
+            tasks: doneTasks,
+            isToday: isToday,
+            onTapTask: presentTodoSheet,
+            onStatusClick: { task in cycleStatus(task) },
+            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onDropTask: { task in updateTaskStatus(task, to: .done) },
+          )
+          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
+
+          TodoColumn(
+            title: "Incomplete",
+            count: inCompleteTasks.count,
+            color: DesignSystem.Colors.accentRed,
+            tasks: inCompleteTasks,
+            isToday: isToday,
+            onTapTask: presentTodoSheet,
+            onStatusClick: { task in cycleStatus(task) },
+            onStatusRightClick: { task in updateTaskStatus(task, to: .inComplete) },
+            onDropTask: { task in updateTaskStatus(task, to: .inComplete) },
+          )
+          .containerRelativeFrame(.horizontal, count: 3, span: 1, spacing: 16)
+          .id(BoardScrollPosition.trailing)
+        }
+        .scrollTargetLayout()
+        .padding(.horizontal)
+      }
+      .scrollTargetBehavior(.viewAligned)
+      .scrollPosition(id: $scrollPosition, anchor: .leading)
+      .scrollIndicators(.hidden)
     }
     .padding(.top)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -101,6 +228,17 @@ struct BoardView: View {
     }
   }
 
+  private func cycleStatus(_ task: ViewTodo) {
+    let nextStatus: ViewTodoStatus =
+      switch task.status {
+      case .todo: .inProgress
+      case .inProgress: .done
+      case .done: .todo
+      case .inComplete: .todo
+      }
+    updateTaskStatus(task, to: nextStatus)
+  }
+
   private func updateTaskStatus(_ task: ViewTodo, to newStatus: ViewTodoStatus) {
     guard let userTodos = todoStore.todos[sessionStore.userId],
           let originalTodo = userTodos.first(where: { $0.id == task.id })
@@ -121,7 +259,10 @@ private struct TodoColumn: View {
   let count: Int
   let color: Color
   let tasks: [ViewTodo]
+  let isToday: (Date) -> Bool
   let onTapTask: (ViewTodo) -> Void
+  let onStatusClick: (ViewTodo) -> Void
+  let onStatusRightClick: (ViewTodo) -> Void
   let onDropTask: (ViewTodo) -> Void
 
   var body: some View {
@@ -132,11 +273,16 @@ private struct TodoColumn: View {
       ScrollView(.vertical) {
         LazyVStack(spacing: 12) {
           ForEach(tasks) { task in
-            TaskCard(task: task)
-              .draggable(task)
-              .onTapGesture {
-                onTapTask(task)
-              }
+            TaskCard(
+              task: task,
+              onStatusClick: { onStatusClick(task) },
+              onStatusRightClick: { onStatusRightClick(task) },
+            )
+            .opacity(isToday(task.date) ? 1.0 : 0.65)
+            .draggable(task)
+            .onTapGesture {
+              onTapTask(task)
+            }
           }
         }
       }
