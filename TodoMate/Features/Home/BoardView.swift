@@ -99,6 +99,13 @@ struct BoardView: View {
               dateFilter = filter
             } label: {
               Text(filter.rawValue)
+              HStack {
+                Text(filter.rawValue)
+                Spacer()
+                if dateFilter == filter {
+                  Image(systemName: "checkmark")
+                }
+              }
             }
           }
         } label: {
@@ -198,8 +205,9 @@ struct BoardView: View {
           .id(BoardScrollPosition.trailing)
         }
         .scrollTargetLayout()
+        .padding(.horizontal, 16) // Revert to padding
+        .padding(.trailing, 20) // Extra trailing padding to fix clipping
       }
-      .contentMargins(.horizontal, 16, for: .scrollContent) // Use contentMargins instead of padding
       .scrollTargetBehavior(.viewAligned)
       .scrollPosition(id: $scrollPosition, anchor: .leading)
       .scrollIndicators(.hidden)

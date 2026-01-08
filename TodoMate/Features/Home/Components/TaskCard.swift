@@ -101,7 +101,7 @@ struct TaskCard: View {
           } label: {
             if task.status == .inProgress {
               Circle()
-                .strokeBorder(task.status.displayColor, lineWidth: 2)
+                .strokeBorder(task.status.displayColor, lineWidth: 3)
                 .frame(width: 14, height: 14)
             } else {
               Image(systemName: task.status.iconName)
