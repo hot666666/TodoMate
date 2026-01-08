@@ -15,27 +15,35 @@ final class FirestoreMemoRepository: MemoRepository {
   }
 
   func create(_ memo: Memo) throws {
-    try reference.memoCollection().document(memo.owner).setData(from: memo)
+    // Changed: Use memo.id as document ID instead of owner
+    try reference.memoCollection().document(memo.id).setData(from: memo)
   }
 
   func update(_ memo: Memo) throws {
-    try reference.memoCollection().document(memo.owner).setData(from: memo)
+    // Changed: Use memo.id as document ID instead of owner
+    try reference.memoCollection().document(memo.id).setData(from: memo)
   }
 
-  func delete(_ memoId: String) async throws {
-    try await reference.memoCollection().document(memoId).delete()
+  func delete(_ memo: Memo) async throws {
+    try await reference.memoCollection().document(memo.id).delete()
   }
 
-  func readByUserId(_ userId: String, useCache: Bool = true) async throws -> Memo? {
+  func readAllByUserId(_ userId: String, useCache: Bool = true) async throws -> [Memo] {
     let source: FirestoreSource = useCache ? .cache : .server
-    let snapshot = try await reference.memoCollection().document(userId).getDocument(source: source)
-    return try? snapshot.data(as: Memo.self)
+    let snapshot = try await reference.memoCollection()
+      .whereField("owner", isEqualTo: userId)
+      .order(by: "updatedAt", descending: true)
+      .getDocuments(source: source)
+    return snapshot.documents.compactMap { try? $0.data(as: Memo.self) }
   }
 
-  func readByUserIds(_ userIds: [String], useCache: Bool = true) async throws -> [Memo] {
+  func readAllByUserIds(_ userIds: [String], useCache: Bool = true) async throws -> [Memo] {
     guard !userIds.isEmpty else { return [] }
     let source: FirestoreSource = useCache ? .cache : .server
-    let snapshot = try await reference.memoCollection().whereField(FieldPath.documentID(), in: userIds).getDocuments(source: source)
+    let snapshot = try await reference.memoCollection()
+      .whereField("owner", in: userIds)
+      .order(by: "updatedAt", descending: true)
+      .getDocuments(source: source)
     return snapshot.documents.compactMap { try? $0.data(as: Memo.self) }
   }
 }
@@ -43,7 +51,7 @@ final class FirestoreMemoRepository: MemoRepository {
 final class StubMemoRepository: MemoRepository {
   func create(_: Memo) throws {}
   func update(_: Memo) throws {}
-  func delete(_: String) async throws {}
-  func readByUserId(_: String, useCache _: Bool = true) async throws -> Memo? { nil }
-  func readByUserIds(_: [String], useCache _: Bool = true) async throws -> [Memo] { [] }
+  func delete(_: Memo) async throws {}
+  func readAllByUserId(_: String, useCache _: Bool = true) async throws -> [Memo] { [] }
+  func readAllByUserIds(_: [String], useCache _: Bool = true) async throws -> [Memo] { [] }
 }

@@ -44,6 +44,7 @@ final class DIContainer {
   @ObservationIgnored let createMemoUseCase: CreateMemoUseCase
   @ObservationIgnored let readGroupMemoUseCase: ReadGroupMemoUseCase
   @ObservationIgnored let updateMemoUseCase: UpdateMemoUseCase
+  @ObservationIgnored let deleteMemoUseCase: DeleteMemoUseCase
 
   // Auth
   @ObservationIgnored let signInUseCase: SignInUseCase
@@ -110,6 +111,7 @@ final class DIContainer {
     createMemoUseCase = CreateMemoUseCaseImpl(repository: memoRepository)
     readGroupMemoUseCase = ReadGroupMemoUseCaseImpl(repository: memoRepository)
     updateMemoUseCase = UpdateMemoUseCaseImpl(repository: memoRepository)
+    deleteMemoUseCase = DeleteMemoUseCaseImpl(repository: memoRepository)
 
     // Domain Layer - Auth
     signInUseCase = SignInUseCaseImpl(authService: authService)

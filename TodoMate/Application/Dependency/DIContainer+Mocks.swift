@@ -233,28 +233,29 @@ import Foundation
   }
 
   final class MockMemoRepository: MemoRepository {
-    var memo: Memo?
+    var memos: [Memo]
     let currentUser: User
 
     init(memo: Memo?, currentUser: User) {
-      self.memo = memo
+      memos = memo.map { [$0] } ?? []
       self.currentUser = currentUser
     }
 
-    func create(_ memo: Memo) throws { self.memo = memo }
-    func update(_ memo: Memo) throws { self.memo = memo }
-    func delete(_: String) async throws { memo = nil }
-
-    func readByUserId(_ userId: String, useCache _: Bool) async throws -> Memo? {
-      if userId == currentUser.id { return memo }
-      return nil
+    func create(_ memo: Memo) throws { memos.insert(memo, at: 0) }
+    func update(_ memo: Memo) throws {
+      if let index = memos.firstIndex(where: { $0.id == memo.id }) {
+        memos[index] = memo
+      }
     }
 
-    func readByUserIds(_ userIds: [String], useCache _: Bool) async throws -> [Memo] {
-      if let result = memo, userIds.contains(result.owner) {
-        return [result]
-      }
-      return []
+    func delete(_ memo: Memo) async throws { memos.removeAll { $0.id == memo.id } }
+
+    func readAllByUserId(_ userId: String, useCache _: Bool) async throws -> [Memo] {
+      memos.filter { $0.owner == userId }
+    }
+
+    func readAllByUserIds(_ userIds: [String], useCache _: Bool) async throws -> [Memo] {
+      memos.filter { userIds.contains($0.owner) }
     }
   }
 

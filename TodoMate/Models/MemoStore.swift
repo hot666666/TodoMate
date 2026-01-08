@@ -15,6 +15,7 @@ final class MemoStore {
   private let createMemoUseCase: CreateMemoUseCase
   private let readGroupMemoUseCase: ReadGroupMemoUseCase
   private let updateMemoUseCase: UpdateMemoUseCase
+  private let deleteMemoUseCase: DeleteMemoUseCase
 
   // MARK: - Listener
 
@@ -22,12 +23,13 @@ final class MemoStore {
 
   // MARK: - State
 
-  private(set) var memos: [String: Memo?] = [:]
+  private(set) var memos: [String: [Memo]] = [:]
 
   init(container: DIContainer) {
     createMemoUseCase = container.createMemoUseCase
     readGroupMemoUseCase = container.readGroupMemoUseCase
     updateMemoUseCase = container.updateMemoUseCase
+    deleteMemoUseCase = container.deleteMemoUseCase
   }
 
   // MARK: - Subscriber
@@ -70,35 +72,58 @@ final class MemoStore {
     do {
       let fetchedMemos = try await readGroupMemoUseCase.run(for: userIds, useCache: useCache)
 
-      for (userId, memo) in fetchedMemos {
-        if let memo {
-          memos[userId] = memo
-        }
+      for (userId, userMemos) in fetchedMemos {
+        memos[userId] = userMemos
       }
     } catch {
       Log.error("Failed to load memos for users \(userIds): \(error)", category: .data)
     }
   }
 
-  func save(_ content: String, currentUserId: String) {
+  /// 새 메모 추가
+  func add(content: String, currentUserId: String) {
     do {
-      let existingMemo = memos[currentUserId] ?? nil
-      var memo: Memo
-
-      if let existing = existingMemo {
-        // 기존 메모 업데이트
-        memo = existing.withUpdatedContent(content)
-        try updateMemoUseCase.run(for: currentUserId, memo)
-      } else {
-        // 새 메모 생성
-        memo = Memo(owner: currentUserId, content: content)
-        try createMemoUseCase.run(for: currentUserId, memo)
-      }
+      let memo = Memo(owner: currentUserId, content: content)
+      try createMemoUseCase.run(for: currentUserId, memo)
 
       // Optimistic update
-      memos[currentUserId] = memo
+      var userMemos = memos[currentUserId] ?? []
+      userMemos.insert(memo, at: 0)
+      memos[currentUserId] = userMemos
     } catch {
-      Log.error("Failed to save memo for user \(currentUserId): \(error)", category: .data)
+      Log.error("Failed to add memo for user \(currentUserId): \(error)", category: .data)
+    }
+  }
+
+  /// 기존 메모 업데이트
+  func update(_ memo: Memo, currentUserId: String) {
+    do {
+      let updatedMemo = memo.withUpdatedContent(memo.content)
+      try updateMemoUseCase.run(for: currentUserId, updatedMemo)
+
+      // Optimistic update
+      if var userMemos = memos[currentUserId],
+         let index = userMemos.firstIndex(where: { $0.id == memo.id }) {
+        userMemos[index] = updatedMemo
+        memos[currentUserId] = userMemos
+      }
+    } catch {
+      Log.error("Failed to update memo for user \(currentUserId): \(error)", category: .data)
+    }
+  }
+
+  /// 메모 삭제
+  func delete(_ memo: Memo, currentUserId: String) async {
+    do {
+      try await deleteMemoUseCase.run(for: currentUserId, memo)
+
+      // Optimistic update
+      if var userMemos = memos[currentUserId] {
+        userMemos.removeAll { $0.id == memo.id }
+        memos[currentUserId] = userMemos
+      }
+    } catch {
+      Log.error("Failed to delete memo for user \(currentUserId): \(error)", category: .data)
     }
   }
 
@@ -110,7 +135,7 @@ final class MemoStore {
 extension MemoStore {
   static let preview: MemoStore = {
     let store = MemoStore(container: DIContainer.preview)
-    store.memos = [User.stub.id: .stub]
+    store.memos = [User.stub.id: [.stub]]
     return store
   }()
 }

@@ -11,12 +11,16 @@ struct MemoView: View {
   @Environment(MemoStore.self) private var memoStore
   @Environment(SessionStore.self) private var sessionStore
 
-  @State private var isEditing = false
-  @State private var editedContent = ""
+  @Namespace private var namespace
+  @State private var selectedMemo: Memo?
 
-  private var currentMemo: Memo? {
-    memoStore.memos[sessionStore.userId] ?? nil
+  private var currentUserMemos: [Memo] {
+    memoStore.memos[sessionStore.userId] ?? []
   }
+
+  private let columns = [
+    GridItem(.adaptive(minimum: 180, maximum: 300), spacing: 16),
+  ]
 
   var body: some View {
     ZStack {
@@ -31,55 +35,24 @@ struct MemoView: View {
           .fontWeight(.semibold)
           .padding(.horizontal, 20)
 
-        if isEditing {
-          // Edit Mode
-          VStack(alignment: .leading, spacing: 12) {
-            TextEditor(text: $editedContent)
-              .font(.body)
-              .scrollContentBackground(.hidden)
-              .padding(16)
-              .background(.regularMaterial)
-              .clipShape(.rect(cornerRadius: 12))
-              .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            HStack {
-              Spacer()
-              Button("Cancel") {
-                isEditing = false
-                editedContent = currentMemo?.content ?? ""
-              }
-              .buttonStyle(.bordered)
-
-              Button("Save") {
-                memoStore.save(editedContent, currentUserId: sessionStore.userId)
-                isEditing = false
-              }
-              .buttonStyle(.borderedProminent)
-            }
-          }
-          .padding(.horizontal, 20)
+        // Grid View
+        if currentUserMemos.isEmpty {
+          ContentUnavailableView(
+            "No Memos",
+            systemImage: "square.text.square",
+            description: Text("Tap the + button to create a memo"),
+          )
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-          // View Mode
           ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-              if let memo = currentMemo, !memo.isEmpty {
-                Text(memo.content)
-                  .font(.body)
-                  .frame(maxWidth: .infinity, alignment: .leading)
-                  .padding(24)
-                  .cardContainer(cornerRadius: 12)
+            LazyVGrid(columns: columns, spacing: 16) {
+              ForEach(currentUserMemos) { memo in
+                MemoGridItem(memo: memo, namespace: namespace)
                   .onTapGesture {
-                    editedContent = memo.content
-                    isEditing = true
+                    withAnimation(.spring(duration: 0.4)) {
+                      selectedMemo = memo
+                    }
                   }
-              } else {
-                ContentUnavailableView(
-                  "No Memo",
-                  systemImage: "square.text.square",
-                  description: Text("Tap the + button to create a memo"),
-                )
-                .frame(maxWidth: .infinity)
-                .padding(40)
               }
             }
             .padding(.horizontal, 20)
@@ -87,20 +60,55 @@ struct MemoView: View {
         }
       }
       .padding(.top)
+
+      // Detail Overlay
+      if let memo = selectedMemo {
+        Color.black.opacity(0.3)
+          .ignoresSafeArea()
+          .onTapGesture {
+            withAnimation(.spring(duration: 0.4)) {
+              selectedMemo = nil
+            }
+          }
+
+        MemoDetailView(
+          memo: Binding(
+            get: { memo },
+            set: { newValue in
+              selectedMemo = newValue
+            },
+          ),
+          namespace: namespace,
+        ) {
+          withAnimation(.spring(duration: 0.4)) {
+            selectedMemo = nil
+          }
+        }
+        .frame(maxWidth: 600, maxHeight: 500)
+        .padding(40)
+        .transition(.scale(scale: 0.9).combined(with: .opacity))
+      }
     }
     .toolbar {
-      if !isEditing {
-        ToolbarItem(placement: .primaryAction) {
-          Button {
-            editedContent = currentMemo?.content ?? ""
-            isEditing = true
-          } label: {
-            Image(systemName: currentMemo == nil ? "plus" : "pencil")
-          }
+      ToolbarItem(placement: .primaryAction) {
+        Button {
+          addNewMemo()
+        } label: {
+          Image(systemName: "plus")
         }
       }
     }
     .accessibilityIdentifier("memoView")
+  }
+
+  private func addNewMemo() {
+    memoStore.add(content: "", currentUserId: sessionStore.userId)
+    // Select the newly created memo (it's inserted at index 0)
+    if let newMemo = currentUserMemos.first {
+      withAnimation(.spring(duration: 0.4)) {
+        selectedMemo = newMemo
+      }
+    }
   }
 }
 
