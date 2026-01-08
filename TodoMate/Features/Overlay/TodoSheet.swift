@@ -99,12 +99,14 @@ extension TodoSheet {
         )
         Spacer()
 
-        Button(editableTodo.isNew ? "생성" : "수정") {
-          perform(.submitAndDismiss)
+        if isEditable {
+          TodoSheetActionButton(
+            hasChanges: editableTodo.isDirty,
+            isNew: editableTodo.isNew,
+            onSave: { perform(.submitAndDismiss) },
+            onDismiss: { perform(.dismissWithConfirmation) },
+          )
         }
-        .buttonStyle(GlassmorphismButtonStyle(disabled: isSubmitDisabled))
-        .opacity(isEditable ? 1 : 0)
-        .disabled(isSubmitDisabled)
       }
       .padding(.top, DesignSystem.TodoSheet.Padding.medium)
     }
@@ -117,7 +119,10 @@ extension TodoSheet {
       perform(.dismissWithConfirmation)
     }
     .padding(DesignSystem.TodoSheet.Layout.sheetPadding)
-    .frame(maxWidth: DesignSystem.TodoSheet.Layout.maxWidth)
+    .frame(width: 450)
+    .background(.regularMaterial)
+    .clipShape(.rect(cornerRadius: 12))
+    .shadow(color: .black.opacity(0.2), radius: 10)
     .coordinateSpace(name: "TodoSheet")
   }
 }
@@ -132,5 +137,5 @@ extension TodoSheet {
   TodoSheet(editableTodo: EditableTodo(owner: SessionStore.preview.userId))
     .environment(DIContainer.preview)
     .environment(SessionStore.preview)
-    .frame(width: 400, height: 300)
+    .frame(width: 600, height: 400)
 }

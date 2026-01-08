@@ -23,6 +23,8 @@ struct TodoDatePicker: View {
         width: DesignSystem.TodoSheet.DatePicker.width,
         height: DesignSystem.TodoSheet.DatePicker.height,
       )
+      .background(.ultraThinMaterial)
+      .clipShape(RoundedRectangle(cornerRadius: 12))
   }
 }
 

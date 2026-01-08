@@ -107,6 +107,9 @@ struct CalendarView: View {
             onTapTask: { task in
               presentTodoSheet(for: task)
             },
+            onTapMore: { date, todos in
+              presentDayTodoList(for: date, todos: todos)
+            },
           )
           .frame(minHeight: 100, maxHeight: .infinity, alignment: .top)
           .frame(height: cellHeight)
@@ -162,8 +165,26 @@ struct CalendarView: View {
     else { return }
 
     let editableTodo = EditableTodo(from: originalTodo)
-    overlay?.presentCentered {
+    overlay?.presentCentered(
+      backdropOpacity: 0,
+      offset: CGPoint(x: 0, y: -120),
+    ) {
       TodoSheet(editableTodo: editableTodo)
+    }
+  }
+
+  private func presentDayTodoList(for date: Date, todos: [ViewTodo]) {
+    overlay?.presentCentered(
+      backdropOpacity: 0,
+    ) {
+      DayTodoListView(
+        date: date,
+        todos: todos,
+        onTapTodo: { task in
+          overlay?.dismissTop()
+          presentTodoSheet(for: task)
+        },
+      )
     }
   }
 }
@@ -177,6 +198,7 @@ struct CalendarCell: View {
   @Binding var selectedTask: ViewTodo?
   let onDrop: (ViewTodo) -> Void
   let onTapTask: (ViewTodo) -> Void
+  let onTapMore: (Date, [ViewTodo]) -> Void
 
   private let calendar = Calendar.current
 
@@ -219,10 +241,15 @@ struct CalendarCell: View {
           }
 
           if showMore {
-            Text("+\(tasks.count - visibleCount) more")
-              .font(.caption2)
-              .foregroundStyle(.secondary)
-              .padding(.horizontal, 4)
+            Button {
+              onTapMore(date, tasks)
+            } label: {
+              Text("+\(tasks.count - visibleCount) more")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+            }
+            .buttonStyle(.plain)
           }
         }
         .padding(.horizontal, 2)
