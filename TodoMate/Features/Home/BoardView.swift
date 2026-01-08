@@ -197,8 +197,9 @@ struct BoardView: View {
           .id(BoardScrollPosition.trailing)
         }
         .scrollTargetLayout()
+        .padding(.vertical, 1) // Prevent top/bottom clipping
       }
-      .contentMargins(.horizontal, 16, for: .scrollContent)
+      .safeAreaPadding(.horizontal, 16)
       .scrollTargetBehavior(.viewAligned)
       .scrollPosition(id: $scrollPosition, anchor: .leading)
       .scrollIndicators(.hidden)
