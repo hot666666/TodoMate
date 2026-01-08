@@ -89,29 +89,8 @@ struct BoardView: View {
       // Date Header with Filter
       HStack {
         Text(Date().formatted(.dateTime.year().month().day().weekday(.wide)))
-          .font(.title2)
+          .font(.title)
           .fontWeight(.semibold)
-
-        // Filter Menu - icon only, right next to date
-        Menu {
-          Picker("Date Filter", selection: $dateFilter) {
-            ForEach(DateFilter.allCases, id: \.self) { filter in
-              Text(filter.rawValue).tag(filter)
-            }
-          }
-          .pickerStyle(.inline)
-        } label: {
-          Image(
-            systemName: dateFilter == .today
-              ? "line.3.horizontal.decrease.circle"
-              : "line.3.horizontal.decrease.circle.fill",
-          )
-          .font(.title3)
-          .foregroundStyle(dateFilter == .today ? .secondary : DesignSystem.Colors.primary)
-          .contentTransition(.symbolEffect(.replace))
-        }
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden) // Hide the 'v' indicator
 
         Spacer()
 
@@ -211,6 +190,26 @@ struct BoardView: View {
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("personalBoardView")
     .toolbar {
+      ToolbarItem(placement: .primaryAction) {
+        Menu {
+          Picker("Date Filter", selection: $dateFilter) {
+            ForEach(DateFilter.allCases, id: \.self) { filter in
+              Text(filter.rawValue).tag(filter)
+            }
+          }
+          .pickerStyle(.inline)
+        } label: {
+          Image(
+            systemName: dateFilter == .today
+              ? "line.3.horizontal.decrease.circle"
+              : "line.3.horizontal.decrease.circle.fill",
+          )
+          .foregroundStyle(dateFilter == .today ? .secondary : DesignSystem.Colors.primary)
+          .contentTransition(.symbolEffect(.replace))
+        }
+        .menuIndicator(.hidden)
+      }
+
       HomeToolbarContent()
     }
   }
@@ -289,7 +288,7 @@ private struct TodoColumn: View {
           }
         }
       }
-      .scrollIndicators(.hidden)
+      .contentMargins(.bottom, 40, for: .scrollContent)
     }
     .dropDestination(for: ViewTodo.self) { items, _ in
       if let task = items.first {
