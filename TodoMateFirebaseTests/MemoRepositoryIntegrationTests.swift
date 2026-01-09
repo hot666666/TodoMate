@@ -10,119 +10,118 @@ import Testing
 
 @testable import TodoMate
 
-/// Firebase 에뮬레이터를 사용한 MemoRepository 통합 테스트
-/// .serialized: 병렬 실행 시 resetAllCollections()가 다른 테스트 데이터를 삭제할 수 있어 직렬 실행 필수
-@Suite("Memo Repository Integration Tests", .serialized)
-struct MemoRepositoryIntegrationTests {
-  let repository: MemoRepository
-  let testUserId = "test-user"
+extension FirebaseIntegrationTests {
+  /// Firebase 에뮬레이터를 사용한 MemoRepository 통합 테스트
+  /// .serialized: 병렬 실행 시 resetAllCollections()가 다른 테스트 데이터를 삭제할 수 있어 직렬 실행 필수
+  @Suite("Memo Repository Integration Tests", .serialized)
+  struct MemoRepositoryIntegrationTests {
+    let repository: MemoRepository
+    let testUserId = "test-user"
 
-  init() async throws {
-    #if USE_FIREBASE_EMULATOR
-      // 각 테스트 전에 모든 컬렉션 리셋
-      try await FirestoreReference.shared.resetAllCollections()
-    #endif
-    repository = FirestoreMemoRepository()
-  }
+    init() async throws {
+      try await FirebaseIntegrationTests.setup()
+      repository = FirestoreMemoRepository()
+    }
 
-  // MARK: - Create & Read
+    // MARK: - Create & Read
 
-  @Test("Memo 생성 및 조회 확인")
-  func createAndReadMemo() async throws {
-    // Given
-    let memo = Memo(owner: testUserId, content: "Repository 테스트 메모")
+    @Test("Memo 생성 및 조회 확인")
+    func createAndReadMemo() async throws {
+      // Given
+      let memo = Memo(owner: testUserId, content: "Repository 테스트 메모")
 
-    // When
-    try repository.create(memo)
+      // When
+      try repository.create(memo)
 
-    // Then
-    let results = try await repository.readAllByUserId(testUserId, useCache: false)
+      // Then
+      let results = try await repository.readAllByUserId(testUserId, useCache: false)
 
-    let found = results.first { $0.id == memo.id }
-    #expect(found != nil)
-    #expect(found?.content == "Repository 테스트 메모")
-    #expect(found?.owner == testUserId)
-  }
+      let found = results.first { $0.id == memo.id }
+      #expect(found != nil)
+      #expect(found?.content == "Repository 테스트 메모")
+      #expect(found?.owner == testUserId)
+    }
 
-  // MARK: - Update
+    // MARK: - Update
 
-  @Test("Memo 내용 수정")
-  func updateMemo() async throws {
-    // Given
-    var memo = Memo(owner: testUserId, content: "수정 전")
-    try repository.create(memo)
+    @Test("Memo 내용 수정")
+    func updateMemo() async throws {
+      // Given
+      var memo = Memo(owner: testUserId, content: "수정 전")
+      try repository.create(memo)
 
-    // When
-    memo.content = "수정 후"
-    try repository.update(memo)
+      // When
+      memo.content = "수정 후"
+      try repository.update(memo)
 
-    // Then
-    let results = try await repository.readAllByUserId(testUserId, useCache: false)
-    let updated = results.first { $0.id == memo.id }
+      // Then
+      let results = try await repository.readAllByUserId(testUserId, useCache: false)
+      let updated = results.first { $0.id == memo.id }
 
-    #expect(updated?.content == "수정 후")
-  }
+      #expect(updated?.content == "수정 후")
+    }
 
-  // MARK: - Delete
+    // MARK: - Delete
 
-  @Test("Memo 삭제")
-  func deleteMemo() async throws {
-    // Given
-    let memo = Memo(owner: testUserId, content: "삭제될 메모")
-    try repository.create(memo)
+    @Test("Memo 삭제")
+    func deleteMemo() async throws {
+      // Given
+      let memo = Memo(owner: testUserId, content: "삭제될 메모")
+      try repository.create(memo)
 
-    // When
-    try await repository.delete(memo)
+      // When
+      try await repository.delete(memo)
 
-    // Then
-    let results = try await repository.readAllByUserId(testUserId, useCache: false)
-    #expect(!results.contains { $0.id == memo.id })
-  }
+      // Then
+      let results = try await repository.readAllByUserId(testUserId, useCache: false)
+      #expect(!results.contains { $0.id == memo.id })
+    }
 
-  // MARK: - Multiple Memos
+    // MARK: - Multiple Memos
 
-  @Test("다중 메모 조회")
-  func readMultipleMemos() async throws {
-    // Given
-    let memo1 = Memo(owner: testUserId, content: "첫 번째 메모")
-    let memo2 = Memo(owner: testUserId, content: "두 번째 메모")
-    let memo3 = Memo(owner: testUserId, content: "세 번째 메모")
+    @Test("다중 메모 조회")
+    func readMultipleMemos() async throws {
+      // Given
+      let memo1 = Memo(owner: testUserId, content: "첫 번째 메모")
+      let memo2 = Memo(owner: testUserId, content: "두 번째 메모")
+      let memo3 = Memo(owner: testUserId, content: "세 번째 메모")
 
-    try repository.create(memo1)
-    try repository.create(memo2)
-    try repository.create(memo3)
+      try repository.create(memo1)
+      try repository.create(memo2)
+      try repository.create(memo3)
 
-    // When
-    let results = try await repository.readAllByUserId(testUserId, useCache: false)
+      // When
+      let results = try await repository.readAllByUserId(testUserId, useCache: false)
 
-    // Then
-    #expect(results.count >= 3)
-    let ids = Set(results.map(\.id))
-    #expect(ids.contains(memo1.id))
-    #expect(ids.contains(memo2.id))
-    #expect(ids.contains(memo3.id))
-  }
+      // Then
+      #expect(results.count >= 3)
+      let ids = Set(results.map(\.id))
+      #expect(ids.contains(memo1.id))
+      #expect(ids.contains(memo2.id))
+      #expect(ids.contains(memo3.id))
+    }
 
-  // MARK: - Read by Multiple Users
+    // MARK: - Read by Multiple Users
 
-  @Test("다중 사용자 메모 조회")
-  func readMemosByMultipleUsers() async throws {
-    // Given
-    let otherUserId = "other-user"
-    let memo1 = Memo(owner: testUserId, content: "내 메모")
-    let memo2 = Memo(owner: otherUserId, content: "다른 사람 메모")
+    @Test("다중 사용자 메모 조회")
+    func readMemosByMultipleUsers() async throws {
+      // Given
+      let otherUserId = "other-user"
+      let memo1 = Memo(owner: testUserId, content: "내 메모")
+      let memo2 = Memo(owner: otherUserId, content: "다른 사람 메모")
 
-    try repository.create(memo1)
-    try repository.create(memo2)
+      try repository.create(memo1)
+      try repository.create(memo2)
 
-    // When
-    let results = try await repository.readAllByUserIds(
-      [testUserId, otherUserId], useCache: false,
-    )
+      // When
+      let results = try await repository.readAllByUserIds(
+        [testUserId, otherUserId], useCache: false,
+      )
 
-    // Then
-    let ids = Set(results.map(\.id))
-    #expect(ids.contains(memo1.id))
-    #expect(ids.contains(memo2.id))
+      // Then
+      let ids = Set(results.map(\.id))
+      #expect(ids.contains(memo1.id))
+      #expect(ids.contains(memo2.id))
+    }
   }
 }

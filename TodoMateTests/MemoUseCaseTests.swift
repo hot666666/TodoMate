@@ -123,7 +123,7 @@ struct ReadGroupMemoUseCaseTests {
 @Suite("UpdateMemoUseCase Tests")
 struct UpdateMemoUseCaseTests {
   @Test("기존 메모 업데이트")
-  func updateMemo_updatesExistingMemo() throws {
+  func updateMemo_updatesExistingMemo() async throws {
     // Given
     let repository = InMemoryMemoRepository()
     let useCase = UpdateMemoUseCaseImpl(repository: repository)
