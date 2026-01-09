@@ -30,6 +30,7 @@ struct CalendarView: View {
 
   var body: some View {
     VStack(spacing: 0) {
+      calendarHeader
       weekdayHeader
       calendarGrid
     }
@@ -37,9 +38,6 @@ struct CalendarView: View {
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("personalCalendarView")
     .toolbar {
-      ToolbarItemGroup(placement: .primaryAction) {
-        calendarHeader
-      }
       HomeToolbarContent()
     }
   }
@@ -47,25 +45,30 @@ struct CalendarView: View {
   // MARK: - Calendar Header
 
   private var calendarHeader: some View {
-    HStack {
-      Text(currentDate.formatted(.dateTime.month().year()))
-        .font(.headline)
+    HStack(alignment: .top) {
+      Text(currentDate.formatted(.dateTime.month(.wide).year()))
+        .font(.title)
 
-      HStack(spacing: 20) {
+      Spacer()
+
+      HStack(spacing: 8) {
         Button {
           currentDate = calendar.date(byAdding: .month, value: -1, to: currentDate) ?? currentDate
         } label: {
           Image(systemName: "chevron.left")
-            .fontWeight(.semibold)
+        }
+
+        Button("Today") {
+          currentDate = Date()
         }
 
         Button {
           currentDate = calendar.date(byAdding: .month, value: 1, to: currentDate) ?? currentDate
         } label: {
           Image(systemName: "chevron.right")
-            .fontWeight(.semibold)
         }
       }
+      .buttonStyle(.bordered)
     }
     .padding(.horizontal)
   }
@@ -81,7 +84,6 @@ struct CalendarView: View {
           .foregroundStyle(.secondary)
           .frame(maxWidth: .infinity)
           .padding(.vertical, 8)
-          .background(Color.secondary.opacity(0.05))
       }
     }
     .overlay(Divider(), alignment: .bottom)
@@ -100,6 +102,7 @@ struct CalendarView: View {
             date: date,
             currentMonth: currentDate,
             tasks: tasksForDate(date),
+            cellHeight: cellHeight,
             selectedTask: $selectedTask,
             onDrop: { task in
               moveTask(task, to: date)
@@ -111,7 +114,6 @@ struct CalendarView: View {
               presentDayTodoList(for: date, todos: todos)
             },
           )
-          .frame(minHeight: 100, maxHeight: .infinity, alignment: .top)
           .frame(height: cellHeight)
         }
       }
@@ -195,6 +197,7 @@ struct CalendarCell: View {
   let date: Date
   let currentMonth: Date
   let tasks: [ViewTodo]
+  let cellHeight: CGFloat
   @Binding var selectedTask: ViewTodo?
   let onDrop: (ViewTodo) -> Void
   let onTapTask: (ViewTodo) -> Void
@@ -210,52 +213,59 @@ struct CalendarCell: View {
     calendar.isDateInToday(date)
   }
 
+  private var maxVisibleItems: Int {
+    let availableHeight = cellHeight - DesignSystem.Layout.calendarCellHeaderHeight
+    let itemHeight = DesignSystem.Layout.calendarCellItemHeight
+    return max(0, Int(availableHeight / itemHeight))
+  }
+
+  private var showMore: Bool {
+    tasks.count > maxVisibleItems
+  }
+
+  private var visibleCount: Int {
+    showMore ? max(0, maxVisibleItems - 1) : tasks.count
+  }
+
   var body: some View {
-    GeometryReader { geometry in
-      let availableHeight = geometry.size.height - DesignSystem.Layout.calendarCellHeaderHeight
-      let itemHeight = DesignSystem.Layout.calendarCellItemHeight
-      let maxItems = max(0, Int(availableHeight / itemHeight))
-      let showMore = tasks.count > maxItems
-      let visibleCount = showMore ? max(0, maxItems - 1) : tasks.count
+    VStack(alignment: .leading, spacing: 4) {
+      // Date Number
+      Text("\(calendar.component(.day, from: date))")
+        .font(.system(size: 14, weight: isToday ? .bold : .medium))
+        .foregroundStyle(isToday ? .primary : (isCurrentMonth ? .primary : .secondary))
+        .opacity(isCurrentMonth ? 1 : 0.4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(6)
 
-      VStack(alignment: .leading, spacing: 4) {
-        // Date Number
-        Text("\(calendar.component(.day, from: date))")
-          .font(.system(size: 14, weight: isToday ? .bold : .medium))
-          .foregroundStyle(isToday ? .primary : (isCurrentMonth ? .primary : .secondary))
-          .opacity(isCurrentMonth ? 1 : 0.4)
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .padding(6)
-
-        // Tasks
-        VStack(alignment: .leading, spacing: 2) {
-          ForEach(tasks.prefix(visibleCount)) { task in
-            TaskCard(task: task, style: .compact)
-              .draggable(task)
-              .onTapGesture {
-                onTapTask(task)
-              }
-              .opacity(
-                selectedTask?.id == task.id
-                  ? 1.0 : (selectedTask == nil ? 1.0 : 0.6))
-          }
-
-          if showMore {
-            Button {
-              onTapMore(date, tasks)
-            } label: {
-              Text("+\(tasks.count - visibleCount) more")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
+      // Tasks
+      VStack(alignment: .leading, spacing: 2) {
+        ForEach(tasks.prefix(visibleCount)) { task in
+          TaskCard(task: task, style: .compact)
+            .draggable(task)
+            .onTapGesture {
+              onTapTask(task)
             }
-            .buttonStyle(.plain)
-          }
+            .opacity(
+              selectedTask?.id == task.id
+                ? 1.0 : (selectedTask == nil ? 1.0 : 0.6),
+            )
         }
-        .padding(.horizontal, 2)
 
-        Spacer(minLength: 0)
+        if showMore {
+          Button {
+            onTapMore(date, tasks)
+          } label: {
+            Text("+\(tasks.count - visibleCount) more")
+              .font(.caption2)
+              .foregroundStyle(.secondary)
+              .padding(.horizontal, 4)
+          }
+          .buttonStyle(.plain)
+        }
       }
+      .padding(.horizontal, 2)
+
+      Spacer(minLength: 0)
     }
     .background(
       Rectangle()

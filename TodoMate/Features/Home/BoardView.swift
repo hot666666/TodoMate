@@ -90,7 +90,6 @@ struct BoardView: View {
       HStack {
         Text(Date().formatted(.dateTime.year().month().day().weekday(.wide)))
           .font(.title)
-          .fontWeight(.semibold)
 
         Spacer()
 
@@ -288,7 +287,7 @@ private struct TodoColumn: View {
           }
         }
       }
-      .contentMargins(.bottom, 40, for: .scrollContent)
+      .contentMargins(.bottom, 20, for: .scrollContent)
     }
     .dropDestination(for: ViewTodo.self) { items, _ in
       if let task = items.first {
