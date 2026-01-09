@@ -85,3 +85,6 @@ If SwiftData is configured to use CloudKit:
 - Use the following Swift Package manifest template whenever you generate a new Swift package for this project.
 - You can use the tools version comment to // swift-tools-version: 6.2 in Package.swift
 - You can set the minimum supported iOS version in platforms to .iOS(.v26).
+
+## Code style
+- Writing code that already follows the rules defined in .swiftformat and swiftlint.yml reduces the amount of work the pre-commit hook needs to do.
