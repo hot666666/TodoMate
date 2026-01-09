@@ -47,7 +47,7 @@ struct SidebarView: View {
             Image(systemName: "checkmark.circle.fill")
               .foregroundStyle(DesignSystem.Colors.primary)
           }
-          .badge(todayTodoCount)
+          .badge(Text("\(todayTodoCount)").monospacedDigit())
         }
         .accessibilityIdentifier("sidebar_todo")
 
@@ -58,7 +58,7 @@ struct SidebarView: View {
             Image(systemName: "square.text.square.fill")
               .foregroundStyle(DesignSystem.Colors.trafficYellow)
           }
-          .badge(memoCount)
+          .badge(Text("\(memoCount)").monospacedDigit())
         }
         .accessibilityIdentifier("sidebar_memo")
       } header: {
