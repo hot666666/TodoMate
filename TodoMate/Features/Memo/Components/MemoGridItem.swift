@@ -9,11 +9,10 @@ import SwiftUI
 
 struct MemoGridItem: View {
   let memo: Memo
-  let namespace: Namespace.ID
 
   private var previewContent: String {
     let lines = memo.content.components(separatedBy: .newlines)
-    let limitedLines = lines.prefix(8)
+    let limitedLines = lines.prefix(6)
     return limitedLines.joined(separator: "\n")
   }
 
@@ -21,8 +20,9 @@ struct MemoGridItem: View {
     VStack(alignment: .leading, spacing: 8) {
       Text(previewContent)
         .font(.body)
-        .lineLimit(8)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .lineLimit(6)
+        .multilineTextAlignment(.leading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
 
       Spacer()
 
@@ -31,16 +31,14 @@ struct MemoGridItem: View {
         .foregroundStyle(.secondary)
     }
     .padding(16)
-    .frame(minHeight: 120)
+    .frame(minHeight: 150)
     .background(.regularMaterial)
     .clipShape(.rect(cornerRadius: 12))
-    .matchedGeometryEffect(id: memo.id, in: namespace)
   }
 }
 
 #Preview {
-  @Previewable @Namespace var namespace
-  MemoGridItem(memo: .stub, namespace: namespace)
+  MemoGridItem(memo: .stub)
     .frame(width: 200)
     .padding()
 }

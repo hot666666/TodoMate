@@ -11,8 +11,9 @@ struct MemoView: View {
   @Environment(MemoStore.self) private var memoStore
   @Environment(SessionStore.self) private var sessionStore
 
-  @Namespace private var namespace
   @State private var selectedMemo: Memo?
+  @Namespace private var heroNamespace
+  @State private var isDetailViewPresented = false
 
   private var currentUserMemos: [Memo] {
     memoStore.memos[sessionStore.userId] ?? []
@@ -28,73 +29,67 @@ struct MemoView: View {
       Color(nsColor: .windowBackgroundColor)
         .ignoresSafeArea()
 
-      VStack(alignment: .leading, spacing: 16) {
-        // Date Header
-        Text(Date().formatted(.dateTime.year().month().day().weekday(.wide)))
-          .font(.title2)
-          .fontWeight(.semibold)
-          .padding(.horizontal, 20)
-
-        // Grid View
-        if currentUserMemos.isEmpty {
-          ContentUnavailableView(
-            "No Memos",
-            systemImage: "square.text.square",
-            description: Text("Tap the + button to create a memo"),
-          )
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-          ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
-              ForEach(currentUserMemos) { memo in
-                MemoGridItem(memo: memo, namespace: namespace)
-                  .onTapGesture {
-                    withAnimation(.spring(duration: 0.4)) {
-                      selectedMemo = memo
-                    }
-                  }
-              }
-            }
-            .padding(.horizontal, 20)
-          }
-        }
-      }
-      .padding(.top)
-
-      // Detail Overlay
-      if let memo = selectedMemo {
-        Color.black.opacity(0.3)
-          .ignoresSafeArea()
-          .onTapGesture {
-            withAnimation(.spring(duration: 0.4)) {
-              selectedMemo = nil
-            }
-          }
-
+      if let selectedMemo, isDetailViewPresented {
+        // Detail View
         MemoDetailView(
-          memo: Binding(
-            get: { memo },
-            set: { newValue in
-              selectedMemo = newValue
-            },
-          ),
-          namespace: namespace,
-        ) {
-          withAnimation(.spring(duration: 0.4)) {
-            selectedMemo = nil
+          memo: selectedMemo,
+          namespace: heroNamespace,
+          onDismiss: dismissDetail,
+          onSave: { updatedContent in
+            saveMemo(selectedMemo, with: updatedContent)
+          },
+          onDelete: {
+            deleteMemo(selectedMemo)
+          },
+        )
+        .transition(.asymmetric(insertion: .identity, removal: .opacity))
+        .zIndex(1)
+      } else {
+        // Grid View
+        VStack(alignment: .leading, spacing: 16) {
+          // Date Header
+          Text(Date().formatted(.dateTime.year().month().day().weekday(.wide)))
+            .font(.title2)
+            .fontWeight(.semibold)
+            .padding(.horizontal, 20)
+
+          if currentUserMemos.isEmpty {
+            ContentUnavailableView(
+              "No Memos",
+              systemImage: "square.text.square",
+              description: Text("Tap the + button to create a memo"),
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+          } else {
+            ScrollView {
+              LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(currentUserMemos) { memo in
+                  MemoGridItem(memo: memo)
+                    .matchedGeometryEffect(id: memo.id, in: heroNamespace)
+                    .onTapGesture {
+                      withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                        selectedMemo = memo
+                        isDetailViewPresented = true
+                      }
+                    }
+                }
+              }
+              .padding(.horizontal, 20)
+              .padding(.bottom, 20)
+            }
           }
         }
-        .frame(maxWidth: 600, maxHeight: 500)
-        .padding(40)
-        .transition(.scale(scale: 0.9).combined(with: .opacity))
+        .padding(.top)
       }
     }
     .toolbar {
-      ToolbarItem(placement: .primaryAction) {
-        Button {
-          addNewMemo()
-        } label: {
-          Image(systemName: "plus")
+      if !isDetailViewPresented {
+        ToolbarItem(placement: .primaryAction) {
+          Button {
+            addNewMemo()
+          } label: {
+            Image(systemName: "plus")
+          }
         }
       }
     }
@@ -103,11 +98,36 @@ struct MemoView: View {
 
   private func addNewMemo() {
     memoStore.add(content: "", currentUserId: sessionStore.userId)
-    // Select the newly created memo (it's inserted at index 0)
-    if let newMemo = currentUserMemos.first {
-      withAnimation(.spring(duration: 0.4)) {
-        selectedMemo = newMemo
+
+    Task {
+      try? await Task.sleep(for: .seconds(0.1))
+      if let newMemo = currentUserMemos.first {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+          selectedMemo = newMemo
+          isDetailViewPresented = true
+        }
       }
+    }
+  }
+
+  private func dismissDetail() {
+    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+      selectedMemo = nil
+      isDetailViewPresented = false
+    }
+  }
+
+  private func saveMemo(_ memo: Memo, with newContent: String) {
+    if newContent != memo.content {
+      let updatedMemo = memo.withUpdatedContent(newContent)
+      memoStore.update(updatedMemo, currentUserId: sessionStore.userId)
+    }
+  }
+
+  private func deleteMemo(_ memo: Memo) {
+    Task {
+      await memoStore.delete(memo, currentUserId: sessionStore.userId)
+      dismissDetail()
     }
   }
 }

@@ -7,12 +7,14 @@
 
 import Foundation
 
-struct Memo: Identifiable, Codable, Equatable {
-  let id: String /// DocumentID
+struct Memo: Identifiable, Codable, Equatable, Hashable {
+  let id: String
+  /// DocumentID
   var content: String
   let createdAt: Date
   var updatedAt: Date
-  let owner: String /// UserID
+  let owner: String
+  /// UserID
 
   init(
     id: String = UUID().uuidString,
@@ -67,7 +69,9 @@ extension Memo {
 
 extension Memo {
   var isEmpty: Bool { content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-  var wordCount: Int { content.components(separatedBy: .whitespacesAndNewlines).count(where: { !$0.isEmpty }) }
+  var wordCount: Int {
+    content.components(separatedBy: .whitespacesAndNewlines).count(where: { !$0.isEmpty })
+  }
 
   static func empty(for userId: String) -> Memo {
     Memo(owner: userId, content: "")
