@@ -11,6 +11,16 @@ struct SettingView: View {
   @Environment(SessionStore.self) private var sessionStore
   @State private var showLogoutConfirmation = false
   @State private var showLeaveGroupConfirmation = false
+  @State private var showEditNameSheet = false
+  @State private var editingName = ""
+
+  private var hasGroup: Bool {
+    !sessionStore.userGroupId.isEmpty
+  }
+
+  private var memberCount: Int {
+    sessionStore.groupMembers.count
+  }
 
   var body: some View {
     ScrollView {
@@ -21,8 +31,8 @@ struct SettingView: View {
         // Group Section
         groupSection
 
-        // Account Section
-        accountSection
+        // App Section
+        appSection
       }
       .accessibilityIdentifier("settings_view")
       .padding(32)
@@ -43,9 +53,7 @@ struct SettingView: View {
       }
       Button("Cancel", role: .cancel) {}
     } message: {
-      Text(
-        "Are you sure you want to leave \"Design Team\"? You'll need an invitation to rejoin.",
-      )
+      Text("Are you sure you want to leave this group? You'll need an invitation to rejoin.")
     }
     .confirmationDialog(
       "Sign Out",
@@ -59,6 +67,16 @@ struct SettingView: View {
     } message: {
       Text("Are you sure you want to sign out of your account?")
     }
+    .sheet(isPresented: $showEditNameSheet) {
+      EditDisplayNameSheet(
+        currentName: sessionStore.user?.displayName ?? "",
+        onSave: { newName in
+          Task {
+            await updateDisplayName(newName)
+          }
+        },
+      )
+    }
   }
 
   // MARK: - Profile Section
@@ -71,35 +89,22 @@ struct SettingView: View {
 
       HStack(spacing: 16) {
         // Avatar
-        Circle()
-          .fill(
-            LinearGradient(
-              colors: [.blue, .purple],
-              startPoint: .topLeading,
-              endPoint: .bottomTrailing,
-            ),
-          )
-          .frame(width: 64, height: 64)
-          .overlay(
-            Text((sessionStore.user?.displayName ?? "?").prefix(2).uppercased())
-              .font(.title2)
-              .fontWeight(.semibold)
-              .foregroundStyle(.white),
-          )
+        ProfileAvatarView(
+          displayName: sessionStore.user?.displayName ?? "?",
+          size: 64,
+        )
 
         VStack(alignment: .leading, spacing: 4) {
           Text(sessionStore.user?.displayName ?? "Guest")
             .font(.title3)
             .fontWeight(.semibold)
-          Text("user@example.com")
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
         }
 
         Spacer()
 
         Button("Edit") {
-          // Edit profile
+          editingName = sessionStore.user?.displayName ?? ""
+          showEditNameSheet = true
         }
         .buttonStyle(.bordered)
       }
@@ -118,62 +123,79 @@ struct SettingView: View {
         .foregroundStyle(.secondary)
 
       VStack(spacing: 0) {
-        // Current Group
-        HStack(spacing: 12) {
-          Image(systemName: "person.3.fill")
-            .font(.system(size: 24))
-            .foregroundStyle(.blue)
-            .frame(width: 40)
-
-          VStack(alignment: .leading, spacing: 2) {
-            Text("Design Team")
-              .font(.subheadline)
-              .fontWeight(.medium)
-            Text("4 members")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-          }
-
-          Spacer()
-
-          Text("Joined")
-            .font(.caption)
-            .foregroundStyle(.green)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.green.opacity(0.1))
-            .clipShape(Capsule())
-        }
-        .padding(16)
-
-        Divider()
-
-        // Leave Group
-        Button {
-          showLeaveGroupConfirmation = true
-        } label: {
-          HStack {
-            Image(systemName: "rectangle.portrait.and.arrow.right")
-              .foregroundStyle(.red)
+        if hasGroup {
+          // Current Group
+          HStack(spacing: 12) {
+            Image(systemName: "person.3.fill")
+              .font(.system(size: 24))
+              .foregroundStyle(.blue)
               .frame(width: 40)
-            Text("Leave Group")
-              .foregroundStyle(.red)
+
+            VStack(alignment: .leading, spacing: 2) {
+              Text("My Group")
+                .font(.subheadline)
+                .fontWeight(.medium)
+              Text("\(memberCount) member\(memberCount == 1 ? "" : "s")")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text("Joined")
+              .font(.caption)
+              .foregroundStyle(.green)
+              .padding(.horizontal, 8)
+              .padding(.vertical, 4)
+              .background(Color.green.opacity(0.1))
+              .clipShape(Capsule())
+          }
+          .padding(16)
+
+          Divider()
+
+          // Leave Group
+          Button {
+            showLeaveGroupConfirmation = true
+          } label: {
+            HStack {
+              Image(systemName: "rectangle.portrait.and.arrow.right")
+                .foregroundStyle(.red)
+                .frame(width: 40)
+              Text("Leave Group")
+                .foregroundStyle(.red)
+              Spacer()
+            }
+            .padding(16)
+          }
+          .buttonStyle(.plain)
+        } else {
+          // No group
+          HStack(spacing: 12) {
+            Image(systemName: "person.2.slash")
+              .font(.system(size: 24))
+              .foregroundStyle(.secondary)
+              .frame(width: 40)
+
+            Text("그룹 없음")
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+
             Spacer()
           }
           .padding(16)
         }
-        .buttonStyle(.plain)
       }
       .background(Color(nsColor: .controlBackgroundColor))
       .clipShape(RoundedRectangle(cornerRadius: 12))
     }
   }
 
-  // MARK: - Account Section
+  // MARK: - App Section
 
-  private var accountSection: some View {
+  private var appSection: some View {
     VStack(alignment: .leading, spacing: 16) {
-      Text("Account")
+      Text("App")
         .font(.headline)
         .foregroundStyle(.secondary)
 
@@ -196,6 +218,72 @@ struct SettingView: View {
       }
       .background(Color(nsColor: .controlBackgroundColor))
       .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+  }
+
+  // MARK: - Actions
+
+  private func updateDisplayName(_ newName: String) async {
+    guard var user = sessionStore.user else { return }
+    user.displayName = newName
+    user.updatedAt = Date()
+
+    do {
+      try await sessionStore.updateUser(user)
+    } catch {
+      Log.error("Failed to update display name: \(error)", category: .auth)
+    }
+  }
+}
+
+// MARK: - Edit Display Name Sheet
+
+private struct EditDisplayNameSheet: View {
+  @Environment(\.dismiss) private var dismiss
+  let currentName: String
+  let onSave: (String) -> Void
+
+  @State private var name: String = ""
+  @FocusState private var isFocused: Bool
+
+  private var isValid: Bool {
+    let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    return !trimmed.isEmpty && name.count <= UpdateUserUseCaseImpl.maxDisplayNameLength
+  }
+
+  var body: some View {
+    VStack(spacing: 20) {
+      Text("이름 변경")
+        .font(.headline)
+
+      TextField("이름", text: $name)
+        .textFieldStyle(.roundedBorder)
+        .focused($isFocused)
+
+      Text("\(name.count)/\(UpdateUserUseCaseImpl.maxDisplayNameLength)")
+        .font(.caption)
+        .foregroundStyle(
+          name.count > UpdateUserUseCaseImpl.maxDisplayNameLength ? .red : .secondary)
+
+      HStack(spacing: 12) {
+        Button("취소") {
+          dismiss()
+        }
+        .buttonStyle(.bordered)
+
+        Button("저장") {
+          onSave(name.trimmingCharacters(in: .whitespacesAndNewlines))
+          dismiss()
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(!isValid)
+      }
+    }
+    .padding(24)
+    .frame(width: 300)
+    .onAppear {
+      name = currentName
+      isFocused = true
     }
   }
 }

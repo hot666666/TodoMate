@@ -208,6 +208,11 @@ final class SessionStore {
       Log.error("Failed to refresh session: \(error)", category: .auth)
     }
   }
+
+  func updateUser(_ updatedUser: User) async throws {
+    try await updateUserUseCase.execute(updatedUser)
+    user = updatedUser
+  }
 }
 
 extension SessionStore {

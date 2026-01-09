@@ -133,18 +133,11 @@ struct SidebarView: View {
 
 private struct SidebarProfileView: View {
   let displayName: String
-  let subtitle: String
+  let subtitle: String?
 
   var body: some View {
     HStack(spacing: 12) {
-      Circle()
-        .fill(Color.orange.opacity(0.8))
-        .frame(width: 32, height: 32)
-        .overlay {
-          Image(systemName: "person.fill")
-            .foregroundStyle(.white)
-            .font(.caption)
-        }
+      ProfileAvatarView(displayName: displayName, size: 32)
 
       VStack(alignment: .leading, spacing: 0) {
         Text(displayName)
@@ -152,9 +145,11 @@ private struct SidebarProfileView: View {
           .fontWeight(.semibold)
           .foregroundStyle(.primary)
 
-        Text(subtitle)
-          .font(.caption)
-          .foregroundStyle(.secondary)
+        if let subtitle {
+          Text(subtitle)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
       }
     }
     .padding(.vertical, 4)
