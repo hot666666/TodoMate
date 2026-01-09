@@ -110,6 +110,9 @@ struct CalendarView: View {
             onTapTask: { task in
               presentTodoSheet(for: task)
             },
+            onTapDate: { date, todos in
+              presentDayTodoList(for: date, todos: todos)
+            },
             onTapMore: { date, todos in
               presentDayTodoList(for: date, todos: todos)
             },
@@ -182,8 +185,8 @@ struct CalendarView: View {
       DayTodoListView(
         date: date,
         todos: todos,
-        onTapTodo: { task in
-          overlay?.dismissTop()
+        onTapTodo: { [self] task in
+          // Stack TodoSheet on top of DayTodoListView (don't dismiss)
           presentTodoSheet(for: task)
         },
       )
@@ -201,6 +204,7 @@ struct CalendarCell: View {
   @Binding var selectedTask: ViewTodo?
   let onDrop: (ViewTodo) -> Void
   let onTapTask: (ViewTodo) -> Void
+  let onTapDate: (Date, [ViewTodo]) -> Void
   let onTapMore: (Date, [ViewTodo]) -> Void
 
   private let calendar = Calendar.current
@@ -229,13 +233,19 @@ struct CalendarCell: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
-      // Date Number
-      Text("\(calendar.component(.day, from: date))")
-        .font(.system(size: 14, weight: isToday ? .bold : .medium))
-        .foregroundStyle(isToday ? .primary : (isCurrentMonth ? .primary : .secondary))
-        .opacity(isCurrentMonth ? 1 : 0.4)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(6)
+      // Date Number - tappable
+      Button {
+        onTapDate(date, tasks)
+      } label: {
+        Text("\(calendar.component(.day, from: date))")
+          .font(.system(size: 14, weight: isToday ? .bold : .medium))
+          .foregroundStyle(isToday ? .primary : (isCurrentMonth ? .primary : .secondary))
+          .opacity(isCurrentMonth ? 1 : 0.4)
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .padding(6)
+          .contentShape(.rect)
+      }
+      .buttonStyle(.plain)
 
       // Tasks
       VStack(alignment: .leading, spacing: 2) {
