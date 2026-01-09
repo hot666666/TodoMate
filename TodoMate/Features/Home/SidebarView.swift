@@ -10,6 +10,7 @@ import SwiftUI
 struct SidebarView: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(TodoStore.self) private var todoStore
+  @Environment(MemoStore.self) private var memoStore
   @Environment(NetworkModeManager.self) private var networkManager
   @Binding var selection: NavigationDestination?
 
@@ -18,6 +19,11 @@ struct SidebarView: View {
     let today = calendar.startOfDay(for: .now)
     let todos = todoStore.todos[sessionStore.userId] ?? []
     return todos.count(where: { calendar.startOfDay(for: $0.date) == today })
+  }
+
+  private var memoCount: Int {
+    let memos = memoStore.memos[sessionStore.userId] ?? []
+    return memos.count
   }
 
   var body: some View {
@@ -52,6 +58,7 @@ struct SidebarView: View {
             Image(systemName: "square.text.square.fill")
               .foregroundStyle(DesignSystem.Colors.trafficYellow)
           }
+          .badge(memoCount)
         }
         .accessibilityIdentifier("sidebar_memo")
       } header: {
@@ -159,6 +166,7 @@ private struct SidebarProfileView: View {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
       .environment(TodoStore.preview)
+      .environment(MemoStore.preview)
       .environment(NetworkModeManager.preview)
   } detail: {
     Text("Detail")
