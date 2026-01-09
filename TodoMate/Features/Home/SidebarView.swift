@@ -32,7 +32,7 @@ struct SidebarView: View {
         NavigationLink(value: NavigationDestination.settings) {
           SidebarProfileView(
             displayName: sessionStore.user?.displayName ?? "Guest",
-            subtitle: "Pro Member",
+            subtitle: nil,
           )
         }
         .accessibilityIdentifier("sidebar_profile")
