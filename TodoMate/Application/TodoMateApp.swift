@@ -102,6 +102,7 @@ private extension TodoMateApp {
     let todoRepo = FirestoreTodoRepository()
     let messageRepo = FirestoreMessageRepository()
     let memoRepo = FirestoreMemoRepository()
+    let groupRepo = FirestoreGroupRepository()
     let authService = FirebaseAuthService()
     let calendarDayService = CalendarDayServiceImpl()
     let messageReadTracker = MessageReadTrackerImpl()
@@ -113,6 +114,7 @@ private extension TodoMateApp {
       todoRepository: todoRepo,
       messageRepository: messageRepo,
       memoRepository: memoRepo,
+      groupRepository: groupRepo,
       authService: authService,
       calendarDayService: calendarDayService,
       messageReadTracker: messageReadTracker,

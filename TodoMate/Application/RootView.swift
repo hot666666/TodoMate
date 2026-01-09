@@ -23,6 +23,7 @@ private struct ContentView: View {
   @Environment(MemoStore.self) private var memoStore
   @Environment(MessageStore.self) private var messageStore
   @Environment(\.overlayManager) private var overlay
+  @Environment(\.scenePhase) private var scenePhase
 
   private var isOverlayPresented: Bool {
     !(overlay?.isEmpty ?? true)
@@ -38,6 +39,13 @@ private struct ContentView: View {
 
         // 2. Auth 상태 변화 감지 시작
         sessionStore.startListeningToAuthChanges()
+      }
+      .onChange(of: scenePhase) { _, newPhase in
+        if newPhase == .active {
+          Task {
+            await sessionStore.refresh()
+          }
+        }
       }
   }
 

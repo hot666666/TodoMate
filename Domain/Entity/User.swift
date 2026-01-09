@@ -8,9 +8,11 @@
 import Foundation
 
 struct User: Codable, Identifiable, Hashable {
-  let id: String /// DocumentID
+  let id: String
+  /// DocumentID
   var displayName: String
-  var groupId: String /// GroupID
+  var groupId: String
+  /// GroupID
   let createdAt: Date
   var updatedAt: Date
 
@@ -31,7 +33,7 @@ struct User: Codable, Identifiable, Hashable {
   init(
     id: String = UUID().uuidString,
     displayName: String = "Unknown",
-    groupId: String = UUID().uuidString,
+    groupId: String = "",
   ) {
     let now: Date = .now
     self.init(
@@ -56,7 +58,9 @@ extension User {
   )
 
   static let stubs = [
-    User(id: EntityConstant.User.stubId, displayName: "hs", groupId: EntityConstant.UserGroup.stubId),
+    User(
+      id: EntityConstant.User.stubId, displayName: "hs", groupId: EntityConstant.UserGroup.stubId,
+    ),
     User(displayName: "jy", groupId: EntityConstant.UserGroup.stubId),
   ]
 }

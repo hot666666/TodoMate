@@ -126,6 +126,7 @@ import Foundation
         todoRepository: todoRepo,
         messageRepository: messageRepo,
         memoRepository: memoRepo,
+        groupRepository: StubGroupRepository(),
         authService: authService,
         calendarDayService: CalendarDayServiceImpl(),
         messageReadTracker: StubMessageReadTracker(),

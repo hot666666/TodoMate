@@ -18,6 +18,10 @@ final class SessionStore {
   @ObservationIgnored private let readUserUseCase: ReadUserUseCase
   @ObservationIgnored private let readUserGroupUseCase: ReadUserGroupUseCase
   @ObservationIgnored private let updateUserUseCase: UpdateUserUseCase
+  @ObservationIgnored private let createGroupUseCase: CreateGroupUseCase
+  @ObservationIgnored private let readGroupUseCase: ReadGroupUseCase
+  @ObservationIgnored private let joinGroupUseCase: JoinGroupUseCase
+  @ObservationIgnored private let leaveGroupUseCase: LeaveGroupUseCase
 
   // MARK: - Listenter & Publisher
 
@@ -59,6 +63,7 @@ final class SessionStore {
 
   private(set) var groupMemberIds: [String] = []
   private(set) var groupMemberDisplayNames: [String: String] = [:]
+  private(set) var currentGroup: UserGroup?
 
   // MARK: - Init
 
@@ -69,6 +74,10 @@ final class SessionStore {
     readUserUseCase = container.readUserUseCase
     readUserGroupUseCase = container.readUserGroupUseCase
     updateUserUseCase = container.updateUserUseCase
+    createGroupUseCase = container.createGroupUseCase
+    readGroupUseCase = container.readGroupUseCase
+    joinGroupUseCase = container.joinGroupUseCase
+    leaveGroupUseCase = container.leaveGroupUseCase
   }
 
   // MARK: - Auth Listening
@@ -114,6 +123,9 @@ final class SessionStore {
           memberIds: groupMemberIds,
         ))
       Log.info("Authenticated: \(session.currentUser.displayName)", category: .auth)
+
+      // Update with latest data from server
+      await refresh()
     } catch {
       Log.error("Failed to authenticate: \(error)", category: .auth)
       authState = .unauthenticated
@@ -177,19 +189,6 @@ final class SessionStore {
     }
   }
 
-  func leaveGroup() async {
-    guard var updatedUser = user else { return }
-    updatedUser.groupId = ""
-    updatedUser.updatedAt = Date()
-
-    do {
-      try await updateUserUseCase.execute(updatedUser)
-      await refresh()
-    } catch {
-      Log.error("Failed to leave group: \(error)", category: .auth)
-    }
-  }
-
   func refresh() async {
     guard let currentUser = user else { return }
     do {
@@ -204,6 +203,13 @@ final class SessionStore {
         groupId: latestUser.groupId, useCache: false,
       )
       groupMembers = latestGroup.placingFirst(latestUser)
+
+      // Fetch current group info
+      if !latestUser.groupId.isEmpty {
+        currentGroup = try await readGroupUseCase.execute(groupId: latestUser.groupId)
+      } else {
+        currentGroup = nil
+      }
     } catch {
       Log.error("Failed to refresh session: \(error)", category: .auth)
     }
@@ -212,6 +218,48 @@ final class SessionStore {
   func updateUser(_ updatedUser: User) async throws {
     try await updateUserUseCase.execute(updatedUser)
     user = updatedUser
+  }
+
+  func createGroup(name: String) async throws {
+    guard let currentUser = user else { return }
+    guard currentUser.groupId.isEmpty else {
+      throw GroupOperationError.alreadyInGroup
+    }
+    _ = try await createGroupUseCase.execute(name: name, userId: currentUser.id)
+    await refresh()
+  }
+
+  func joinGroup(groupId: String) async throws {
+    guard let currentUser = user else { return }
+    guard currentUser.groupId.isEmpty else {
+      throw GroupOperationError.alreadyInGroup
+    }
+    try await joinGroupUseCase.execute(groupId: groupId, userId: currentUser.id)
+    await refresh()
+  }
+
+  func leaveGroup() async {
+    guard let currentUser = user, !currentUser.groupId.isEmpty else { return }
+    do {
+      try await leaveGroupUseCase.execute(groupId: currentUser.groupId, userId: currentUser.id)
+      await refresh()
+    } catch {
+      Log.error("Failed to leave group: \(error)", category: .auth)
+    }
+  }
+}
+
+enum GroupOperationError: Error, LocalizedError {
+  case alreadyInGroup
+  case notInGroup
+
+  var errorDescription: String? {
+    switch self {
+    case .alreadyInGroup:
+      "You are already in a group. Leave your current group first."
+    case .notInGroup:
+      "You are not in any group."
+    }
   }
 }
 

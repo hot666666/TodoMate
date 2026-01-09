@@ -149,45 +149,71 @@ struct UpdateUserUseCaseTests {
 
 @Suite("LeaveGroupUseCase Tests")
 struct LeaveGroupUseCaseTests {
-  @Test("그룹 탈퇴 성공 시 groupId가 빈 문자열로 설정됨")
-  func leaveGroup_setsGroupIdToEmpty() async throws {
+  @Test("LeaveGroupUseCase는 groupRepository.leaveGroup을 호출함")
+  func leaveGroup_callsGroupRepository() async throws {
     // Given
-    let repository = InMemoryUserRepository()
-    let useCase = LeaveGroupUseCaseImpl(userRepository: repository)
+    let userRepository = InMemoryUserRepository()
+    let groupRepository = InMemoryGroupRepository()
+    let useCase = LeaveGroupUseCaseImpl(
+      groupRepository: groupRepository,
+      userRepository: userRepository,
+    )
 
-    let originalGroupId = "group123"
-    let user = User(id: "user1", displayName: "Test", groupId: originalGroupId)
-    repository.users = [user]
+    let groupId = "group123"
+    let userId = "user1"
+    let user = User(id: userId, displayName: "Test", groupId: groupId)
+    let group = UserGroup(id: groupId, name: "Test Group", memberIds: [userId])
+    userRepository.users = [user]
+    groupRepository.groups = [group]
 
     // When
-    try await useCase.execute(for: user)
+    try await useCase.execute(groupId: groupId, userId: userId)
 
     // Then
-    #expect(repository.updateCallCount == 1)
-    #expect(repository.lastUpdatedUser?.groupId == "")
-    #expect(repository.lastUpdatedUser?.id == user.id)
+    #expect(groupRepository.leaveGroupCallCount == 1)
+    #expect(groupRepository.lastLeaveGroupId == groupId)
+    #expect(groupRepository.lastLeaveUserId == userId)
+  }
+}
+
+// MARK: - Test Mock GroupRepository
+
+final class InMemoryGroupRepository: GroupRepository {
+  var groups: [UserGroup] = []
+  var leaveGroupCallCount = 0
+  var lastLeaveGroupId: String?
+  var lastLeaveUserId: String?
+  var joinGroupCallCount = 0
+  var lastJoinGroupId: String?
+  var lastJoinUserId: String?
+
+  func create(_ group: UserGroup) async throws {
+    groups.append(group)
   }
 
-  @Test("그룹 탈퇴 시 updatedAt이 갱신됨")
-  func leaveGroup_updatesTimestamp() async throws {
-    // Given
-    let repository = InMemoryUserRepository()
-    let useCase = LeaveGroupUseCaseImpl(userRepository: repository)
+  func read(groupId: String) async throws -> UserGroup? {
+    groups.first { $0.id == groupId }
+  }
 
-    let oldDate = Date.distantPast
-    let user = User(
-      id: "user1",
-      displayName: "Test",
-      groupId: "group123",
-      createdAt: oldDate,
-      updatedAt: oldDate,
-    )
-    repository.users = [user]
+  func update(_ group: UserGroup) async throws {
+    if let index = groups.firstIndex(where: { $0.id == group.id }) {
+      groups[index] = group
+    }
+  }
 
-    // When
-    try await useCase.execute(for: user)
+  func delete(groupId: String) async throws {
+    groups.removeAll { $0.id == groupId }
+  }
 
-    // Then
-    #expect(repository.lastUpdatedUser?.updatedAt != oldDate)
+  func joinGroup(groupId: String, userId: String, userRepository _: UserRepository) async throws {
+    joinGroupCallCount += 1
+    lastJoinGroupId = groupId
+    lastJoinUserId = userId
+  }
+
+  func leaveGroup(groupId: String, userId: String, userRepository _: UserRepository) async throws {
+    leaveGroupCallCount += 1
+    lastLeaveGroupId = groupId
+    lastLeaveUserId = userId
   }
 }

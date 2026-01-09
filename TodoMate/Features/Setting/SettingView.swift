@@ -132,7 +132,7 @@ struct SettingView: View {
               .frame(width: 40)
 
             VStack(alignment: .leading, spacing: 2) {
-              Text("My Group")
+              Text(sessionStore.currentGroup?.name ?? "My Group")
                 .font(.subheadline)
                 .fontWeight(.medium)
               Text("\(memberCount) member\(memberCount == 1 ? "" : "s")")

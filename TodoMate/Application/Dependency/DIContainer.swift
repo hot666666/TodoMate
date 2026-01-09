@@ -15,6 +15,7 @@ final class DIContainer {
   @ObservationIgnored let todoRepository: TodoRepository
   @ObservationIgnored let messageRepository: MessageRepository
   @ObservationIgnored let memoRepository: MemoRepository
+  @ObservationIgnored let groupRepository: GroupRepository
   @ObservationIgnored let authService: AuthService
   @ObservationIgnored let messageReadTracker: MessageReadTracker
 
@@ -46,6 +47,12 @@ final class DIContainer {
   @ObservationIgnored let updateMemoUseCase: UpdateMemoUseCase
   @ObservationIgnored let deleteMemoUseCase: DeleteMemoUseCase
 
+  // Group
+  @ObservationIgnored let createGroupUseCase: CreateGroupUseCase
+  @ObservationIgnored let readGroupUseCase: ReadGroupUseCase
+  @ObservationIgnored let joinGroupUseCase: JoinGroupUseCase
+  @ObservationIgnored let leaveGroupUseCase: LeaveGroupUseCase
+
   // Auth
   @ObservationIgnored let signInUseCase: SignInUseCase
   @ObservationIgnored let signOutUseCase: SignOutUseCase
@@ -64,6 +71,7 @@ final class DIContainer {
     todoRepository: TodoRepository,
     messageRepository: MessageRepository,
     memoRepository: MemoRepository,
+    groupRepository: GroupRepository,
     authService: AuthService,
     calendarDayService: CalendarDayService,
     messageReadTracker: MessageReadTracker,
@@ -75,6 +83,7 @@ final class DIContainer {
     self.todoRepository = todoRepository
     self.messageRepository = messageRepository
     self.memoRepository = memoRepository
+    self.groupRepository = groupRepository
     self.authService = authService
     self.calendarDayService = calendarDayService
     self.messageReadTracker = messageReadTracker
@@ -113,6 +122,18 @@ final class DIContainer {
     updateMemoUseCase = UpdateMemoUseCaseImpl(repository: memoRepository)
     deleteMemoUseCase = DeleteMemoUseCaseImpl(repository: memoRepository)
 
+    // Domain Layer - Group
+    createGroupUseCase = CreateGroupUseCaseImpl(
+      groupRepository: groupRepository, userRepository: userRepository,
+    )
+    readGroupUseCase = ReadGroupUseCaseImpl(groupRepository: groupRepository)
+    joinGroupUseCase = JoinGroupUseCaseImpl(
+      groupRepository: groupRepository, userRepository: userRepository,
+    )
+    leaveGroupUseCase = LeaveGroupUseCaseImpl(
+      groupRepository: groupRepository, userRepository: userRepository,
+    )
+
     // Domain Layer - Auth
     signInUseCase = SignInUseCaseImpl(authService: authService)
     signOutUseCase = SignOutUseCaseImpl(authService: authService)
@@ -126,6 +147,7 @@ extension DIContainer {
     todoRepository: StubTodoRepository(),
     messageRepository: StubMessageRepository(),
     memoRepository: StubMemoRepository(),
+    groupRepository: StubGroupRepository(),
     authService: StubAuthService(),
     calendarDayService: CalendarDayServiceImpl(),
     messageReadTracker: StubMessageReadTracker(),

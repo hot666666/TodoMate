@@ -39,6 +39,10 @@ final class FirestoreReference {
     db.collection(FireStore.MEMO)
   }
 
+  func groupCollection() -> CollectionReference {
+    db.collection(FireStore.GROUP)
+  }
+
   #if USE_FIREBASE_EMULATOR
     /// 테스트용: 모든 컬렉션의 문서 삭제
     func resetAllCollections() async throws {

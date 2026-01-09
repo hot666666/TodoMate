@@ -16,6 +16,7 @@ extension Const {
     static let TODO = "\(VERSION)-todos"
     static let MESSAGE = "\(VERSION)-group_messages"
     static let MEMO = "\(VERSION)-memos"
+    static let GROUP = "\(VERSION)-groups"
   }
 }
 
