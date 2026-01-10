@@ -10,11 +10,20 @@ import SwiftUI
 
 /// 특정 날짜의 모든 할 일 목록을 4열 상태별 레이아웃으로 보여주는 오버레이 뷰
 struct DayTodoListView: View {
+  @Environment(TodoStore.self) private var todoStore
+  @Environment(SessionStore.self) private var sessionStore
   @Environment(\.overlayManager) private var overlay
 
   let date: Date
-  let todos: [ViewTodo]
   let onTapTodo: (ViewTodo) -> Void
+
+  private var todos: [ViewTodo] {
+    let userTodos = todoStore.todos[sessionStore.userId] ?? []
+    return
+      userTodos
+        .filter { Calendar.current.isDate($0.date, inSameDayAs: date) }
+        .map { ViewTodo(from: $0) }
+  }
 
   private var title: String {
     date.formatted(.dateTime.month().day().weekday(.wide))
@@ -137,19 +146,9 @@ struct DayTodoListView: View {
 #Preview {
   DayTodoListView(
     date: Date(),
-    todos: [
-      ViewTodo(
-        id: "1", owner: "u", content: "Task 1", status: .todo, detail: "", date: .now, tags: [],
-      ),
-      ViewTodo(
-        id: "2", owner: "u", content: "Task 2", status: .inProgress, detail: "", date: .now,
-        tags: [],
-      ),
-      ViewTodo(
-        id: "3", owner: "u", content: "Task 3", status: .done, detail: "", date: .now, tags: [],
-      ),
-    ],
     onTapTodo: { _ in },
   )
+  .environment(TodoStore.preview)
+  .environment(SessionStore.preview)
   .padding()
 }
