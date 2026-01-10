@@ -34,7 +34,7 @@ final class FirestoreGroupRepository: GroupRepository {
   func joinGroup(groupId: String, userId: String, userRepository _: UserRepository) async throws {
     let db = reference.db
 
-    try await db.runTransaction { transaction, errorPointer in
+    _ = try await db.runTransaction { transaction, errorPointer in
       // 1. Read group
       let groupRef = self.reference.groupCollection().document(groupId)
       let groupSnapshot: DocumentSnapshot
@@ -89,7 +89,7 @@ final class FirestoreGroupRepository: GroupRepository {
   func leaveGroup(groupId: String, userId: String, userRepository _: UserRepository) async throws {
     let db = reference.db
 
-    try await db.runTransaction { transaction, errorPointer in
+    _ = try await db.runTransaction { transaction, errorPointer in
       // 1. Read group
       let groupRef = self.reference.groupCollection().document(groupId)
       let groupSnapshot: DocumentSnapshot

@@ -13,9 +13,11 @@ struct GroupFeedView: View {
   @Environment(TodoStore.self) private var todoStore
   @Environment(MessageStore.self) private var messageStore
 
+  @Namespace private var segmentAnimation
   @State private var viewModel = GroupFeedViewModel()
   @State private var isChatVisible = true
   @State private var chatPanelWidth: CGFloat = 340
+  @State private var selectedMemberId: String?
 
   private let minChatWidth: CGFloat = 280
   private let maxChatWidth: CGFloat = 500
@@ -45,20 +47,6 @@ struct GroupFeedView: View {
       }
     }
     .background(Color(nsColor: .windowBackgroundColor))
-    .toolbar {
-      ToolbarItemGroup(placement: .primaryAction) {
-        if !isChatVisible {
-          Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-              isChatVisible = true
-            }
-          } label: {
-            Image(systemName: "bubble.left.and.bubble.right.fill")
-              .foregroundStyle(.blue)
-          }
-        }
-      }
-    }
     .accessibilityIdentifier("groupFeedView")
   }
 
@@ -88,42 +76,31 @@ struct GroupFeedView: View {
         viewModel: viewModel,
         sessionStore: sessionStore,
         messageStore: messageStore,
-        onClose: {
-          withAnimation(.easeInOut(duration: 0.2)) {
-            isChatVisible = false
-          }
-        },
       )
       .frame(width: chatPanelWidth)
       .transition(.move(edge: .trailing))
+    }
+    .toolbar {
+      ToolbarItem(placement: .primaryAction) {
+        Button {
+          withAnimation(.easeInOut(duration: 0.2)) {
+            isChatVisible = false
+          }
+        } label: {
+          Image(systemName: "arrow.right.to.line")
+        }
+      }
     }
   }
 
   // MARK: - Header
 
   private var headerView: some View {
-    HStack {
-      HStack(spacing: 12) {
-        Image(systemName: "briefcase.fill")
-          .foregroundStyle(.secondary)
-
-        // Using userGroupId or a placeholder name since Group name isn't directly in SessionStore
-        // Ideally we fetch Group entity, but for now we show "My Group" or lookup name from userGroupDisplayNames?
-        // Logic: specific group name retrieval might need update in SessionStore.
-        Text("Design Team") // Placeholder/Mock for now as per instructions to migrate existing UI.
-          .font(.title3)
-          .fontWeight(.semibold)
-          .foregroundStyle(.primary)
-
-        Text("Group")
-          .font(.caption2)
-          .fontWeight(.medium)
-          .foregroundStyle(.blue)
-          .padding(.horizontal, 8)
-          .padding(.vertical, 2)
-          .background(Color.blue.opacity(0.1))
-          .clipShape(Capsule())
-      }
+    HStack(spacing: 0) {
+      Text(sessionStore.currentGroup?.name ?? "Group")
+        .font(.title) // .title
+        .fontWeight(.semibold)
+        .foregroundStyle(.primary)
 
       Spacer()
 
@@ -131,16 +108,7 @@ struct GroupFeedView: View {
         // User Avatars
         HStack(spacing: -10) {
           ForEach(sessionStore.groupMembers.prefix(3)) { member in
-            // Avatar placeholder since User entity doesn't have avatarUrl yet
-            Circle()
-              .fill(Color.blue.opacity(0.3))
-              .frame(width: 32, height: 32)
-              .overlay(
-                Text(member.displayName.prefix(1).uppercased())
-                  .font(.caption)
-                  .fontWeight(.bold)
-                  .foregroundStyle(.blue),
-              )
+            ProfileAvatarView(displayName: member.displayName, size: 32)
               .overlay(Circle().stroke(.white, lineWidth: 2))
           }
 
@@ -152,6 +120,7 @@ struct GroupFeedView: View {
               .frame(width: 32, height: 32)
               .background(Color.gray.opacity(0.1))
               .clipShape(Circle())
+              .overlay(Circle().stroke(.white, lineWidth: 2))
           }
         }
 
@@ -173,16 +142,73 @@ struct GroupFeedView: View {
   // MARK: - Feed Content
 
   private var feedContent: some View {
-    ScrollView {
-      LazyVStack(alignment: .leading, spacing: 24) {
-        ForEach(sessionStore.groupMembers) { member in
+    VStack(spacing: 0) {
+      // Custom Segmented Control
+      ScrollView(.horizontal, showsIndicators: false) {
+        HStack(spacing: 0) {
+          ForEach(sessionStore.groupMembers) { member in
+            let isSelected = selectedMemberId == member.id
+            Text(member.displayName)
+              .font(.subheadline)
+              .fontWeight(isSelected ? .semibold : .regular)
+              .foregroundStyle(isSelected ? .white : .primary)
+              .padding(.vertical, 8)
+              .padding(.horizontal, 16)
+              .background {
+                if isSelected {
+                  RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.blue) // Accent color
+                    .matchedGeometryEffect(id: "segment", in: segmentAnimation)
+                }
+              }
+              .contentShape(Rectangle())
+              .onTapGesture {
+                withAnimation(.snappy) {
+                  selectedMemberId = member.id
+                }
+              }
+          }
+        }
+        .padding(4)
+        .background(Color(nsColor: .controlBackgroundColor)) // or .tertiarySystemFill
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+      }
+      .frame(maxWidth: .infinity, alignment: .leading) // Container leading alignment
+      .padding(.horizontal, 24)
+      .padding(.top, 12)
+      .padding(.bottom, 6)
+
+      // Selected member's todos
+      if let memberId = selectedMemberId,
+         let member = sessionStore.groupMembers.first(where: { $0.id == memberId }) {
+        ScrollView {
           GroupMemberSection(
             user: member,
             todos: (todoStore.todos[member.id] ?? []).map { ViewTodo(from: $0) },
           )
+          .padding(24)
+        }
+      } else {
+        Spacer()
+      }
+    }
+    .toolbar {
+      if !isChatVisible {
+        ToolbarItem(placement: .primaryAction) {
+          Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+              isChatVisible = true
+            }
+          } label: {
+            Image(systemName: "bubble.left.and.bubble.right")
+          }
         }
       }
-      .padding(24)
+    }
+    .onAppear {
+      if selectedMemberId == nil {
+        selectedMemberId = sessionStore.groupMembers.first?.id
+      }
     }
   }
 }
@@ -195,29 +221,6 @@ private struct GroupMemberSection: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
-      // Header
-      HStack(spacing: 12) {
-        Circle()
-          .fill(Color.blue.opacity(0.3))
-          .frame(width: 40, height: 40)
-          .overlay(
-            Text(user.displayName.prefix(1).uppercased())
-              .font(.headline)
-              .fontWeight(.bold)
-              .foregroundStyle(.blue),
-          )
-
-        VStack(alignment: .leading, spacing: 2) {
-          Text(user.displayName)
-            .font(.subheadline)
-            .fontWeight(.semibold)
-
-          Text("Member")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
-      }
-
       // Todos
       if todos.isEmpty {
         HStack(spacing: 12) {
@@ -238,6 +241,7 @@ private struct GroupMemberSection: View {
         }
       }
     }
+    .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.bottom, 16)
   }
 }
@@ -248,9 +252,17 @@ private struct ChatPanelView: View {
   @Bindable var viewModel: GroupFeedViewModel
   var sessionStore: SessionStore
   var messageStore: MessageStore
-  var onClose: () -> Void
 
   // Removed Photo Picker state for now as it's not supported by domain
+
+  /// Messages grouped by date for display
+  private var groupedMessages: [(date: Date, messages: [GroupMessage])] {
+    Dictionary(grouping: messageStore.messages) { message in
+      Calendar.current.startOfDay(for: message.createdAt)
+    }
+    .map { (date: $0.key, messages: $0.value.sorted { $0.createdAt < $1.createdAt }) }
+    .sorted { $0.date < $1.date }
+  }
 
   var body: some View {
     VStack(spacing: 0) {
@@ -258,28 +270,49 @@ private struct ChatPanelView: View {
       ScrollViewReader { proxy in
         ScrollView {
           LazyVStack(spacing: 16) {
-            Text("TODAY")
-              .font(.caption2)
-              .fontWeight(.bold)
-              .foregroundStyle(.secondary)
-              .padding(.horizontal, 8)
-              .padding(.vertical, 4)
-              .background(Color.secondary.opacity(0.1))
-              .clipShape(Capsule())
-              .padding(.top, 10)
+            ForEach(groupedMessages, id: \.date) { group in
+              // Date header
+              Text(formatDateHeader(group.date))
+                .font(.caption2)
+                .fontWeight(.bold)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.secondary.opacity(0.1))
+                .clipShape(Capsule())
+                .padding(.top, 10)
 
-            ForEach(messageStore.messages) { message in
-              // Convert GroupMessage to ChatMessage for display
-              let chatMsg = ViewGroupMessage(from: message, senderId: message.owner)
-              let sender = viewModel.getMember(byId: message.owner, sessionStore: sessionStore)
-              let viewUser = sender.map { ViewUser(from: $0) }
+              ForEach(group.messages) { message in
+                // Convert GroupMessage to ChatMessage for display
+                let chatMsg = ViewGroupMessage(from: message, senderId: message.owner)
+                let sender = viewModel.getMember(byId: message.owner, sessionStore: sessionStore)
+                let viewUser = sender.map { ViewUser(from: $0) }
 
-              ChatMessageBubble(
-                message: chatMsg,
-                isMe: message.owner == sessionStore.userId,
-                user: viewUser,
-              )
-              .id(message.id)
+                HStack(alignment: .bottom, spacing: 2) {
+                  if message.owner == sessionStore.userId {
+                    Spacer()
+                    Text(message.createdAt.formatted(date: .omitted, time: .shortened))
+                      .font(.caption2)
+                      .foregroundStyle(.tertiary)
+                    ChatMessageBubble(
+                      message: chatMsg,
+                      isMe: true,
+                      user: viewUser,
+                    )
+                  } else {
+                    ChatMessageBubble(
+                      message: chatMsg,
+                      isMe: false,
+                      user: viewUser,
+                    )
+                    Text(message.createdAt.formatted(date: .omitted, time: .shortened))
+                      .font(.caption2)
+                      .foregroundStyle(.tertiary)
+                    Spacer()
+                  }
+                }
+                .id(message.id)
+              }
             }
           }
           .padding(16)
@@ -296,18 +329,11 @@ private struct ChatPanelView: View {
       // Input
       chatInput
     }
-    .toolbar {
-      ToolbarItem(placement: .primaryAction) {
-        chatHeader
-      }
-    }
     .background(.ultraThinMaterial)
   }
 
-  private var chatHeader: some View {
-    Button(action: onClose) {
-      Image(systemName: "arrow.right.to.line")
-    }
+  private func formatDateHeader(_ date: Date) -> String {
+    DateHeaderFormatter.format(date)
   }
 
   private var chatInput: some View {
