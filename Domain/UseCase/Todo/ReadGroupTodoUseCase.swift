@@ -8,7 +8,8 @@
 import Foundation
 
 protocol ReadGroupTodoUseCase {
-  func run(for userIds: [String], in date: Date, useCache: Bool) async throws -> [String: [Todo]]
+  func run(for userIds: [String], in range: ClosedRange<Date>, useCache: Bool) async throws
+    -> [String: [Todo]]
 }
 
 final class ReadGroupTodoUseCaseImpl: ReadGroupTodoUseCase {
@@ -18,18 +19,21 @@ final class ReadGroupTodoUseCaseImpl: ReadGroupTodoUseCase {
     self.repository = repository
   }
 
-  func run(for userIds: [String], in date: Date, useCache: Bool) async throws -> [String: [Todo]] {
+  func run(for userIds: [String], in range: ClosedRange<Date>, useCache: Bool) async throws
+    -> [String: [Todo]] {
     let query = TodoQuery()
       .owners(userIds: userIds)
-      .dateRange(date.dayRange)
+      .dateRange(range)
     let result = try await repository.readAll(query: query, source: useCache ? .cache : .server)
     let groupedResult = Dictionary(grouping: result) { $0.owner }
-    return Dictionary(uniqueKeysWithValues: userIds.map { userId in (userId, groupedResult[userId] ?? []) })
+    return Dictionary(
+      uniqueKeysWithValues: userIds.map { userId in (userId, groupedResult[userId] ?? []) })
   }
 }
 
 final class StubReadGroupTodoUseCase: ReadGroupTodoUseCase {
-  func run(for userIds: [String], in _: Date, useCache _: Bool) async throws -> [String: [Todo]] {
+  func run(for userIds: [String], in _: ClosedRange<Date>, useCache _: Bool) async throws
+    -> [String: [Todo]] {
     Dictionary(uniqueKeysWithValues: userIds.map { userId in (userId, []) })
   }
 }

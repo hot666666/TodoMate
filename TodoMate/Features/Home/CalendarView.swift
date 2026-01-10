@@ -110,11 +110,11 @@ struct CalendarView: View {
             onTapTask: { task in
               presentTodoSheet(for: task)
             },
-            onTapDate: { date, todos in
-              presentDayTodoList(for: date, todos: todos)
+            onTapDate: { date, _ in
+              presentDayTodoList(for: date)
             },
-            onTapMore: { date, todos in
-              presentDayTodoList(for: date, todos: todos)
+            onTapMore: { date, _ in
+              presentDayTodoList(for: date)
             },
           )
           .frame(height: cellHeight)
@@ -178,13 +178,12 @@ struct CalendarView: View {
     }
   }
 
-  private func presentDayTodoList(for date: Date, todos: [ViewTodo]) {
+  private func presentDayTodoList(for date: Date) {
     overlay?.presentCentered(
       backdropOpacity: 0,
     ) {
       DayTodoListView(
         date: date,
-        todos: todos,
         onTapTodo: { [self] task in
           // Stack TodoSheet on top of DayTodoListView (don't dismiss)
           presentTodoSheet(for: task)
