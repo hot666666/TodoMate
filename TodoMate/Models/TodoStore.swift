@@ -45,10 +45,11 @@ final class TodoStore {
         switch event {
         case let .loggedIn(userId, _, memberIds):
           currentUserId = userId
-          // Cache-first: 먼저 캐시에서 빠르게 로드 (오프라인 지원)
-          await load(for: memberIds, useCache: true)
-          // 그 다음 서버에서 최신 데이터로 업데이트
-          await load(for: memberIds, useCache: false)
+          // Cache-first: ±1달 (Wide Range) 캐시 로드
+          await load(for: memberIds, range: Date().monthRange, useCache: true)
+          // Server: 오늘 (Narrow Range) 최신 데이터 동기화
+          await load(for: memberIds, range: Date().dayRange, useCache: false)
+
           Log.info(
             "Received loggedIn event, loaded todos for \(memberIds.count) users", category: .data,
           )
@@ -69,17 +70,18 @@ final class TodoStore {
   // MARK: - Public Methods
 
   func refresh(for userIds: [String]) async {
-    await load(for: userIds, useCache: true)
+    await load(for: userIds, range: Date().monthRange, useCache: true)
+    await load(for: userIds, range: Date().dayRange, useCache: false)
   }
 
-  func load(for userIds: [String], useCache: Bool = true) async {
+  func load(for userIds: [String], range: ClosedRange<Date>, useCache: Bool = true) async {
     currentDate = .now
 
     do {
-      todos = try await readGroupTodoUseCase.run(for: userIds, in: currentDate, useCache: useCache)
+      let result = try await readGroupTodoUseCase.run(for: userIds, in: range, useCache: useCache)
+      merge(result, in: range)
     } catch {
       Log.error("Failed to load todos for users \(userIds): \(error)", category: .data)
-      todos = [:]
     }
   }
 
@@ -136,6 +138,25 @@ extension TodoStore {
     var userTodos = todos[userId, default: []]
     update(&userTodos)
     todos[userId] = userTodos
+  }
+
+  private func merge(_ newTodos: [String: [Todo]], in range: ClosedRange<Date>) {
+    for (userId, fetchedTodos) in newTodos {
+      var currentTodos = todos[userId, default: []]
+
+      // 1. Remove existing todos in the fetch range
+      currentTodos.removeAll { todo in
+        range.contains(todo.date)
+      }
+
+      // 2. Append new fetched todos
+      currentTodos.append(contentsOf: fetchedTodos)
+
+      // 3. Sort by date descending
+      currentTodos.sort { $0.date > $1.date }
+
+      todos[userId] = currentTodos
+    }
   }
 }
 

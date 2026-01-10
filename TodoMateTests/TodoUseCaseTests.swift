@@ -189,7 +189,7 @@ struct ReadGroupTodoUseCaseTests {
     repository.todos = [todo1, todo2, todo3]
 
     // When
-    let result = try await useCase.run(for: [user1, user2], in: today, useCache: true)
+    let result = try await useCase.run(for: [user1, user2], in: today.dayRange, useCache: true)
 
     // Then
     #expect(result[user1]?.count == 2)
@@ -210,7 +210,7 @@ struct ReadGroupTodoUseCaseTests {
 
     // When
     let result = try await useCase.run(
-      for: [user1, userWithNoTodos], in: today, useCache: true,
+      for: [user1, userWithNoTodos], in: today.dayRange, useCache: true,
     )
 
     // Then
@@ -233,7 +233,7 @@ struct ReadGroupTodoUseCaseTests {
     repository.todos = [todoToday, todoTomorrow]
 
     // When
-    let result = try await useCase.run(for: [userId], in: today, useCache: true)
+    let result = try await useCase.run(for: [userId], in: today.dayRange, useCache: true)
 
     // Then
     #expect(result[userId]?.count == 1)
