@@ -21,9 +21,9 @@ final class NetworkModeManager {
   private(set) var isOnline: Bool = true
   private(set) var isTransitioning: Bool = false
 
-  init(container: PublicDIContainer, core: CoreDIContainer) {
+  init(core: CoreDIContainer) {
     userDefaults = core.userDefaults
-    networkController = container.networkController
+    networkController = core.networkController
 
     // Load saved preference (default: online)
     isOnline = userDefaults.bool(for: .networkModeIsOnline, default: true)
@@ -75,5 +75,5 @@ final class NetworkModeManager {
 }
 
 extension NetworkModeManager {
-  static let preview = NetworkModeManager(container: .preview, core: .preview)
+  static let preview = NetworkModeManager(core: .preview)
 }

@@ -10,43 +10,10 @@
 import SimpleOverlaySystem
 import SwiftUI
 
-// MARK: - Date Filter
-
-enum DateFilter: String, CaseIterable {
-  case today = "오늘"
-  case lastWeek = "최근 1주"
-  case lastMonth = "최근 1달"
-
-  var dateRange: ClosedRange<Date> {
-    let calendar = Calendar.current
-    let today = calendar.startOfDay(for: .now)
-    let endOfToday = calendar.date(byAdding: .day, value: 1, to: today)!
-
-    switch self {
-    case .today:
-      return today ... endOfToday
-    case .lastWeek:
-      let weekAgo = calendar.date(byAdding: .day, value: -7, to: today)!
-      return weekAgo ... endOfToday
-    case .lastMonth:
-      let monthAgo = calendar.date(byAdding: .month, value: -1, to: today)!
-      return monthAgo ... endOfToday
-    }
-  }
-}
-
-// MARK: - Scroll Position
-
-private enum BoardScrollPosition: String, Hashable {
-  case leading
-  case trailing
-}
-
 // MARK: - BoardView
 
 struct BoardView: View {
-  @Environment(TodoStore.self) private var todoStore
-  @Environment(SessionStore.self) private var sessionStore
+  @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
   let selection: NavigationDestination
 
@@ -55,10 +22,10 @@ struct BoardView: View {
 
   // Computed properties to group tasks by status
   private var viewTodos: [ViewTodo] {
-    let todos = todoStore.todos[sessionStore.userId] ?? []
+    let allTodos = todoStore.todos.values.flatMap(\.self)
     let range = dateFilter.dateRange
     return
-      todos
+      allTodos
         .filter { range.contains($0.date) }
         .map { ViewTodo(from: $0) }
         .sorted { $0.date > $1.date }
@@ -187,7 +154,7 @@ struct BoardView: View {
       }
     }
     .background(Color(nsColor: .windowBackgroundColor))
-    .accessibilityIdentifier("personalBoardView")
+    .accessibilityIdentifier("privateBoardView")
     .toolbar {
       ToolbarItem(placement: .primaryAction) {
         Menu {
@@ -203,7 +170,9 @@ struct BoardView: View {
               ? "line.3.horizontal.decrease.circle"
               : "line.3.horizontal.decrease.circle.fill",
           )
-          .foregroundStyle(dateFilter == .today ? .secondary : DesignSystem.Colors.primary)
+          .foregroundStyle(
+            dateFilter == .today ? .secondary : DesignSystem.Colors.primary,
+          )
           .contentTransition(.symbolEffect(.replace))
         }
         .menuIndicator(.hidden)
@@ -216,8 +185,8 @@ struct BoardView: View {
   // MARK: - Actions
 
   private func presentTodoSheet(for task: ViewTodo) {
-    guard let userTodos = todoStore.todos[sessionStore.userId],
-          let originalTodo = userTodos.first(where: { $0.id == task.id })
+    let allTodos = todoStore.todos.values.flatMap(\.self)
+    guard let originalTodo = allTodos.first(where: { $0.id == task.id })
     else { return }
 
     let editableTodo = EditableTodo(from: originalTodo)
@@ -241,15 +210,15 @@ struct BoardView: View {
   }
 
   private func updateTaskStatus(_ task: ViewTodo, to newStatus: ViewTodoStatus) {
-    guard let userTodos = todoStore.todos[sessionStore.userId],
-          let originalTodo = userTodos.first(where: { $0.id == task.id })
+    let allTodos = todoStore.todos.values.flatMap(\.self)
+    guard let originalTodo = allTodos.first(where: { $0.id == task.id })
     else { return }
 
     var updatedTodo = originalTodo
     updatedTodo.status = newStatus.toDomainStatus()
     updatedTodo.updatedAt = Date()
 
-    todoStore.update(updatedTodo, userId: sessionStore.userId)
+    todoStore.updateTodo(updatedTodo)
   }
 }
 
@@ -321,7 +290,6 @@ private struct TodoColumn: View {
 
 #Preview {
   BoardView(selection: .todo)
-    .environment(TodoStore.preview)
-    .environment(SessionStore.preview)
+    .environment(PrivateTodoStore.preview)
     .environment(OverlayManager())
 }
