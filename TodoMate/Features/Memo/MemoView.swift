@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MemoView: View {
-  @Environment(MemoStore.self) private var memoStore
+  @Environment(PrivateMemoStore.self) private var memoStore
   @Environment(SessionStore.self) private var sessionStore
 
   @State private var selectedMemo: Memo?
@@ -16,7 +16,7 @@ struct MemoView: View {
   @State private var isDetailViewPresented = false
 
   private var currentUserMemos: [Memo] {
-    memoStore.memos[sessionStore.userId] ?? []
+    memoStore.memos
   }
 
   private let columns = [
@@ -80,6 +80,10 @@ struct MemoView: View {
           }
         }
         .padding(.top)
+        .task {
+          // Load local memos when view appears
+          await memoStore.load()
+        }
       }
     }
     .toolbar {
@@ -97,7 +101,7 @@ struct MemoView: View {
   }
 
   private func addNewMemo() {
-    memoStore.add(content: "", currentUserId: sessionStore.userId)
+    memoStore.add(content: "")
 
     Task {
       try? await Task.sleep(for: .seconds(0.1))
@@ -120,20 +124,21 @@ struct MemoView: View {
   private func saveMemo(_ memo: Memo, with newContent: String) {
     if newContent != memo.content {
       let updatedMemo = memo.withUpdatedContent(newContent)
-      memoStore.update(updatedMemo, currentUserId: sessionStore.userId)
+      memoStore.update(updatedMemo)
     }
   }
 
   private func deleteMemo(_ memo: Memo) {
     Task {
-      await memoStore.delete(memo, currentUserId: sessionStore.userId)
+      memoStore.delete(memo)
       dismissDetail()
     }
   }
 }
 
 #Preview {
+  // Note: PrivateMemoStore does not have a static preview yet, need to mock or provide one if needed
+  // For now, assuming environment injection will be handled in app preview or ignored here
   MemoView()
-    .environment(MemoStore.preview)
     .environment(SessionStore.preview)
 }

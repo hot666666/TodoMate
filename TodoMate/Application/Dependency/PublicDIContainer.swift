@@ -14,7 +14,7 @@ final class PublicDIContainer {
   @ObservationIgnored let userRepository: UserRepository
   @ObservationIgnored let todoRepository: TodoRepository
   @ObservationIgnored let messageRepository: MessageRepository
-  @ObservationIgnored let memoRepository: MemoRepository
+
   @ObservationIgnored let groupRepository: GroupRepository
   @ObservationIgnored let authService: AuthService
   @ObservationIgnored let messageReadTracker: MessageReadTracker
@@ -41,12 +41,6 @@ final class PublicDIContainer {
   @ObservationIgnored let deleteMessageUseCase: DeleteMessageUseCase
   @ObservationIgnored let observeMessagesUseCase: ObserveMessageUseCase
 
-  // Memo
-  @ObservationIgnored let createMemoUseCase: CreateMemoUseCase
-  @ObservationIgnored let readGroupMemoUseCase: ReadGroupMemoUseCase
-  @ObservationIgnored let updateMemoUseCase: UpdateMemoUseCase
-  @ObservationIgnored let deleteMemoUseCase: DeleteMemoUseCase
-
   // Group
   @ObservationIgnored let createGroupUseCase: CreateGroupUseCase
   @ObservationIgnored let readGroupUseCase: ReadGroupUseCase
@@ -62,7 +56,7 @@ final class PublicDIContainer {
     userRepository: UserRepository,
     todoRepository: TodoRepository,
     messageRepository: MessageRepository,
-    memoRepository: MemoRepository,
+
     groupRepository: GroupRepository,
     authService: AuthService,
     messageReadTracker: MessageReadTracker,
@@ -71,7 +65,7 @@ final class PublicDIContainer {
     self.userRepository = userRepository
     self.todoRepository = todoRepository
     self.messageRepository = messageRepository
-    self.memoRepository = memoRepository
+
     self.groupRepository = groupRepository
     self.authService = authService
     self.messageReadTracker = messageReadTracker
@@ -102,12 +96,6 @@ final class PublicDIContainer {
     deleteMessageUseCase = DeleteMessageUseCaseImpl(repository: messageRepository)
     observeMessagesUseCase = ObserveMessageUseCaseImpl(repository: messageRepository)
 
-    // Domain Layer - Memo
-    createMemoUseCase = CreateMemoUseCaseImpl(repository: memoRepository)
-    readGroupMemoUseCase = ReadGroupMemoUseCaseImpl(repository: memoRepository)
-    updateMemoUseCase = UpdateMemoUseCaseImpl(repository: memoRepository)
-    deleteMemoUseCase = DeleteMemoUseCaseImpl(repository: memoRepository)
-
     // Domain Layer - Group
     createGroupUseCase = CreateGroupUseCaseImpl(
       groupRepository: groupRepository, userRepository: userRepository,
@@ -132,7 +120,7 @@ extension PublicDIContainer {
     userRepository: StubUserRepository(),
     todoRepository: StubTodoRepository(),
     messageRepository: StubMessageRepository(),
-    memoRepository: StubMemoRepository(),
+
     groupRepository: StubGroupRepository(),
     authService: StubAuthService(),
     messageReadTracker: StubMessageReadTracker(),

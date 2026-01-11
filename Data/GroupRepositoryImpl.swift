@@ -10,7 +10,7 @@ import FirebaseFirestore
 final class FirestoreGroupRepository: GroupRepository {
   private let reference: FirestoreReference
 
-  init(reference: FirestoreReference = .shared) {
+  init(reference: FirestoreReference) {
     self.reference = reference
   }
 
@@ -142,5 +142,6 @@ final class StubGroupRepository: GroupRepository {
   func update(_: UserGroup) async throws {}
   func delete(groupId _: String) async throws {}
   func joinGroup(groupId _: String, userId _: String, userRepository _: UserRepository) async throws {}
-  func leaveGroup(groupId _: String, userId _: String, userRepository _: UserRepository) async throws {}
+  func leaveGroup(groupId _: String, userId _: String, userRepository _: UserRepository)
+    async throws {}
 }

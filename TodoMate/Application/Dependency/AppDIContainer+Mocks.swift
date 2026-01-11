@@ -116,12 +116,11 @@ import Foundation
       user: User,
       groupMembers: [User],
       todos: [Todo],
-      memo: Memo?,
+      memo _: Memo?,
       messages: [GroupMessage],
     ) -> PublicDIContainer {
       let userRepo = MockUserRepository(currentUser: user, groupMembers: groupMembers)
       let todoRepo = MockTodoRepository(todos: todos)
-      let memoRepo = MockMemoRepository(memo: memo, currentUser: user)
       let messageRepo = MockMessageRepository(messages: messages)
       let authService = MockAuthService(userId: user.id)
 
@@ -129,7 +128,6 @@ import Foundation
         userRepository: userRepo,
         todoRepository: todoRepo,
         messageRepository: messageRepo,
-        memoRepository: memoRepo,
         groupRepository: StubGroupRepository(),
         authService: authService,
         messageReadTracker: StubMessageReadTracker(),

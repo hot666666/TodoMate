@@ -81,7 +81,6 @@ struct TodoStoreTests {
       userRepository: MockUserRepository(currentUser: user, groupMembers: []),
       todoRepository: repo,
       messageRepository: MockMessageRepository(messages: []),
-      memoRepository: MockMemoRepository(memo: nil, currentUser: user),
       groupRepository: StubGroupRepository(),
       authService: MockAuthService(userId: userId),
       messageReadTracker: StubMessageReadTracker(),

@@ -10,7 +10,7 @@ import SwiftUI
 struct SidebarView: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(TodoStore.self) private var todoStore
-  @Environment(MemoStore.self) private var memoStore
+  @Environment(PrivateMemoStore.self) private var memoStore
   @Environment(NetworkModeManager.self) private var networkManager
   @Binding var selection: NavigationDestination?
 
@@ -22,8 +22,7 @@ struct SidebarView: View {
   }
 
   private var memoCount: Int {
-    let memos = memoStore.memos[sessionStore.userId] ?? []
-    return memos.count
+    memoStore.memos.count
   }
 
   var body: some View {
@@ -160,7 +159,7 @@ private struct SidebarProfileView: View {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
       .environment(TodoStore.preview)
-      .environment(MemoStore.preview)
+      .environment(PrivateMemoStore.preview)
       .environment(NetworkModeManager.preview)
   } detail: {
     Text("Detail")

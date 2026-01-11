@@ -20,7 +20,8 @@ extension FirebaseIntegrationTests {
 
     init() async throws {
       try await FirebaseIntegrationTests.setup()
-      repository = FirestoreMemoRepository()
+      let reference = FirestoreReference()
+      repository = FirestoreMemoRepository(reference: reference)
     }
 
     // MARK: - Create & Read

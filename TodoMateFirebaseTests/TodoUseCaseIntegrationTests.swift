@@ -23,7 +23,8 @@ extension FirebaseIntegrationTests {
 
     init() async throws {
       try await FirebaseIntegrationTests.setup()
-      repository = FirestoreTodoRepository()
+      let reference = FirestoreReference()
+      repository = FirestoreTodoRepository(reference: reference)
       createUseCase = CreateTodoUseCaseImpl(repository: repository)
       readUseCase = ReadMonthlyTodoUseCaseImpl(repository: repository)
       deleteUseCase = DeleteTodoUseCaseImpl(repository: repository)
