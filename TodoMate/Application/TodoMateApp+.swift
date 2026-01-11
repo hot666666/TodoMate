@@ -1,8 +1,8 @@
 import SwiftUI
 
 extension TodoMateApp {
-  static func checkAndHandleAppUpdate(container: DIContainer) {
-    let userDefaults = container.userDefaults
+  static func checkAndHandleAppUpdate(container: AppDIContainer) {
+    let userDefaults = container.core.userDefaults
 
     let currentVersion =
       Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
@@ -14,7 +14,8 @@ extension TodoMateApp {
     // 업데이트 기록이 존재하면 작업 x -> 3.0.0 이전버전에서 업데이트 시, 수행
     if lastVersion == nil {
       Log.info("First launch detected. Initializing app state...")
-      try? container.authService.signOut()
+      // Public 컨테이너가 있으면 로그아웃 시도 (실질적으로 첫 실행시에는 없을 가능성이 큼)
+      try? container.publicContainer?.authService.signOut()
 
       // 앱의 모든 UserDefaults 데이터 삭제
       if let bundleIdentifier = Bundle.main.bundleIdentifier {

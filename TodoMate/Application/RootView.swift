@@ -1,6 +1,6 @@
 //
 //  RootView.swift
-//  Todo
+//  TodoMate
 //
 //  Created by hs on 6/2/25.
 //
@@ -9,19 +9,30 @@ import SimpleOverlaySystem
 import SwiftUI
 
 struct RootView: View {
+  @AppStorage(UserDefaultsKey.isPublicModeEnabled.rawValue)
+  private var isPublicModeEnabled: Bool = true
+
+  @Environment(CoreDIContainer.self) private var core
+
   var body: some View {
     OverlayContainer {
-      ContentView()
+      if isPublicModeEnabled {
+        PublicFeatureWrapper(core: core) {
+          PublicContentView()
+        }
+      } else {
+        // Phase 1: Offline mode placeholder
+        OfflinePlaceholderView()
+      }
     }
   }
 }
 
-private struct ContentView: View {
-  @Environment(DIContainer.self) private var container
+/// Firebase/Auth 기반의 기존 메인 컨텐츠
+private struct PublicContentView: View {
+  @Environment(CoreDIContainer.self) private var core
+  @Environment(PublicDIContainer.self) private var container
   @Environment(SessionStore.self) private var sessionStore
-  @Environment(TodoStore.self) private var todoStore
-  @Environment(MemoStore.self) private var memoStore
-  @Environment(MessageStore.self) private var messageStore
   @Environment(\.overlayManager) private var overlay
   @Environment(\.scenePhase) private var scenePhase
 
@@ -31,15 +42,6 @@ private struct ContentView: View {
 
   var body: some View {
     content
-      .task {
-        // 1. 먼저 각 Store가 SessionStore의 이벤트를 구독
-        todoStore.startListening(to: sessionStore.events())
-        memoStore.startListening(to: sessionStore.events())
-        messageStore.startListening(to: sessionStore.events())
-
-        // 2. Auth 상태 변화 감지 시작
-        sessionStore.startListeningToAuthChanges()
-      }
       .onChange(of: scenePhase) { _, newPhase in
         if newPhase == .active {
           Task {
@@ -57,7 +59,7 @@ private struct ContentView: View {
         .font(.callout)
         .opacity(0.5)
     case .authenticated:
-      AuthenticatedView(naviManager: .init(container: container))
+      AuthenticatedView(naviManager: .init(container: core))
         .disabled(isOverlayPresented)
     case .unauthenticated:
       LoginView()
@@ -65,12 +67,36 @@ private struct ContentView: View {
   }
 }
 
+/// 오프라인 모드 진입 시 보여줄 임시 뷰
+private struct OfflinePlaceholderView: View {
+  @AppStorage(UserDefaultsKey.isPublicModeEnabled.rawValue)
+  private var isPublicModeEnabled: Bool = false
+
+  var body: some View {
+    VStack(spacing: 20) {
+      Image(systemName: "icloud.slash")
+        .font(.system(size: 50))
+        .foregroundStyle(.secondary)
+
+      Text("Offline Mode (Experimental)")
+        .font(.headline)
+
+      Text("Currently core storage implementation is in progress.")
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+
+      Button("Back to Public Mode") {
+        isPublicModeEnabled = true
+      }
+      .buttonStyle(.borderedProminent)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
+
 #Preview {
   RootView()
-    .frame(width: 300, height: 400)
-    .environment(DIContainer.preview)
-    .environment(SessionStore.preview)
-    .environment(TodoStore.preview)
-    .environment(MemoStore.preview)
-    .environment(MessageStore.preview)
+    .frame(width: 800, height: 600)
+    .environment(AppDIContainer.preview)
+    .environment(CoreDIContainer.preview)
 }

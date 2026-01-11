@@ -25,7 +25,7 @@ final class MemoStore {
 
   private(set) var memos: [String: [Memo]] = [:]
 
-  init(container: DIContainer) {
+  init(container: PublicDIContainer) {
     createMemoUseCase = container.createMemoUseCase
     readGroupMemoUseCase = container.readGroupMemoUseCase
     updateMemoUseCase = container.updateMemoUseCase
@@ -134,7 +134,7 @@ final class MemoStore {
 
 extension MemoStore {
   static let preview: MemoStore = {
-    let store = MemoStore(container: DIContainer.preview)
+    let store = MemoStore(container: PublicDIContainer.preview)
     store.memos = [User.stub.id: [.stub]]
     return store
   }()

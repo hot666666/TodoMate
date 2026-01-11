@@ -63,7 +63,8 @@ struct AuthenticatedView: View {
 
 #Preview {
   AuthenticatedView(naviManager: .preview)
-    .environment(DIContainer.preview)
+    .environment(CoreDIContainer.preview)
+    .environment(PublicDIContainer.preview)
     .environment(SessionStore.preview)
     .environment(TodoStore.preview)
     .environment(MemoStore.preview)

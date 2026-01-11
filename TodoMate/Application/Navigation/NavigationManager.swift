@@ -22,7 +22,7 @@ final class NavigationManager {
     }
   }
 
-  init(container: DIContainer) {
+  init(container: CoreDIContainer) {
     userDefaults = container.userDefaults
     if let data = userDefaults.data(for: .sidebarVisibility),
        let decoded = try? JSONDecoder().decode(NavigationSplitViewVisibility.self, from: data) {

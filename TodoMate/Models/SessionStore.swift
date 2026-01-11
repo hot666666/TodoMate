@@ -67,7 +67,7 @@ final class SessionStore {
 
   // MARK: - Init
 
-  init(container: DIContainer) {
+  init(container: PublicDIContainer) {
     listenAuthStateUseCase = container.listenAuthStateUseCase
     loadUserSessionUseCase = container.loadUserSessionUseCase
     signOutUseCase = container.signOutUseCase

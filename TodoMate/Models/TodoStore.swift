@@ -27,7 +27,7 @@ final class TodoStore {
   private var currentDate: Date = .now
   private var currentUserId: String = ""
 
-  init(container: DIContainer) {
+  init(container: PublicDIContainer) {
     createTodoUseCase = container.createTodoUseCase
     readGroupTodoUseCase = container.readGroupTodoUseCase
     updateTodoUseCase = container.updateTodoUseCase
@@ -162,7 +162,7 @@ extension TodoStore {
 
 extension TodoStore {
   static let preview: TodoStore = {
-    let store = TodoStore(container: DIContainer.preview)
+    let store = TodoStore(container: PublicDIContainer.preview)
     store.todos = [User.stub.id: [Todo.stub]]
     return store
   }()

@@ -1,5 +1,5 @@
 //
-//  DIContainer.swift
+//  PublicDIContainer.swift
 //  Todo
 //
 //  Created by hs on 6/7/25.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @Observable
-final class DIContainer {
+final class PublicDIContainer {
   // MARK: - Data Layer
 
   @ObservationIgnored let userRepository: UserRepository
@@ -58,13 +58,7 @@ final class DIContainer {
   @ObservationIgnored let signOutUseCase: SignOutUseCase
   @ObservationIgnored let listenAuthStateUseCase: ListenAuthStateUseCase
 
-  // Network
   @ObservationIgnored let networkController: NetworkController
-
-  // System
-  @ObservationIgnored let userDefaults: UserDefaults
-  // TODO: 이동분류
-  @ObservationIgnored let calendarDayService: CalendarDayService
 
   init(
     userRepository: UserRepository,
@@ -73,10 +67,8 @@ final class DIContainer {
     memoRepository: MemoRepository,
     groupRepository: GroupRepository,
     authService: AuthService,
-    calendarDayService: CalendarDayService,
     messageReadTracker: MessageReadTracker,
     networkController: NetworkController,
-    userDefaults: UserDefaults,
   ) {
     // Data Layer
     self.userRepository = userRepository
@@ -85,10 +77,8 @@ final class DIContainer {
     self.memoRepository = memoRepository
     self.groupRepository = groupRepository
     self.authService = authService
-    self.calendarDayService = calendarDayService
     self.messageReadTracker = messageReadTracker
     self.networkController = networkController
-    self.userDefaults = userDefaults
 
     // Domain Layer - User
     let readUserUseCase = ReadUserUseCaseImpl(userRepository: userRepository)
@@ -141,17 +131,15 @@ final class DIContainer {
   }
 }
 
-extension DIContainer {
-  static let preview: DIContainer = .init(
+extension PublicDIContainer {
+  static let preview: PublicDIContainer = .init(
     userRepository: StubUserRepository(),
     todoRepository: StubTodoRepository(),
     messageRepository: StubMessageRepository(),
     memoRepository: StubMemoRepository(),
     groupRepository: StubGroupRepository(),
     authService: StubAuthService(),
-    calendarDayService: CalendarDayServiceImpl(),
     messageReadTracker: StubMessageReadTracker(),
     networkController: StubNetworkController(),
-    userDefaults: .preview,
   )
 }
