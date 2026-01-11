@@ -24,7 +24,8 @@ extension FirebaseIntegrationTests {
 
     init() async throws {
       try await FirebaseIntegrationTests.setup()
-      repository = FirestoreMemoRepository()
+      let reference = FirestoreReference()
+      repository = FirestoreMemoRepository(reference: reference)
       createUseCase = CreateMemoUseCaseImpl(repository: repository)
       readUseCase = ReadGroupMemoUseCaseImpl(repository: repository)
       updateUseCase = UpdateMemoUseCaseImpl(repository: repository)

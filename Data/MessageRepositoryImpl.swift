@@ -10,7 +10,7 @@ import FirebaseFirestore
 final class FirestoreMessageRepository: MessageRepository {
   private let reference: FirestoreReference
 
-  init(reference: FirestoreReference = .shared) {
+  init(reference: FirestoreReference) {
     self.reference = reference
   }
 
@@ -40,12 +40,20 @@ final class FirestoreMessageRepository: MessageRepository {
         .whereField("groupId", isEqualTo: groupId)
         .order(by: "createdAt", descending: false)
         .addSnapshotListener { snapshot, error in
-          if let error { continuation.yield(.error(error)); return }
-          guard let snapshot else { continuation.yield(.error(FirestoreRepositoryError.snapshotNotFound)); return }
+          if let error {
+            continuation.yield(.error(error))
+            return
+          }
+          guard let snapshot else {
+            continuation.yield(.error(FirestoreRepositoryError.snapshotNotFound))
+            return
+          }
 
           for change in snapshot.documentChanges {
             guard let message = try? change.document.data(as: GroupMessage.self) else {
-              continuation.yield(.error(FirestoreRepositoryError.decodingError(documentID: change.document.documentID)))
+              continuation.yield(
+                .error(
+                  FirestoreRepositoryError.decodingError(documentID: change.document.documentID)))
               continue
             }
             switch change.type {
@@ -66,5 +74,7 @@ final class StubMessageRepository: MessageRepository {
   func update(_: GroupMessage) throws {}
   func delete(_: String) async throws {}
   func readAll(groupId _: String, source _: DataSource) async throws -> [GroupMessage] { [] }
-  func observeAll(groupId _: String) -> AsyncStream<RepositoryEvent<GroupMessage>> { AsyncStream { $0.finish() } }
+  func observeAll(groupId _: String) -> AsyncStream<RepositoryEvent<GroupMessage>> {
+    AsyncStream { $0.finish() }
+  }
 }

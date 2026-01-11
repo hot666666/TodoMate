@@ -5,8 +5,6 @@
 //  Created by hs on 6/2/25.
 //
 
-import FirebaseCore
-import GoogleSignIn
 import SwiftData
 import SwiftUI
 
@@ -20,12 +18,8 @@ struct TodoMateApp: App {
   private let modelContainer: ModelContainer
 
   init() {
-    // Firebase 및 Google Sign-In 구성 (App 레벨에서 미리 수행)
-    TodoMateApp.configureFirebase()
-    TodoMateApp.configureGoogleSignIn()
-
     // Create SwiftData Container
-    let schema = Schema([SDTodo.self])
+    let schema = Schema([SDTodo.self, SDMemo.self])
     let config = ModelConfiguration(isStoredInMemoryOnly: false)
 
     do {
@@ -35,12 +29,9 @@ struct TodoMateApp: App {
     }
 
     // 최상위 DI 컨테이너 생성 (Core 포함)
-    // 최상위 DI 컨테이너 생성 (Core 포함)
-    let networkController = FirestoreNetworkController()
     let core = CoreDIContainer(
       userDefaults: .standard,
       modelContext: modelContainer.mainContext,
-      networkController: networkController,
     )
     appContainer = AppDIContainer(core: core)
 
@@ -52,10 +43,9 @@ struct TodoMateApp: App {
     WindowGroup {
       RootView()
         .environment(appContainer)
-        .environment(appContainer)
         .environment(appContainer.core)
-        .environment(appContainer.networkModeManager)
         .environment(PrivateTodoStore(container: appContainer.core))
+        .environment(PrivateMemoStore(container: appContainer.core))
         .modelContainer(modelContainer)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
@@ -64,22 +54,5 @@ struct TodoMateApp: App {
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)
     #endif
-  }
-}
-
-private extension TodoMateApp {
-  static func configureFirebase() {
-    // FirebaseApp.configure()는 앱 수명 주기 당 한 번만 호출되어야 함
-    if FirebaseApp.app() == nil {
-      FirebaseApp.configure()
-    }
-  }
-
-  static func configureGoogleSignIn() {
-    guard let clientId = FirebaseApp.app()?.options.clientID else {
-      Log.warning("Firebase client ID is not configured.")
-      return
-    }
-    GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
   }
 }

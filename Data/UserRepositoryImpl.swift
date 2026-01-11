@@ -10,7 +10,7 @@ import FirebaseFirestore
 final class FirestoreUserRepository: UserRepository {
   private let reference: FirestoreReference
 
-  init(reference: FirestoreReference = .shared) {
+  init(reference: FirestoreReference) {
     self.reference = reference
   }
 

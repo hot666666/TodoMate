@@ -67,6 +67,6 @@ struct AuthenticatedView: View {
     .environment(PublicDIContainer.preview)
     .environment(SessionStore.preview)
     .environment(TodoStore.preview)
-    .environment(MemoStore.preview)
+    .environment(PrivateMemoStore(container: .preview))
     .environment(MessageStore.preview)
 }

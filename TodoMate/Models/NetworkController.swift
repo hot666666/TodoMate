@@ -22,7 +22,7 @@ protocol NetworkController {
 final class FirestoreNetworkController: NetworkController {
   private let reference: FirestoreReference
 
-  init(reference: FirestoreReference = .shared) {
+  init(reference: FirestoreReference) {
     self.reference = reference
   }
 

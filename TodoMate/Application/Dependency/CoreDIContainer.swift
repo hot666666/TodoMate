@@ -15,25 +15,24 @@ final class CoreDIContainer {
   @ObservationIgnored let userDefaults: UserDefaults
   @ObservationIgnored let calendarDayService: CalendarDayService
   @ObservationIgnored let localTodoRepository: TodoRepository
-  @ObservationIgnored let networkController: NetworkController
+  @ObservationIgnored let localMemoRepository: MemoRepository
 
   init(
     userDefaults: UserDefaults = .standard,
     calendarDayService: CalendarDayService = CalendarDayServiceImpl(),
     modelContext: ModelContext,
-    networkController: NetworkController,
   ) {
     self.userDefaults = userDefaults
     self.calendarDayService = calendarDayService
     localTodoRepository = LocalTodoRepositoryImpl(modelContext: modelContext)
-    self.networkController = networkController
+    localMemoRepository = LocalMemoRepository(modelContext: modelContext)
   }
 }
 
 extension CoreDIContainer {
   @MainActor
   static var preview: CoreDIContainer = {
-    let schema = Schema([SDTodo.self])
+    let schema = Schema([SDTodo.self, SDMemo.self])
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     // swiftlint:disable:next force_try
     let container = try! ModelContainer(for: schema, configurations: [config])
@@ -41,7 +40,6 @@ extension CoreDIContainer {
       userDefaults: .preview,
       calendarDayService: CalendarDayServiceImpl(),
       modelContext: container.mainContext,
-      networkController: StubNetworkController(),
     )
   }()
 }
