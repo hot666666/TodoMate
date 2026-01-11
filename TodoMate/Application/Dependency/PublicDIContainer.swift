@@ -58,8 +58,6 @@ final class PublicDIContainer {
   @ObservationIgnored let signOutUseCase: SignOutUseCase
   @ObservationIgnored let listenAuthStateUseCase: ListenAuthStateUseCase
 
-  @ObservationIgnored let networkController: NetworkController
-
   init(
     userRepository: UserRepository,
     todoRepository: TodoRepository,
@@ -68,7 +66,6 @@ final class PublicDIContainer {
     groupRepository: GroupRepository,
     authService: AuthService,
     messageReadTracker: MessageReadTracker,
-    networkController: NetworkController,
   ) {
     // Data Layer
     self.userRepository = userRepository
@@ -78,7 +75,6 @@ final class PublicDIContainer {
     self.groupRepository = groupRepository
     self.authService = authService
     self.messageReadTracker = messageReadTracker
-    self.networkController = networkController
 
     // Domain Layer - User
     let readUserUseCase = ReadUserUseCaseImpl(userRepository: userRepository)
@@ -140,6 +136,5 @@ extension PublicDIContainer {
     groupRepository: StubGroupRepository(),
     authService: StubAuthService(),
     messageReadTracker: StubMessageReadTracker(),
-    networkController: StubNetworkController(),
   )
 }

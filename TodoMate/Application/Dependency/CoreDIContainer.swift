@@ -15,15 +15,18 @@ final class CoreDIContainer {
   @ObservationIgnored let userDefaults: UserDefaults
   @ObservationIgnored let calendarDayService: CalendarDayService
   @ObservationIgnored let localTodoRepository: TodoRepository
+  @ObservationIgnored let networkController: NetworkController
 
   init(
     userDefaults: UserDefaults = .standard,
     calendarDayService: CalendarDayService = CalendarDayServiceImpl(),
     modelContext: ModelContext,
+    networkController: NetworkController,
   ) {
     self.userDefaults = userDefaults
     self.calendarDayService = calendarDayService
     localTodoRepository = LocalTodoRepositoryImpl(modelContext: modelContext)
+    self.networkController = networkController
   }
 }
 
@@ -38,6 +41,7 @@ extension CoreDIContainer {
       userDefaults: .preview,
       calendarDayService: CalendarDayServiceImpl(),
       modelContext: container.mainContext,
+      networkController: StubNetworkController(),
     )
   }()
 }

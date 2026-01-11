@@ -9,8 +9,7 @@ import SimpleOverlaySystem
 import SwiftUI
 
 struct CalendarView: View {
-  @Environment(TodoStore.self) private var todoStore
-  @Environment(SessionStore.self) private var sessionStore
+  @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
   let selection: NavigationDestination
   @State private var currentDate = Date()
@@ -24,7 +23,7 @@ struct CalendarView: View {
 
   // Convert store todos to view todos
   private var viewTodos: [ViewTodo] {
-    let todos = todoStore.todos[sessionStore.userId] ?? []
+    let todos = todoStore.todos.values.flatMap(\.self)
     return todos.map { ViewTodo(from: $0) }
   }
 
@@ -153,20 +152,20 @@ struct CalendarView: View {
   }
 
   private func moveTask(_ task: ViewTodo, to date: Date) {
-    guard let userTodos = todoStore.todos[sessionStore.userId],
-          let originalTodo = userTodos.first(where: { $0.id == task.id })
+    let allTodos = todoStore.todos.values.flatMap(\.self)
+    guard let originalTodo = allTodos.first(where: { $0.id == task.id })
     else { return }
 
     var updatedTodo = originalTodo
     updatedTodo.date = date.startOfDay
     updatedTodo.updatedAt = Date()
 
-    todoStore.update(updatedTodo, userId: sessionStore.userId)
+    todoStore.updateTodo(updatedTodo)
   }
 
   private func presentTodoSheet(for task: ViewTodo) {
-    guard let userTodos = todoStore.todos[sessionStore.userId],
-          let originalTodo = userTodos.first(where: { $0.id == task.id })
+    let allTodos = todoStore.todos.values.flatMap(\.self)
+    guard let originalTodo = allTodos.first(where: { $0.id == task.id })
     else { return }
 
     let editableTodo = EditableTodo(from: originalTodo)
@@ -294,8 +293,5 @@ struct CalendarCell: View {
 #Preview {
   CalendarView(selection: .todo)
     .environment(NavigationManager.preview)
-    .environment(TodoStore.preview)
-    .environment(SessionStore.preview)
-    .environment(MemoStore.preview)
-    .environment(MessageStore.preview)
+    .environment(PrivateTodoStore.preview)
 }

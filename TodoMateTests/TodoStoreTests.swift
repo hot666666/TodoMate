@@ -85,7 +85,6 @@ struct TodoStoreTests {
       groupRepository: StubGroupRepository(),
       authService: MockAuthService(userId: userId),
       messageReadTracker: StubMessageReadTracker(),
-      networkController: StubNetworkController(),
     )
   }
 }

@@ -272,4 +272,13 @@ extension SessionStore {
     store.authState = .authenticated
     return store
   }()
+
+  static let local: SessionStore = {
+    let store = SessionStore(container: .preview) // Use preview container as dummy
+    store.user = User(
+      id: "local-user", displayName: "Me", groupId: "",
+    )
+    store.authState = .authenticated
+    return store
+  }()
 }
