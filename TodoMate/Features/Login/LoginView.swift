@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct LoginView: View {
-  @Environment(DIContainer.self) private var container
+  @Environment(PublicDIContainer.self) private var container
   @State private var isLoading = false
   @State private var isErrorDialogPresented = false
   @State private var errorMessage: String?
@@ -71,5 +71,5 @@ extension LoginView {
 
 #Preview {
   LoginView()
-    .environment(DIContainer.preview)
+    .environment(PublicDIContainer.preview)
 }

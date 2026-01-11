@@ -1,5 +1,5 @@
 //
-//  DIContainer+Mocks.swift
+//  AppDIContainer+Mocks.swift
 //  TodoMate
 //
 //  Created by agent on 1/6/26.
@@ -15,8 +15,9 @@ import Foundation
     case groupUser = "group_user"
     case noGroupUser = "no_group_user"
 
-    /// DIContainer for this scenario
-    var container: DIContainer {
+    /// AppDIContainer for this scenario
+    @MainActor
+    var container: AppDIContainer {
       switch self {
       case .groupUser:
         .mockGroupUser
@@ -48,19 +49,17 @@ import Foundation
     }
   }
 
-  extension DIContainer {
-    static func makeMock(for scenario: String) -> DIContainer {
+  extension AppDIContainer {
+    @MainActor
+    static func makeMock(for scenario: String) -> AppDIContainer {
       guard let scenarioEnum = ScreenshotScenario(rawValue: scenario) else {
-        return .preview // Default fallback
+        return AppDIContainer(core: .preview) // Default fallback
       }
       return scenarioEnum.container
     }
-  }
 
-  // MARK: - Mock Factories
-
-  extension DIContainer {
-    static var mockGroupUser: DIContainer {
+    @MainActor
+    static var mockGroupUser: AppDIContainer {
       let mainUser = User.stub
       let memberUser = User(id: "member1", displayName: "Member 1", groupId: mainUser.groupId)
 
@@ -81,16 +80,19 @@ import Foundation
         GroupMessage(content: "Hi there!", groupId: mainUser.groupId, owner: memberUser.id),
       ]
 
-      return createMockContainer(
+      let publicContainer = createMockPublicContainer(
         user: mainUser,
         groupMembers: [mainUser, memberUser],
         todos: todos,
         memo: memo,
         messages: messages,
       )
+
+      return AppDIContainer(core: .preview, publicContainer: publicContainer)
     }
 
-    static var mockNoGroupUser: DIContainer {
+    @MainActor
+    static var mockNoGroupUser: AppDIContainer {
       let mainUser = User(id: "user_no_group", displayName: "Solo User", groupId: "")
 
       let todos = [
@@ -99,39 +101,39 @@ import Foundation
           .complete),
       ]
 
-      return createMockContainer(
+      let publicContainer = createMockPublicContainer(
         user: mainUser,
         groupMembers: [],
         todos: todos,
         memo: Memo(owner: mainUser.id, content: "Personal Memo"),
         messages: [],
       )
+
+      return AppDIContainer(core: .preview, publicContainer: publicContainer)
     }
 
-    private static func createMockContainer(
+    private static func createMockPublicContainer(
       user: User,
       groupMembers: [User],
       todos: [Todo],
       memo: Memo?,
       messages: [GroupMessage],
-    ) -> DIContainer {
+    ) -> PublicDIContainer {
       let userRepo = MockUserRepository(currentUser: user, groupMembers: groupMembers)
       let todoRepo = MockTodoRepository(todos: todos)
       let memoRepo = MockMemoRepository(memo: memo, currentUser: user)
       let messageRepo = MockMessageRepository(messages: messages)
       let authService = MockAuthService(userId: user.id)
 
-      return DIContainer(
+      return PublicDIContainer(
         userRepository: userRepo,
         todoRepository: todoRepo,
         messageRepository: messageRepo,
         memoRepository: memoRepo,
         groupRepository: StubGroupRepository(),
         authService: authService,
-        calendarDayService: CalendarDayServiceImpl(),
         messageReadTracker: StubMessageReadTracker(),
         networkController: StubNetworkController(),
-        userDefaults: .preview,
       )
     }
   }

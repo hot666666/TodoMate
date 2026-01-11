@@ -9,7 +9,7 @@ import SimpleOverlaySystem
 import SwiftUI
 
 struct TodoSheet: View {
-  @Environment(DIContainer.self) private var container
+  @Environment(PublicDIContainer.self) private var container
   @Environment(TodoStore.self) private var todoStore
   @Environment(SessionStore.self) private var sessionStore
   @Environment(\.overlayManager) private var overlay
@@ -139,7 +139,7 @@ extension TodoSheet {
 
 #Preview {
   TodoSheet(editableTodo: EditableTodo(owner: SessionStore.preview.userId))
-    .environment(DIContainer.preview)
+    .environment(PublicDIContainer.preview)
     .environment(SessionStore.preview)
     .frame(width: 600, height: 400)
 }
