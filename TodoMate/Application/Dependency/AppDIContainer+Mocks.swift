@@ -133,7 +133,6 @@ import Foundation
         groupRepository: StubGroupRepository(),
         authService: authService,
         messageReadTracker: StubMessageReadTracker(),
-        networkController: StubNetworkController(),
       )
     }
   }

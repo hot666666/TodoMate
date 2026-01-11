@@ -21,8 +21,7 @@ struct RootView: View {
           PublicContentView()
         }
       } else {
-        // Phase 1: Offline mode placeholder
-        OfflinePlaceholderView()
+        PrivateFeatureWrapper(core: core)
       }
     }
   }

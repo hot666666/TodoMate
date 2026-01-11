@@ -15,19 +15,17 @@ struct PublicFeatureWrapper<Content: View>: View {
   @State private var todoStore: TodoStore
   @State private var memoStore: MemoStore
   @State private var messageStore: MessageStore
-  @State private var networkManager: NetworkModeManager
 
   private let content: () -> Content
 
-  init(core: CoreDIContainer, @ViewBuilder content: @escaping () -> Content) {
+  init(core _: CoreDIContainer, @ViewBuilder content: @escaping () -> Content) {
     let container = PublicFeatureWrapper.composePublicContainer()
     _publicDI = State(initialValue: container)
     _sessionStore = State(initialValue: SessionStore(container: container))
     _todoStore = State(initialValue: TodoStore(container: container))
     _memoStore = State(initialValue: MemoStore(container: container))
+    _memoStore = State(initialValue: MemoStore(container: container))
     _messageStore = State(initialValue: MessageStore(container: container))
-    _networkManager = State(
-      initialValue: NetworkModeManager(container: container, core: core))
     self.content = content
 
     Log.info("PublicDIContainer initialized", category: .app)
@@ -40,7 +38,6 @@ struct PublicFeatureWrapper<Content: View>: View {
       .environment(todoStore)
       .environment(memoStore)
       .environment(messageStore)
-      .environment(networkManager)
       .task {
         // Start listening to auth changes
         todoStore.startListening(to: sessionStore.events())
@@ -67,7 +64,6 @@ struct PublicFeatureWrapper<Content: View>: View {
     let groupRepo = FirestoreGroupRepository()
     let authService = FirebaseAuthService()
     let messageReadTracker = MessageReadTrackerImpl()
-    let networkController = FirestoreNetworkController()
 
     return PublicDIContainer(
       userRepository: userRepo,
@@ -77,7 +73,6 @@ struct PublicFeatureWrapper<Content: View>: View {
       groupRepository: groupRepo,
       authService: authService,
       messageReadTracker: messageReadTracker,
-      networkController: networkController,
     )
   }
 }

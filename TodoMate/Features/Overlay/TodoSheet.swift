@@ -9,20 +9,14 @@ import SimpleOverlaySystem
 import SwiftUI
 
 struct TodoSheet: View {
-  @Environment(PublicDIContainer.self) private var container
-  @Environment(TodoStore.self) private var todoStore
-  @Environment(SessionStore.self) private var sessionStore
+  @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
   @FocusState private var focusedField: SheetField?
   @Bindable var editableTodo: EditableTodo
 
-  private var isEditable: Bool {
-    sessionStore.userId == editableTodo.owner
-  }
-
   private var isSubmitDisabled: Bool {
-    !isEditable || editableTodo.content.isEmpty || !editableTodo.isDirty
+    editableTodo.content.isEmpty || !editableTodo.isDirty
   }
 
   enum Action {
@@ -34,19 +28,17 @@ struct TodoSheet: View {
   private func perform(_ action: Action) {
     switch action {
     case .focusContentField:
-      if isEditable, editableTodo.content.isEmpty {
+      if editableTodo.content.isEmpty {
         focusedField = .content
       }
 
     case .submitAndDismiss:
-      guard isEditable else { return }
-
       if editableTodo.isDirty {
         let todo = Todo.from(editableTodo)
         if editableTodo.isNew {
-          todoStore.add(todo, userId: sessionStore.userId)
+          todoStore.addTodo(todo)
         } else {
-          todoStore.update(todo, userId: sessionStore.userId)
+          todoStore.updateTodo(todo)
         }
       }
       overlay?.dismissTop()
@@ -103,18 +95,15 @@ extension TodoSheet {
         )
         Spacer()
 
-        if isEditable {
-          TodoSheetActionButton(
-            hasChanges: editableTodo.isDirty,
-            isNew: editableTodo.isNew,
-            onSave: { perform(.submitAndDismiss) },
-            onDismiss: { perform(.dismissWithConfirmation) },
-          )
-        }
+        TodoSheetActionButton(
+          hasChanges: editableTodo.isDirty,
+          isNew: editableTodo.isNew,
+          onSave: { perform(.submitAndDismiss) },
+          onDismiss: { perform(.dismissWithConfirmation) },
+        )
       }
       .padding(.top, DesignSystem.TodoSheet.Padding.medium)
     }
-    .disabled(!isEditable)
     .onAppear {
       perform(.focusContentField)
     }
@@ -138,8 +127,7 @@ extension TodoSheet {
 }
 
 #Preview {
-  TodoSheet(editableTodo: EditableTodo(owner: SessionStore.preview.userId))
-    .environment(PublicDIContainer.preview)
-    .environment(SessionStore.preview)
+  TodoSheet(editableTodo: EditableTodo(owner: "local_user"))
+    .environment(PrivateTodoStore.preview)
     .frame(width: 600, height: 400)
 }

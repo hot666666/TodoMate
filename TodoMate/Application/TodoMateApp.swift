@@ -35,9 +35,12 @@ struct TodoMateApp: App {
     }
 
     // 최상위 DI 컨테이너 생성 (Core 포함)
+    // 최상위 DI 컨테이너 생성 (Core 포함)
+    let networkController = FirestoreNetworkController()
     let core = CoreDIContainer(
       userDefaults: .standard,
       modelContext: modelContainer.mainContext,
+      networkController: networkController,
     )
     appContainer = AppDIContainer(core: core)
 
@@ -49,7 +52,10 @@ struct TodoMateApp: App {
     WindowGroup {
       RootView()
         .environment(appContainer)
+        .environment(appContainer)
         .environment(appContainer.core)
+        .environment(appContainer.networkModeManager)
+        .environment(PrivateTodoStore(container: appContainer.core))
         .modelContainer(modelContainer)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
