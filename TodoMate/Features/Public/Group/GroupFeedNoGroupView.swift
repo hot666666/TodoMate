@@ -11,10 +11,21 @@ struct GroupFeedNoGroupView: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(NavigationManager.self) private var naviManager
 
+  @AppStorage(UserDefaultsKey.isPublicModeEnabled.rawValue)
+  private var isPublicModeEnabled: Bool = false
+
   var body: some View {
     HStack(spacing: 24) {
-      JoinGroupCard(sessionStore: sessionStore, naviManager: naviManager)
-      CreateGroupCard(sessionStore: sessionStore, naviManager: naviManager)
+      JoinGroupCard(
+        sessionStore: sessionStore,
+        naviManager: naviManager,
+        enabled: isPublicModeEnabled,
+      )
+      CreateGroupCard(
+        sessionStore: sessionStore,
+        naviManager: naviManager,
+        enabled: isPublicModeEnabled,
+      )
     }
     .padding(32)
     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -28,6 +39,7 @@ struct GroupFeedNoGroupView: View {
 private struct JoinGroupCard: View {
   let sessionStore: SessionStore
   let naviManager: NavigationManager
+  let enabled: Bool
   @State private var groupId = ""
   @State private var isJoining = false
   @State private var errorMessage: String?
@@ -75,7 +87,13 @@ private struct JoinGroupCard: View {
             }
           }
           .buttonStyle(.card(padding: .init(top: 10, leading: 20, bottom: 10, trailing: 20)))
-          .disabled(groupId.trimmingCharacters(in: .whitespaces).isEmpty || isJoining)
+          .disabled(!enabled || groupId.trimmingCharacters(in: .whitespaces).isEmpty || isJoining)
+        }
+
+        if !enabled {
+          Text("Go Online to join groups")
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
 
         if let error = errorMessage {
@@ -115,6 +133,7 @@ private struct JoinGroupCard: View {
 private struct CreateGroupCard: View {
   let sessionStore: SessionStore
   let naviManager: NavigationManager
+  let enabled: Bool
   @State private var groupName = ""
   @State private var isCreating = false
   @State private var showingInput = false
@@ -187,9 +206,16 @@ private struct CreateGroupCard: View {
         } label: {
           Text("Create Group")
             .fontWeight(.medium)
-            .foregroundStyle(.green)
+            .foregroundStyle(enabled ? .green : .secondary)
         }
         .buttonStyle(.card(padding: .init(top: 8, leading: 16, bottom: 8, trailing: 16)))
+        .disabled(!enabled)
+
+        if !enabled {
+          Text("Go Online to create groups")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
       }
 
       Spacer()

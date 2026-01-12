@@ -72,7 +72,7 @@ FirebaseEmulator/firestore-debug.log
 FirebaseEmulator/ui-debug.log
 
 # Certificate & Profile
-/private/
+private/
 
 # memo
 taskmemo.md

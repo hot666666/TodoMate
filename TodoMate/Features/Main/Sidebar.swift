@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct Sidebar: View {
+  @Environment(AppDIContainer.self) private var diContainer
   @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(PrivateMemoStore.self) private var memoStore
-  @Environment(AppDIContainer.self) private var diContainer
 
   @AppStorage(UserDefaultsKey.cachedProfileName.rawValue)
   private var cachedProfileName: String = ""
@@ -45,7 +45,7 @@ struct Sidebar: View {
     List(selection: $selection) {
       Section {
         NavigationLink(value: NavigationDestination.settings) {
-          SidebarProfileView(
+          SidebarProfile(
             displayName: displayName,
             subtitle: nil,
           )
@@ -123,9 +123,9 @@ struct Sidebar: View {
   }
 }
 
-// MARK: - SidebarProfileView
+// MARK: - SidebarProfile
 
-private struct SidebarProfileView: View {
+private struct SidebarProfile: View {
   let displayName: String
   let subtitle: String?
 

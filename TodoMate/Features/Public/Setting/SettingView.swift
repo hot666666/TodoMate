@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct SettingView: View {
-  @Environment(SessionStore.self) private var sessionStore
   @Environment(AppDIContainer.self) private var appDI
+  @Environment(SessionStore.self) private var sessionStore
+  @AppStorage(UserDefaultsKey.isPublicModeEnabled.rawValue)
+  private var isPublicModeEnabled: Bool = false
   @State private var showLogoutConfirmation = false
   @State private var showLeaveGroupConfirmation = false
   @State private var showEditNameSheet = false
@@ -26,16 +28,10 @@ struct SettingView: View {
   var body: some View {
     ScrollView {
       VStack(spacing: 24) {
-        // Profile Section
         profileSection
-
-        // Group Section
         groupSection
-
-        // App Section
-        appSection
       }
-      .accessibilityIdentifier("settings_view")
+      .accessibilityIdentifier("setting_view")
       .padding(32)
       .frame(maxWidth: 500)
       .frame(maxWidth: .infinity)
@@ -89,7 +85,7 @@ struct SettingView: View {
 
   private var profileSection: some View {
     VStack(alignment: .leading, spacing: 16) {
-      Text("Profile")
+      Text("User")
         .font(.headline)
         .foregroundStyle(.secondary)
 
@@ -104,6 +100,22 @@ struct SettingView: View {
           Text(sessionStore.user?.displayName ?? "Guest")
             .font(.title3)
             .fontWeight(.semibold)
+
+          Button {
+            showLogoutConfirmation = true
+          } label: {
+            HStack(spacing: 4) {
+              Image(systemName: "arrow.right.square")
+              Text("Leave")
+            }
+            .foregroundStyle(.red)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.red.opacity(isPublicModeEnabled ? 0.1 : 0.05))
+            .clipShape(Capsule())
+          }
+          .buttonStyle(.plain)
+          .disabled(!isPublicModeEnabled)
         }
 
         Spacer()
@@ -148,33 +160,24 @@ struct SettingView: View {
 
             Spacer()
 
-            Text("Joined")
-              .font(.caption)
-              .foregroundStyle(.green)
-              .padding(.horizontal, 8)
-              .padding(.vertical, 4)
-              .background(Color.green.opacity(0.1))
+            // Leave Group (Moved from below)
+            Button {
+              showLeaveGroupConfirmation = true
+            } label: {
+              HStack(spacing: 4) {
+                Image(systemName: "rectangle.portrait.and.arrow.right")
+                Text("Leave")
+              }
+              .foregroundStyle(.red)
+              .padding(.horizontal, 12)
+              .padding(.vertical, 6)
+              .background(Color.red.opacity(isPublicModeEnabled ? 0.1 : 0.05))
               .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .disabled(!isPublicModeEnabled)
           }
           .padding(16)
-
-          Divider()
-
-          // Leave Group
-          Button {
-            showLeaveGroupConfirmation = true
-          } label: {
-            HStack {
-              Image(systemName: "rectangle.portrait.and.arrow.right")
-                .foregroundStyle(.red)
-                .frame(width: 40)
-              Text("Leave Group")
-                .foregroundStyle(.red)
-              Spacer()
-            }
-            .padding(16)
-          }
-          .buttonStyle(.plain)
         } else {
           // No group
           HStack(spacing: 12) {
@@ -191,36 +194,6 @@ struct SettingView: View {
           }
           .padding(16)
         }
-      }
-      .background(Color(nsColor: .controlBackgroundColor))
-      .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-  }
-
-  // MARK: - App Section
-
-  private var appSection: some View {
-    VStack(alignment: .leading, spacing: 16) {
-      Text("App")
-        .font(.headline)
-        .foregroundStyle(.secondary)
-
-      VStack(spacing: 0) {
-        // Sign Out
-        Button {
-          showLogoutConfirmation = true
-        } label: {
-          HStack {
-            Image(systemName: "arrow.right.square")
-              .foregroundStyle(.red)
-              .frame(width: 40)
-            Text("Sign Out")
-              .foregroundStyle(.red)
-            Spacer()
-          }
-          .padding(16)
-        }
-        .buttonStyle(.plain)
       }
       .background(Color(nsColor: .controlBackgroundColor))
       .clipShape(RoundedRectangle(cornerRadius: 12))
