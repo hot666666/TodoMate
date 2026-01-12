@@ -15,6 +15,7 @@ final class PublicDIContainer {
   let messageRepository: MessageRepository
 
   let groupRepository: GroupRepository
+  let connectivityRepository: ConnectivityRepository
   let authService: AuthService
   let messageReadTracker: MessageReadTracker
 
@@ -51,11 +52,15 @@ final class PublicDIContainer {
   let signOutUseCase: SignOutUseCase
   let listenAuthStateUseCase: ListenAuthStateUseCase
 
+  // System
+  let togglePublicConnectivityUseCase: TogglePublicConnectivityUseCase
+
   init(
     userRepository: UserRepository,
     todoRepository: TodoRepository,
     messageRepository: MessageRepository,
     groupRepository: GroupRepository,
+    connectivityRepository: ConnectivityRepository,
     authService: AuthService,
     messageReadTracker: MessageReadTracker,
   ) {
@@ -64,6 +69,7 @@ final class PublicDIContainer {
     self.todoRepository = todoRepository
     self.messageRepository = messageRepository
     self.groupRepository = groupRepository
+    self.connectivityRepository = connectivityRepository
     self.authService = authService
     self.messageReadTracker = messageReadTracker
 
@@ -109,6 +115,10 @@ final class PublicDIContainer {
     signInUseCase = SignInUseCaseImpl(authService: authService)
     signOutUseCase = SignOutUseCaseImpl(authService: authService)
     listenAuthStateUseCase = ListenAuthStateUseCaseImpl(authService: authService)
+
+    // Domain Layer - System
+    togglePublicConnectivityUseCase = TogglePublicConnectivityUseCaseImpl(
+      repository: connectivityRepository)
   }
 }
 
@@ -117,8 +127,8 @@ extension PublicDIContainer {
     userRepository: StubUserRepository(),
     todoRepository: StubTodoRepository(),
     messageRepository: StubMessageRepository(),
-
     groupRepository: StubGroupRepository(),
+    connectivityRepository: StubConnectivityRepository(),
     authService: StubAuthService(),
     messageReadTracker: StubMessageReadTracker(),
   )
