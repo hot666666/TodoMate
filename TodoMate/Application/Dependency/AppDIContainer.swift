@@ -5,26 +5,23 @@
 //  Created by agent on 1/10/26.
 //
 
-import Foundation
 import Observation
 
-/// 앱 전체의 의존성을 관리하는 최상위 컨테이너
 @MainActor
 @Observable
 final class AppDIContainer {
-  let core: CoreDIContainer
+  /// 앱 고유의 기능들을 주입하는 컨테이너
+  @ObservationIgnored let core: CoreDIContainer
+  /// 온라인 기능들을 주입하는 컨테이너
+  @ObservationIgnored let pub: PublicDIContainer
 
-  /// UI 테스트 시나리오 등에서 미리 주입된 Public 컨테이너
-  /// 일반적인 경우 PublicFeatureWrapper에서 생성하여 관리함
-  var publicContainer: PublicDIContainer?
-
-  init(core: CoreDIContainer, publicContainer: PublicDIContainer? = nil) {
-    self.core = core
-    self.publicContainer = publicContainer
+  init(coreContainer: CoreDIContainer, publicContainer: PublicDIContainer) {
+    core = coreContainer
+    pub = publicContainer
   }
 }
 
 extension AppDIContainer {
   @MainActor
-  static let preview: AppDIContainer = .init(core: .preview)
+  static let preview: AppDIContainer = .init(coreContainer: .preview, publicContainer: .preview)
 }

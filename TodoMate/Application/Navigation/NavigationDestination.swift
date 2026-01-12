@@ -11,16 +11,14 @@ enum NavigationDestination: Hashable, Identifiable {
   case todo
   case memo
   case settings
-  case group(String) // Group ID
-  case noGroups
+  case group
 
   var id: String {
     switch self {
     case .todo: "todo"
     case .memo: "memo"
     case .settings: "settings"
-    case let .group(id): "group_\(id)"
-    case .noGroups: "noGroups"
+    case .group: "group"
     }
   }
 
@@ -29,8 +27,7 @@ enum NavigationDestination: Hashable, Identifiable {
     case .todo: "Todo"
     case .memo: "Memo"
     case .settings: "Settings"
-    case let .group(groupId): groupId
-    case .noGroups: "No Groups Joined"
+    case .group: "Group"
     }
   }
 }

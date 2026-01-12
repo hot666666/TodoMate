@@ -26,6 +26,17 @@ enum UserDefaultsKey: String {
 
   /// Public 기능 활성화 여부
   case isPublicModeEnabled = "is_public_mode_enabled"
+
+  // MARK: - Sidebar Cache
+
+  /// 캐시된 프로필 이름
+  case cachedProfileName = "cached_profile_name"
+
+  /// 캐시된 그룹 이름
+  case cachedGroupName = "cached_group_name"
+
+  /// 캐시된 그룹 ID (그룹 존재 여부 판단용)
+  case cachedUserGroupId = "cached_user_group_id"
 }
 
 // MARK: - UserDefaults Extension

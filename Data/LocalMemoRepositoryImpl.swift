@@ -1,5 +1,5 @@
 //
-//  LocalMemoRepository.swift
+//  LocalMemoRepositoryImpl.swift
 //  TodoMate
 //
 //  Created by agent on 1/11/26.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-struct LocalMemoRepository: MemoRepository {
+struct LocalMemoRepositoryImpl: MemoRepository {
   private let modelContext: ModelContext
 
   init(modelContext: ModelContext) {

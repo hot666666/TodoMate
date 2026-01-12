@@ -15,7 +15,7 @@ extension TodoMateApp {
     if lastVersion == nil {
       Log.info("First launch detected. Initializing app state...")
       // Public 컨테이너가 있으면 로그아웃 시도 (실질적으로 첫 실행시에는 없을 가능성이 큼)
-      try? container.publicContainer?.authService.signOut()
+      try? container.pub.authService.signOut()
 
       // 앱의 모든 UserDefaults 데이터 삭제
       if let bundleIdentifier = Bundle.main.bundleIdentifier {

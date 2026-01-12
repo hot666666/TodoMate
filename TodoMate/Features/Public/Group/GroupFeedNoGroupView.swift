@@ -103,7 +103,7 @@ private struct JoinGroupCard: View {
       do {
         try await sessionStore.joinGroup(groupId: trimmedId)
         // Navigate to the newly joined group
-        naviManager.selection = .group(trimmedId)
+        naviManager.selection = .group
       } catch {
         errorMessage = "Failed to join group."
       }
@@ -211,7 +211,7 @@ private struct CreateGroupCard: View {
         try await sessionStore.createGroup(name: trimmedName)
         // Navigate to the newly created group
         if let newGroupId = sessionStore.user?.groupId, !newGroupId.isEmpty {
-          naviManager.selection = .group(newGroupId)
+          naviManager.selection = .group
         }
       } catch {
         errorMessage = "Failed to create group."

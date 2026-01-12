@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingView: View {
   @Environment(SessionStore.self) private var sessionStore
+  @Environment(AppDIContainer.self) private var appDI
   @State private var showLogoutConfirmation = false
   @State private var showLeaveGroupConfirmation = false
   @State private var showEditNameSheet = false
@@ -41,6 +42,11 @@ struct SettingView: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor))
+    .onAppear {
+      if let displayName = sessionStore.user?.displayName {
+        appDI.core.sidebarCacheUseCase.saveProfileName(displayName)
+      }
+    }
     .confirmationDialog(
       "Leave Group",
       isPresented: $showLeaveGroupConfirmation,
@@ -230,6 +236,7 @@ struct SettingView: View {
 
     do {
       try await sessionStore.updateUser(user)
+      appDI.core.sidebarCacheUseCase.saveProfileName(newName)
     } catch {
       Log.error("Failed to update display name: \(error)", category: .auth)
     }

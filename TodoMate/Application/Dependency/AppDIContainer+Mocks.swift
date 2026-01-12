@@ -53,7 +53,7 @@ import Foundation
     @MainActor
     static func makeMock(for scenario: String) -> AppDIContainer {
       guard let scenarioEnum = ScreenshotScenario(rawValue: scenario) else {
-        return AppDIContainer(core: .preview) // Default fallback
+        return AppDIContainer.preview // Default fallback
       }
       return scenarioEnum.container
     }
@@ -88,7 +88,7 @@ import Foundation
         messages: messages,
       )
 
-      return AppDIContainer(core: .preview, publicContainer: publicContainer)
+      return AppDIContainer(coreContainer: .preview, publicContainer: publicContainer)
     }
 
     @MainActor
@@ -109,7 +109,7 @@ import Foundation
         messages: [],
       )
 
-      return AppDIContainer(core: .preview, publicContainer: publicContainer)
+      return AppDIContainer(coreContainer: .preview, publicContainer: publicContainer)
     }
 
     private static func createMockPublicContainer(

@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct LoginView: View {
-  @Environment(PublicDIContainer.self) private var container
+  @Environment(AppDIContainer.self) private var appDI
   @State private var isLoading = false
   @State private var isErrorDialogPresented = false
   @State private var errorMessage: String?
@@ -19,7 +19,7 @@ struct LoginView: View {
     defer { isLoading = false }
     isLoading = true
     do {
-      try await container.signInUseCase.run()
+      try await appDI.pub.signInUseCase.run()
     } catch {
       errorMessage = "로그인에 실패했습니다: \(error.localizedDescription)"
       isErrorDialogPresented = true
@@ -71,5 +71,5 @@ extension LoginView {
 
 #Preview {
   LoginView()
-    .environment(PublicDIContainer.preview)
+    .environment(AppDIContainer.preview)
 }

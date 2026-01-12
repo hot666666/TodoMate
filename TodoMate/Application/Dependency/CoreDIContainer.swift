@@ -6,26 +6,32 @@
 //
 
 import Foundation
-import Observation
 import SwiftData
 
-/// 오프라인 환경에서도 항상 활성화되는 핵심 의존성 컨테이너
-@Observable
+@MainActor
 final class CoreDIContainer {
+  @ObservationIgnored let modelContainer: ModelContainer
   @ObservationIgnored let userDefaults: UserDefaults
   @ObservationIgnored let calendarDayService: CalendarDayService
   @ObservationIgnored let localTodoRepository: TodoRepository
   @ObservationIgnored let localMemoRepository: MemoRepository
+  @ObservationIgnored let sidebarCacheUseCase: SidebarCacheUseCase
 
   init(
+    modelContainer: ModelContainer,
     userDefaults: UserDefaults = .standard,
     calendarDayService: CalendarDayService = CalendarDayServiceImpl(),
-    modelContext: ModelContext,
   ) {
     self.userDefaults = userDefaults
     self.calendarDayService = calendarDayService
+    self.modelContainer = modelContainer
+
+    let modelContext = modelContainer.mainContext
     localTodoRepository = LocalTodoRepositoryImpl(modelContext: modelContext)
-    localMemoRepository = LocalMemoRepository(modelContext: modelContext)
+    localMemoRepository = LocalMemoRepositoryImpl(modelContext: modelContext)
+
+    let sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
+    sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)
   }
 }
 
@@ -37,9 +43,9 @@ extension CoreDIContainer {
     // swiftlint:disable:next force_try
     let container = try! ModelContainer(for: schema, configurations: [config])
     return CoreDIContainer(
+      modelContainer: container,
       userDefaults: .preview,
       calendarDayService: CalendarDayServiceImpl(),
-      modelContext: container.mainContext,
     )
   }()
 }

@@ -7,56 +7,54 @@
 
 import SwiftUI
 
-@Observable
 final class PublicDIContainer {
   // MARK: - Data Layer
 
-  @ObservationIgnored let userRepository: UserRepository
-  @ObservationIgnored let todoRepository: TodoRepository
-  @ObservationIgnored let messageRepository: MessageRepository
+  let userRepository: UserRepository
+  let todoRepository: TodoRepository
+  let messageRepository: MessageRepository
 
-  @ObservationIgnored let groupRepository: GroupRepository
-  @ObservationIgnored let authService: AuthService
-  @ObservationIgnored let messageReadTracker: MessageReadTracker
+  let groupRepository: GroupRepository
+  let authService: AuthService
+  let messageReadTracker: MessageReadTracker
 
   // MARK: - Domain Layer
 
   // User
-  @ObservationIgnored let readUserUseCase: ReadUserUseCase
-  @ObservationIgnored let readUserGroupUseCase: ReadUserGroupUseCase
-  @ObservationIgnored let updateUserUseCase: UpdateUserUseCase
-  @ObservationIgnored let loadUserSessionUseCase: LoadUserSessionUseCase
+  let readUserUseCase: ReadUserUseCase
+  let readUserGroupUseCase: ReadUserGroupUseCase
+  let updateUserUseCase: UpdateUserUseCase
+  let loadUserSessionUseCase: LoadUserSessionUseCase
 
   // Todo
-  @ObservationIgnored let createTodoUseCase: CreateTodoUseCase
-  @ObservationIgnored let readGroupTodoUseCase: ReadGroupTodoUseCase
-  @ObservationIgnored let readMonthlyTodoUseCase: ReadMonthlyTodoUseCase
-  @ObservationIgnored let updateTodoUseCase: UpdateTodoUseCase
-  @ObservationIgnored let deleteTodoUseCase: DeleteTodoUseCase
+  let createTodoUseCase: CreateTodoUseCase
+  let readGroupTodoUseCase: ReadGroupTodoUseCase
+  let readMonthlyTodoUseCase: ReadMonthlyTodoUseCase
+  let updateTodoUseCase: UpdateTodoUseCase
+  let deleteTodoUseCase: DeleteTodoUseCase
 
   // Message
-  @ObservationIgnored let createMessageUseCase: CreateMessageUseCase
-  @ObservationIgnored let readMessagesUseCase: ReadMessageUseCase
-  @ObservationIgnored let updateMessageUseCase: UpdateMessageUseCase
-  @ObservationIgnored let deleteMessageUseCase: DeleteMessageUseCase
-  @ObservationIgnored let observeMessagesUseCase: ObserveMessageUseCase
+  let createMessageUseCase: CreateMessageUseCase
+  let readMessagesUseCase: ReadMessageUseCase
+  let updateMessageUseCase: UpdateMessageUseCase
+  let deleteMessageUseCase: DeleteMessageUseCase
+  let observeMessagesUseCase: ObserveMessageUseCase
 
   // Group
-  @ObservationIgnored let createGroupUseCase: CreateGroupUseCase
-  @ObservationIgnored let readGroupUseCase: ReadGroupUseCase
-  @ObservationIgnored let joinGroupUseCase: JoinGroupUseCase
-  @ObservationIgnored let leaveGroupUseCase: LeaveGroupUseCase
+  let createGroupUseCase: CreateGroupUseCase
+  let readGroupUseCase: ReadGroupUseCase
+  let joinGroupUseCase: JoinGroupUseCase
+  let leaveGroupUseCase: LeaveGroupUseCase
 
   // Auth
-  @ObservationIgnored let signInUseCase: SignInUseCase
-  @ObservationIgnored let signOutUseCase: SignOutUseCase
-  @ObservationIgnored let listenAuthStateUseCase: ListenAuthStateUseCase
+  let signInUseCase: SignInUseCase
+  let signOutUseCase: SignOutUseCase
+  let listenAuthStateUseCase: ListenAuthStateUseCase
 
   init(
     userRepository: UserRepository,
     todoRepository: TodoRepository,
     messageRepository: MessageRepository,
-
     groupRepository: GroupRepository,
     authService: AuthService,
     messageReadTracker: MessageReadTracker,
@@ -65,7 +63,6 @@ final class PublicDIContainer {
     self.userRepository = userRepository
     self.todoRepository = todoRepository
     self.messageRepository = messageRepository
-
     self.groupRepository = groupRepository
     self.authService = authService
     self.messageReadTracker = messageReadTracker

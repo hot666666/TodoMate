@@ -18,20 +18,19 @@ struct AuthenticatedView<Content: View>: View {
   }
 
   var body: some View {
-    switch sessionStore.authState {
-    case .authenticated:
-      content
-    case .unauthenticated:
-      LoginView()
-    case .loading:
-      ProgressView("Signing in...")
+    Group {
+      switch sessionStore.authState {
+      case .authenticated:
+        content
+      case .unauthenticated:
+        LoginView()
+      case .loading:
+        ProgressView("Signing in...")
+      }
     }
-  }
-}
-
-extension AuthenticatedView where Content == EmptyView {
-  init() {
-    self.init { EmptyView() }
+    .task {
+      await sessionStore.refresh()
+    }
   }
 }
 
@@ -39,8 +38,7 @@ extension AuthenticatedView where Content == EmptyView {
   AuthenticatedView {
     Text("Authenticated Content")
   }
-  .environment(CoreDIContainer.preview)
-  .environment(PublicDIContainer.preview)
+  .environment(AppDIContainer.preview)
   .environment(SessionStore.preview)
   .environment(TodoStore.preview)
   .environment(PrivateMemoStore.preview)
