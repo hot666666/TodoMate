@@ -15,6 +15,7 @@ enum Log {
     case network = "Network"
     case app = "App"
     case cache = "Cache"
+    case connectivity = "Connectivity"
   }
 
   private static func logger(for category: Category) -> Logger {
