@@ -40,15 +40,32 @@ struct TodoMateApp: App {
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
         .frame(minWidth: 720, minHeight: 540)
+        .task {
+          await todoStore.loadTodos()
+          await memoStore.load()
+        }
     }
+
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)
     #endif
   }
 }
 
-private extension TodoMateApp {
-  static func createCoreDIContainer() -> CoreDIContainer {
+extension TodoMateApp {
+  fileprivate static func configureFirebaseAndAuth() {
+    FirebaseApp.configure()
+    Log.info("Firebase configured successfully.")
+
+    if let clientId = FirebaseApp.app()?.options.clientID {
+      GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
+      Log.info("Google Sign-In configured with client ID: \(clientId)")
+    } else {
+      Log.warning("Firebase client ID is not configured.")
+    }
+  }
+
+  fileprivate static func createCoreDIContainer() -> CoreDIContainer {
     let userDefaults = UserDefaults.standard
     let container = Self.createSwiftDataModelContainer()
 
@@ -58,7 +75,7 @@ private extension TodoMateApp {
     )
   }
 
-  static func createPublicDIContainer() -> PublicDIContainer {
+  fileprivate static func createPublicDIContainer() -> PublicDIContainer {
     let firestoreReference = FirestoreReference()
     let authService = FirebaseAuthService()
     let userRepo = FirestoreUserRepository(reference: firestoreReference)
@@ -78,22 +95,6 @@ private extension TodoMateApp {
       authService: authService,
       messageReadTracker: messageReadTracker,
     )
-  }
-
-  static func configureFirebaseAndAuth() {
-    if FirebaseApp.app() == nil {
-      FirebaseApp.configure()
-      Log.info("Firebase configured successfully.")
-    } else {
-      Log.info("Firebase is already configured.")
-    }
-
-    if let clientId = FirebaseApp.app()?.options.clientID {
-      GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
-      Log.info("Google Sign-In configured with client ID: \(clientId)")
-    } else {
-      Log.warning("Firebase client ID is not configured.")
-    }
   }
 
   static func createSwiftDataModelContainer() -> ModelContainer {
