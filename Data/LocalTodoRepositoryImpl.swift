@@ -42,7 +42,7 @@ actor SwiftDataTodoRepositoryImpl: TodoRepository {
     try modelContext.save()
   }
 
-  func readAll(query _: TodoQuery, source _: DataSource) async throws -> [Todo] {
+  func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
     // Note: 'source' is ignored as this is strictly the local repository.
 
     // Construct predicate based on query filters
@@ -55,25 +55,26 @@ actor SwiftDataTodoRepositoryImpl: TodoRepository {
     // We fetch everything and filter in memory.
     // Ideally we optimize this later with specific predicates.
 
-    let descriptor = FetchDescriptor<SDTodo>()
-    let allSDTodos = try modelContext.fetch(descriptor)
-    var todos = allSDTodos.map { $0.toDomain() }
-//
-//    // In-memory filtering
-//    for filter in query.filters {
-//      switch filter {
-//      case .owner(let userId):
-//        todos = todos.filter { $0.owner == userId }
-//      case .owners(let userIds):
-//        todos = todos.filter { userIds.contains($0.owner) }
-//      case .dateRange(let range):
-//        todos = todos.filter { range.contains($0.date) }
-//      case .status(let status):
-//        todos = todos.filter { $0.status == status }
-//      }
-//    }
+    var dateRange: ClosedRange<Date>?
+    for filter in query.filters {
+      if case let .dateRange(range) = filter {
+        dateRange = range
+      }
+    }
 
-    print(todos)
-    return todos
+    let descriptor: FetchDescriptor<SDTodo>
+    if let dateRange {
+      let start = dateRange.lowerBound
+      let end = dateRange.upperBound
+      descriptor = FetchDescriptor<SDTodo>(
+        predicate: #Predicate<SDTodo> { $0.date >= start && $0.date <= end },
+        sortBy: [SortDescriptor(\.date)],
+      )
+    } else {
+      descriptor = FetchDescriptor<SDTodo>(sortBy: [SortDescriptor(\.date)])
+    }
+
+    let allSDTodos = try modelContext.fetch(descriptor)
+    return allSDTodos.map { $0.toDomain() }
   }
 }
