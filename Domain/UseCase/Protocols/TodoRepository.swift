@@ -6,8 +6,8 @@
 //
 
 protocol TodoRepository {
-  func create(_ todo: Todo) throws
-  func update(_ todo: Todo) throws
+  func create(_ todo: Todo) async throws
+  func update(_ todo: Todo) async throws
   func delete(_ todoId: String) async throws
   func readAll(query: TodoQuery, source: DataSource) async throws -> [Todo]
 }

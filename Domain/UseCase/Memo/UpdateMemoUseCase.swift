@@ -6,7 +6,7 @@
 //
 
 protocol UpdateMemoUseCase {
-  func run(for userId: String, _ memo: Memo) throws
+  func run(for userId: String, _ memo: Memo) async throws
 }
 
 final class UpdateMemoUseCaseImpl: UpdateMemoUseCase {
@@ -16,14 +16,14 @@ final class UpdateMemoUseCaseImpl: UpdateMemoUseCase {
     self.repository = repository
   }
 
-  func run(for userId: String, _ memo: Memo) throws {
+  func run(for userId: String, _ memo: Memo) async throws {
     guard memo.owner == userId else { throw MemoUseCaseError.userNotAuthorized }
-    try repository.update(memo)
+    try await repository.update(memo)
   }
 }
 
 final class StubUpdateMemoUseCase: UpdateMemoUseCase {
-  func run(for _: String, _ memo: Memo) throws {
-    try StubMemoRepository().update(memo)
+  func run(for _: String, _ memo: Memo) async throws {
+    try await StubMemoRepository().update(memo)
   }
 }

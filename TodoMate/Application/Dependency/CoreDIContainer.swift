@@ -26,9 +26,8 @@ final class CoreDIContainer {
     self.calendarDayService = calendarDayService
     self.modelContainer = modelContainer
 
-    let modelContext = modelContainer.mainContext
-    localTodoRepository = LocalTodoRepositoryImpl(modelContext: modelContext)
-    localMemoRepository = LocalMemoRepositoryImpl(modelContext: modelContext)
+    localTodoRepository = SwiftDataTodoRepositoryImpl(modelContainer: modelContainer)
+    localMemoRepository = SwiftDataMemoRepositoryImpl(modelContainer: modelContainer)
 
     let sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)

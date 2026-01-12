@@ -39,7 +39,7 @@ final class PrivateTodoStore {
   func addTodo(_ todo: Todo) {
     Task {
       do {
-        try repository.create(todo)
+        try await repository.create(todo)
         await loadTodos() // Reload to refresh UI
       } catch {
         self.error = error
@@ -51,7 +51,7 @@ final class PrivateTodoStore {
   func updateTodo(_ todo: Todo) {
     Task {
       do {
-        try repository.update(todo)
+        try await repository.update(todo)
         await loadTodos()
       } catch {
         self.error = error

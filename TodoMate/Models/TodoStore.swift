@@ -86,28 +86,32 @@ final class TodoStore {
   }
 
   func add(_ todo: Todo, userId: String) {
-    do {
-      try createTodoUseCase.run(for: userId, todo)
-      // Optimistic update
-      updateUserTodos(for: todo.owner) { userTodos in
-        userTodos.append(todo)
+    Task {
+      do {
+        try await createTodoUseCase.run(for: userId, todo)
+        // Optimistic update
+        updateUserTodos(for: todo.owner) { userTodos in
+          userTodos.append(todo)
+        }
+      } catch {
+        Log.error("Failed to add todo: \(error)", category: .data)
       }
-    } catch {
-      Log.error("Failed to add todo: \(error)", category: .data)
     }
   }
 
   func update(_ todo: Todo, userId: String) {
-    do {
-      try updateTodoUseCase.run(for: userId, todo)
-      // Optimistic update
-      updateUserTodos(for: todo.owner) { userTodos in
-        if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
-          userTodos[index] = todo
+    Task {
+      do {
+        try await updateTodoUseCase.run(for: userId, todo)
+        // Optimistic update
+        updateUserTodos(for: todo.owner) { userTodos in
+          if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
+            userTodos[index] = todo
+          }
         }
+      } catch {
+        Log.error("Failed to update todo: \(error)", category: .data)
       }
-    } catch {
-      Log.error("Failed to update todo: \(error)", category: .data)
     }
   }
 
