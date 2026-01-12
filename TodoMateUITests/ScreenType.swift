@@ -24,7 +24,7 @@ enum ScreenType: String, CaseIterable {
     case .memo: "memoView"
     case .groupFeed: "groupFeedView"
     case .noGroups: "GroupFeedNoGroupView"
-    case .settings: "settings_view"
+    case .settings: "settingView"
     }
   }
 
