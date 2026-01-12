@@ -82,6 +82,7 @@ struct TodoStoreTests {
       todoRepository: repo,
       messageRepository: MockMessageRepository(messages: []),
       groupRepository: StubGroupRepository(),
+      connectivityRepository: StubConnectivityRepository(),
       authService: MockAuthService(userId: userId),
       messageReadTracker: StubMessageReadTracker(),
     )

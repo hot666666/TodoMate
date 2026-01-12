@@ -14,7 +14,7 @@ import Testing
 @Suite("Local Todo Repository Tests", .serialized)
 @MainActor
 struct LocalTodoRepositoryTests {
-  let repository: LocalTodoRepositoryImpl
+  let repository: SwiftDataTodoRepositoryImpl
   let container: ModelContainer
   let testUserId = "local-user"
 
@@ -23,7 +23,7 @@ struct LocalTodoRepositoryTests {
     let schema = Schema([SDTodo.self])
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     container = try ModelContainer(for: schema, configurations: [config])
-    repository = LocalTodoRepositoryImpl(modelContext: container.mainContext)
+    repository = SwiftDataTodoRepositoryImpl(modelContainer: container)
   }
 
   // MARK: - Create & Read
@@ -31,7 +31,7 @@ struct LocalTodoRepositoryTests {
   @Test("Creates and reads a single todo locally")
   func createAndReadTodo() async throws {
     let todo = Todo(owner: testUserId, content: "Local Todo", detail: "Detail")
-    try repository.create(todo)
+    try await repository.create(todo)
 
     let query = TodoQuery().owner(userId: testUserId)
     let results = try await repository.readAll(query: query, source: .cache)
@@ -47,11 +47,11 @@ struct LocalTodoRepositoryTests {
   @Test("Updates existing todo locally")
   func updateTodo() async throws {
     var todo = Todo(owner: testUserId, content: "Original")
-    try repository.create(todo)
+    try await repository.create(todo)
 
     todo.content = "Updated"
     todo.status = .complete
-    try repository.update(todo)
+    try await repository.update(todo)
 
     let query = TodoQuery().owner(userId: testUserId)
     let results = try await repository.readAll(query: query, source: .cache)
@@ -66,7 +66,7 @@ struct LocalTodoRepositoryTests {
   @Test("Deletes todo locally")
   func deleteTodo() async throws {
     let todo = Todo(owner: testUserId, content: "To be deleted")
-    try repository.create(todo)
+    try await repository.create(todo)
 
     try await repository.delete(todo.id)
 
