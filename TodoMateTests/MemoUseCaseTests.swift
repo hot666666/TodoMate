@@ -14,11 +14,11 @@ import Testing
 final class InMemoryMemoRepository: MemoRepository {
   var memos: [Memo] = []
 
-  func create(_ memo: Memo) throws {
+  func create(_ memo: Memo) async throws {
     memos.append(memo)
   }
 
-  func update(_ memo: Memo) throws {
+  func update(_ memo: Memo) async throws {
     if let index = memos.firstIndex(where: { $0.id == memo.id }) {
       memos[index] = memo
     }
@@ -44,14 +44,14 @@ struct CreateMemoUseCaseTests {
   let repository = InMemoryMemoRepository()
 
   @Test("새 메모 생성 및 저장")
-  func createMemo_savesNewMemo() throws {
+  func createMemo_savesNewMemo() async throws {
     // Given
     let useCase = CreateMemoUseCaseImpl(repository: repository)
     let userId = "user1"
     let memo = Memo(owner: userId, content: "Test Content")
 
     // When
-    try useCase.run(for: userId, memo)
+    try await useCase.run(for: userId, memo)
 
     // Then
     #expect(repository.memos.count == 1)
@@ -60,7 +60,7 @@ struct CreateMemoUseCaseTests {
   }
 
   @Test("다른 사용자의 메모 생성 시도 시 에러")
-  func createMemo_throwsForUnauthorizedUser() {
+  func createMemo_throwsForUnauthorizedUser() async {
     // Given
     let useCase = CreateMemoUseCaseImpl(repository: repository)
     let ownerId = "user1"
@@ -68,8 +68,8 @@ struct CreateMemoUseCaseTests {
     let memo = Memo(owner: ownerId, content: "Test")
 
     // When/Then
-    #expect(throws: MemoUseCaseError.userNotAuthorized) {
-      try useCase.run(for: differentUserId, memo)
+    await #expect(throws: MemoUseCaseError.userNotAuthorized) {
+      try await useCase.run(for: differentUserId, memo)
     }
   }
 }
@@ -136,7 +136,7 @@ struct UpdateMemoUseCaseTests {
 
     // When
     let updatedMemo = memo.withUpdatedContent(updatedContent)
-    try useCase.run(for: userId, updatedMemo)
+    try await useCase.run(for: userId, updatedMemo)
 
     // Then
     #expect(repository.memos.first?.content == updatedContent)

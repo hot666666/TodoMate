@@ -15,11 +15,11 @@ import Testing
 final class InMemoryTodoRepository: TodoRepository {
   var todos: [Todo] = []
 
-  func create(_ todo: Todo) throws {
+  func create(_ todo: Todo) async throws {
     todos.append(todo)
   }
 
-  func update(_ todo: Todo) throws {
+  func update(_ todo: Todo) async throws {
     if let index = todos.firstIndex(where: { $0.id == todo.id }) {
       todos[index] = todo
     }
@@ -55,14 +55,14 @@ struct CreateTodoUseCaseTests {
   let repository = InMemoryTodoRepository()
 
   @Test("새 Todo 생성 및 저장")
-  func createTodo_savesNewTodo() throws {
+  func createTodo_savesNewTodo() async throws {
     // Given
     let useCase = CreateTodoUseCaseImpl(repository: repository)
     let userId = "user1"
     let todo = Todo(owner: userId, content: "Test Content")
 
     // When
-    try useCase.run(for: userId, todo)
+    try await useCase.run(for: userId, todo)
 
     // Then
     #expect(repository.todos.count == 1)
@@ -71,7 +71,7 @@ struct CreateTodoUseCaseTests {
   }
 
   @Test("다른 사용자의 Todo 생성 시도 시 에러")
-  func createTodo_throwsForUnauthorizedUser() {
+  func createTodo_throwsForUnauthorizedUser() async {
     // Given
     let useCase = CreateTodoUseCaseImpl(repository: repository)
     let ownerId = "user1"
@@ -79,8 +79,8 @@ struct CreateTodoUseCaseTests {
     let todo = Todo(owner: ownerId, content: "Test")
 
     // When/Then
-    #expect(throws: TodoUseCaseError.userNotAuthorized) {
-      try useCase.run(for: differentUserId, todo)
+    await #expect(throws: TodoUseCaseError.userNotAuthorized) {
+      try await useCase.run(for: differentUserId, todo)
     }
   }
 }
@@ -90,7 +90,7 @@ struct CreateTodoUseCaseTests {
 @Suite("UpdateTodoUseCase Unit Tests")
 struct UpdateTodoUseCaseTests {
   @Test("기존 Todo 업데이트")
-  func updateTodo_updatesExistingTodo() throws {
+  func updateTodo_updatesExistingTodo() async throws {
     // Given
     let repository = InMemoryTodoRepository()
     let useCase = UpdateTodoUseCaseImpl(repository: repository)
@@ -102,7 +102,7 @@ struct UpdateTodoUseCaseTests {
     // When
     todo.content = "Updated Content"
     todo.status = .complete
-    try useCase.run(for: userId, todo)
+    try await useCase.run(for: userId, todo)
 
     // Then
     #expect(repository.todos.first?.content == "Updated Content")
@@ -110,7 +110,7 @@ struct UpdateTodoUseCaseTests {
   }
 
   @Test("다른 사용자의 Todo 수정 시도 시 에러")
-  func updateTodo_throwsForUnauthorizedUser() {
+  func updateTodo_throwsForUnauthorizedUser() async {
     // Given
     let repository = InMemoryTodoRepository()
     let useCase = UpdateTodoUseCaseImpl(repository: repository)
@@ -121,8 +121,8 @@ struct UpdateTodoUseCaseTests {
     repository.todos = [todo]
 
     // When/Then
-    #expect(throws: TodoUseCaseError.userNotAuthorized) {
-      try useCase.run(for: differentUserId, todo)
+    await #expect(throws: TodoUseCaseError.userNotAuthorized) {
+      try await useCase.run(for: differentUserId, todo)
     }
   }
 }
