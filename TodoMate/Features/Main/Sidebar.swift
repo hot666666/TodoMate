@@ -1,5 +1,5 @@
 //
-//  SidebarView.swift
+//  Sidebar.swift
 //  TodoMate
 //
 //  Created by agent on 1/5/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SidebarView: View {
+struct Sidebar: View {
   @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(PrivateMemoStore.self) private var memoStore
   @Environment(AppDIContainer.self) private var diContainer
@@ -93,7 +93,7 @@ struct SidebarView: View {
         HStack {
           Text("Public")
           Spacer()
-          PublicConnectivityToggleView()
+          PublicConnectivityToggle()
             .padding(.trailing, 8)
         }
       }
@@ -152,7 +152,7 @@ private struct SidebarProfileView: View {
 
 #Preview {
   NavigationSplitView {
-    SidebarView(selection: .constant(.todo))
+    Sidebar(selection: .constant(.todo))
       .environment(PrivateTodoStore.preview)
       .environment(PrivateMemoStore.preview)
       .environment(AppDIContainer.preview)

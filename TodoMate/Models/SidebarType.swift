@@ -1,11 +1,11 @@
 //
-//  Sidebar.swift
+//  SidebarType.swift
 //  TodoMate
 //
 //  Created by hs on 8/24/25.
 //
 
-enum Sidebar: Identifiable, Hashable, Equatable {
+enum SidebarType: Identifiable, Hashable, Equatable {
   case profile
   case user(User)
 
