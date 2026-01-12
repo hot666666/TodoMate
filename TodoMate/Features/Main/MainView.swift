@@ -44,7 +44,7 @@ private struct MainContent: View {
     @Bindable var naviManager = naviManager
 
     NavigationSplitView(columnVisibility: $naviManager.columnVisibility) {
-      SidebarView(selection: $naviManager.selection)
+      Sidebar(selection: $naviManager.selection)
     } detail: {
       detailView
     }
