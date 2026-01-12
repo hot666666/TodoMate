@@ -12,6 +12,9 @@ import SwiftUI
 @Observable
 @MainActor
 final class GroupFeedViewModel {
+  var isChatVisible = true
+  var selectedMemberId: String?
+
   var chatInputText: String = ""
 
   // MARK: - Actions

@@ -5,44 +5,32 @@
 //  Created by agent on 1/5/26.
 //
 
-import PhotosUI
 import SwiftUI
 
 struct GroupFeedView: View {
   @Environment(SessionStore.self) private var sessionStore
   @Environment(TodoStore.self) private var todoStore
   @Environment(MessageStore.self) private var messageStore
+  @Environment(AppDIContainer.self) private var appDI
 
   @Namespace private var segmentAnimation
-  @State private var viewModel = GroupFeedViewModel()
-  @State private var isChatVisible = true
-  @State private var chatPanelWidth: CGFloat = 340
-  @State private var selectedMemberId: String?
+  @State private var chatPanelWidth: CGFloat = DesignSystem.GroupFeed.chatPanelWidth
 
-  private let minChatWidth: CGFloat = 280
-  private let maxChatWidth: CGFloat = 500
+  @State private var vm = GroupFeedViewModel()
+
+  private let minChatWidth: CGFloat = DesignSystem.GroupFeed.minChatWidth
+  private let maxChatWidth: CGFloat = DesignSystem.GroupFeed.maxChatWidth
 
   var body: some View {
-    Group {
-      if sessionStore.userGroupId.isEmpty {
-        GroupFeedNoGroupView()
-      } else {
-        contentView
-      }
-    }
-  }
-
-  private var contentView: some View {
     HStack(spacing: 0) {
-      // Main Content
       VStack(spacing: 0) {
         headerView
         feedContent
       }
       .frame(maxWidth: .infinity)
 
-      // Resizable Chat Panel (trailing)
-      if isChatVisible {
+      /// Resizable Chat Panel (trailing)
+      if vm.isChatVisible {
         resizableChatPanel
       }
     }
@@ -72,19 +60,15 @@ struct GroupFeedView: View {
             },
         )
 
-      ChatPanelView(
-        viewModel: viewModel,
-        sessionStore: sessionStore,
-        messageStore: messageStore,
-      )
-      .frame(width: chatPanelWidth)
-      .transition(.move(edge: .trailing))
+      ChatPanelView(viewModel: vm)
+        .frame(width: chatPanelWidth)
+        .transition(.move(edge: .trailing))
     }
     .toolbar {
       ToolbarItem(placement: .primaryAction) {
         Button {
           withAnimation(.easeInOut(duration: 0.2)) {
-            isChatVisible = false
+            vm.isChatVisible = false
           }
         } label: {
           Image(systemName: "arrow.right.to.line")
@@ -147,7 +131,7 @@ struct GroupFeedView: View {
       ScrollView(.horizontal, showsIndicators: false) {
         HStack(spacing: 0) {
           ForEach(sessionStore.groupMembers) { member in
-            let isSelected = selectedMemberId == member.id
+            let isSelected = vm.selectedMemberId == member.id
             Text(member.displayName)
               .font(.subheadline)
               .fontWeight(isSelected ? .semibold : .regular)
@@ -164,7 +148,7 @@ struct GroupFeedView: View {
               .contentShape(Rectangle())
               .onTapGesture {
                 withAnimation(.snappy) {
-                  selectedMemberId = member.id
+                  vm.selectedMemberId = member.id
                 }
               }
           }
@@ -179,7 +163,7 @@ struct GroupFeedView: View {
       .padding(.bottom, 6)
 
       // Selected member's todos
-      if let memberId = selectedMemberId,
+      if let memberId = vm.selectedMemberId,
          let member = sessionStore.groupMembers.first(where: { $0.id == memberId }) {
         ScrollView {
           GroupMemberSection(
@@ -193,11 +177,11 @@ struct GroupFeedView: View {
       }
     }
     .toolbar {
-      if !isChatVisible {
+      if !vm.isChatVisible {
         ToolbarItem(placement: .primaryAction) {
           Button {
             withAnimation(.easeInOut(duration: 0.2)) {
-              isChatVisible = true
+              vm.isChatVisible = true
             }
           } label: {
             Image(systemName: "bubble.left.and.bubble.right")
@@ -206,8 +190,18 @@ struct GroupFeedView: View {
       }
     }
     .onAppear {
-      if selectedMemberId == nil {
-        selectedMemberId = sessionStore.groupMembers.first?.id
+      if vm.selectedMemberId == nil {
+        vm.selectedMemberId = sessionStore.groupMembers.first?.id
+      }
+
+      // Update Cache
+      if let group = sessionStore.currentGroup {
+        appDI.core.sidebarCacheUseCase.saveGroup(name: group.name, id: group.id)
+      }
+    }
+    .onChange(of: sessionStore.currentGroup) { _, group in
+      if let group {
+        appDI.core.sidebarCacheUseCase.saveGroup(name: group.name, id: group.id)
       }
     }
   }
@@ -249,9 +243,10 @@ private struct GroupMemberSection: View {
 // MARK: - Chat Panel View
 
 private struct ChatPanelView: View {
+  @Environment(SessionStore.self) private var sessionStore
+  @Environment(TodoStore.self) private var todoStore
+  @Environment(MessageStore.self) private var messageStore
   @Bindable var viewModel: GroupFeedViewModel
-  var sessionStore: SessionStore
-  var messageStore: MessageStore
 
   // Removed Photo Picker state for now as it's not supported by domain
 

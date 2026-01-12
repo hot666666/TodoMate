@@ -8,30 +8,36 @@
 import SimpleOverlaySystem
 import SwiftUI
 
+// MARK: - MainView
+
 struct MainView: View {
-  @Environment(CoreDIContainer.self) private var core
+  @Environment(AppDIContainer.self) private var container
+  /// SessionStore 생성
+  @State private var sessionStore: SessionStore
+
+  init(container: AppDIContainer) {
+    _sessionStore = State(initialValue: SessionStore(container: container))
+  }
 
   var body: some View {
     OverlayContainer {
-      MainContent(naviManager: .init(container: core))
+      MainContent(naviManager: .init(container: container))
+        .environment(sessionStore)
+    }
+    .task {
+      sessionStore.startListeningToAuthChanges()
     }
   }
 }
 
-private struct MainContent: View {
-  @Environment(CoreDIContainer.self) private var core
-  @Environment(SessionStore.self) private var sessionStore
-  @Environment(\.overlayManager) private var overlay
-  @Environment(\.scenePhase) private var scenePhase
+// MARK: - MainContent
 
+private struct MainContent: View {
+  @Environment(AppDIContainer.self) private var container
   @State private var naviManager: NavigationManager
 
   init(naviManager: NavigationManager) {
     self.naviManager = naviManager
-  }
-
-  private var isOverlayPresented: Bool {
-    !(overlay?.isEmpty ?? true)
   }
 
   var body: some View {
@@ -44,17 +50,6 @@ private struct MainContent: View {
     }
     .navigationSplitViewStyle(.prominentDetail)
     .environment(naviManager)
-    .onChange(of: scenePhase) { _, newPhase in
-      if newPhase == .active {
-        Task {
-          // Refresh session/data if needed
-          // Authentication check is now done at the view level (AuthenticatedView)
-          // or implicitly by stores listening to auth changes.
-          // sessionStore.refresh() might still be useful.
-          await sessionStore.refresh()
-        }
-      }
-    }
   }
 
   @ViewBuilder
@@ -68,36 +63,38 @@ private struct MainContent: View {
         case .calendar:
           CalendarView(selection: .todo)
         }
+
       case .memo:
         MemoView()
+
       case .settings:
         AuthenticatedView {
           SettingView()
         }
+
       case .group:
         AuthenticatedView {
-          GroupFeedView()
-        }
-      case .noGroups:
-        AuthenticatedView {
-          GroupFeedNoGroupView()
+          GroupFeedWrapperView(container: container)
         }
       }
     } else {
-      ContentUnavailableView(
-        "Select an Item",
-        systemImage: "sidebar.left",
-        description: Text("Choose a category from the sidebar"),
-      )
+      unavailableView
     }
+  }
+
+  private var unavailableView: some View {
+    ContentUnavailableView(
+      "Select an Item",
+      systemImage: "sidebar.left",
+      description: Text("Choose a category from the sidebar"),
+    )
   }
 }
 
 #Preview {
-  MainView()
+  MainView(container: .preview)
     .frame(width: 800, height: 600)
     .environment(AppDIContainer.preview)
-    .environment(CoreDIContainer.preview)
-    .environment(SessionStore.preview)
+    .environment(AppDIContainer.preview)
     .environment(TodoStore.preview)
 }

@@ -73,6 +73,14 @@ enum DesignSystem {
     static let calendarCellItemHeight: CGFloat = 26
   }
 
+  // MARK: - GroupFeed
+
+  enum GroupFeed {
+    static let chatPanelWidth: CGFloat = 340
+    static let minChatWidth: CGFloat = 280
+    static let maxChatWidth: CGFloat = 500
+  }
+
   // MARK: - TodoSheet
 
   enum TodoSheet {

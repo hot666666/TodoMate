@@ -100,11 +100,6 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		45A242A72F0BCA50006B9A72 /* DesignSystem */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = DesignSystem;
-			sourceTree = "<group>";
-		};
 		45A242BB2F0BCCCF006B9A72 /* Resources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -195,7 +190,6 @@
 				452C64D42E21F56600A68B94 /* .swiftlint.yml */,
 				45A242C42F0BCCE8006B9A72 /* Shared */,
 				45A2428B2F0BC61F006B9A72 /* Extensions */,
-				45A242A72F0BCA50006B9A72 /* DesignSystem */,
 				452C66A12E22752500A68B94 /* Data */,
 				452C66822E226FF600A68B94 /* Domain */,
 				45DA69ED2E238B00007183E3 /* TodoMate */,
@@ -280,7 +274,6 @@
 				452C66822E226FF600A68B94 /* Domain */,
 				452C66A12E22752500A68B94 /* Data */,
 				45A2428B2F0BC61F006B9A72 /* Extensions */,
-				45A242A72F0BCA50006B9A72 /* DesignSystem */,
 				45A242BB2F0BCCCF006B9A72 /* Resources */,
 				45A242C42F0BCCE8006B9A72 /* Shared */,
 				45DA69ED2E238B00007183E3 /* TodoMate */,

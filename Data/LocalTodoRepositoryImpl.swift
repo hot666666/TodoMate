@@ -18,6 +18,7 @@ final class LocalTodoRepositoryImpl: TodoRepository {
   func create(_ todo: Todo) throws {
     let sdTodo = SDTodo(from: todo)
     modelContext.insert(sdTodo)
+    try modelContext.save()
   }
 
   func update(_ todo: Todo) throws {
@@ -41,6 +42,7 @@ final class LocalTodoRepositoryImpl: TodoRepository {
       // Since protocol uses `throws`, let's just leave it silent or insert?
       // Revisit requirement. For now, treating as must-exist.
     }
+    try modelContext.save()
   }
 
   func delete(_ todoId: String) async throws {
@@ -48,6 +50,7 @@ final class LocalTodoRepositoryImpl: TodoRepository {
     if let existing = try modelContext.fetch(descriptor).first {
       modelContext.delete(existing)
     }
+    try modelContext.save()
   }
 
   func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
