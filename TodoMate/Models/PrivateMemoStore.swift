@@ -59,7 +59,7 @@ final class PrivateMemoStore {
 
     Task {
       do {
-        try createMemoUseCase.run(for: localUserId, memo)
+        try await createMemoUseCase.run(for: localUserId, memo)
         await load() // Reload to reflect changes
       } catch {
         Log.error("Failed to create private memo: \(error)", category: .data)
@@ -73,7 +73,7 @@ final class PrivateMemoStore {
 
     Task {
       do {
-        try updateMemoUseCase.run(for: localUserId, updatedMemo)
+        try await updateMemoUseCase.run(for: localUserId, updatedMemo)
         await load()
       } catch {
         Log.error("Failed to update private memo: \(error)", category: .data)

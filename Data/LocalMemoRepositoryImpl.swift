@@ -8,20 +8,17 @@
 import Foundation
 import SwiftData
 
-struct LocalMemoRepositoryImpl: MemoRepository {
-  private let modelContext: ModelContext
+@ModelActor
+actor SwiftDataMemoRepositoryImpl: MemoRepository {
+  // @ModelActor provides `modelContext` and `modelExecutor`
 
-  init(modelContext: ModelContext) {
-    self.modelContext = modelContext
-  }
-
-  func create(_ memo: Memo) throws {
+  func create(_ memo: Memo) async throws {
     let sdMemo = memo.toSDMemo()
     modelContext.insert(sdMemo)
     try modelContext.save()
   }
 
-  func update(_ memo: Memo) throws {
+  func update(_ memo: Memo) async throws {
     let memoId = memo.id
     let descriptor = FetchDescriptor<SDMemo>(predicate: #Predicate<SDMemo> { $0.id == memoId })
 
@@ -31,7 +28,7 @@ struct LocalMemoRepositoryImpl: MemoRepository {
       try modelContext.save()
     } else {
       // If not found, treat as create
-      try create(memo)
+      try await create(memo)
     }
   }
 

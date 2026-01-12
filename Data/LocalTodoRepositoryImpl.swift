@@ -8,20 +8,17 @@
 import Foundation
 import SwiftData
 
-final class LocalTodoRepositoryImpl: TodoRepository {
-  private let modelContext: ModelContext
+@ModelActor
+actor SwiftDataTodoRepositoryImpl: TodoRepository {
+  // @ModelActor provides `modelContext` and `modelExecutor`
 
-  init(modelContext: ModelContext) {
-    self.modelContext = modelContext
-  }
-
-  func create(_ todo: Todo) throws {
+  func create(_ todo: Todo) async throws {
     let sdTodo = SDTodo(from: todo)
     modelContext.insert(sdTodo)
     try modelContext.save()
   }
 
-  func update(_ todo: Todo) throws {
+  func update(_ todo: Todo) async throws {
     let id = todo.id
     // SwiftData predicate construction for ID match
     let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == id })
@@ -33,14 +30,6 @@ final class LocalTodoRepositoryImpl: TodoRepository {
       existing.date = todo.date
       existing.updatedAt = Date() // Update timestamp
       existing.owner = todo.owner
-    } else {
-      // If not found, should we throw or insert? Domain logic usually expects update to fail if not found,
-      // but for robustness we might log warning.
-      // throw TodoRepositoryError.notFound
-      // For now, let's just insert it as fallback or do nothing.
-      // Safe choice: do nothing but log, or throw.
-      // Since protocol uses `throws`, let's just leave it silent or insert?
-      // Revisit requirement. For now, treating as must-exist.
     }
     try modelContext.save()
   }
@@ -53,7 +42,7 @@ final class LocalTodoRepositoryImpl: TodoRepository {
     try modelContext.save()
   }
 
-  func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
+  func readAll(query _: TodoQuery, source _: DataSource) async throws -> [Todo] {
     // Note: 'source' is ignored as this is strictly the local repository.
 
     // Construct predicate based on query filters
@@ -69,21 +58,22 @@ final class LocalTodoRepositoryImpl: TodoRepository {
     let descriptor = FetchDescriptor<SDTodo>()
     let allSDTodos = try modelContext.fetch(descriptor)
     var todos = allSDTodos.map { $0.toDomain() }
+//
+//    // In-memory filtering
+//    for filter in query.filters {
+//      switch filter {
+//      case .owner(let userId):
+//        todos = todos.filter { $0.owner == userId }
+//      case .owners(let userIds):
+//        todos = todos.filter { userIds.contains($0.owner) }
+//      case .dateRange(let range):
+//        todos = todos.filter { range.contains($0.date) }
+//      case .status(let status):
+//        todos = todos.filter { $0.status == status }
+//      }
+//    }
 
-    // In-memory filtering
-    for filter in query.filters {
-      switch filter {
-      case let .owner(userId):
-        todos = todos.filter { $0.owner == userId }
-      case let .owners(userIds):
-        todos = todos.filter { userIds.contains($0.owner) }
-      case let .dateRange(range):
-        todos = todos.filter { range.contains($0.date) }
-      case let .status(status):
-        todos = todos.filter { $0.status == status }
-      }
-    }
-
+    print(todos)
     return todos
   }
 }
