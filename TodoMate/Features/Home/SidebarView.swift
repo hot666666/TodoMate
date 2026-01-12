@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SidebarView: View {
   @Environment(SessionStore.self) private var sessionStore
-  @Environment(TodoStore.self) private var todoStore
+  @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(PrivateMemoStore.self) private var memoStore
   @Environment(NetworkModeManager.self) private var networkManager
   @Binding var selection: NavigationDestination?
@@ -17,8 +17,10 @@ struct SidebarView: View {
   private var todayTodoCount: Int {
     let calendar = Calendar.current
     let today = calendar.startOfDay(for: .now)
-    let todos = todoStore.todos[sessionStore.userId] ?? []
-    return todos.count(where: { calendar.startOfDay(for: $0.date) == today })
+    // Flatten the dictionary values if needed or iterate
+    // PrivateTodoStore stores [Date: [Todo]]
+    let allTodos = todoStore.todos.values.flatMap(\.self)
+    return allTodos.count(where: { calendar.startOfDay(for: $0.date) == today })
   }
 
   private var memoCount: Int {
@@ -158,7 +160,7 @@ private struct SidebarProfileView: View {
   NavigationSplitView {
     SidebarView(selection: .constant(.todo))
       .environment(SessionStore.preview)
-      .environment(TodoStore.preview)
+      .environment(PrivateTodoStore.preview)
       .environment(PrivateMemoStore.preview)
       .environment(NetworkModeManager.preview)
   } detail: {

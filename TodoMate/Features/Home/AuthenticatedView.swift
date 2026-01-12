@@ -9,64 +9,40 @@
 
 import SwiftUI
 
-struct AuthenticatedView: View {
+struct AuthenticatedView<Content: View>: View {
   @Environment(SessionStore.self) private var sessionStore
-  @State private var naviManager: NavigationManager
+  let content: Content
 
-  init(naviManager: NavigationManager) {
-    self.naviManager = naviManager
+  init(@ViewBuilder content: () -> Content) {
+    self.content = content()
   }
 
   var body: some View {
-    @Bindable var naviManager = naviManager
-
-    NavigationSplitView(columnVisibility: $naviManager.columnVisibility) {
-      SidebarView(selection: $naviManager.selection)
-    } detail: {
-      detailView
-    }
-    .navigationSplitViewStyle(.prominentDetail)
-    .environment(naviManager)
-  }
-
-  // MARK: - Detail View
-
-  @ViewBuilder
-  private var detailView: some View {
-    if let selection = naviManager.selection {
-      switch selection {
-      case .todo:
-        switch naviManager.viewMode {
-        case .board:
-          BoardView(selection: .todo)
-        case .calendar:
-          CalendarView(selection: .todo)
-        }
-      case .memo:
-        MemoView()
-      case .settings:
-        SettingView()
-      case .group:
-        GroupFeedView()
-      case .noGroups:
-        GroupFeedNoGroupView()
-      }
-    } else {
-      ContentUnavailableView(
-        "Select an Item",
-        systemImage: "sidebar.left",
-        description: Text("Choose a category from the sidebar"),
-      )
+    switch sessionStore.authState {
+    case .authenticated:
+      content
+    case .unauthenticated:
+      LoginView()
+    case .loading:
+      ProgressView("Signing in...")
     }
   }
 }
 
+extension AuthenticatedView where Content == EmptyView {
+  init() {
+    self.init { EmptyView() }
+  }
+}
+
 #Preview {
-  AuthenticatedView(naviManager: .preview)
-    .environment(CoreDIContainer.preview)
-    .environment(PublicDIContainer.preview)
-    .environment(SessionStore.preview)
-    .environment(TodoStore.preview)
-    .environment(PrivateMemoStore(container: .preview))
-    .environment(MessageStore.preview)
+  AuthenticatedView {
+    Text("Authenticated Content")
+  }
+  .environment(CoreDIContainer.preview)
+  .environment(PublicDIContainer.preview)
+  .environment(SessionStore.preview)
+  .environment(TodoStore.preview)
+  .environment(PrivateMemoStore.preview)
+  .environment(MessageStore.preview)
 }
