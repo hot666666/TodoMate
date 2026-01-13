@@ -24,9 +24,9 @@ final class ScreenshotTests: XCTestCase {
     navigator = nil
   }
 
-  private func launchApp(scenario: String = "group_user") {
+  private func launchApp(args: [String] = []) {
     app = XCUIApplication()
-    app.launchArguments = ["--ui-testing", "-scenario", scenario]
+    app.launchArguments = ["--ui-testing", "-useMockContainer"] + args
     app.launch()
     app.activate()
 
@@ -41,7 +41,7 @@ final class ScreenshotTests: XCTestCase {
 
   @MainActor
   func testCapturePersonalBoard() {
-    launchApp()
+    launchApp() // Default scenario seeds data
     captureScreen(.personalBoard)
   }
 
@@ -57,28 +57,53 @@ final class ScreenshotTests: XCTestCase {
     captureScreen(.memo)
   }
 
+  // MARK: - Settings in 3 States
+
   @MainActor
-  func testCaptureSettings() {
-    launchApp()
-    captureScreen(.settings)
+  func testCaptureSettings_Guest() {
+    launchApp(args: ["-scenario", "guest"])
+    captureScreen(.settings, suffix: "_guest")
+  }
+
+  @MainActor
+  func testCaptureSettings_NoGroup() {
+    launchApp(args: ["-scenario", "no_group"])
+    captureScreen(.settings, suffix: "_no_group")
+  }
+
+  @MainActor
+  func testCaptureSettings_GroupUser() {
+    launchApp(args: ["-scenario", "group_user"])
+    captureScreen(.settings, suffix: "_group_user")
+  }
+
+  // MARK: - Group in 3 States
+
+  @MainActor
+  func testCaptureLogin() {
+    // Guest accessing Group -> Login View
+    launchApp(args: ["-scenario", "guest"])
+    captureScreen(.login)
   }
 
   @MainActor
   func testCaptureNoGroups() {
-    launchApp(scenario: "no_group_user")
+    // Logged in (No Group) accessing Group -> No Groups View
+    launchApp(args: ["-scenario", "no_group"])
     captureScreen(.noGroups)
   }
 
   @MainActor
   func testCaptureGroupFeed() {
-    launchApp(scenario: "group_user")
+    // Logged in (Group) accessing Group -> Feed View
+    launchApp(args: ["-scenario", "group_user"])
     captureScreen(.groupFeed)
   }
 
   // MARK: - Private Helpers
 
-  private func captureScreen(_ screen: ScreenType) {
-    print("\n🎯 Capturing: \(screen.rawValue)")
+  private func captureScreen(_ screen: ScreenType, suffix: String? = nil) {
+    print("\n🎯 Capturing: \(screen.rawValue)\(suffix ?? "")")
 
     navigator.navigate(to: screen)
 
@@ -86,6 +111,6 @@ final class ScreenshotTests: XCTestCase {
     Thread.sleep(forTimeInterval: 0.5)
 
     let screenshot = app.windows.firstMatch.screenshot()
-    ScreenshotCapture.save(screenshot: screenshot, for: screen, to: self)
+    ScreenshotCapture.save(screenshot: screenshot, for: screen, suffix: suffix, to: self)
   }
 }

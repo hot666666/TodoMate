@@ -18,5 +18,6 @@ enum EntityConstant {
 
   enum UserGroup {
     static let stubId = "testUserGroup"
+    static let stubName = "Test Group"
   }
 }

@@ -46,18 +46,16 @@ struct Sidebar: View {
               displayName: "TodoMate",
               style: .compact,
               avatar: {
-                Image("AppImage")
-                  .resizable()
-                  .aspectRatio(contentMode: .fit)
-                  .frame(width: 32, height: 32)
-                  .clipShape(Circle())
+                AppImage(size: 32)
               },
             )
           } else {
             UserProfileView(
               displayName: cachedProfileName,
               style: .compact,
-              size: 32,
+              avatar: {
+                DefaultAvatar(displayName: cachedProfileName, size: 32)
+              },
             )
           }
         }

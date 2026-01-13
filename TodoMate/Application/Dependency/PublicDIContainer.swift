@@ -132,4 +132,21 @@ extension PublicDIContainer {
     authService: StubAuthService(),
     messageReadTracker: StubMessageReadTracker(),
   )
+
+  static func mock(
+    authState: String? = User.stub.id,
+    groupState: UserGroup? = .stub,
+    user: User? = .stub,
+    messages: [GroupMessage] = [],
+  ) -> PublicDIContainer {
+    .init(
+      userRepository: StubUserRepository(userToReturn: user),
+      todoRepository: StubTodoRepository(),
+      messageRepository: StubMessageRepository(messagesToReturn: messages),
+      groupRepository: StubGroupRepository(groupToReturn: groupState),
+      connectivityRepository: StubConnectivityRepository(),
+      authService: StubAuthService(signedInUserId: authState),
+      messageReadTracker: StubMessageReadTracker(),
+    )
+  }
 }

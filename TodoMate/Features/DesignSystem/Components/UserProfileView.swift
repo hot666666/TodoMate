@@ -33,15 +33,11 @@ struct UserProfileView<Avatar: View, LeadingAction: View, TrailingAction: View>:
       ProfileAvatarView(style: style) {
         avatar()
       } label: {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 5) {
           Text(displayName)
-            .font(style == .compact ? .subheadline : .body)
+            .font(style == .compact ? .subheadline : .title3)
             .fontWeight(.semibold)
             .foregroundStyle(.primary)
-
-          if style == .default {
-            // Can add subtitle here if needed in future
-          }
         }
       } action: {
         leadingAction()

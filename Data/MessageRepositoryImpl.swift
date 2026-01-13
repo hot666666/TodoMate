@@ -70,11 +70,25 @@ final class FirestoreMessageRepository: MessageRepository {
 }
 
 final class StubMessageRepository: MessageRepository {
+  var messagesToReturn: [GroupMessage]
+
+  init(messagesToReturn: [GroupMessage] = []) {
+    self.messagesToReturn = messagesToReturn
+  }
+
   func create(_: GroupMessage) throws {}
   func update(_: GroupMessage) throws {}
   func delete(_: String) async throws {}
-  func readAll(groupId _: String, source _: DataSource) async throws -> [GroupMessage] { [] }
+  func readAll(groupId _: String, source _: DataSource) async throws -> [GroupMessage] {
+    messagesToReturn
+  }
+
   func observeAll(groupId _: String) -> AsyncStream<RepositoryEvent<GroupMessage>> {
-    AsyncStream { $0.finish() }
+    AsyncStream { continuation in
+      for message in messagesToReturn {
+        continuation.yield(.added(message))
+      }
+      // Keep stream alive
+    }
   }
 }

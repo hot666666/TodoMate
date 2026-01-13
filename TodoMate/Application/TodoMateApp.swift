@@ -14,21 +14,23 @@ import SwiftUI
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   private let appDIContainer: AppDIContainer
-  /// Private Todo/MemoStore 생성
+
+  // MARK: - Global States(App Lifetime)
+
   @State private var todoStore: PrivateTodoStore
   @State private var memoStore: PrivateMemoStore
 
   init() {
-    /// Firebaes, Google Sign-In 초기화
+    /// Firebase 및 인증 설정
     Self.configureFirebaseAndAuth()
-    /// DI 컨테이너 생성
-    let userDefaults = UserDefaults.standard
-    let coreDI = Self.createCoreDIContainer(userDefaults: userDefaults)
-    let publicDI = Self.createPublicDIContainer(userDefaults: userDefaults)
-    appDIContainer = AppDIContainer(coreContainer: coreDI, publicContainer: publicDI)
-    /// Store 객체 초기화
-    _todoStore = State(initialValue: PrivateTodoStore(container: coreDI))
-    _memoStore = State(initialValue: PrivateMemoStore(container: coreDI))
+    /// DI Container 생성
+    let container = Self.makeContainer()
+    appDIContainer = container
+    /// 앱 업데이트 체크 및 처리
+    Self.checkAndHandleAppUpdate(container: container)
+    /// Store 초기화
+    _todoStore = State(initialValue: PrivateTodoStore(container: container.core))
+    _memoStore = State(initialValue: PrivateMemoStore(container: container.core))
   }
 
   var body: some Scene {
@@ -42,19 +44,52 @@ struct TodoMateApp: App {
         .background(.ultraThickMaterial)
         .frame(minWidth: 720, minHeight: 540)
         .task {
+          #if DEBUG
+            if Self.isUITesting {
+              MockDataSeeder.seed(container: appDIContainer.core.modelContainer)
+            }
+          #endif
           await todoStore.loadTodos()
           await memoStore.load()
         }
     }
-
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)
     #endif
   }
 }
 
-extension TodoMateApp {
-  fileprivate static func configureFirebaseAndAuth() {
+private extension TodoMateApp {
+  #if DEBUG
+    static var isUITesting: Bool {
+      ProcessInfo.processInfo.arguments.contains("-useMockContainer")
+    }
+  #endif
+
+  @MainActor
+  static func makeContainer() -> AppDIContainer {
+    #if DEBUG
+      if isUITesting {
+        let scenario = parseSenarioFromArguments()
+        return AppDIContainer.makeMock(for: scenario)
+      }
+    #endif
+
+    return composeContainer()
+  }
+
+  @MainActor
+  static func composeContainer() -> AppDIContainer {
+    let userDefaults = UserDefaults.standard
+    let coreDI = createCoreDIContainer(userDefaults: userDefaults)
+    let publicDI = createPublicDIContainer(userDefaults: userDefaults)
+
+    return AppDIContainer(coreContainer: coreDI, publicContainer: publicDI)
+  }
+}
+
+private extension TodoMateApp {
+  static func configureFirebaseAndAuth() {
     FirebaseApp.configure()
     Log.info("Firebase configured successfully.")
 
@@ -66,7 +101,7 @@ extension TodoMateApp {
     }
   }
 
-  fileprivate static func createCoreDIContainer(userDefaults: UserDefaults) -> CoreDIContainer {
+  static func createCoreDIContainer(userDefaults: UserDefaults) -> CoreDIContainer {
     let container = Self.createSwiftDataModelContainer()
 
     return CoreDIContainer(
@@ -75,7 +110,7 @@ extension TodoMateApp {
     )
   }
 
-  fileprivate static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
+  static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
     let firestoreReference = FirestoreReference()
     let authService = FirebaseAuthService()
     let userRepo = FirestoreUserRepository(reference: firestoreReference)

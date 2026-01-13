@@ -60,6 +60,7 @@ extension LoginView {
     }
 
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .accessibilityIdentifier("loginView")
     .confirmationDialog(
       "로그인 오류",
       isPresented: $isErrorDialogPresented,
