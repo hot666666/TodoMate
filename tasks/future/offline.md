@@ -120,7 +120,8 @@ graph TD
 
 ### Phase 4: 데이터 계층 구현 (SwiftData 준비) [DONE]
 - [x] **로컬 Repository 구현**
-    - [x] `LocalTodoRepository` 생성 및 SwiftData 기본 CRUD 연결.
+    - [x] `LocalTodoRepository` 등 기본 CRUD 연결.
+    - [x] **Refactoring**: 모든 Repository를 `async/await` 및 `@ModelActor` 패턴으로 전환하여 Thread Safety 확보.
     - [x] `SDTodo` 모델 정의 및 `Todo` 엔티티 매핑 구현.
     - [x] `CoreDIContainer`에 `modelContext` 주입 및 Repository 등록.
 
@@ -136,15 +137,12 @@ graph TD
 - [x] **Refactor `BoardView` to be store-agnostic (Local-Only)**
 - [x] **Refactor `CalendarView` to be store-agnostic (Local-Only)**
 - [x] **Integrate Private Views into `PrivateSidebarView` and `RootView`**
+- [x] **Improve UX/UI**
+    - [x] `HotKeyManager` 도입: Global `ESC` 키 처리 및 단축키 지원.
+    - [x] `Guest Profile` 지원: 로그인하지 않은 상태에서도 사이드바 프로필 UI 유지.
+    - [x] `Settings` UI 개선: 토글 버튼 및 그룹 섹션 스타일링.
 
-### Phase 6: Verification and Cleanup
 
-- [ ] **Verify `init` / `deinit` logs of `PublicDIContainer` when toggling**
-- [ ] **Verify `CoreDIContainer` doesn't import Firebase**
-- [ ] **Run basic smoke tests in offline mode**
-- [ ] **Verify build and unit tests with new DI structure**
-- [ ] **Verify Private Mode UI functionality (CRUD)**
-- [ ] **Verify Public Mode UI regression test**
 
 ## 최근 진행 요약
 
@@ -169,8 +167,7 @@ Public 섹션의 모든 뷰와 스토어는 이 래퍼 내부에서 조립됩니
 
 ### 검증 계획
 
-1.  **Private 영역**:
-    -   네트워크 연결 여부와 상관없이 `BoardView`, `CalendarView`가 로컬 데이터를 정상적으로 CRUD 하는지 확인.
-2.  **Public 영역**:
-    -   토글 ON 시 로그인 화면 또는 그룹 화면으로 정상 진입하는지 확인.
-    -   오프라인 토글 OFF 시 Public 관련 리소스가 해제되는지 확인 (기존 검증 항목 재확인).
+#### 4. 추가 개선 사항 (Completed)
+- **HotKeyManager**: `ESC` 키를 통한 오버레이 닫기 및 전역 단축키 관리를 위한 매니저 도입.
+- **Async/Await Refactoring**: 모든 Repository와 UseCase가 Modern Concurrency(`async/await`)를 사용하도록 변경. SwfitData의 `@ModelActor`를 사용하여 데이터 안정성 확보.
+- **UI Testing**: UI 스크린샷 자동화 테스트(`TodoMateUITests`) 추가 및 시나리오 검증 시스템 구축.
