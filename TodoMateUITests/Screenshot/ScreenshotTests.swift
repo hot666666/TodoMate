@@ -62,19 +62,19 @@ final class ScreenshotTests: XCTestCase {
   @MainActor
   func testCaptureSettings_Guest() {
     launchApp(args: ["-scenario", "guest"])
-    captureScreen(.settings)
+    captureScreen(.settings, suffix: "_guest")
   }
 
   @MainActor
   func testCaptureSettings_NoGroup() {
     launchApp(args: ["-scenario", "no_group"])
-    captureScreen(.settings)
+    captureScreen(.settings, suffix: "_no_group")
   }
 
   @MainActor
   func testCaptureSettings_GroupUser() {
     launchApp(args: ["-scenario", "group_user"])
-    captureScreen(.settings)
+    captureScreen(.settings, suffix: "_group_user")
   }
 
   // MARK: - Group in 3 States
@@ -102,8 +102,8 @@ final class ScreenshotTests: XCTestCase {
 
   // MARK: - Private Helpers
 
-  private func captureScreen(_ screen: ScreenType) {
-    print("\n🎯 Capturing: \(screen.rawValue)")
+  private func captureScreen(_ screen: ScreenType, suffix: String? = nil) {
+    print("\n🎯 Capturing: \(screen.rawValue)\(suffix ?? "")")
 
     navigator.navigate(to: screen)
 
@@ -111,6 +111,6 @@ final class ScreenshotTests: XCTestCase {
     Thread.sleep(forTimeInterval: 0.5)
 
     let screenshot = app.windows.firstMatch.screenshot()
-    ScreenshotCapture.save(screenshot: screenshot, for: screen, to: self)
+    ScreenshotCapture.save(screenshot: screenshot, for: screen, suffix: suffix, to: self)
   }
 }

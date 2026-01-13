@@ -6,62 +6,139 @@
 //
 
 import Foundation
+import SwiftData
 
 #if DEBUG
 
   // MARK: - Screenshot Testing Scenarios
 
-  enum ScreenshotScenario: String {
-    case groupUser = "group_user"
-    case noGroupUser = "no_group_user"
-
-    /// AppDIContainer for this scenario
-    @MainActor
-    var container: AppDIContainer {
-      switch self {
-      case .groupUser:
-        .mockGroupUser
-      case .noGroupUser:
-        .mockNoGroupUser
-      }
-    }
-
-    /// The mock user for this scenario
-    var user: User {
-      switch self {
-      case .groupUser:
-        User.stub // Has groupId
-      case .noGroupUser:
-        User(id: "user_no_group", displayName: "Solo User", groupId: "")
-      }
-    }
-
-    /// Group members for this scenario
-    var groupMembers: [User] {
-      switch self {
-      case .groupUser:
-        [
-          User.stub, User(id: "member1", displayName: "Member 1", groupId: User.stub.groupId),
-        ]
-      case .noGroupUser:
-        []
-      }
-    }
-  }
-
   extension AppDIContainer {
+    enum ScreenshotScenario: String {
+      case groupUser = "group_user"
+      case noGroup = "no_group"
+      case guest
+
+      /// AppDIContainer for this scenario
+      @MainActor
+      var container: AppDIContainer {
+        switch self {
+        case .groupUser:
+          .mockGroupUser
+        case .noGroup:
+          .mockNoGroupUser
+        case .guest:
+          .mockGuest
+        }
+      }
+
+      /// The mock user for this scenario
+      var user: User? {
+        switch self {
+        case .groupUser:
+          User.stub
+        case .noGroup:
+          // Use stub constants but ensure empty groupId
+          User(
+            id: EntityConstant.User.stubId,
+            displayName: EntityConstant.User.stubDisplayName,
+            groupId: "",
+          )
+        case .guest:
+          nil
+        }
+      }
+
+      /// Group members for this scenario
+      var groupMembers: [User] {
+        switch self {
+        case .groupUser:
+          [
+            User.stub,
+            User(
+              id: "member1", displayName: "Member 1", groupId: EntityConstant.UserGroup.stubId,
+            ),
+          ]
+        case .noGroup, .guest:
+          []
+        }
+      }
+
+      /// Configure UserDefaults for the scenario
+      @MainActor
+      func configureUserDefaults() {
+        // 1. Clear existing defaults for clean state
+        if let bundleID = Bundle.main.bundleIdentifier {
+          UserDefaults.standard.removePersistentDomain(forName: bundleID)
+        }
+
+        // Prevent checkAndHandleAppUpdate from wiping data by setting a fake version
+        UserDefaults.standard.set("1.0.0", forKey: UserDefaultsKey.appLastVersion.rawValue)
+
+        // 2. Set user profile
+        guard let user else { return }
+        UserDefaults.standard.set(
+          user.displayName, forKey: UserDefaultsKey.cachedProfileName.rawValue,
+        )
+
+        // 3. Set group info if applicable
+        if !user.groupId.isEmpty {
+          // Use EntityConstant for the group name since we don't have a full Group object here,
+          // but we know this scenario uses the stub group.
+          UserDefaults.standard.set(
+            EntityConstant.UserGroup.stubName, forKey: UserDefaultsKey.cachedGroupName.rawValue,
+          )
+          UserDefaults.standard.set(
+            user.groupId, forKey: UserDefaultsKey.cachedUserGroupId.rawValue,
+          )
+        } else {
+          UserDefaults.standard.removeObject(forKey: UserDefaultsKey.cachedGroupName.rawValue)
+          UserDefaults.standard.removeObject(forKey: UserDefaultsKey.cachedUserGroupId.rawValue)
+        }
+      }
+    }
+
     @MainActor
     static func makeMock(for scenario: String) -> AppDIContainer {
       guard let scenarioEnum = ScreenshotScenario(rawValue: scenario) else {
         return AppDIContainer.preview // Default fallback
       }
+
+      // Seed UserDefaults for the scenario
+      scenarioEnum.configureUserDefaults()
+
       return scenarioEnum.container
+    }
+
+    @MainActor
+    static var mockCore: CoreDIContainer {
+      let schema = Schema([SDTodo.self, SDMemo.self])
+      let config = ModelConfiguration(isStoredInMemoryOnly: true)
+      // swiftlint:disable:next force_try
+      let container = try! ModelContainer(for: schema, configurations: [config])
+      return CoreDIContainer(
+        modelContainer: container,
+        userDefaults: .standard,
+      )
+    }
+
+    @MainActor
+    static var mockGuest: AppDIContainer {
+      let publicContainer = createMockPublicContainer(
+        user: nil,
+        groupMembers: [],
+        todos: [],
+        memo: nil,
+        messages: [],
+      )
+      return AppDIContainer(coreContainer: mockCore, publicContainer: publicContainer)
     }
 
     @MainActor
     static var mockGroupUser: AppDIContainer {
       let mainUser = User.stub
-      let memberUser = User(id: "member1", displayName: "Member 1", groupId: mainUser.groupId)
+      let memberUser = User(
+        id: "member1", displayName: "Member 1", groupId: EntityConstant.UserGroup.stubId,
+      )
 
       let todos = [
         Todo.stub,
@@ -88,12 +165,15 @@ import Foundation
         messages: messages,
       )
 
-      return AppDIContainer(coreContainer: .preview, publicContainer: publicContainer)
+      return AppDIContainer(coreContainer: mockCore, publicContainer: publicContainer)
     }
 
     @MainActor
     static var mockNoGroupUser: AppDIContainer {
-      let mainUser = User(id: "user_no_group", displayName: "Solo User", groupId: "")
+      // Use the scenario definition to ensure consistency
+      guard let mainUser = ScreenshotScenario.noGroup.user else {
+        return .preview
+      }
 
       let todos = [
         Todo(owner: mainUser.id, content: "Personal Task 1", in: .now),
@@ -109,11 +189,12 @@ import Foundation
         messages: [],
       )
 
-      return AppDIContainer(coreContainer: .preview, publicContainer: publicContainer)
+      return AppDIContainer(coreContainer: mockCore, publicContainer: publicContainer)
     }
 
+    // Helper to create PublicDIContainer with optional user
     private static func createMockPublicContainer(
-      user: User,
+      user: User?,
       groupMembers: [User],
       todos: [Todo],
       memo _: Memo?,
@@ -122,7 +203,9 @@ import Foundation
       let userRepo = MockUserRepository(currentUser: user, groupMembers: groupMembers)
       let todoRepo = MockTodoRepository(todos: todos)
       let messageRepo = MockMessageRepository(messages: messages)
-      let authService = MockAuthService(userId: user.id)
+
+      // If user is nil (guest), authState is nil
+      let authService = MockAuthService(userId: user?.id)
 
       return PublicDIContainer(
         userRepository: userRepo,
@@ -140,11 +223,11 @@ import Foundation
 
   /// UI Testing용 AuthService - scenario에 맞는 user ID로 인증
   final class MockAuthService: AuthService {
-    private let userId: String
+    private let userId: String?
 
     var signedInUserId: String? { userId }
 
-    init(userId: String) {
+    init(userId: String?) {
       self.userId = userId
     }
 
@@ -162,10 +245,10 @@ import Foundation
   // MARK: - Mock Repositories
 
   final class MockUserRepository: UserRepository {
-    let currentUser: User
+    let currentUser: User?
     let groupMembers: [User]
 
-    init(currentUser: User, groupMembers: [User]) {
+    init(currentUser: User?, groupMembers: [User]) {
       self.currentUser = currentUser
       self.groupMembers = groupMembers
     }
@@ -175,12 +258,12 @@ import Foundation
     }
 
     func read(userId: String, source _: DataSource) async throws -> User? {
-      if userId == currentUser.id { return currentUser }
+      if let currentUser, userId == currentUser.id { return currentUser }
       return groupMembers.first { $0.id == userId }
     }
 
     func readAll(groupId: String, source _: DataSource) async throws -> [User] {
-      if groupId == currentUser.groupId { return groupMembers }
+      if let currentUser, groupId == currentUser.groupId { return groupMembers }
       return []
     }
 
