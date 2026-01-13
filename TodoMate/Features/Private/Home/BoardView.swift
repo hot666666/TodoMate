@@ -15,7 +15,6 @@ import SwiftUI
 struct BoardView: View {
   @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
-  let selection: NavigationDestination
 
   @State private var dateFilter: DateFilter = .today
   @State private var scrollPosition: BoardScrollPosition? = .leading
@@ -290,7 +289,7 @@ private struct TodoColumn: View {
 }
 
 #Preview {
-  BoardView(selection: .todo)
+  BoardView()
     .environment(PrivateTodoStore.preview)
     .environment(OverlayManager())
 }

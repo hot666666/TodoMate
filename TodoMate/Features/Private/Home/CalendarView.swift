@@ -11,7 +11,6 @@ import SwiftUI
 struct CalendarView: View {
   @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
-  let selection: NavigationDestination
   @State private var currentDate = Date()
   @State private var selectedTask: ViewTodo?
 
@@ -292,7 +291,7 @@ struct CalendarCell: View {
 }
 
 #Preview {
-  CalendarView(selection: .todo)
+  CalendarView()
     .environment(NavigationManager.preview)
     .environment(PrivateTodoStore.preview)
 }

@@ -100,6 +100,13 @@ struct MemoView: View {
       }
     }
     .accessibilityIdentifier("memoView")
+    .onKeyPress(.escape) {
+      if isDetailViewPresented {
+        dismissDetail()
+        return .handled
+      }
+      return .ignored
+    }
   }
 
   private func addNewMemo() {
