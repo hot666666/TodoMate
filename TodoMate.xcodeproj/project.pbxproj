@@ -871,8 +871,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hot666666/SimpleOverlaySystem";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = exactVersion;
+				version = 1.0.3;
 			};
 		};
 		45962D2A2D4B128300089A48 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
