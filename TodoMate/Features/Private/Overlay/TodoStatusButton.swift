@@ -17,6 +17,7 @@ struct TodoStatusButton: View {
       placement: .bottom(spacing: 4, alignment: .center),
       dismissPolicy: .tap,
       barrier: .blockAll,
+      backdropOpacity: 0,
     ) {
       TodoStatusChip(status: status)
     } content: {
