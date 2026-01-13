@@ -5,8 +5,6 @@
 //  Created by hs on 07/02/25.
 //
 
-import Foundation
-
 protocol UpdateLocalMemoUseCase {
   func run(_ memo: Memo) async throws
 }
