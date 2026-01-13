@@ -117,6 +117,10 @@ extension TodoSheet {
     .clipShape(.rect(cornerRadius: 12))
     .shadow(color: .black.opacity(0.2), radius: 10)
     .coordinateSpace(name: "TodoSheet")
+    .onKeyPress(.escape) {
+      perform(.dismissWithConfirmation)
+      return .handled
+    }
   }
 }
 
