@@ -27,9 +27,11 @@ struct SettingView: View {
 
   var body: some View {
     ScrollView {
-      VStack(spacing: 24) {
+      VStack(spacing: 30) {
         profileSection
-        groupSection
+        if let _ = sessionStore.user {
+          groupSection
+        }
       }
       .accessibilityIdentifier("setting_view")
       .padding(32)
@@ -99,8 +101,8 @@ struct SettingView: View {
             Button("로그아웃") {
               showLogoutConfirmation = true
             }
-            .buttonStyle(.bordered)
-            .tint(.red)
+            .foregroundStyle(.red)
+            .buttonStyle(.plain)
           } trailingAction: {
             Button("수정") {
               editingName = user.displayName
@@ -201,8 +203,6 @@ struct SettingView: View {
           .padding(16)
         }
       }
-      .background(Color(nsColor: .controlBackgroundColor))
-      .clipShape(RoundedRectangle(cornerRadius: 12))
     }
   }
 
