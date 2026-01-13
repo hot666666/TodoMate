@@ -13,6 +13,7 @@ final class CoreDIContainer {
   @ObservationIgnored let modelContainer: ModelContainer
   @ObservationIgnored let userDefaults: UserDefaults
   @ObservationIgnored let calendar: Calendar
+  @ObservationIgnored let hotKeyManager: HotKeyManager
   @ObservationIgnored let sidebarCacheRepository: SidebarCacheRepository
   @ObservationIgnored let localTodoRepository: TodoRepository
   @ObservationIgnored let localMemoRepository: MemoRepository
@@ -33,10 +34,12 @@ final class CoreDIContainer {
     modelContainer: ModelContainer,
     userDefaults: UserDefaults = .standard,
     calendar: Calendar = .current,
+    hotKeyManager: HotKeyManager,
   ) {
     self.modelContainer = modelContainer
     self.userDefaults = userDefaults
     self.calendar = calendar
+    self.hotKeyManager = hotKeyManager
     calendarDayService = CalendarDayServiceImpl(calendar: calendar)
 
     localTodoRepository = SwiftDataTodoRepositoryImpl(modelContainer: modelContainer)
@@ -69,6 +72,7 @@ extension CoreDIContainer {
     return CoreDIContainer(
       modelContainer: container,
       userDefaults: .preview,
+      hotKeyManager: HotKeyManager(),
     )
   }()
 }
