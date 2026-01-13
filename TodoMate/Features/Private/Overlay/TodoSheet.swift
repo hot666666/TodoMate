@@ -9,9 +9,11 @@ import SimpleOverlaySystem
 import SwiftUI
 
 struct TodoSheet: View {
+  @Environment(AppDIContainer.self) private var container
   @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
+  @State private var escToken: HotKeyManager.RegistrationToken?
   @FocusState private var focusedField: SheetField?
   @Bindable var editableTodo: EditableTodo
 
@@ -106,6 +108,18 @@ extension TodoSheet {
     }
     .onAppear {
       perform(.focusContentField)
+
+      // Register ESC handler (Pushes to top of stack)
+      escToken = container.core.hotKeyManager.register(key: .escape, modifiers: []) {
+        Task { @MainActor in
+          perform(.dismissWithConfirmation)
+        }
+      }
+    }
+    .onDisappear {
+      if let token = escToken {
+        container.core.hotKeyManager.unregister(token)
+      }
     }
     .onTapBackground {
       perform(.dismissWithConfirmation)
@@ -117,10 +131,6 @@ extension TodoSheet {
     .clipShape(.rect(cornerRadius: 12))
     .shadow(color: .black.opacity(0.2), radius: 10)
     .coordinateSpace(name: "TodoSheet")
-    .onKeyPress(.escape) {
-      perform(.dismissWithConfirmation)
-      return .handled
-    }
   }
 }
 
