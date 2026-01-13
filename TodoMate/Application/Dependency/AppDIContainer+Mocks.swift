@@ -118,6 +118,7 @@ import SwiftData
       return CoreDIContainer(
         modelContainer: container,
         userDefaults: .standard,
+        hotKeyManager: HotKeyManager(),
       )
     }
 

@@ -81,7 +81,8 @@ private extension TodoMateApp {
   @MainActor
   static func composeContainer() -> AppDIContainer {
     let userDefaults = UserDefaults.standard
-    let coreDI = createCoreDIContainer(userDefaults: userDefaults)
+    let hotKeyManager = HotKeyManager()
+    let coreDI = createCoreDIContainer(userDefaults: userDefaults, hotKeyManager: hotKeyManager)
     let publicDI = createPublicDIContainer(userDefaults: userDefaults)
 
     return AppDIContainer(coreContainer: coreDI, publicContainer: publicDI)
@@ -101,12 +102,16 @@ private extension TodoMateApp {
     }
   }
 
-  static func createCoreDIContainer(userDefaults: UserDefaults) -> CoreDIContainer {
+  static func createCoreDIContainer(
+    userDefaults: UserDefaults,
+    hotKeyManager: HotKeyManager,
+  ) -> CoreDIContainer {
     let container = Self.createSwiftDataModelContainer()
 
     return CoreDIContainer(
       modelContainer: container,
       userDefaults: userDefaults,
+      hotKeyManager: hotKeyManager,
     )
   }
 
