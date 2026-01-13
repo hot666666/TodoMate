@@ -36,7 +36,7 @@ struct ProfileAvatarView<Avatar: View, Label: View, Action: View>: View {
     HStack(spacing: style == .compact ? 8 : 16) {
       avatar()
 
-      VStack(alignment: .leading) {
+      VStack(alignment: .leading, spacing: 6) {
         label()
         if style == .default {
           action()
