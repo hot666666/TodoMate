@@ -37,9 +37,11 @@ final class CalendarDayServiceImpl: CalendarDayService {
   }
 
   func getRange(for month: Date) -> ClosedRange<Date> {
-    let calendar = Calendar.current
-    let firstDayOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: month))!
-    let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: firstDayOfMonth)!
+    let firstDayOfMonth = calendar.date(
+      from: calendar.dateComponents([.year, .month], from: month))!
+    let lastDayOfMonth = calendar.date(
+      byAdding: DateComponents(month: 1, day: -1), to: firstDayOfMonth,
+    )!
 
     // 첫 주의 시작: 이번달 1일이 포함된 "주"의 시작일
     let firstWeekday = calendar.firstWeekday

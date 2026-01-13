@@ -15,48 +15,51 @@ import Testing
 struct PrivateTodoStoreTests {
   // MARK: - Mock Repository
 
-  final class MockTodoRepository: TodoRepository {
+  // MARK: - Mock UseCases
+
+  final class MockCreateUseCase: CreateLocalTodoUseCase {
+    var runHandler: ((Todo) -> Void)?
+    func run(_ todo: Todo) async throws { runHandler?(todo) }
+  }
+
+  final class MockReadUseCase: ReadLocalTodoUseCase {
     var todos: [Todo] = []
-
-    func create(_ todo: Todo) async throws {
-      todos.append(todo)
+    func run(date: Date) async throws -> [Todo] {
+      // Filter by date for "today" logic if needed, or just return set todos
+      // mimicing the behavior of ReadLocalTodoUseCaseImpl
+      let calendar = Calendar.current
+      return todos.filter { calendar.isDate($0.date, inSameDayAs: date) }
     }
 
-    func update(_ todo: Todo) async throws {
-      if let index = todos.firstIndex(where: { $0.id == todo.id }) {
-        todos[index] = todo
-      }
+    func run(in range: ClosedRange<Date>) async throws -> [Todo] {
+      todos.filter { range.contains($0.date) }
     }
+  }
 
-    func delete(_ todoId: String) async throws {
-      todos.removeAll { $0.id == todoId }
-    }
+  final class MockUpdateUseCase: UpdateLocalTodoUseCase {
+    var runHandler: ((Todo) -> Void)?
+    func run(_ todo: Todo) async throws { runHandler?(todo) }
+  }
 
-    func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
-      todos.filter { todo in
-        for filter in query.filters {
-          switch filter {
-          case let .dateRange(range):
-            // Logic to mimic strict filtering.
-            // Store logic: sends startOfDay...endOfDay
-            if !range.contains(todo.date) { return false }
-          case .owner:
-            // Repository was told to ignore owner, but in-memory mock can implement or ignore.
-            // For this test, we care about date.
-            continue
-          default: continue
-          }
-        }
-        return true
-      }
-    }
+  final class MockDeleteUseCase: DeleteLocalTodoUseCase {
+    var runHandler: ((String) -> Void)?
+    func run(_ todoId: String) async throws { runHandler?(todoId) }
   }
 
   @Test("Load only Today's todos")
   func loadTodos_filtersToday() async {
     // Given
-    let repository = MockTodoRepository()
-    let store = PrivateTodoStore(repository: repository)
+    let createUC = MockCreateUseCase()
+    let readUC = MockReadUseCase()
+    let updateUC = MockUpdateUseCase()
+    let deleteUC = MockDeleteUseCase()
+
+    let store = PrivateTodoStore(
+      createUseCase: createUC,
+      readUseCase: readUC,
+      updateUseCase: updateUC,
+      deleteUseCase: deleteUC,
+    )
 
     let calendar = Calendar.current
     let today = Date()
@@ -67,7 +70,7 @@ struct PrivateTodoStoreTests {
     let todoYesterday = Todo(owner: "me", content: "Yesterday", in: yesterday)
     let todoTomorrow = Todo(owner: "me", content: "Tomorrow", in: tomorrow)
 
-    repository.todos = [todoYesterday, todoToday, todoTomorrow]
+    readUC.todos = [todoYesterday, todoToday, todoTomorrow]
 
     // When
     await store.loadTodos()
@@ -80,21 +83,34 @@ struct PrivateTodoStoreTests {
   @Test("Add Todo refreshes list")
   func addTodo_refreshesList() async {
     // Given
-    let repository = MockTodoRepository()
-    let store = PrivateTodoStore(repository: repository)
+    let createUC = MockCreateUseCase()
+    let readUC = MockReadUseCase()
+    let updateUC = MockUpdateUseCase()
+    let deleteUC = MockDeleteUseCase()
+
+    let store = PrivateTodoStore(
+      createUseCase: createUC,
+      readUseCase: readUC,
+      updateUseCase: updateUC,
+      deleteUseCase: deleteUC,
+    )
+
     let todo = Todo(owner: "me", content: "New Todo", in: Date())
+
+    var created = false
+    createUC.runHandler = { _ in created = true }
+
+    // Simulate data update after create
+    readUC.todos = [todo]
 
     // When
     store.addTodo(todo)
 
-    // Wait for async task in store.addTodo (fire and forget)
-    // Since it's unstructured concurrency, we need a small delay or check
-    // Ideally store should expose async API, but it follows current pattern.
-    // We can wait a bit
+    // Wait slightly for async task
     try? await Task.sleep(for: .milliseconds(100))
 
     // Then
-    #expect(repository.todos.count == 1)
+    #expect(created)
     #expect(store.todos.count == 1)
     #expect(store.todos.first?.content == "New Todo")
   }
@@ -102,21 +118,21 @@ struct PrivateTodoStoreTests {
   @Test("Load Calendar Todos filters by month")
   func loadCalendarTodos_filtersMonth() async {
     // Given
-    let repository = MockTodoRepository()
-    let store = PrivateTodoStore(repository: repository)
+    let createUC = MockCreateUseCase()
+    let readUC = MockReadUseCase()
+    let updateUC = MockUpdateUseCase()
+    let deleteUC = MockDeleteUseCase()
+
+    let store = PrivateTodoStore(
+      createUseCase: createUC,
+      readUseCase: readUC,
+      updateUseCase: updateUC,
+      deleteUseCase: deleteUC,
+    )
 
     let calendar = Calendar.current
-
-    // Create dates for current month, next month, prev month
-    // Assuming 'today' is not on the edge of month for simplicity of test,
-    // or just constructing explicit dates.
-
-    // Let's force a specific date like 2024-01-15
-    var components = DateComponents()
-    components.year = 2024
-    components.month = 1
-    components.day = 15
-    let midJan = calendar.date(from: components)!
+    // Mid Jan 2024
+    let midJan = calendar.date(from: DateComponents(year: 2024, month: 1, day: 15))!
 
     let jan1 = calendar.date(from: DateComponents(year: 2024, month: 1, day: 1))!
     let jan31 = calendar.date(from: DateComponents(year: 2024, month: 1, day: 31))!
@@ -129,14 +145,16 @@ struct PrivateTodoStoreTests {
     let todoFeb1 = Todo(owner: "me", content: "Feb 1", in: feb1)
     let todoDec31 = Todo(owner: "me", content: "Dec 31", in: dec31)
 
-    repository.todos = [todoDec31, todoJan1, todoMidJan, todoJan31, todoFeb1]
+    readUC.todos = [todoDec31, todoJan1, todoMidJan, todoJan31, todoFeb1]
 
     // When
     await store.loadCalendarTodos(for: midJan)
 
     // Then
-    // Should include Jan 1, Jan 15, Jan 31 (3 items)
-    // Should exclude Dec 31, Feb 1
+    // Expecting logic inside ReadLocalTodoUseCase to handle range,
+    // and MockReadUseCase receives a range and filters.
+    // The Store calculates range (Start of Month to End of Month)
+
     #expect(store.calendarTodos.count == 3)
     let contents = store.calendarTodos.map(\.content).sorted()
     #expect(contents == ["Jan 1", "Jan 15", "Jan 31"])

@@ -11,31 +11,41 @@ import Observation
 @Observable
 @MainActor
 final class PrivateTodoStore {
-  private let repository: TodoRepository
+  private let createUseCase: CreateLocalTodoUseCase
+  private let readUseCase: ReadLocalTodoUseCase
+  private let updateUseCase: UpdateLocalTodoUseCase
+  private let deleteUseCase: DeleteLocalTodoUseCase
 
   var todos: [Todo] = []
   var calendarTodos: [Todo] = []
   var error: Error?
 
-  init(repository: TodoRepository) {
-    self.repository = repository
+  init(
+    createUseCase: CreateLocalTodoUseCase,
+    readUseCase: ReadLocalTodoUseCase,
+    updateUseCase: UpdateLocalTodoUseCase,
+    deleteUseCase: DeleteLocalTodoUseCase,
+  ) {
+    self.createUseCase = createUseCase
+    self.readUseCase = readUseCase
+    self.updateUseCase = updateUseCase
+    self.deleteUseCase = deleteUseCase
   }
 
   convenience init(container: CoreDIContainer) {
-    self.init(repository: container.localTodoRepository)
+    self.init(
+      createUseCase: container.createLocalTodoUseCase,
+      readUseCase: container.readLocalTodoUseCase,
+      updateUseCase: container.updateLocalTodoUseCase,
+      deleteUseCase: container.deleteLocalTodoUseCase,
+    )
   }
 
   func loadTodos() async {
     do {
-      let calendar = Calendar.current
       let today = Date()
-      let startOfDay = calendar.startOfDay(for: today)
-      guard let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: today)
-      else { return }
-
-      let query = TodoQuery().dateRange(startOfDay ... endOfDay)
-      let todayTodos = try await repository.readAll(query: query, source: .cache)
-      todos = todayTodos
+      let todos = try await readUseCase.run(date: today)
+      self.todos = todos
     } catch {
       self.error = error
       Log.error("Failed to load local todos: \(error)")
@@ -54,8 +64,7 @@ final class PrivateTodoStore {
         let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endOfMonth)
       else { return }
 
-      let query = TodoQuery().dateRange(startOfMonth ... endOfDay)
-      let monthTodos = try await repository.readAll(query: query, source: .cache)
+      let monthTodos = try await readUseCase.run(in: startOfMonth ... endOfDay)
       calendarTodos = monthTodos
     } catch {
       self.error = error
@@ -66,7 +75,7 @@ final class PrivateTodoStore {
   func addTodo(_ todo: Todo) {
     Task {
       do {
-        try await repository.create(todo)
+        try await createUseCase.run(todo)
         await loadTodos()
         // We reload calendar for the todo's date just in case it's currently viewed
         await loadCalendarTodos(for: todo.date)
@@ -80,7 +89,7 @@ final class PrivateTodoStore {
   func updateTodo(_ todo: Todo) {
     Task {
       do {
-        try await repository.update(todo)
+        try await updateUseCase.run(todo)
         await loadTodos()
         await loadCalendarTodos(for: todo.date)
       } catch {
@@ -93,17 +102,11 @@ final class PrivateTodoStore {
   func deleteTodo(_ todoId: String) {
     Task {
       do {
-        try await repository.delete(todoId)
+        try await deleteUseCase.run(todoId)
         await loadTodos()
         // Ideally we know the date, but for now we might need to refresh current calendar view context
         // This is a limitation of not passing the deleted Todo object or date.
         // We'll rely on View's onAppear or simple refresh.
-        // Or overload delete to take date?
-        // For now, let's just accept that delete might not update calendar immediately if we don't know date.
-        // But `loadTodos` updates Today.
-        // Let's create a `deleteTodo(_ todo: Todo)` overload or just refresh a default date?
-        // Actually, if we delete, we should probably refresh the currently viewed month if possible.
-        // Storing 'currentCalendarDate' in Store is an option.
       } catch {
         self.error = error
         Log.error("Failed to delete local todo: \(error)")
@@ -114,7 +117,7 @@ final class PrivateTodoStore {
   func deleteTodo(_ todo: Todo) {
     Task {
       do {
-        try await repository.delete(todo.id)
+        try await deleteUseCase.run(todo.id)
         await loadTodos()
         await loadCalendarTodos(for: todo.date)
       } catch {
