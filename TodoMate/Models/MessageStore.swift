@@ -30,7 +30,7 @@ final class MessageStore {
   private(set) var hasUnreadMessages: Bool = false
   private var currentGroupId: String = ""
 
-  init(container: DIContainer) {
+  init(container: PublicDIContainer) {
     createMessageUseCase = container.createMessageUseCase
     updateMessageUseCase = container.updateMessageUseCase
     deleteMessageUseCase = container.deleteMessageUseCase
@@ -168,7 +168,7 @@ final class MessageStore {
 
 extension MessageStore {
   static let preview: MessageStore = {
-    let store = MessageStore(container: DIContainer.preview)
+    let store = MessageStore(container: PublicDIContainer.preview)
     store.messages = [.stub]
     return store
   }()

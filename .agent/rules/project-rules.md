@@ -7,6 +7,7 @@ trigger: always_on
 This repository contains an Xcode project written with Swift and SwiftUI. Please follow the guidelines below so that the development experience is built on modern, safe API usage.
 Avoid simply using callback for asynchronous tasks, use Swift Concurreny API
 
+Always check the build result before responding if any files related to build have been modified.
 
 ## Role
 

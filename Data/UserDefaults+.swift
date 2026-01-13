@@ -23,12 +23,31 @@ enum UserDefaultsKey: String {
 
   /// 사이드바 표시 상태
   case sidebarVisibility = "sidebar_visibility"
+
+  /// Public 기능 활성화 여부
+  case isPublicModeEnabled = "is_public_mode_enabled"
+
+  // MARK: - Sidebar Cache
+
+  /// 캐시된 프로필 이름
+  case cachedProfileName = "cached_profile_name"
+
+  /// 캐시된 그룹 이름
+  case cachedGroupName = "cached_group_name"
+
+  /// 캐시된 그룹 ID (그룹 존재 여부 판단용)
+  case cachedUserGroupId = "cached_user_group_id"
+
+  // MARK: - Message
+
+  /// 마지막 읽은 메시지 타임스탬프
+  case lastMessageReadTimestamp = "last_message_read_timestamp"
 }
 
 // MARK: - UserDefaults Extension
 
 extension UserDefaults {
-  /// In-memory UserDefaults for previews/tests
+  /// In-memory UserDefaults for preivews/tests
   static var preview: UserDefaults {
     let suiteName = "preview"
     let defaults = UserDefaults(suiteName: suiteName)!
@@ -48,7 +67,15 @@ extension UserDefaults {
     object(forKey: key.rawValue) as? Bool ?? defaultValue
   }
 
+  func double(for key: UserDefaultsKey) -> Double {
+    double(forKey: key.rawValue)
+  }
+
   func data(for key: UserDefaultsKey) -> Data? {
     data(forKey: key.rawValue)
+  }
+
+  func removeObject(for key: UserDefaultsKey) {
+    removeObject(forKey: key.rawValue)
   }
 }

@@ -13,7 +13,7 @@ import Testing
 
 @Suite("GroupRepository Integration Tests")
 struct GroupRepositoryIntegrationTests {
-  let repository = FirestoreGroupRepository()
+  let repository = FirestoreGroupRepository(reference: FirestoreReference())
 
   // Note: Integration tests require Firebase Emulator.
   // Assuming the environment is set up correctly by the test runner.

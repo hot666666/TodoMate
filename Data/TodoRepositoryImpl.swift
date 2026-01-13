@@ -9,15 +9,15 @@ import Foundation
 final class FirestoreTodoRepository: TodoRepository {
   private let reference: FirestoreReference
 
-  init(reference: FirestoreReference = .shared) {
+  init(reference: FirestoreReference) {
     self.reference = reference
   }
 
-  func create(_ todo: Todo) throws {
+  func create(_ todo: Todo) async throws {
     try reference.todoCollection().document(todo.id).setData(from: todo)
   }
 
-  func update(_ todo: Todo) throws {
+  func update(_ todo: Todo) async throws {
     try reference.todoCollection().document(todo.id).setData(from: todo)
   }
 
@@ -54,8 +54,8 @@ final class FirestoreTodoRepository: TodoRepository {
 // MARK: - StubTodoRepository
 
 final class StubTodoRepository: TodoRepository {
-  func create(_: Todo) throws {}
-  func update(_: Todo) throws {}
+  func create(_: Todo) async throws {}
+  func update(_: Todo) async throws {}
   func delete(_: String) async throws {}
   func readAll(query _: TodoQuery, source _: DataSource) async throws -> [Todo] { [] }
 }

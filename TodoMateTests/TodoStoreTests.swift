@@ -75,19 +75,16 @@ struct TodoStoreTests {
 
   // MARK: - Helpers
 
-  private func createMockContainer(repo: MockTodoRepository, userId: String) -> DIContainer {
+  private func createMockContainer(repo: MockTodoRepository, userId: String) -> PublicDIContainer {
     let user = User(id: userId, displayName: "Test User", groupId: "")
-    return DIContainer(
+    return PublicDIContainer(
       userRepository: MockUserRepository(currentUser: user, groupMembers: []),
       todoRepository: repo,
-      messageRepository: MockMessageRepository(messages: []),
-      memoRepository: MockMemoRepository(memo: nil, currentUser: user),
+      messageRepository: MockMessageRepository(messages: [], currentUser: user),
       groupRepository: StubGroupRepository(),
+      connectivityRepository: StubConnectivityRepository(),
       authService: MockAuthService(userId: userId),
-      calendarDayService: CalendarDayServiceImpl(),
       messageReadTracker: StubMessageReadTracker(),
-      networkController: StubNetworkController(),
-      userDefaults: .preview,
     )
   }
 }

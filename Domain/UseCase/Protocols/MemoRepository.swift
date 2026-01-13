@@ -6,8 +6,8 @@
 //
 
 protocol MemoRepository {
-  func create(_ memo: Memo) throws
-  func update(_ memo: Memo) throws
+  func create(_ memo: Memo) async throws
+  func update(_ memo: Memo) async throws
   func delete(_ memo: Memo) async throws
   func readAllByUserId(_ userId: String, useCache: Bool) async throws -> [Memo]
   func readAllByUserIds(_ userIds: [String], useCache: Bool) async throws -> [Memo]

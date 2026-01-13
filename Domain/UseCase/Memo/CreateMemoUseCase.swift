@@ -6,7 +6,7 @@
 //
 
 protocol CreateMemoUseCase {
-  func run(for userId: String, _ memo: Memo) throws
+  func run(for userId: String, _ memo: Memo) async throws
 }
 
 final class CreateMemoUseCaseImpl: CreateMemoUseCase {
@@ -16,14 +16,14 @@ final class CreateMemoUseCaseImpl: CreateMemoUseCase {
     self.repository = repository
   }
 
-  func run(for userId: String, _ memo: Memo) throws {
+  func run(for userId: String, _ memo: Memo) async throws {
     guard memo.owner == userId else { throw MemoUseCaseError.userNotAuthorized }
-    try repository.create(memo)
+    try await repository.create(memo)
   }
 }
 
 final class StubCreateMemoUseCase: CreateMemoUseCase {
-  func run(for _: String, _ memo: Memo) throws {
-    try StubMemoRepository().create(memo)
+  func run(for _: String, _ memo: Memo) async throws {
+    try await StubMemoRepository().create(memo)
   }
 }

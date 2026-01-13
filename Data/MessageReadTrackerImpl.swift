@@ -9,15 +9,16 @@ import Foundation
 
 final class MessageReadTrackerImpl: MessageReadTracker {
   private var cachedTimestamp: Double = 0
-  private let userDefaultsKey = "lastMessageReadTimestamp"
+  private let userDefaults: UserDefaults
 
-  init() {
-    cachedTimestamp = UserDefaults.standard.double(forKey: userDefaultsKey)
+  init(userDefaults: UserDefaults = .standard) {
+    self.userDefaults = userDefaults
+    cachedTimestamp = userDefaults.double(for: .lastMessageReadTimestamp)
   }
 
   func markAsRead() {
     cachedTimestamp = Date().timeIntervalSince1970
-    UserDefaults.standard.set(cachedTimestamp, forKey: userDefaultsKey)
+    userDefaults.set(cachedTimestamp, for: .lastMessageReadTimestamp)
   }
 
   func hasUnreadMessages(in messages: [GroupMessage]) -> Bool {
@@ -27,6 +28,6 @@ final class MessageReadTrackerImpl: MessageReadTracker {
 
   func clearReadHistory() {
     cachedTimestamp = 0
-    UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+    userDefaults.removeObject(for: .lastMessageReadTimestamp)
   }
 }

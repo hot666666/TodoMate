@@ -10,16 +10,16 @@ import FirebaseFirestore
 final class FirestoreMemoRepository: MemoRepository {
   private let reference: FirestoreReference
 
-  init(reference: FirestoreReference = .shared) {
+  init(reference: FirestoreReference) {
     self.reference = reference
   }
 
-  func create(_ memo: Memo) throws {
+  func create(_ memo: Memo) async throws {
     // Changed: Use memo.id as document ID instead of owner
     try reference.memoCollection().document(memo.id).setData(from: memo)
   }
 
-  func update(_ memo: Memo) throws {
+  func update(_ memo: Memo) async throws {
     // Changed: Use memo.id as document ID instead of owner
     try reference.memoCollection().document(memo.id).setData(from: memo)
   }
@@ -49,8 +49,8 @@ final class FirestoreMemoRepository: MemoRepository {
 }
 
 final class StubMemoRepository: MemoRepository {
-  func create(_: Memo) throws {}
-  func update(_: Memo) throws {}
+  func create(_: Memo) async throws {}
+  func update(_: Memo) async throws {}
   func delete(_: Memo) async throws {}
   func readAllByUserId(_: String, useCache _: Bool = true) async throws -> [Memo] { [] }
   func readAllByUserIds(_: [String], useCache _: Bool = true) async throws -> [Memo] { [] }

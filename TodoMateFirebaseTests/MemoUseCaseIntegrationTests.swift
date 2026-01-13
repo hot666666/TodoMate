@@ -24,7 +24,8 @@ extension FirebaseIntegrationTests {
 
     init() async throws {
       try await FirebaseIntegrationTests.setup()
-      repository = FirestoreMemoRepository()
+      let reference = FirestoreReference()
+      repository = FirestoreMemoRepository(reference: reference)
       createUseCase = CreateMemoUseCaseImpl(repository: repository)
       readUseCase = ReadGroupMemoUseCaseImpl(repository: repository)
       updateUseCase = UpdateMemoUseCaseImpl(repository: repository)
@@ -39,7 +40,7 @@ extension FirebaseIntegrationTests {
       let memo = Memo(owner: testUserId, content: "테스트 메모")
 
       // When
-      try createUseCase.run(for: testUserId, memo)
+      try await createUseCase.run(for: testUserId, memo)
 
       // Then
       let memos = try await readUseCase.run(for: [testUserId], useCache: false)
@@ -57,8 +58,8 @@ extension FirebaseIntegrationTests {
       let myMemo = Memo(owner: testUserId, content: "내 메모")
       let otherMemo = Memo(owner: otherUserId, content: "다른 사람 메모")
 
-      try createUseCase.run(for: testUserId, myMemo)
-      try createUseCase.run(for: otherUserId, otherMemo)
+      try await createUseCase.run(for: testUserId, myMemo)
+      try await createUseCase.run(for: otherUserId, otherMemo)
 
       // When
       let memos = try await readUseCase.run(for: [testUserId, otherUserId], useCache: false)
@@ -73,7 +74,7 @@ extension FirebaseIntegrationTests {
       // Given
       let emptyUserId = "empty-user"
       let myMemo = Memo(owner: testUserId, content: "내 메모")
-      try createUseCase.run(for: testUserId, myMemo)
+      try await createUseCase.run(for: testUserId, myMemo)
 
       // When
       let memos = try await readUseCase.run(for: [testUserId, emptyUserId], useCache: false)
@@ -89,11 +90,11 @@ extension FirebaseIntegrationTests {
     func updateMemo() async throws {
       // Given
       var memo = Memo(owner: testUserId, content: "원본 내용")
-      try createUseCase.run(for: testUserId, memo)
+      try await createUseCase.run(for: testUserId, memo)
 
       // When
       memo = memo.withUpdatedContent("수정된 내용")
-      try updateUseCase.run(for: testUserId, memo)
+      try await updateUseCase.run(for: testUserId, memo)
 
       // Then
       let memos = try await readUseCase.run(for: [testUserId], useCache: false)
@@ -102,15 +103,15 @@ extension FirebaseIntegrationTests {
     }
 
     @Test("다른 사용자의 Memo 수정 시도하면 에러 발생")
-    func updateOtherUserMemoFails() throws {
+    func updateOtherUserMemoFails() async throws {
       // Given
       let otherUserId = "other-user"
       let otherMemo = Memo(owner: otherUserId, content: "다른 사람 메모")
-      try createUseCase.run(for: otherUserId, otherMemo)
+      try await createUseCase.run(for: otherUserId, otherMemo)
 
       // When & Then
-      #expect(throws: MemoUseCaseError.userNotAuthorized) {
-        try updateUseCase.run(for: testUserId, otherMemo)
+      await #expect(throws: MemoUseCaseError.userNotAuthorized) {
+        try await updateUseCase.run(for: testUserId, otherMemo)
       }
     }
 
@@ -120,7 +121,7 @@ extension FirebaseIntegrationTests {
     func deleteMemo() async throws {
       // Given
       let memo = Memo(owner: testUserId, content: "삭제할 메모")
-      try createUseCase.run(for: testUserId, memo)
+      try await createUseCase.run(for: testUserId, memo)
 
       let beforeDelete = try await readUseCase.run(for: [testUserId], useCache: false)
       #expect(beforeDelete[testUserId]?.contains { $0.id == memo.id } == true)
@@ -138,7 +139,7 @@ extension FirebaseIntegrationTests {
       // Given
       let otherUserId = "other-user"
       let otherMemo = Memo(owner: otherUserId, content: "다른 사람 메모")
-      try createUseCase.run(for: otherUserId, otherMemo)
+      try await createUseCase.run(for: otherUserId, otherMemo)
 
       // When & Then
       await #expect(throws: MemoUseCaseError.userNotAuthorized) {

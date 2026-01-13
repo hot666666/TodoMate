@@ -23,7 +23,8 @@ extension FirebaseIntegrationTests {
 
     init() async throws {
       try await FirebaseIntegrationTests.setup()
-      repository = FirestoreTodoRepository()
+      let reference = FirestoreReference()
+      repository = FirestoreTodoRepository(reference: reference)
       createUseCase = CreateTodoUseCaseImpl(repository: repository)
       readUseCase = ReadMonthlyTodoUseCaseImpl(repository: repository)
       deleteUseCase = DeleteTodoUseCaseImpl(repository: repository)
@@ -38,7 +39,7 @@ extension FirebaseIntegrationTests {
       let dateRange = todo.date.startOfDay ... todo.date.endOfDay
 
       // When
-      try createUseCase.run(for: testUserId, todo)
+      try await createUseCase.run(for: testUserId, todo)
 
       // Then
       let todos = try await readUseCase.run(for: testUserId, range: dateRange, useCache: false)
@@ -57,8 +58,8 @@ extension FirebaseIntegrationTests {
       let todo1 = Todo(owner: testUserId, content: "오늘 할일 1", in: today)
       let todo2 = Todo(owner: testUserId, content: "오늘 할일 2", in: today)
 
-      try createUseCase.run(for: testUserId, todo1)
-      try createUseCase.run(for: testUserId, todo2)
+      try await createUseCase.run(for: testUserId, todo1)
+      try await createUseCase.run(for: testUserId, todo2)
 
       // When
       let dateRange = today.startOfDay ... today.endOfDay
@@ -77,8 +78,8 @@ extension FirebaseIntegrationTests {
       let myTodo = Todo(owner: testUserId, content: "내 할일")
       let otherTodo = Todo(owner: otherUserId, content: "다른 사람 할일")
 
-      try createUseCase.run(for: testUserId, myTodo)
-      try createUseCase.run(for: otherUserId, otherTodo)
+      try await createUseCase.run(for: testUserId, myTodo)
+      try await createUseCase.run(for: otherUserId, otherTodo)
 
       // When
       let dateRange = myTodo.date ... myTodo.date
@@ -96,7 +97,7 @@ extension FirebaseIntegrationTests {
     func deleteTodo() async throws {
       // Given
       let todo = Todo(owner: testUserId, content: "삭제할 할일")
-      try createUseCase.run(for: testUserId, todo)
+      try await createUseCase.run(for: testUserId, todo)
 
       let dateRange = todo.date ... todo.date
       let beforeDelete = try await readUseCase.run(
@@ -119,7 +120,7 @@ extension FirebaseIntegrationTests {
       // Given
       let otherUserId = "other-user"
       let otherTodo = Todo(owner: otherUserId, content: "다른 사람 할일")
-      try createUseCase.run(for: otherUserId, otherTodo)
+      try await createUseCase.run(for: otherUserId, otherTodo)
 
       // When & Then
       await #expect(throws: TodoUseCaseError.userNotAuthorized) {

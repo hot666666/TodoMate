@@ -22,6 +22,7 @@ final class SessionStore {
   @ObservationIgnored private let readGroupUseCase: ReadGroupUseCase
   @ObservationIgnored private let joinGroupUseCase: JoinGroupUseCase
   @ObservationIgnored private let leaveGroupUseCase: LeaveGroupUseCase
+  @ObservationIgnored private let sidebarCacheUseCase: SidebarCacheUseCase
 
   // MARK: - Listenter & Publisher
 
@@ -52,6 +53,7 @@ final class SessionStore {
   private(set) var user: User?
   var userId: String { user?.id ?? "" }
   var userGroupId: String { user?.groupId ?? "" }
+  var hasGroup: Bool { user?.groupId.isEmpty == false }
 
   private(set) var groupMembers: [User] = [] {
     didSet {
@@ -67,7 +69,10 @@ final class SessionStore {
 
   // MARK: - Init
 
-  init(container: DIContainer) {
+  init(container: AppDIContainer) {
+    sidebarCacheUseCase = container.core.sidebarCacheUseCase
+
+    let container = container.pub
     listenAuthStateUseCase = container.listenAuthStateUseCase
     loadUserSessionUseCase = container.loadUserSessionUseCase
     signOutUseCase = container.signOutUseCase
@@ -138,6 +143,7 @@ final class SessionStore {
     groupMemberIds = []
     groupMemberDisplayNames = [:]
     authState = .unauthenticated
+    sidebarCacheUseCase.clearCache()
     emit(.loggedOut)
     Log.info("Logged out", category: .auth)
   }
@@ -146,7 +152,7 @@ final class SessionStore {
 
   /// 새로운 이벤트 스트림 생성 - 구독자가 세션 이벤트를 받을 수 있음
   /// 구독 시작 시 현재 인증 상태를 즉시 전송 (Replay 패턴)
-  func events() -> AsyncStream<SessionEvent> {
+  var streamEvents: AsyncStream<SessionEvent> {
     let id = UUID()
     return AsyncStream { continuation in
       self.continuations[id] = continuation
@@ -198,6 +204,7 @@ final class SessionStore {
         return
       }
       user = latestUser
+      sidebarCacheUseCase.saveProfileName(latestUser.displayName)
 
       let latestGroup = try await readUserGroupUseCase.run(
         groupId: latestUser.groupId, useCache: false,
@@ -207,8 +214,12 @@ final class SessionStore {
       // Fetch current group info
       if !latestUser.groupId.isEmpty {
         currentGroup = try await readGroupUseCase.execute(groupId: latestUser.groupId)
+        if let group = currentGroup {
+          sidebarCacheUseCase.saveGroup(name: group.name, id: group.id)
+        }
       } else {
         currentGroup = nil
+        // sidebarCacheUseCase.clearGroupCache()
       }
     } catch {
       Log.error("Failed to refresh session: \(error)", category: .auth)
@@ -272,4 +283,20 @@ extension SessionStore {
     store.authState = .authenticated
     return store
   }()
+
+  static let local: SessionStore = {
+    let store = SessionStore(container: .preview) // Use preview container as dummy
+    store.user = User(
+      id: "local-user", displayName: "Me", groupId: "",
+    )
+    store.authState = .authenticated
+    return store
+  }()
+}
+
+private struct StubSidebarCacheUseCase: SidebarCacheUseCase {
+  func saveProfileName(_: String) {}
+  func saveGroup(name _: String, id _: String) {}
+  func clearGroupCache() {}
+  func clearCache() {}
 }

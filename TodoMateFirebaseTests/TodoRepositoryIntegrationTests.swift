@@ -20,7 +20,8 @@ extension FirebaseIntegrationTests {
 
     init() async throws {
       try await FirebaseIntegrationTests.setup()
-      repository = FirestoreTodoRepository()
+      let reference = FirestoreReference()
+      repository = FirestoreTodoRepository(reference: reference)
     }
 
     // MARK: - Create & Read
@@ -31,7 +32,7 @@ extension FirebaseIntegrationTests {
       let todo = Todo(owner: testUserId, content: "Repository 테스트")
 
       // When
-      try repository.create(todo)
+      try await repository.create(todo)
 
       // Then
       let query = TodoQuery().owner(userId: testUserId)
@@ -49,12 +50,12 @@ extension FirebaseIntegrationTests {
     func updateTodo() async throws {
       // Given
       var todo = Todo(owner: testUserId, content: "수정 전")
-      try repository.create(todo)
+      try await repository.create(todo)
 
       // When
       todo.content = "수정 후"
       todo.status = .complete
-      try repository.update(todo)
+      try await repository.update(todo)
 
       // Then
       let query = TodoQuery().owner(userId: testUserId)
@@ -71,7 +72,7 @@ extension FirebaseIntegrationTests {
     func deleteTodo() async throws {
       // Given
       let todo = Todo(owner: testUserId, content: "삭제될 할일")
-      try repository.create(todo)
+      try await repository.create(todo)
 
       // When
       try await repository.delete(todo.id)
@@ -92,9 +93,9 @@ extension FirebaseIntegrationTests {
       let todo2 = Todo(owner: otherUserId, content: "다른 사람 할일")
       let todo3 = Todo(owner: "random-user", content: "무관한 할일")
 
-      try repository.create(todo1)
-      try repository.create(todo2)
-      try repository.create(todo3)
+      try await repository.create(todo1)
+      try await repository.create(todo2)
+      try await repository.create(todo3)
 
       // When
       let query = TodoQuery().owners(userIds: [testUserId, otherUserId])
@@ -117,8 +118,8 @@ extension FirebaseIntegrationTests {
       let todoToday = Todo(owner: testUserId, content: "오늘", in: today)
       let todoTomorrow = Todo(owner: testUserId, content: "내일", in: tomorrow)
 
-      try repository.create(todoToday)
-      try repository.create(todoTomorrow)
+      try await repository.create(todoToday)
+      try await repository.create(todoTomorrow)
 
       // When: 오늘만 조회
       let range = today.startOfDay ... today.endOfDay
@@ -138,8 +139,8 @@ extension FirebaseIntegrationTests {
       var todo2 = Todo(owner: testUserId, content: "진행중")
       todo2.status = .inProgress
 
-      try repository.create(todo1)
-      try repository.create(todo2)
+      try await repository.create(todo1)
+      try await repository.create(todo2)
 
       // When
       let query = TodoQuery().owner(userId: testUserId).status(.complete)

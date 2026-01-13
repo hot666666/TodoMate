@@ -16,7 +16,7 @@ struct FirebaseIntegrationTests {
   /// 각 테스트 실행 전 공통 초기화 로직 (DB 리셋 등)
   static func setup() async throws {
     #if USE_FIREBASE_EMULATOR
-      try await FirestoreReference.shared.resetAllCollections()
+      try await FirestoreReference().resetAllCollections()
     #endif
   }
 }

@@ -6,7 +6,7 @@
 //
 
 protocol CreateTodoUseCase {
-  func run(for userId: String, _ todo: Todo) throws
+  func run(for userId: String, _ todo: Todo) async throws
 }
 
 final class CreateTodoUseCaseImpl: CreateTodoUseCase {
@@ -16,12 +16,12 @@ final class CreateTodoUseCaseImpl: CreateTodoUseCase {
     self.repository = repository
   }
 
-  func run(for userId: String, _ todo: Todo) throws {
+  func run(for userId: String, _ todo: Todo) async throws {
     guard todo.owner == userId else { throw TodoUseCaseError.userNotAuthorized }
-    try repository.create(todo)
+    try await repository.create(todo)
   }
 }
 
 final class StubCreateTodoUseCase: CreateTodoUseCase {
-  func run(for _: String, _: Todo) throws {}
+  func run(for _: String, _: Todo) async throws {}
 }

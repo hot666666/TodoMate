@@ -12,43 +12,53 @@
 
 ```mermaid
 graph TD
-    App["TodoMateApp"] -->|Init| CoreDI["CoreDIContainer<br/>(Private Data / SwiftData)"]
-    App --> Root["RootView<br/>.environmentCoreDI"]
+    Root["RootView (App Entry)"]
 
-    Root --> Sidebar["SidebarView<br/>Toggle: Enable Groups"]
-    Root --> ViewState["AppStorage: isPublicEnabled"]
-
-    Root --> EntryPoint{"if isPublicEnabled?"}
-
-    subgraph Private Context [Always Alive]
-        CoreDI --> PrivateStore["PrivateTodoStore<br/>(Local Only)"]
-        PrivateStore --> PrivateViews["Private Todos/Memos"]
-        CoreDI --> LocalRepos["Local Repositories<br/>(SwiftData)"]
+    subgraph PrivateLayer ["Private Integration (Always On)"]
+        PrivateStores["Private Stores (SwiftData)"]
+        subgraph LocalUI ["Local UI (Private Views)"]
+            BoardView["BoardView (Local)"]
+            CalendarView["CalendarView (Local)"]
+            TodoSheet["TodoSheet (Local)"]
+            MemoView["MemoView (Local)"]
+        end
     end
 
-    EntryPoint -- False --> OfflineView["OfflineIndicatorView /<br/>Private Only Mode UI"]
+    subgraph PublicLayer ["Public Integration (Conditional)"]
+        PFWrapper["PublicFeatureWrapper (Lifecycle Boundary)"]
 
-    EntryPoint -- True --> PublicWrapper["PublicFeatureWrapper<br/>(View Lifecycle Manager)"]
+        subgraph PublicStores ["Remote Stores (Firebase)"]
+            SS["SessionStore"]
+            TS["TodoStore (Group)"]
+            MS["MessageStore"]
+        end
 
-    subgraph Public Context [Lifecycle: View State Bound]
-        PublicWrapper -->|onAppear: Init| PublicDI["PublicDIContainer<br/>(Firestore / Auth)"]
-        PublicWrapper -->|onDisappear: Deinit| Dealloc["Clean up Listeners"]
-
-        PublicWrapper -->|Inject| PublicRoot["PublicRootView"]
-
-        PublicDI --> PublicStore["PublicTodoStore<br/>(Group Data)"]
-        PublicDI --> SessionStore["SessionStore<br/>(Auth/Profile)"]
-        PublicDI --> Listeners["Firestore Listeners"]
-
-        PublicRoot --> Content{"Logged In?"}
-        Content -- No --> Login["Login Modal"]
-        Content -- Yes --> GroupViews["Group List / Chat"]
+        subgraph PublicUI ["Public UI (Group Views)"]
+            Auth["Auth / Login View"]
+            NoGroup["NoGroupsView"]
+            GroupFeed["GroupFeedView"]
+            GroupSettings["GroupSettingsView"]
+        end
     end
 
-    style PublicWrapper fill:#e1f5fe,stroke:#01579b
-    style PublicDI fill:#bbdefb,stroke:#0d47a1
-    style Listeners fill:#ffcdd2,stroke:#b71c1c,stroke-dasharray: 5 5
-    style CoreDI fill:#f0f4c3,stroke:#827717
+    Root --> PrivateLayer
+    Root -- "If Toggle ON" --> PublicLayer
+
+    %% Private Connections
+    PrivateStores --> BoardView
+    PrivateStores --> CalendarView
+    PrivateStores --> TodoSheet
+    PrivateStores --> MemoView
+
+    %% Public Connections (Assembled inside Wrapper)
+    PFWrapper -- "Init & Inject" --> PublicStores
+    PFWrapper --> Auth
+    Auth -- "Authenticated" --> NoGroup
+    Auth -- "Authenticated" --> GroupFeed
+
+    PublicStores --> GroupFeed
+    PublicStores --> GroupSettings
+    PublicStores --> NoGroup
 ```
 
 ## 구현 전략
@@ -65,57 +75,102 @@ graph TD
 
 ## 상세 작업 목록
 
-### Phase 1: 의존성 주입(DI) 리팩토링
-- [ ] **`CoreDIContainer` 정의**
-    - [ ] 로컬 전용 의존성 식별 및 이동:
+### Phase 1: 의존성 주입(DI) 리팩토링 [DONE]
+- [x] **`CoreDIContainer` 정의**
+    - [x] 로컬 전용 의존성 식별 및 이동:
         - `UserDefaults`
         - `CalendarDayService`
-    - [ ] 로컬 Repository 등록 (Placeholder 또는 SwiftData 구현체):
-        - `LocalTodoRepository`
-        - `LocalMemoRepository`
-    - [ ] Core UseCases 등록:
-        - `CreateLocalTodoUseCase`, `ReadLocalTodoUseCase` 등
+    - [ ] 로컬 Repository 등록 (SwiftData 구현체 - Phase 4 예정)
+    - [ ] Core UseCases 등록
 
-- [ ] **`PublicDIContainer` 정의**
-    - [ ] Firebase/Remote 의존성 이동:
+- [x] **`PublicDIContainer` 정의**
+    - [x] Firebase/Remote 의존성 이동:
         - `AuthService`
         - `UserRepository`, `FirebaseTodoRepository`, `GroupRepository`, `MessageRepository`
-    - [ ] Public UseCases 등록:
+    - [x] Public UseCases 등록:
         - `SignInUseCase`, `CreateRemoteTodoUseCase`, `ReadGroupUseCase` 등
-    - [ ] **중요**: `init()` 시점에 필요한 리스너가 있다면 등록하고, `deinit` 시점에 확실하게 해제되도록 관리해야 함.
+    - [x] **중요**: `init()` 시점에 리스너 등록 후 `cleanup()` 메서드를 통해 명시적으로 해제되도록 관리 (구현 완료).
 
-### Phase 2: 뷰 계층 및 수명주기(Lifecycle)
-- [ ] **모드 토글 상태 관리**
-    - [ ] `AppStorage("isPublicModeEnabled")` 등을 사용하여 간단하게 상태 관리.
-    - [ ] 사이드바 또는 설정에 토글 UI 배치.
+- [x] **`AppDIContainer` 정의**
+    - [x] `CoreDIContainer`와 `PublicDIContainer?`를 담는 최상위 컨테이너 구현.
+    - [x] UI Test용 Mocking 지원 (`AppDIContainer+Mocks.swift`).
 
-- [ ] **`PublicFeatureWrapper` 뷰 구현**
-    - [ ] `StateObject` 또는 `@State`로 `PublicDIContainer`를 관리하는 Wrapper 뷰.
-    - [ ] 조건: `if isPublicModeEnabled { PublicFeatureWrapper() }`
-    - [ ] **Lifecycle**:
-        - `init`: `PublicDIContainer` 생성 (Firebase 연결 시작).
-        - `body`: 하위 뷰에 `environment(publicDI)` 주입.
-        - 뷰가 사라질 때(토글 OFF) 자연스럽게 `deinit` 호출되며 리소스 해제.
+### Phase 2: 뷰 계층 및 수명주기(Lifecycle) [DONE]
+- [x] **모드 토글 상태 관리**
+    - [x] `AppStorage("isPublicModeEnabled")`를 사용하여 상태 관리 (`RootView`).
+    - [x] 사이드바에 네트워크 토글 UI 배치 (`SidebarView`).
 
-- [ ] **`Default / Offline` UI 처리**
-    - [ ] 토글이 꺼져 있을 때 보여줄 플레이스홀더 또는 "오프라인/개인 모드 안내" UI 구현.
-    - [ ] 사이드바의 "Group" 섹션이 숨겨지거나, 비활성화 상태임을 표시.
+- [x] **`PublicFeatureWrapper` 뷰 구현**
+    - [x] `@State`로 `PublicDIContainer` 및 Store들을 관리하는 Wrapper 뷰 구현.
+    - [x] **Lifecycle**:
+        - `init`: `PublicDIContainer` 및 Store들 생성 (Firebase 서비스 준비).
+        - `body`: 하위 뷰에 `environment` 주입.
+        - `onDisappear`: Store들의 `cleanup()` 호출 및 리소스 해제 로그 확인.
 
-### Phase 3: 스토어 및 데이터 리팩토링
-- [ ] **`TodoStore` 분리**
-    - [ ] `PrivateTodoStore`: "나의 할 일" (로컬) 관리. `CoreDI` 주입.
-    - [ ] `PublicTodoStore`: "그룹 할 일" (공유) 관리. `PublicDI` 주입.
-- [ ] **`SessionStore` 격리**
-    - [ ] `SessionStore`를 `PublicDI`의 하위 요소로 이동.
-    - [ ] `SessionStore` 없이도 앱이 실행될 수 있어야 함.
+- [x] **`Default / Offline` UI 처리**
+    - [x] `OfflinePlaceholderView` 구현: 오프라인 모드 진입 시 표시되는 안내 UI.
+    - [x] `RootView`에서 토글 상태에 따른 분기 처리 구현.
 
-### Phase 4: 데이터 계층 구현 (SwiftData 준비)
-- [ ] **로컬 Repository 구현**
-    - [ ] `LocalTodoRepository` 생성 및 SwiftData 기본 CRUD 연결.
-    - [ ] 기존 Firebase 의존 코드 제거 및 분리.
+### Phase 3: 스토어 및 데이터 리팩토링 [DONE]
+- [x] **스토어 분리 및 정리**
+    - [x] `SessionStore`, `TodoStore` 등을 `PublicFeatureWrapper` 내부로 격리.
+    - [x] `PrivateTodoStore` 신설: SwiftData 기반 개인용 데이터 관리 (프로토타입 구현 완료).
+- [x] **Data layer 분리**
+    - [x] `CoreDI`에는 Firebase 의존성이 없는 Repository만 존재하도록 보장.
+
+### Phase 4: 데이터 계층 구현 (SwiftData 준비) [DONE]
+- [x] **로컬 Repository 구현**
+    - [x] `LocalTodoRepository` 생성 및 SwiftData 기본 CRUD 연결.
+    - [x] `SDTodo` 모델 정의 및 `Todo` 엔티티 매핑 구현.
+    - [x] `CoreDIContainer`에 `modelContext` 주입 및 Repository 등록.
 
 ## 검증 체크리스트
-- [ ] **View 생명주기 검증**: 토글 ON/OFF 반복 시 `PublicDIContainer`의 `init`/`deinit`이 정확히 호출되는지 로그 확인.
-- [ ] **메모리 누수 테스트**: 토글 OFF 시 관련 객체(Firestore 리스너, Store 등)가 힙 메모리에서 완전히 사라지는지 확인.
-- [ ] **오프라인 실행 테스트**: WiFi 끄고 앱 실행 -> 토글 OFF 상태에서 앱 정상 작동 확인.
-- [ ] **CoreDI 격리 확인**: `CoreDIContainer` 파일에 `import Firebase` 구문이 없는지 확인.
+- [x] **View 생명주기 검증**: 토글 ON/OFF 반복 시 `PublicDIContainer` 관련 로그 확인 (`init`/`cleaned up`).
+- [ ] **메모리 누수 테스트**: 토글 OFF 시 관련 객체가 메모리에서 해제되는지 Instruments로 확인 필요.
+- [x] **오프라인 실행 테스트**: 토글 OFF 상태에서 `OfflinePlaceholderView` 정상 진입 확인.
+- [x] **CoreDI 격리 확인**: `CoreDIContainer.swift` 파일에서 Firebase import 제거 완료.
+
+### Phase 5: UI Integration (Current) [DONE]
+
+- [x] **Refactor `TodoSheet` to be store-agnostic (Local-Only)**
+- [x] **Refactor `BoardView` to be store-agnostic (Local-Only)**
+- [x] **Refactor `CalendarView` to be store-agnostic (Local-Only)**
+- [x] **Integrate Private Views into `PrivateSidebarView` and `RootView`**
+
+### Phase 6: Verification and Cleanup
+
+- [ ] **Verify `init` / `deinit` logs of `PublicDIContainer` when toggling**
+- [ ] **Verify `CoreDIContainer` doesn't import Firebase**
+- [ ] **Run basic smoke tests in offline mode**
+- [ ] **Verify build and unit tests with new DI structure**
+- [ ] **Verify Private Mode UI functionality (CRUD)**
+- [ ] **Verify Public Mode UI regression test**
+
+## 최근 진행 요약
+
+### 목표
+**Private(개인)** 영역은 `PrivateTodoStore`와 로컬 뷰로 구성되어 항상 동작하며, **Public(그룹/원격)** 영역은 `PublicFeatureWrapper` 내부에서만 생명주기를 가집니다. 이를 시각적으로 명확히 하고, `BoardView`와 `CalendarView`를 순수 로컬 뷰로 전환합니다.
+
+### 주요 변경 사항
+
+#### 1. BoardView & CalendarView (Private Only)
+이 뷰들은 **Public 영역과 완전히 분리**된 순수 로컬 뷰가 됩니다.
+- **역할**: 오직 사용자의 개인 투두 로컬 데이터(`PrivateTodoStore`)만 표시하고 관리합니다. (기존 Firebase `TodoStore` 사용 안 함)
+- **변경**: `@Environment(PrivateTodoStore.self)`를 주입받아 동작하도록 수정.
+
+#### 2. TodoSheet (Private Only)
+개인 투두 작성을 위한 시트로, 로컬 저장소에 직접 연결됩니다.
+- **변경**: `TodoStore`(Firebase) 의존성을 제거하고, `PrivateTodoStore`를 사용하여 SwiftData에 저장.
+
+#### 3. PublicFeatureWrapper (Public Context)
+Public 섹션의 모든 뷰와 스토어는 이 래퍼 내부에서 조립됩니다.
+- **역할**: `SessionStore`, `MessageStore`, `TodoStore`(그룹용) 등 Firebase 의존 객체들을 생성하고 주입.
+- **흐름**: 토글 ON -> Wrapper 진입 -> `PublicDIContainer` 생성 -> Auth/Login 화면 -> (로그인 시) 그룹 피드/설정 화면 노출.
+
+### 검증 계획
+
+1.  **Private 영역**:
+    -   네트워크 연결 여부와 상관없이 `BoardView`, `CalendarView`가 로컬 데이터를 정상적으로 CRUD 하는지 확인.
+2.  **Public 영역**:
+    -   토글 ON 시 로그인 화면 또는 그룹 화면으로 정상 진입하는지 확인.
+    -   오프라인 토글 OFF 시 Public 관련 리소스가 해제되는지 확인 (기존 검증 항목 재확인).

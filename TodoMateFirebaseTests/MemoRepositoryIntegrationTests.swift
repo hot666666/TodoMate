@@ -20,7 +20,8 @@ extension FirebaseIntegrationTests {
 
     init() async throws {
       try await FirebaseIntegrationTests.setup()
-      repository = FirestoreMemoRepository()
+      let reference = FirestoreReference()
+      repository = FirestoreMemoRepository(reference: reference)
     }
 
     // MARK: - Create & Read
@@ -31,7 +32,7 @@ extension FirebaseIntegrationTests {
       let memo = Memo(owner: testUserId, content: "Repository 테스트 메모")
 
       // When
-      try repository.create(memo)
+      try await repository.create(memo)
 
       // Then
       let results = try await repository.readAllByUserId(testUserId, useCache: false)
@@ -48,11 +49,11 @@ extension FirebaseIntegrationTests {
     func updateMemo() async throws {
       // Given
       var memo = Memo(owner: testUserId, content: "수정 전")
-      try repository.create(memo)
+      try await repository.create(memo)
 
       // When
       memo.content = "수정 후"
-      try repository.update(memo)
+      try await repository.update(memo)
 
       // Then
       let results = try await repository.readAllByUserId(testUserId, useCache: false)
@@ -67,7 +68,7 @@ extension FirebaseIntegrationTests {
     func deleteMemo() async throws {
       // Given
       let memo = Memo(owner: testUserId, content: "삭제될 메모")
-      try repository.create(memo)
+      try await repository.create(memo)
 
       // When
       try await repository.delete(memo)
@@ -86,9 +87,9 @@ extension FirebaseIntegrationTests {
       let memo2 = Memo(owner: testUserId, content: "두 번째 메모")
       let memo3 = Memo(owner: testUserId, content: "세 번째 메모")
 
-      try repository.create(memo1)
-      try repository.create(memo2)
-      try repository.create(memo3)
+      try await repository.create(memo1)
+      try await repository.create(memo2)
+      try await repository.create(memo3)
 
       // When
       let results = try await repository.readAllByUserId(testUserId, useCache: false)
@@ -110,8 +111,8 @@ extension FirebaseIntegrationTests {
       let memo1 = Memo(owner: testUserId, content: "내 메모")
       let memo2 = Memo(owner: otherUserId, content: "다른 사람 메모")
 
-      try repository.create(memo1)
-      try repository.create(memo2)
+      try await repository.create(memo1)
+      try await repository.create(memo2)
 
       // When
       let results = try await repository.readAllByUserIds(

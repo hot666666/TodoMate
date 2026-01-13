@@ -6,7 +6,7 @@
 //
 
 protocol UpdateTodoUseCase {
-  func run(for userId: String, _ todo: Todo) throws
+  func run(for userId: String, _ todo: Todo) async throws
 }
 
 final class UpdateTodoUseCaseImpl: UpdateTodoUseCase {
@@ -16,12 +16,12 @@ final class UpdateTodoUseCaseImpl: UpdateTodoUseCase {
     self.repository = repository
   }
 
-  func run(for userId: String, _ todo: Todo) throws {
+  func run(for userId: String, _ todo: Todo) async throws {
     guard todo.owner == userId else { throw TodoUseCaseError.userNotAuthorized }
-    try repository.update(todo)
+    try await repository.update(todo)
   }
 }
 
 final class StubUpdateTodoUseCase: UpdateTodoUseCase {
-  func run(for _: String, _: Todo) throws {}
+  func run(for _: String, _: Todo) async throws {}
 }

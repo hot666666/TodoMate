@@ -27,7 +27,7 @@ final class TodoStore {
   private var currentDate: Date = .now
   private var currentUserId: String = ""
 
-  init(container: DIContainer) {
+  init(container: PublicDIContainer) {
     createTodoUseCase = container.createTodoUseCase
     readGroupTodoUseCase = container.readGroupTodoUseCase
     updateTodoUseCase = container.updateTodoUseCase
@@ -86,28 +86,32 @@ final class TodoStore {
   }
 
   func add(_ todo: Todo, userId: String) {
-    do {
-      try createTodoUseCase.run(for: userId, todo)
-      // Optimistic update
-      updateUserTodos(for: todo.owner) { userTodos in
-        userTodos.append(todo)
+    Task {
+      do {
+        try await createTodoUseCase.run(for: userId, todo)
+        // Optimistic update
+        updateUserTodos(for: todo.owner) { userTodos in
+          userTodos.append(todo)
+        }
+      } catch {
+        Log.error("Failed to add todo: \(error)", category: .data)
       }
-    } catch {
-      Log.error("Failed to add todo: \(error)", category: .data)
     }
   }
 
   func update(_ todo: Todo, userId: String) {
-    do {
-      try updateTodoUseCase.run(for: userId, todo)
-      // Optimistic update
-      updateUserTodos(for: todo.owner) { userTodos in
-        if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
-          userTodos[index] = todo
+    Task {
+      do {
+        try await updateTodoUseCase.run(for: userId, todo)
+        // Optimistic update
+        updateUserTodos(for: todo.owner) { userTodos in
+          if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
+            userTodos[index] = todo
+          }
         }
+      } catch {
+        Log.error("Failed to update todo: \(error)", category: .data)
       }
-    } catch {
-      Log.error("Failed to update todo: \(error)", category: .data)
     }
   }
 
@@ -162,7 +166,7 @@ extension TodoStore {
 
 extension TodoStore {
   static let preview: TodoStore = {
-    let store = TodoStore(container: DIContainer.preview)
+    let store = TodoStore(container: PublicDIContainer.preview)
     store.todos = [User.stub.id: [Todo.stub]]
     return store
   }()

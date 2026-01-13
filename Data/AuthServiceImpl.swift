@@ -63,8 +63,10 @@ final class FirebaseAuthService: AuthService {
 }
 
 final class StubAuthService: AuthService {
-  var signedInUserId: String? {
-    User.stub.id
+  var signedInUserId: String?
+
+  init(signedInUserId: String? = User.stub.id) {
+    self.signedInUserId = signedInUserId
   }
 
   func signIn() async throws {}
@@ -73,7 +75,7 @@ final class StubAuthService: AuthService {
 
   func listenToAuthStateChanges() -> AsyncStream<String?> {
     AsyncStream { continuation in
-      continuation.yield(User.stub.id)
+      continuation.yield(signedInUserId)
       continuation.finish()
     }
   }

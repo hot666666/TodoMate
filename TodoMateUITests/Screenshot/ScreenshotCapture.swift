@@ -17,9 +17,11 @@ enum ScreenshotCapture {
   static func save(
     screenshot: XCUIScreenshot,
     for screenType: ScreenType,
+    suffix: String? = nil,
     to testCase: XCTestCase,
   ) {
-    save(screenshot: screenshot, name: screenType.rawValue, to: testCase)
+    let name = screenType.rawValue + (suffix ?? "")
+    save(screenshot: screenshot, name: name, to: testCase)
   }
 
   /// 커스텀 이름으로 스크린샷 저장
