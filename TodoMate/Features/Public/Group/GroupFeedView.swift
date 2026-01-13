@@ -73,6 +73,7 @@ struct GroupFeedView: View {
         } label: {
           Image(systemName: "arrow.right.to.line")
         }
+        .keyboardShortcut("t", modifiers: .command)
       }
     }
   }
@@ -186,6 +187,7 @@ struct GroupFeedView: View {
           } label: {
             Image(systemName: "bubble.left.and.bubble.right")
           }
+          .keyboardShortcut("t", modifiers: .command)
         }
       }
     }
