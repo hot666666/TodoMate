@@ -219,7 +219,7 @@ final class SessionStore {
         }
       } else {
         currentGroup = nil
-        sidebarCacheUseCase.clearGroupCache()
+        // sidebarCacheUseCase.clearGroupCache()
       }
     } catch {
       Log.error("Failed to refresh session: \(error)", category: .auth)
