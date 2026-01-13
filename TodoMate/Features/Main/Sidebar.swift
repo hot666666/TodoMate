@@ -29,10 +29,6 @@ struct Sidebar: View {
     memoStore.memos.count
   }
 
-  private var displayName: String {
-    (cachedProfileName.isEmpty ? nil : cachedProfileName) ?? "유저"
-  }
-
   private var hasGroup: Bool {
     !cachedUserGroupId.isEmpty
   }
@@ -45,10 +41,25 @@ struct Sidebar: View {
     List(selection: $selection) {
       Section {
         NavigationLink(value: NavigationDestination.settings) {
-          SidebarProfile(
-            displayName: displayName,
-            subtitle: nil,
-          )
+          if cachedProfileName.isEmpty {
+            UserProfileView(
+              displayName: "TodoMate",
+              style: .compact,
+              avatar: {
+                Image("AppImage")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(width: 32, height: 32)
+                  .clipShape(Circle())
+              },
+            )
+          } else {
+            UserProfileView(
+              displayName: cachedProfileName,
+              style: .compact,
+              size: 32,
+            )
+          }
         }
         .accessibilityIdentifier("sidebar_profile")
         .buttonStyle(.plain)
@@ -120,33 +131,6 @@ struct Sidebar: View {
       Image(systemName: "person.2.fill")
         .foregroundStyle(.secondary)
     }
-  }
-}
-
-// MARK: - SidebarProfile
-
-private struct SidebarProfile: View {
-  let displayName: String
-  let subtitle: String?
-
-  var body: some View {
-    HStack(spacing: 12) {
-      ProfileAvatarView(displayName: displayName, size: 32)
-
-      VStack(alignment: .leading, spacing: 0) {
-        Text(displayName)
-          .font(.subheadline)
-          .fontWeight(.semibold)
-          .foregroundStyle(.primary)
-
-        if let subtitle {
-          Text(subtitle)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
-      }
-    }
-    .padding(.vertical, 4)
   }
 }
 
