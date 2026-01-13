@@ -2,14 +2,55 @@
 //  ProfileAvatarView.swift
 //  TodoMate
 //
-//  Created by agent on 1/9/26.
+//  Created by agent on 1/13/26.
 //
 
 import SwiftUI
 
-/// 프로필 아바타 컴포넌트
-/// Settings와 Sidebar에서 공유하여 일관된 프로필 이미지 스타일 제공
-struct ProfileAvatarView: View {
+// MARK: - ProfileAvatarView
+
+enum ProfileAvatarStyle {
+  case compact // Action hidden
+  case `default` // All visible
+}
+
+struct ProfileAvatarView<Avatar: View, Label: View, Action: View>: View {
+  let style: ProfileAvatarStyle
+  @ViewBuilder let avatar: () -> Avatar
+  @ViewBuilder let label: () -> Label
+  @ViewBuilder let action: () -> Action
+
+  init(
+    style: ProfileAvatarStyle = .default,
+    @ViewBuilder avatar: @escaping () -> Avatar,
+    @ViewBuilder label: @escaping () -> Label,
+    @ViewBuilder action: @escaping () -> Action = { EmptyView() },
+  ) {
+    self.style = style
+    self.avatar = avatar
+    self.label = label
+    self.action = action
+  }
+
+  var body: some View {
+    HStack(spacing: style == .compact ? 8 : 16) {
+      avatar()
+
+      VStack(alignment: .leading) {
+        label()
+        if style == .default {
+          action()
+        }
+      }
+
+      Spacer()
+    }
+  }
+}
+
+// MARK: - DefaultAvatar
+
+struct DefaultAvatar: View {
   let displayName: String
   var size: CGFloat = 64
 
@@ -47,14 +88,48 @@ struct ProfileAvatarView: View {
   }
 }
 
-#Preview("Large") {
-  ProfileAvatarView(displayName: "홍길동", size: 64)
+// MARK: - Previews
+
+#Preview("Row - Default Style") {
+  ProfileAvatarView(style: .default) {
+    DefaultAvatar(displayName: "홍길동", size: 64)
+  } label: {
+    VStack(alignment: .leading, spacing: 2) {
+      Text("홍길동")
+        .font(.subheadline)
+        .fontWeight(.semibold)
+        .foregroundStyle(.primary)
+      Text("User")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+  } action: {
+    Button("Edit") {}
+      .buttonStyle(.bordered)
+  }
+  .padding()
 }
 
-#Preview("Medium") {
-  ProfileAvatarView(displayName: "Guest", size: 40)
+#Preview("Row - Compact Style") {
+  ProfileAvatarView(style: .compact) {
+    DefaultAvatar(displayName: "Guest", size: 64)
+  } label: {
+    Text("Guest")
+      .font(.subheadline)
+      .fontWeight(.semibold)
+      .foregroundStyle(.primary)
+  }
+  .padding()
 }
 
-#Preview("Small") {
-  ProfileAvatarView(displayName: "AB", size: 32)
+#Preview("Avatar - Large") {
+  DefaultAvatar(displayName: "홍길동", size: 64)
+}
+
+#Preview("Avatar - Medium") {
+  DefaultAvatar(displayName: "Guest", size: 40)
+}
+
+#Preview("Avatar - Small") {
+  DefaultAvatar(displayName: "AB", size: 32)
 }

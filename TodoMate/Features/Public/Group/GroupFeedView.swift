@@ -92,7 +92,7 @@ struct GroupFeedView: View {
         // User Avatars
         HStack(spacing: -10) {
           ForEach(sessionStore.groupMembers.prefix(3)) { member in
-            ProfileAvatarView(displayName: member.displayName, size: 32)
+            DefaultAvatar(displayName: member.displayName, size: 32)
               .overlay(Circle().stroke(.white, lineWidth: 2))
           }
 
