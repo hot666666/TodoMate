@@ -29,7 +29,7 @@ struct SettingView: View {
     ScrollView {
       VStack(spacing: 30) {
         profileSection
-        if let _ = sessionStore.user {
+        if sessionStore.user != nil {
           groupSection
         }
       }
@@ -109,6 +109,7 @@ struct SettingView: View {
               showEditNameSheet = true
             }
             .buttonStyle(.bordered)
+            .disabled(!isPublicModeEnabled)
           }
         } else {
           UserProfileView(displayName: "TodoMate", style: .default) {
@@ -152,9 +153,9 @@ struct SettingView: View {
         if hasGroup {
           // Current Group
           HStack(spacing: 12) {
-            Image(systemName: "person.3.fill")
+            Image(systemName: "person.2.fill")
               .font(.system(size: 24))
-              .foregroundStyle(.blue)
+              .foregroundStyle(DesignSystem.Colors.accentIndigo)
               .frame(width: 40)
 
             VStack(alignment: .leading, spacing: 2) {
