@@ -137,8 +137,14 @@ final class FirestoreGroupRepository: GroupRepository {
 }
 
 final class StubGroupRepository: GroupRepository {
+  var groupToReturn: UserGroup?
+
+  init(groupToReturn: UserGroup? = .stub) {
+    self.groupToReturn = groupToReturn
+  }
+
   func create(_: UserGroup) async throws {}
-  func read(groupId _: String) async throws -> UserGroup? { .stub }
+  func read(groupId _: String) async throws -> UserGroup? { groupToReturn }
   func update(_: UserGroup) async throws {}
   func delete(groupId _: String) async throws {}
   func joinGroup(groupId _: String, userId _: String, userRepository _: UserRepository) async throws {}
