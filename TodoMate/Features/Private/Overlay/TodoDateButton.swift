@@ -27,6 +27,7 @@ struct TodoDateButton: View {
       placement: .bottom(spacing: 4, alignment: .leading),
       dismissPolicy: .tap,
       barrier: .blockAll,
+      backdropOpacity: 0,
     ) {
       TagButtonLabel(
         icon: isToday ? "calendar" : "calendar.badge.clock",

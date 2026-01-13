@@ -107,6 +107,9 @@ extension TodoSheet {
     .onAppear {
       perform(.focusContentField)
     }
+    .onTapBackground {
+      perform(.dismissWithConfirmation)
+    }
     .compositingGroup()
     .onKeyPress(keyCode: 53) {
       perform(.dismissWithConfirmation)
