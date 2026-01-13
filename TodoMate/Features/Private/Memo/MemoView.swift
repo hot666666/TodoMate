@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct MemoView: View {
+  @Environment(AppDIContainer.self) private var container
   @Environment(PrivateMemoStore.self) private var memoStore
 
   @State private var selectedMemo: Memo?
+  @State private var escToken: HotKeyManager.RegistrationToken?
   @Namespace private var heroNamespace
   @State private var isDetailViewPresented = false
 
@@ -100,6 +102,45 @@ struct MemoView: View {
       }
     }
     .accessibilityIdentifier("memoView")
+    .onAppear {
+      registerESCHandler()
+    }
+    .onDisappear {
+      unregisterESCHandler()
+    }
+    .onChange(of: isDetailViewPresented) { _, isPresented in
+      if isPresented {
+        registerESCHandler()
+      } else {
+        // Detail closed, re-register to ensure we are top?
+        // Actually MemoView's ESC handler is for detail dismissal.
+        // If detail is NOT presented, maybe we don't need ESC?
+        // Or keep it to ensure it does nothing or propagates (HotKeyManager doesn't propagate automatically).
+        // Let's keep it simple: Register on appear, handle logic inside.
+        // Wait, stack behavior: If I navigate deeply, I want THIS view to handle ESC.
+        // If I open detail, I want ESC to close detail.
+      }
+    }
+  }
+
+  private func registerESCHandler() {
+    // Avoid double registration
+    if escToken == nil {
+      escToken = container.core.hotKeyManager.register(key: .escape, modifiers: []) {
+        Task { @MainActor in
+          if isDetailViewPresented {
+            dismissDetail()
+          }
+        }
+      }
+    }
+  }
+
+  private func unregisterESCHandler() {
+    if let token = escToken {
+      container.core.hotKeyManager.unregister(token)
+      escToken = nil
+    }
   }
 
   private func addNewMemo() {

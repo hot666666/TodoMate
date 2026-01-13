@@ -53,7 +53,7 @@ final class SessionStore {
   private(set) var user: User?
   var userId: String { user?.id ?? "" }
   var userGroupId: String { user?.groupId ?? "" }
-  var hasGroup: Bool { currentGroup != nil }
+  var hasGroup: Bool { user?.groupId.isEmpty == false }
 
   private(set) var groupMembers: [User] = [] {
     didSet {
@@ -219,7 +219,7 @@ final class SessionStore {
         }
       } else {
         currentGroup = nil
-        sidebarCacheUseCase.clearGroupCache()
+        // sidebarCacheUseCase.clearGroupCache()
       }
     } catch {
       Log.error("Failed to refresh session: \(error)", category: .auth)

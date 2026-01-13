@@ -58,13 +58,6 @@ private struct MainContent: View {
     .onDisappear {
       unregisterHotKeys()
     }
-    .onKeyPress(.escape) {
-      if overlay?.isEmpty == false {
-        overlay?.dismissTop()
-        return .handled
-      }
-      return .ignored
-    }
   }
 
   private func registerHotKeys() {
@@ -93,12 +86,7 @@ private struct MainContent: View {
     if let selection = naviManager.selection {
       switch selection {
       case .todo:
-        switch naviManager.viewMode {
-        case .board:
-          BoardView(selection: .todo)
-        case .calendar:
-          CalendarView(selection: .todo)
-        }
+        HomeView(naviManager: naviManager)
 
       case .memo:
         MemoView()
