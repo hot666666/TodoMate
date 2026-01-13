@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ConfirmationView: View {
+  @Environment(AppDIContainer.self) private var container
+  @State private var escToken: HotKeyManager.RegistrationToken?
+
   let title: String
   let message: String?
   let destructiveActionTitle: String
@@ -65,9 +68,17 @@ struct ConfirmationView: View {
         ),
     )
     .shadow(radius: DesignSystem.Confirmation.shadowRadius)
-    .onKeyPress(.escape) {
-      onDismiss()
-      return .handled
+    .onAppear {
+      escToken = container.core.hotKeyManager.register(key: .escape, modifiers: []) {
+        Task { @MainActor in
+          onDismiss()
+        }
+      }
+    }
+    .onDisappear {
+      if let token = escToken {
+        container.core.hotKeyManager.unregister(token)
+      }
     }
   }
 }

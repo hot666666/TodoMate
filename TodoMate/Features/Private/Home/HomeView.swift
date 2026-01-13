@@ -8,29 +8,35 @@
 import SwiftUI
 
 struct HomeView: View {
+  @Environment(AppDIContainer.self) private var container
   @Environment(\.overlayManager) private var overlay
   let naviManager: NavigationManager
+  @State private var escToken: HotKeyManager.RegistrationToken?
 
   var body: some View {
-    switch naviManager.viewMode {
-    case .board:
-      BoardView()
-        .onKeyPress(.escape) {
-          if overlay?.isEmpty == false {
+    Group {
+      switch naviManager.viewMode {
+      case .board:
+        BoardView()
+      case .calendar:
+        CalendarView()
+      }
+    }
+    .onAppear {
+      escToken = container.core.hotKeyManager.register(
+        key: .escape, modifiers: [],
+      ) {
+        if overlay?.isEmpty == false {
+          Task { @MainActor in
             overlay?.dismissTop()
-            return .handled
           }
-          return .ignored
         }
-    case .calendar:
-      CalendarView()
-        .onKeyPress(.escape) {
-          if overlay?.isEmpty == false {
-            overlay?.dismissTop()
-            return .handled
-          }
-          return .ignored
-        }
+      }
+    }
+    .onDisappear {
+      if let token = escToken {
+        container.core.hotKeyManager.unregister(token)
+      }
     }
   }
 }
