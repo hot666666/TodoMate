@@ -41,15 +41,20 @@ extension LoginView {
             await signIn()
           }
         } label: {
-          HStack(spacing: 4) {
+          HStack(spacing: 8) {
             Image(systemName: "g.circle.fill")
               .imageScale(.large)
-            Text("Google로 로그인")
+            Text("Google 로그인")
+              .font(.headline)
+              .fontWeight(.bold)
           }
-          .padding(.horizontal, 16)
-          .padding(.vertical, 8)
+          .foregroundStyle(.white)
+          .padding(.horizontal, 32)
+          .padding(.vertical, 14)
+          .background(Color.blue)
+          .clipShape(Capsule())
         }
-        .buttonStyle(GlassmorphismButtonStyle(disabled: isLoading))
+        .buttonStyle(.plain)
         .disabled(isLoading)
       }
     }
