@@ -111,9 +111,6 @@ extension TodoSheet {
       perform(.dismissWithConfirmation)
     }
     .compositingGroup()
-    .onKeyPress(keyCode: 53) {
-      perform(.dismissWithConfirmation)
-    }
     .padding(DesignSystem.TodoSheet.Layout.sheetPadding)
     .frame(width: 450)
     .background(.regularMaterial)

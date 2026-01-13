@@ -34,7 +34,9 @@ struct MainView: View {
 
 private struct MainContent: View {
   @Environment(AppDIContainer.self) private var container
+  @Environment(\.overlayManager) private var overlay
   @State private var naviManager: NavigationManager
+  @State private var sidebarToken: HotKeyManager.RegistrationToken?
 
   init(naviManager: NavigationManager) {
     self.naviManager = naviManager
@@ -50,6 +52,40 @@ private struct MainContent: View {
     }
     .navigationSplitViewStyle(.prominentDetail)
     .environment(naviManager)
+    .onAppear {
+      registerHotKeys()
+    }
+    .onDisappear {
+      unregisterHotKeys()
+    }
+    .onKeyPress(.escape) {
+      if overlay?.isEmpty == false {
+        overlay?.dismissTop()
+        return .handled
+      }
+      return .ignored
+    }
+  }
+
+  private func registerHotKeys() {
+    // Command+B: Toggle Sidebar
+    sidebarToken = container.core.hotKeyManager.register(
+      key: .b, modifiers: [.command],
+    ) { [weak naviManager] in
+      Task { @MainActor in
+        guard let naviManager else { return }
+        withAnimation {
+          naviManager.columnVisibility =
+            naviManager.columnVisibility == .all ? .detailOnly : .all
+        }
+      }
+    }
+  }
+
+  private func unregisterHotKeys() {
+    if let token = sidebarToken {
+      container.core.hotKeyManager.unregister(token)
+    }
   }
 
   @ViewBuilder

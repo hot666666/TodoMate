@@ -191,6 +191,7 @@ struct BoardView: View {
 
     let editableTodo = EditableTodo(from: originalTodo)
     overlay?.presentCentered(
+      id: .todoSheet,
       backdropOpacity: 0,
       offset: CGPoint(x: 0, y: -120),
     ) {

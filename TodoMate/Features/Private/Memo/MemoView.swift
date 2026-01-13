@@ -95,6 +95,7 @@ struct MemoView: View {
           } label: {
             Image(systemName: "plus")
           }
+          .keyboardShortcut("n", modifiers: .command)
         }
       }
     }
