@@ -89,46 +89,52 @@ struct SettingView: View {
         .font(.headline)
         .foregroundStyle(.secondary)
 
-      HStack(spacing: 16) {
-        // Avatar
-        ProfileAvatarView(
-          displayName: sessionStore.user?.displayName ?? "?",
-          size: 64,
-        )
-
-        VStack(alignment: .leading, spacing: 4) {
-          Text(sessionStore.user?.displayName ?? "Guest")
-            .font(.title3)
-            .fontWeight(.semibold)
-
-          Button {
-            showLogoutConfirmation = true
-          } label: {
-            HStack(spacing: 4) {
-              Image(systemName: "arrow.right.square")
-              Text("Leave")
+      Group {
+        if let user = sessionStore.user {
+          UserProfileView(
+            displayName: user.displayName,
+            style: .default,
+            size: 64,
+          ) {
+            Button("로그아웃") {
+              showLogoutConfirmation = true
             }
-            .foregroundStyle(.red)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.red.opacity(isPublicModeEnabled ? 0.1 : 0.05))
-            .clipShape(Capsule())
+            .buttonStyle(.bordered)
+            .tint(.red)
+          } trailingAction: {
+            Button("수정") {
+              editingName = user.displayName
+              showEditNameSheet = true
+            }
+            .buttonStyle(.bordered)
           }
-          .buttonStyle(.plain)
-          .disabled(!isPublicModeEnabled)
+        } else {
+          UserProfileView(displayName: "TodoMate", style: .default) {
+            Image("AppImage")
+              .resizable()
+              .aspectRatio(contentMode: .fit)
+              .frame(width: 64, height: 64)
+              .clipShape(Circle())
+          } leadingAction: {
+            Button {
+              Task {
+                try? await appDI.pub.signInUseCase.run()
+              }
+            } label: {
+              HStack(spacing: 4) {
+                Image(systemName: "g.circle.fill")
+                Text("로그인")
+              }
+              .foregroundStyle(.white)
+              .padding(.horizontal, 12)
+              .padding(.vertical, 6)
+              .background(Color.blue)
+              .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+          }
         }
-
-        Spacer()
-
-        Button("Edit") {
-          editingName = sessionStore.user?.displayName ?? ""
-          showEditNameSheet = true
-        }
-        .buttonStyle(.bordered)
       }
-      .padding(16)
-      .background(Color(nsColor: .controlBackgroundColor))
-      .clipShape(RoundedRectangle(cornerRadius: 12))
     }
   }
 
