@@ -24,9 +24,9 @@ final class ScreenshotTests: XCTestCase {
     navigator = nil
   }
 
-  private func launchApp(scenario: String = "group_user") {
+  private func launchApp(args: [String] = []) {
     app = XCUIApplication()
-    app.launchArguments = ["--ui-testing", "-scenario", scenario]
+    app.launchArguments = ["--ui-testing", "-useMockContainer"] + args
     app.launch()
     app.activate()
 
@@ -41,7 +41,7 @@ final class ScreenshotTests: XCTestCase {
 
   @MainActor
   func testCapturePersonalBoard() {
-    launchApp()
+    launchApp() // Default scenario seeds data
     captureScreen(.personalBoard)
   }
 
@@ -57,21 +57,46 @@ final class ScreenshotTests: XCTestCase {
     captureScreen(.memo)
   }
 
+  // MARK: - Settings in 3 States
+
   @MainActor
-  func testCaptureSettings() {
-    launchApp()
+  func testCaptureSettings_Guest() {
+    launchApp(args: ["-scenario", "guest"])
     captureScreen(.settings)
   }
 
   @MainActor
+  func testCaptureSettings_NoGroup() {
+    launchApp(args: ["-scenario", "no_group"])
+    captureScreen(.settings)
+  }
+
+  @MainActor
+  func testCaptureSettings_GroupUser() {
+    launchApp(args: ["-scenario", "group_user"])
+    captureScreen(.settings)
+  }
+
+  // MARK: - Group in 3 States
+
+  @MainActor
+  func testCaptureLogin() {
+    // Guest accessing Group -> Login View
+    launchApp(args: ["-scenario", "guest"])
+    captureScreen(.login)
+  }
+
+  @MainActor
   func testCaptureNoGroups() {
-    launchApp(scenario: "no_group_user")
+    // Logged in (No Group) accessing Group -> No Groups View
+    launchApp(args: ["-scenario", "no_group"])
     captureScreen(.noGroups)
   }
 
   @MainActor
   func testCaptureGroupFeed() {
-    launchApp(scenario: "group_user")
+    // Logged in (Group) accessing Group -> Feed View
+    launchApp(args: ["-scenario", "group_user"])
     captureScreen(.groupFeed)
   }
 

@@ -14,6 +14,7 @@ enum ScreenType: String, CaseIterable {
   case memo
   case groupFeed = "group_feed"
   case noGroups = "no_groups"
+  case login
   case settings
 
   /// 해당 화면의 메인 뷰 accessibility identifier
@@ -24,6 +25,7 @@ enum ScreenType: String, CaseIterable {
     case .memo: "memoView"
     case .groupFeed: "groupFeedView"
     case .noGroups: "GroupFeedNoGroupView"
+    case .login: "loginView"
     case .settings: "settingView"
     }
   }
@@ -33,9 +35,9 @@ enum ScreenType: String, CaseIterable {
     switch self {
     case .personalBoard, .personalCalendar: "sidebar_todo"
     case .memo: "sidebar_memo"
-    case .groupFeed: "sidebar_group"
-    case .noGroups: "sidebar_noGroups"
+    case .groupFeed, .noGroups: "sidebar_group"
     case .settings: "sidebar_profile"
+    case .login: "sidebar_group"
     }
   }
 

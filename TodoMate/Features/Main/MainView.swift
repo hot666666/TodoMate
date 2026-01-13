@@ -68,9 +68,7 @@ private struct MainContent: View {
         MemoView()
 
       case .settings:
-        AuthenticatedView {
-          SettingView()
-        }
+        SettingView()
 
       case .group:
         AuthenticatedView {

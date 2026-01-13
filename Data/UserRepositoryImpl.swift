@@ -42,8 +42,14 @@ final class FirestoreUserRepository: UserRepository {
 }
 
 final class StubUserRepository: UserRepository {
+  var userToReturn: User?
+
+  init(userToReturn: User? = .stub) {
+    self.userToReturn = userToReturn
+  }
+
   func create(_ newUser: User) throws -> User { newUser }
-  func read(userId _: String, source _: DataSource) async throws -> User? { User.stub }
+  func read(userId _: String, source _: DataSource) async throws -> User? { userToReturn }
   func readAll(groupId _: String, source _: DataSource) async throws -> [User] { User.stubs }
   func readAll(source _: DataSource) async throws -> [User] { User.stubs }
   func update(_: User) async throws {}
