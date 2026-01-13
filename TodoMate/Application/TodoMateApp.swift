@@ -22,8 +22,9 @@ struct TodoMateApp: App {
     /// Firebaes, Google Sign-In 초기화
     Self.configureFirebaseAndAuth()
     /// DI 컨테이너 생성
-    let coreDI = Self.createCoreDIContainer()
-    let publicDI = Self.createPublicDIContainer()
+    let userDefaults = UserDefaults.standard
+    let coreDI = Self.createCoreDIContainer(userDefaults: userDefaults)
+    let publicDI = Self.createPublicDIContainer(userDefaults: userDefaults)
     appDIContainer = AppDIContainer(coreContainer: coreDI, publicContainer: publicDI)
     /// Store 객체 초기화
     _todoStore = State(initialValue: PrivateTodoStore(container: coreDI))
@@ -65,8 +66,7 @@ extension TodoMateApp {
     }
   }
 
-  fileprivate static func createCoreDIContainer() -> CoreDIContainer {
-    let userDefaults = UserDefaults.standard
+  fileprivate static func createCoreDIContainer(userDefaults: UserDefaults) -> CoreDIContainer {
     let container = Self.createSwiftDataModelContainer()
 
     return CoreDIContainer(
@@ -75,7 +75,7 @@ extension TodoMateApp {
     )
   }
 
-  fileprivate static func createPublicDIContainer() -> PublicDIContainer {
+  fileprivate static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
     let firestoreReference = FirestoreReference()
     let authService = FirebaseAuthService()
     let userRepo = FirestoreUserRepository(reference: firestoreReference)
@@ -84,7 +84,7 @@ extension TodoMateApp {
     let groupRepo = FirestoreGroupRepository(reference: firestoreReference)
 
     let connectivityRepo = FirestoreConnectivityRepository(reference: firestoreReference)
-    let messageReadTracker = MessageReadTrackerImpl()
+    let messageReadTracker = MessageReadTrackerImpl(userDefaults: userDefaults)
 
     return PublicDIContainer(
       userRepository: userRepo,

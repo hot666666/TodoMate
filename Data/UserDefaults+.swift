@@ -37,12 +37,17 @@ enum UserDefaultsKey: String {
 
   /// 캐시된 그룹 ID (그룹 존재 여부 판단용)
   case cachedUserGroupId = "cached_user_group_id"
+
+  // MARK: - Message
+
+  /// 마지막 읽은 메시지 타임스탬프
+  case lastMessageReadTimestamp = "last_message_read_timestamp"
 }
 
 // MARK: - UserDefaults Extension
 
 extension UserDefaults {
-  /// In-memory UserDefaults for previews/tests
+  /// In-memory UserDefaults for preivews/tests
   static var preview: UserDefaults {
     let suiteName = "preview"
     let defaults = UserDefaults(suiteName: suiteName)!
@@ -62,7 +67,15 @@ extension UserDefaults {
     object(forKey: key.rawValue) as? Bool ?? defaultValue
   }
 
+  func double(for key: UserDefaultsKey) -> Double {
+    double(forKey: key.rawValue)
+  }
+
   func data(for key: UserDefaultsKey) -> Data? {
     data(forKey: key.rawValue)
+  }
+
+  func removeObject(for key: UserDefaultsKey) {
+    removeObject(forKey: key.rawValue)
   }
 }
