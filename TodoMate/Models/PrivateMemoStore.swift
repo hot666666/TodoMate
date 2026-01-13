@@ -13,10 +13,10 @@ import Observation
 final class PrivateMemoStore {
   // MARK: - Dependencies
 
-  private let createMemoUseCase: CreateMemoUseCase
-  private let readGroupMemoUseCase: ReadGroupMemoUseCase
-  private let updateMemoUseCase: UpdateMemoUseCase
-  private let deleteMemoUseCase: DeleteMemoUseCase
+  private let createUseCase: CreateLocalMemoUseCase
+  private let readUseCase: ReadLocalMemoUseCase
+  private let updateUseCase: UpdateLocalMemoUseCase
+  private let deleteUseCase: DeleteLocalMemoUseCase
 
   // MARK: - State
 
@@ -24,30 +24,32 @@ final class PrivateMemoStore {
 
   // MARK: - Initialization
 
-  init(container: CoreDIContainer) {
-    // For Private context, we construct UseCases using the Local Repository from CoreDI
-    let repository = container.localMemoRepository
+  init(
+    createUseCase: CreateLocalMemoUseCase,
+    readUseCase: ReadLocalMemoUseCase,
+    updateUseCase: UpdateLocalMemoUseCase,
+    deleteUseCase: DeleteLocalMemoUseCase,
+  ) {
+    self.createUseCase = createUseCase
+    self.readUseCase = readUseCase
+    self.updateUseCase = updateUseCase
+    self.deleteUseCase = deleteUseCase
+  }
 
-    // Use generic UseCase implementations or create specific local ones if logic differs.
-    // Assuming standard implementations work with any Repository.
-    createMemoUseCase = CreateMemoUseCaseImpl(repository: repository)
-    readGroupMemoUseCase = ReadGroupMemoUseCaseImpl(repository: repository)
-    updateMemoUseCase = UpdateMemoUseCaseImpl(repository: repository)
-    deleteMemoUseCase = DeleteMemoUseCaseImpl(repository: repository)
+  convenience init(container: CoreDIContainer) {
+    self.init(
+      createUseCase: container.createLocalMemoUseCase,
+      readUseCase: container.readLocalMemoUseCase,
+      updateUseCase: container.updateLocalMemoUseCase,
+      deleteUseCase: container.deleteLocalMemoUseCase,
+    )
   }
 
   // MARK: - Actions
 
   func load() async {
-    // For local, "userId" is less relevant but we need one.
-    // Using a fixed local ID or the one from SessionStore.local.
-    let localUserId = SessionStore.local.user?.id ?? "local-user"
-
     do {
-      // readGroupMemo returns [String: [Memo]]
-      let result = try await readGroupMemoUseCase.run(for: [localUserId], useCache: true)
-      // Flatten or pick the user's memos
-      memos = result.values.flatMap(\.self).sorted(by: { $0.createdAt > $1.createdAt })
+      memos = try await readUseCase.run().sorted(by: { $0.createdAt > $1.createdAt })
     } catch {
       Log.error("Failed to load private memos: \(error)", category: .data)
     }
@@ -59,7 +61,7 @@ final class PrivateMemoStore {
 
     Task {
       do {
-        try await createMemoUseCase.run(for: localUserId, memo)
+        try await createUseCase.run(memo)
         await load() // Reload to reflect changes
       } catch {
         Log.error("Failed to create private memo: \(error)", category: .data)
@@ -68,12 +70,11 @@ final class PrivateMemoStore {
   }
 
   func update(_ memo: Memo) {
-    let localUserId = SessionStore.local.user?.id ?? "local-user"
     let updatedMemo = memo.withUpdatedContent(memo.content)
 
     Task {
       do {
-        try await updateMemoUseCase.run(for: localUserId, updatedMemo)
+        try await updateUseCase.run(updatedMemo)
         await load()
       } catch {
         Log.error("Failed to update private memo: \(error)", category: .data)
@@ -82,11 +83,9 @@ final class PrivateMemoStore {
   }
 
   func delete(_ memo: Memo) {
-    let localUserId = SessionStore.local.user?.id ?? "local-user"
-
     Task {
       do {
-        try await deleteMemoUseCase.run(for: localUserId, memo)
+        try await deleteUseCase.run(memo)
         await load()
       } catch {
         Log.error("Failed to delete private memo: \(error)", category: .data)

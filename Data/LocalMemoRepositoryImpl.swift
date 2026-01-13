@@ -48,7 +48,7 @@ actor SwiftDataMemoRepositoryImpl: MemoRepository {
     return sdMemos.map { $0.toDomain() }
   }
 
-  func readAllByUserIds(_: [String], useCache: Bool) async throws -> [Memo] {
-    try await readAllByUserId("local", useCache: useCache)
+  func readAllByUserIds(_: [String], useCache _: Bool) async throws -> [Memo] {
+    []
   }
 }

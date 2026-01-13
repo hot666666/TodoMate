@@ -12,24 +12,49 @@ import SwiftData
 final class CoreDIContainer {
   @ObservationIgnored let modelContainer: ModelContainer
   @ObservationIgnored let userDefaults: UserDefaults
-  @ObservationIgnored let calendarDayService: CalendarDayService
+  @ObservationIgnored let calendar: Calendar
+  @ObservationIgnored let sidebarCacheRepository: SidebarCacheRepository
   @ObservationIgnored let localTodoRepository: TodoRepository
   @ObservationIgnored let localMemoRepository: MemoRepository
+  @ObservationIgnored let calendarDayService: CalendarDayService
   @ObservationIgnored let sidebarCacheUseCase: SidebarCacheUseCase
+
+  @ObservationIgnored let createLocalTodoUseCase: CreateLocalTodoUseCase
+  @ObservationIgnored let readLocalTodoUseCase: ReadLocalTodoUseCase
+  @ObservationIgnored let updateLocalTodoUseCase: UpdateLocalTodoUseCase
+  @ObservationIgnored let deleteLocalTodoUseCase: DeleteLocalTodoUseCase
+
+  @ObservationIgnored let createLocalMemoUseCase: CreateLocalMemoUseCase
+  @ObservationIgnored let readLocalMemoUseCase: ReadLocalMemoUseCase
+  @ObservationIgnored let updateLocalMemoUseCase: UpdateLocalMemoUseCase
+  @ObservationIgnored let deleteLocalMemoUseCase: DeleteLocalMemoUseCase
 
   init(
     modelContainer: ModelContainer,
     userDefaults: UserDefaults = .standard,
-    calendarDayService: CalendarDayService = CalendarDayServiceImpl(),
+    calendar: Calendar = .current,
   ) {
-    self.userDefaults = userDefaults
-    self.calendarDayService = calendarDayService
     self.modelContainer = modelContainer
+    self.userDefaults = userDefaults
+    self.calendar = calendar
+    calendarDayService = CalendarDayServiceImpl(calendar: calendar)
 
     localTodoRepository = SwiftDataTodoRepositoryImpl(modelContainer: modelContainer)
     localMemoRepository = SwiftDataMemoRepositoryImpl(modelContainer: modelContainer)
 
-    let sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
+    createLocalTodoUseCase = CreateLocalTodoUseCaseImpl(repository: localTodoRepository)
+    readLocalTodoUseCase = ReadLocalTodoUseCaseImpl(
+      repository: localTodoRepository, calendar: calendar,
+    )
+    updateLocalTodoUseCase = UpdateLocalTodoUseCaseImpl(repository: localTodoRepository)
+    deleteLocalTodoUseCase = DeleteLocalTodoUseCaseImpl(repository: localTodoRepository)
+
+    createLocalMemoUseCase = CreateLocalMemoUseCaseImpl(repository: localMemoRepository)
+    readLocalMemoUseCase = ReadLocalMemoUseCaseImpl(repository: localMemoRepository)
+    updateLocalMemoUseCase = UpdateLocalMemoUseCaseImpl(repository: localMemoRepository)
+    deleteLocalMemoUseCase = DeleteLocalMemoUseCaseImpl(repository: localMemoRepository)
+
+    sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)
   }
 }
@@ -44,7 +69,6 @@ extension CoreDIContainer {
     return CoreDIContainer(
       modelContainer: container,
       userDefaults: .preview,
-      calendarDayService: CalendarDayServiceImpl(),
     )
   }()
 }

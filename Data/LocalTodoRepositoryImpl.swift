@@ -43,18 +43,6 @@ actor SwiftDataTodoRepositoryImpl: TodoRepository {
   }
 
   func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
-    // Note: 'source' is ignored as this is strictly the local repository.
-
-    // Construct predicate based on query filters
-    // SwiftData #Predicate is strict. We cannot easily compose dynamic predicates yet without complex logic.
-    // Simplifying: Fetch all and filter in memory for complex cases,
-    // OR separate common patterns.
-    // Common pattern: owner(userId) + dateRange
-
-    // For MVP Offline Phase 3:
-    // We fetch everything and filter in memory.
-    // Ideally we optimize this later with specific predicates.
-
     var dateRange: ClosedRange<Date>?
     for filter in query.filters {
       if case let .dateRange(range) = filter {

@@ -95,6 +95,13 @@ struct Todo: Identifiable, Codable {
     updated.updatedAt = .now
     return updated
   }
+
+  func withUpdatedContent(_ newContent: String) -> Todo {
+    var updated = self
+    updated.content = newContent
+    updated.updatedAt = .now
+    return updated
+  }
 }
 
 extension Todo {
