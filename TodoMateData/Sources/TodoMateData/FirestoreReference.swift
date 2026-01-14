@@ -8,49 +8,64 @@
 import FirebaseFirestore
 
 /// Firestore 연결 모드
-public enum FirestoreMode {
+public enum FirestoreMode: Sendable {
   case production // 실제 Firebase 서버 (Dev/Prod)
   case emulator // 로컬 에뮬레이터 (테스트용)
 }
 
 public final class FirestoreReference: @unchecked Sendable {
-  public nonisolated(unsafe) static var shared: FirestoreReference!
+  // MainActor에서만 설정 가능하도록 제한
+  @MainActor private static var _instance: FirestoreReference?
+
+  @MainActor
+  public static var shared: FirestoreReference {
+    guard let instance = _instance else {
+      fatalError("FirestoreReference.shared가 초기화되지 않았습니다. configure()를 먼저 호출하세요.")
+    }
+    return instance
+  }
+
+  @MainActor
+  public static func configure(mode: FirestoreMode = .production) {
+    guard _instance == nil else { return }
+    _instance = (mode == .production) ? FirestoreReference() : FirestoreReference(emulator: ())
+  }
 
   public let db: Firestore
   public let mode: FirestoreMode
 
   /// Production 모드로 초기화 (앱 타겟에서 사용)
   /// - 앱 시작 시 `FirebaseApp.configure()` 호출 후 사용
-  public init() {
+  private init() {
     db = Firestore.firestore()
     mode = .production
   }
 
   /// Emulator 모드로 초기화 (테스트에서 사용)
   /// - `FirebaseEmulatorConfigurator.configure()` 호출 후 사용
-  public init(emulator _: Void) {
+  private init(emulator _: Void) {
     db = Firestore.firestore()
     mode = .emulator
   }
 
   public func userCollection() -> CollectionReference {
-    db.collection(FireStore.USER)
+    db.collection(DocumentCollection.USER)
   }
 
   public func todoCollection() -> CollectionReference {
-    db.collection(FireStore.TODO)
+    db.collection(DocumentCollection.TODO)
   }
 
   public func messageCollection() -> CollectionReference {
-    db.collection(FireStore.MESSAGE)
+    db.collection(DocumentCollection.MESSAGE)
   }
 
   public func memoCollection() -> CollectionReference {
-    db.collection(FireStore.MEMO)
+    db.collection(DocumentCollection.MEMO)
   }
 
   public func groupCollection() -> CollectionReference {
-    db.collection(FireStore.GROUP)
+    db.collection(DocumentCollection.GROUP)
   }
 
   /// 테스트용: 모든 컬렉션의 문서 삭제
@@ -61,11 +76,11 @@ public final class FirestoreReference: @unchecked Sendable {
     }
 
     let collections = [
-      FireStore.USER,
-      FireStore.TODO,
-      FireStore.MESSAGE,
-      FireStore.MEMO,
-      FireStore.GROUP,
+      DocumentCollection.USER,
+      DocumentCollection.TODO,
+      DocumentCollection.MESSAGE,
+      DocumentCollection.MEMO,
+      DocumentCollection.GROUP,
     ]
 
     for collectionName in collections {
@@ -75,12 +90,13 @@ public final class FirestoreReference: @unchecked Sendable {
       }
     }
   }
-}
 
-public enum FireStore {
-  public static let USER = "users"
-  public static let TODO = "todos"
-  public static let MESSAGE = "messages"
-  public static let MEMO = "memos"
-  public static let GROUP = "groups"
+  enum DocumentCollection {
+    static let VERSION = "v2"
+    static let USER = "\(VERSION)-users"
+    static let TODO = "\(VERSION)-todos"
+    static let MESSAGE = "\(VERSION)-group_messages"
+    static let MEMO = "\(VERSION)-memos"
+    static let GROUP = "\(VERSION)-groups"
+  }
 }

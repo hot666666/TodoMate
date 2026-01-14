@@ -26,9 +26,10 @@ struct TodoMateApp: App {
     TodoMateDataConfiguration.configure()
     /// DI Container 생성
     let container = Self.makeContainer()
-    appDIContainer = container
     /// 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: container)
+
+    appDIContainer = container
     /// Store 초기화
     _todoStore = State(initialValue: PrivateTodoStore(container: container.core))
     _memoStore = State(initialValue: PrivateMemoStore(container: container.core))
@@ -106,7 +107,7 @@ private extension TodoMateApp {
   }
 
   static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
-    let firestoreReference = FirestoreReference.shared!
+    let firestoreReference = FirestoreReference.shared
     let authService = FirebaseAuthService()
     let userRepo = FirestoreUserRepository(reference: firestoreReference)
     let todoRepo = FirestoreTodoRepository(reference: firestoreReference)

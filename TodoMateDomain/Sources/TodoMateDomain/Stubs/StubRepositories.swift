@@ -2,8 +2,8 @@ import Foundation
 
 // MARK: - StubGroupRepository
 
-public final class StubGroupRepository: GroupRepository, @unchecked Sendable {
-  public var groupToReturn: UserGroup?
+public final class StubGroupRepository: GroupRepository, Sendable {
+  public let groupToReturn: UserGroup?
 
   public init(groupToReturn: UserGroup? = .stub) {
     self.groupToReturn = groupToReturn
@@ -21,7 +21,7 @@ public final class StubGroupRepository: GroupRepository, @unchecked Sendable {
 
 // MARK: - StubMemoRepository
 
-public final class StubMemoRepository: MemoRepository, @unchecked Sendable {
+public final class StubMemoRepository: MemoRepository, Sendable {
   public init() {}
   public func create(_: Memo) async throws {}
   public func update(_: Memo) async throws {}
@@ -32,8 +32,8 @@ public final class StubMemoRepository: MemoRepository, @unchecked Sendable {
 
 // MARK: - StubMessageRepository
 
-public final class StubMessageRepository: MessageRepository {
-  public var messagesToReturn: [GroupMessage]
+public final class StubMessageRepository: MessageRepository, Sendable {
+  public let messagesToReturn: [GroupMessage]
 
   public init(messagesToReturn: [GroupMessage] = []) {
     self.messagesToReturn = messagesToReturn
@@ -58,7 +58,7 @@ public final class StubMessageRepository: MessageRepository {
 
 // MARK: - StubTodoRepository
 
-public final class StubTodoRepository: TodoRepository {
+public final class StubTodoRepository: TodoRepository, Sendable {
   public init() {}
   public func create(_: Todo) async throws {}
   public func update(_: Todo) async throws {}
@@ -68,8 +68,8 @@ public final class StubTodoRepository: TodoRepository {
 
 // MARK: - StubUserRepository
 
-public final class StubUserRepository: UserRepository, @unchecked Sendable {
-  public var userToReturn: User?
+public final class StubUserRepository: UserRepository, Sendable {
+  public let userToReturn: User?
 
   public init(userToReturn: User? = .stub) {
     self.userToReturn = userToReturn
@@ -87,7 +87,7 @@ public final class StubUserRepository: UserRepository, @unchecked Sendable {
 
 // MARK: - StubAuthService
 
-public final class StubAuthService: AuthService {
+public final class StubAuthService: AuthService, Sendable {
   private let userId: String?
 
   public init(signedInUserId: String? = "stub") {
@@ -106,7 +106,7 @@ public final class StubAuthService: AuthService {
 
 // MARK: - StubConnectivityRepository
 
-public final class StubConnectivityRepository: ConnectivityRepository {
+public final class StubConnectivityRepository: ConnectivityRepository, Sendable {
   public init() {}
   public func setNetworkEnabled(_: Bool) async throws {}
 }

@@ -19,11 +19,12 @@ struct FirestoreIntegrationTests {
     FirebaseEmulatorConfigurator.configure()
 
     // FirestoreReference가 아직 초기화되지 않았다면 에뮬레이터 모드로 초기화
-    if FirestoreReference.shared == nil {
-      FirestoreReference.shared = FirestoreReference(emulator: ())
+    await MainActor.run {
+      FirestoreReference.configure(mode: .emulator)
     }
 
     // 테스트 데이터 초기화
-    try await FirestoreReference.shared.resetAllCollections()
+    let reference = await FirestoreReference.shared
+    try await reference.resetAllCollections()
   }
 }

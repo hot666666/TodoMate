@@ -58,6 +58,8 @@ public final class FirebaseAuthService: AuthService {
         continuation.yield(firebaseUser?.uid)
       }
 
+      // MARK: - 아직 ListenerRegistration가 Firebase 라이브러리 차원에서 Sendable 처리가 아직 되어있지 않음
+
       continuation.onTermination = { @Sendable _ in
         Auth.auth().removeStateDidChangeListener(authHandle)
       }

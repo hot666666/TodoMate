@@ -65,6 +65,8 @@ public final class FirestoreMessageRepository: MessageRepository {
             }
           }
         }
+
+      // NOTE: Firebase의 ListenerRegistration이 아직 Sendable을 준수하지 않음
       continuation.onTermination = { @Sendable _ in listener.remove() }
     }
   }
