@@ -80,7 +80,7 @@ struct TodoStoreTests {
     return PublicDIContainer(
       userRepository: MockUserRepository(currentUser: user, groupMembers: []),
       todoRepository: repo,
-      messageRepository: MockMessageRepository(messages: [], currentUser: user),
+      messageRepository: MockMessageRepository(messages: []),
       groupRepository: StubGroupRepository(),
       connectivityRepository: StubConnectivityRepository(),
       authService: MockAuthService(userId: userId),

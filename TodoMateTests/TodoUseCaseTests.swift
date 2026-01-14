@@ -240,3 +240,107 @@ struct ReadGroupTodoUseCaseTests {
     #expect(result[userId]?.first?.content == "Today")
   }
 }
+
+// MARK: - SyncTodayTodosUseCase Tests
+
+private final class SyncMockRepo: TodoRepository {
+  var todos: [Todo] = []
+  var createCalled = false
+  var updateCalled = false
+
+  func create(_ todo: Todo) async throws {
+    todos.append(todo)
+    createCalled = true
+  }
+
+  func update(_ todo: Todo) async throws {
+    if let index = todos.firstIndex(where: { $0.id == todo.id }) { todos[index] = todo }
+    updateCalled = true
+  }
+
+  func delete(_ todoId: String) async throws {
+    todos.removeAll { $0.id == todoId }
+  }
+
+  func readAll(query _: TodoQuery, source _: DataSource) async throws -> [Todo] {
+    todos
+  }
+}
+
+@Suite("SyncTodayTodosUseCase Unit Tests")
+struct SyncTodayTodosUseCaseTests {
+  @Test("Local New -> Remote Create")
+  func sync_createsRemoteWhenMissing() async throws {
+    let localRepo = SyncMockRepo()
+    let remoteRepo = SyncMockRepo()
+    let useCase = SyncTodayTodosUseCaseImpl(
+      localRepository: localRepo, remoteRepository: remoteRepo,
+    )
+
+    let userId = "user1"
+    let today = Date()
+    let newTodo = Todo(owner: userId, content: "New Local", in: today)
+    localRepo.todos = [newTodo]
+
+    try await useCase.run(for: userId, in: today)
+
+    #expect(remoteRepo.todos.count == 1)
+    #expect(remoteRepo.todos.first?.id == newTodo.id)
+    #expect(remoteRepo.createCalled == true)
+  }
+
+  @Test("Local Newer UpdatedAt -> Remote Update")
+  func sync_updatesRemoteWhenLocalIsNewer() async throws {
+    let localRepo = SyncMockRepo()
+    let remoteRepo = SyncMockRepo()
+    let useCase = SyncTodayTodosUseCaseImpl(
+      localRepository: localRepo, remoteRepository: remoteRepo,
+    )
+
+    let userId = "user1"
+    let today = Date()
+
+    var remoteTodo = Todo(owner: userId, content: "Old Content", in: today)
+    remoteTodo.updatedAt = Date().addingTimeInterval(-3600)
+    remoteRepo.todos = [remoteTodo]
+
+    var localTodo = remoteTodo
+    localTodo.content = "New Content"
+    localTodo.updatedAt = Date()
+    localRepo.todos = [localTodo]
+
+    try await useCase.run(for: userId, in: today)
+
+    #expect(remoteRepo.todos.count == 1)
+    #expect(remoteRepo.todos.first?.content == "New Content")
+    #expect(remoteRepo.updateCalled == true)
+
+    #expect(remoteRepo.todos.count(where: { $0.id == remoteTodo.id }) == 1)
+  }
+
+  @Test("Remote Newer -> No Update")
+  func sync_doesNotUpdateRemoteWhenRemoteIsNewer() async throws {
+    let localRepo = SyncMockRepo()
+    let remoteRepo = SyncMockRepo()
+    let useCase = SyncTodayTodosUseCaseImpl(
+      localRepository: localRepo, remoteRepository: remoteRepo,
+    )
+
+    let userId = "user1"
+    let today = Date()
+
+    var remoteTodo = Todo(owner: userId, content: "Remote Content", in: today)
+    remoteTodo.updatedAt = Date()
+    remoteRepo.todos = [remoteTodo]
+
+    var localTodo = remoteTodo
+    localTodo.content = "Local Old Content"
+    localTodo.updatedAt = Date().addingTimeInterval(-3600)
+    localRepo.todos = [localTodo]
+
+    try await useCase.run(for: userId, in: today)
+
+    #expect(remoteRepo.todos.first?.content == "Remote Content")
+    #expect(remoteRepo.updateCalled == false)
+  }
+}

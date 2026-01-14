@@ -15,9 +15,16 @@ final class AppDIContainer {
   /// 온라인 기능들을 주입하는 컨테이너
   @ObservationIgnored let pub: PublicDIContainer
 
+  @ObservationIgnored let syncTodayTodosUseCase: SyncTodayTodosUseCase
+
   init(coreContainer: CoreDIContainer, publicContainer: PublicDIContainer) {
     core = coreContainer
     pub = publicContainer
+
+    syncTodayTodosUseCase = SyncTodayTodosUseCaseImpl(
+      localRepository: core.localTodoRepository,
+      remoteRepository: pub.todoRepository,
+    )
   }
 }
 
