@@ -58,6 +58,18 @@ struct Memo: Identifiable, Codable, Equatable, Hashable {
     updated.updatedAt = .now
     return updated
   }
+
+  // MARK: - Codable Compatibility
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    id = try container.decode(String.self, forKey: .id)
+    content = try container.decode(String.self, forKey: .content)
+    createdAt = try container.decode(Date.self, forKey: .createdAt)
+    updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+    owner = try container.decode(String.self, forKey: .owner)
+    isDeleted = try container.decodeIfPresent(Bool.self, forKey: .isDeleted) ?? false
+  }
 }
 
 extension Memo {
