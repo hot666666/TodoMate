@@ -17,13 +17,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		45B526B42F0F8A450095C87F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 45E10B872C69B77300FC31CD /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 45E10B8E2C69B77300FC31CD;
-			remoteInfo = TodoMate;
-		};
 		45C1A5862D7D704B005293BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 45E10B872C69B77300FC31CD /* Project object */;
@@ -86,8 +79,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		455B43FD2F17AB2100849861 /* Infra */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = Infra;
 			sourceTree = "<group>";
 		};
@@ -101,36 +92,21 @@
 		};
 		45A242C42F0BCCE8006B9A72 /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = Shared;
-			sourceTree = "<group>";
-		};
-		45B526B12F0F8A450095C87F /* TodoMateFirebaseTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			path = TodoMateFirebaseTests;
 			sourceTree = "<group>";
 		};
 		45DA69ED2E238B00007183E3 /* TodoMate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = TodoMate;
 			sourceTree = "<group>";
 		};
 		45E0A0E42D78497C000FDC24 /* TodoMateTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = TodoMateTests;
 			sourceTree = "<group>";
 		};
 		45E45A042F0CE76000BFEF01 /* TodoMateUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = TodoMateUITests;
 			sourceTree = "<group>";
 		};
@@ -185,7 +161,6 @@
 				455B43FD2F17AB2100849861 /* Infra */,
 				45DA69ED2E238B00007183E3 /* TodoMate */,
 				45E0A0E42D78497C000FDC24 /* TodoMateTests */,
-				45B526B12F0F8A450095C87F /* TodoMateFirebaseTests */,
 				45E45A042F0CE76000BFEF01 /* TodoMateUITests */,
 				45A242BB2F0BCCCF006B9A72 /* Resources */,
 				4525D73E2CA0706500D6C449 /* TodoMate.app */,
@@ -286,10 +261,6 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
-					45B526AF2F0F8A450095C87F = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 45E10B8E2C69B77300FC31CD;
-					};
 					45E0A0E22D78497C000FDC24 = {
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = 45E10B8E2C69B77300FC31CD;
@@ -421,48 +392,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		45B526B72F0F8A450095C87F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8PRWAG4355;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMateFirebaseTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TodoMate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TodoMate";
-			};
-			name = Debug;
-		};
-		45B526B82F0F8A450095C87F /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8PRWAG4355;
-				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.hotcs6.TodoMateFirebaseTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TodoMate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TodoMate";
-			};
-			name = Release;
-		};
 		45E0A0EA2D78497C000FDC24 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
