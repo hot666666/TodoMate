@@ -57,6 +57,8 @@ ui-screenshots SCREENS="":
 
 # 에뮬레이터 시작
 start-emulator:
+    @-lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+    @-lsof -ti:4000 | xargs kill -9 2>/dev/null || true
     @echo "🔥 Starting Firebase emulator..."
     @cd FirebaseEmulator && firebase emulators:start --only firestore &
     @sleep 5

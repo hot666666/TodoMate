@@ -8,8 +8,12 @@
 import FirebaseFirestore
 
 final class FirestoreReference {
-  lazy var db: Firestore = {
-    let db = Firestore.firestore()
+  static let shared = FirestoreReference()
+
+  let db: Firestore
+
+  private init() {
+    db = Firestore.firestore()
     #if USE_FIREBASE_EMULATOR
       let settings = db.settings
       settings.host = "127.0.0.1:8080"
@@ -18,10 +22,7 @@ final class FirestoreReference {
       db.settings = settings
       db.useEmulator(withHost: "localhost", port: 8080)
     #endif
-    return db
-  }()
-
-  init() {}
+  }
 
   func userCollection() -> CollectionReference {
     db.collection(FireStore.USER)
@@ -51,6 +52,7 @@ final class FirestoreReference {
         FireStore.TODO,
         FireStore.MESSAGE,
         FireStore.MEMO,
+        FireStore.GROUP,
       ]
 
       for collectionName in collections {

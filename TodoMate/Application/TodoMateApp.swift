@@ -36,10 +36,11 @@ struct TodoMateApp: App {
   var body: some Scene {
     WindowGroup {
       MainView(container: appDIContainer)
+        .defaultAppStorage(appDIContainer.core.userDefaults)
+        .modelContainer(appDIContainer.core.modelContainer)
         .environment(appDIContainer)
         .environment(todoStore)
         .environment(memoStore)
-        .modelContainer(appDIContainer.core.modelContainer)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
         .frame(minWidth: 720, minHeight: 540)
@@ -57,15 +58,15 @@ struct TodoMateApp: App {
     .windowStyle(.hiddenTitleBar)
     #endif
   }
-}
 
-private extension TodoMateApp {
   #if DEBUG
     static var isUITesting: Bool {
       ProcessInfo.processInfo.arguments.contains("-useMockContainer")
     }
   #endif
+}
 
+private extension TodoMateApp {
   @MainActor
   static func makeContainer() -> AppDIContainer {
     #if DEBUG
@@ -116,7 +117,7 @@ private extension TodoMateApp {
   }
 
   static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
-    let firestoreReference = FirestoreReference()
+    let firestoreReference = FirestoreReference.shared
     let authService = FirebaseAuthService()
     let userRepo = FirestoreUserRepository(reference: firestoreReference)
     let todoRepo = FirestoreTodoRepository(reference: firestoreReference)

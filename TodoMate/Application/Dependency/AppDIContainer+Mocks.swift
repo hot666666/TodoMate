@@ -67,16 +67,14 @@ import SwiftData
       @MainActor
       func configureUserDefaults() {
         // 1. Clear existing defaults for clean state
-        if let bundleID = Bundle.main.bundleIdentifier {
-          UserDefaults.standard.removePersistentDomain(forName: bundleID)
-        }
+        UserDefaults.preview.removePersistentDomain(forName: "preview")
 
         // Prevent checkAndHandleAppUpdate from wiping data by setting a fake version
-        UserDefaults.standard.set("1.0.0", forKey: UserDefaultsKey.appLastVersion.rawValue)
+        UserDefaults.preview.set("1.0.0", forKey: UserDefaultsKey.appLastVersion.rawValue)
 
         // 2. Set user profile
         guard let user else { return }
-        UserDefaults.standard.set(
+        UserDefaults.preview.set(
           user.displayName, forKey: UserDefaultsKey.cachedProfileName.rawValue,
         )
 
@@ -84,15 +82,15 @@ import SwiftData
         if !user.groupId.isEmpty {
           // Use EntityConstant for the group name since we don't have a full Group object here,
           // but we know this scenario uses the stub group.
-          UserDefaults.standard.set(
+          UserDefaults.preview.set(
             EntityConstant.UserGroup.stubName, forKey: UserDefaultsKey.cachedGroupName.rawValue,
           )
-          UserDefaults.standard.set(
+          UserDefaults.preview.set(
             user.groupId, forKey: UserDefaultsKey.cachedUserGroupId.rawValue,
           )
         } else {
-          UserDefaults.standard.removeObject(forKey: UserDefaultsKey.cachedGroupName.rawValue)
-          UserDefaults.standard.removeObject(forKey: UserDefaultsKey.cachedUserGroupId.rawValue)
+          UserDefaults.preview.removeObject(forKey: UserDefaultsKey.cachedGroupName.rawValue)
+          UserDefaults.preview.removeObject(forKey: UserDefaultsKey.cachedUserGroupId.rawValue)
         }
       }
     }
@@ -115,9 +113,10 @@ import SwiftData
       let config = ModelConfiguration(isStoredInMemoryOnly: true)
       // swiftlint:disable:next force_try
       let container = try! ModelContainer(for: schema, configurations: [config])
+      // Use in-memory UserDefaults for test isolation
       return CoreDIContainer(
         modelContainer: container,
-        userDefaults: .standard,
+        userDefaults: .preview,
         hotKeyManager: HotKeyManager(),
       )
     }
