@@ -39,7 +39,7 @@ private struct MainContent: View {
   @State private var sidebarToken: HotKeyManager.RegistrationToken?
 
   init(naviManager: NavigationManager) {
-    self.naviManager = naviManager
+    _naviManager = State(initialValue: naviManager)
   }
 
   var body: some View {

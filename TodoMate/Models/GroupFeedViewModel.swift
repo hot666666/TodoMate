@@ -12,10 +12,22 @@ import SwiftUI
 @Observable
 @MainActor
 final class GroupFeedViewModel {
-  var isChatVisible = true
+  @ObservationIgnored private let userDefaults: UserDefaults
+
+  var isChatVisible = true {
+    didSet {
+      userDefaults.set(isChatVisible, for: .chatPanelVisibility)
+    }
+  }
+
   var selectedMemberId: String?
 
   var chatInputText: String = ""
+
+  init(userDefaults: UserDefaults = .standard) {
+    self.userDefaults = userDefaults
+    isChatVisible = userDefaults.bool(for: .chatPanelVisibility, default: true)
+  }
 
   // MARK: - Actions
 

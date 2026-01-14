@@ -24,6 +24,9 @@ enum UserDefaultsKey: String {
   /// 사이드바 표시 상태
   case sidebarVisibility = "sidebar_visibility"
 
+  /// 채팅 패널 표시 상태
+  case chatPanelVisibility = "chat_panel_visibility"
+
   /// Public 기능 활성화 여부
   case isPublicModeEnabled = "is_public_mode_enabled"
 
