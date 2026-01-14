@@ -5,6 +5,7 @@
 //  Created by agent on 1/12/26.
 //
 
+import Common
 import Foundation
 import TodoMateDomain
 
@@ -34,13 +35,4 @@ public final class SidebarCacheRepositoryImpl: SidebarCacheRepository {
     userDefaults.removeObject(forKey: UserDefaultsKey.cachedGroupName.rawValue)
     userDefaults.removeObject(forKey: UserDefaultsKey.cachedUserGroupId.rawValue)
   }
-}
-
-public enum UserDefaultsKey: String {
-  case lastSidebarState
-  case lastChatPanelState
-  case lastMessageReadTimestamp
-  case cachedProfileName
-  case cachedGroupName
-  case cachedUserGroupId
 }
