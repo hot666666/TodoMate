@@ -1,0 +1,13 @@
+//
+//  TodoRepository.swift
+//  TodoMate
+//
+//  Created by hs on 7/12/25.
+//
+
+public protocol TodoRepository: Sendable {
+  func create(_ todo: Todo) async throws
+  func update(_ todo: Todo) async throws
+  func delete(_ todoId: String) async throws
+  func readAll(query: TodoQuery, source: DataSource) async throws -> [Todo]
+}
