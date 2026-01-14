@@ -5,22 +5,23 @@
 //  Created by hs on 07/02/25.
 //
 
-protocol UpdateLocalTodoUseCase {
+public protocol UpdateLocalTodoUseCase {
   func run(_ todo: Todo) async throws
 }
 
-final class UpdateLocalTodoUseCaseImpl: UpdateLocalTodoUseCase {
+public final class UpdateLocalTodoUseCaseImpl: UpdateLocalTodoUseCase {
   private let repository: TodoRepository
 
-  init(repository: TodoRepository) {
+  public init(repository: TodoRepository) {
     self.repository = repository
   }
 
-  func run(_ todo: Todo) async throws {
+  public func run(_ todo: Todo) async throws {
     try await repository.update(todo)
   }
 }
 
-final class StubUpdateLocalTodoUseCase: UpdateLocalTodoUseCase {
-  func run(_: Todo) async throws {}
+public final class StubUpdateLocalTodoUseCase: UpdateLocalTodoUseCase {
+  public init() {}
+  public func run(_: Todo) async throws {}
 }

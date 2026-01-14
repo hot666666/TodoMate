@@ -7,19 +7,19 @@
 
 import Foundation
 
-protocol ReadGroupTodoUseCase {
+public protocol ReadGroupTodoUseCase {
   func run(for userIds: [String], in range: ClosedRange<Date>, useCache: Bool) async throws
     -> [String: [Todo]]
 }
 
-final class ReadGroupTodoUseCaseImpl: ReadGroupTodoUseCase {
+public final class ReadGroupTodoUseCaseImpl: ReadGroupTodoUseCase {
   private let repository: TodoRepository
 
-  init(repository: TodoRepository) {
+  public init(repository: TodoRepository) {
     self.repository = repository
   }
 
-  func run(for userIds: [String], in range: ClosedRange<Date>, useCache: Bool) async throws
+  public func run(for userIds: [String], in range: ClosedRange<Date>, useCache: Bool) async throws
     -> [String: [Todo]] {
     let query = TodoQuery()
       .owners(userIds: userIds)
@@ -31,8 +31,9 @@ final class ReadGroupTodoUseCaseImpl: ReadGroupTodoUseCase {
   }
 }
 
-final class StubReadGroupTodoUseCase: ReadGroupTodoUseCase {
-  func run(for userIds: [String], in _: ClosedRange<Date>, useCache _: Bool) async throws
+public final class StubReadGroupTodoUseCase: ReadGroupTodoUseCase {
+  public init() {}
+  public func run(for userIds: [String], in _: ClosedRange<Date>, useCache _: Bool) async throws
     -> [String: [Todo]] {
     Dictionary(uniqueKeysWithValues: userIds.map { userId in (userId, []) })
   }

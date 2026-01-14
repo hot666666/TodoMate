@@ -82,7 +82,7 @@ public extension Memo {
   )
 }
 
-extension Memo {
+public extension Memo {
   var isEmpty: Bool { content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
   var wordCount: Int {
     content.components(separatedBy: .whitespacesAndNewlines).count(where: { !$0.isEmpty })

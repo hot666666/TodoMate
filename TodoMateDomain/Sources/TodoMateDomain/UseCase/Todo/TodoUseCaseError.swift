@@ -7,6 +7,6 @@
 
 import Foundation
 
-enum TodoUseCaseError: Error {
+public enum TodoUseCaseError: Error {
   case userNotAuthorized
 }

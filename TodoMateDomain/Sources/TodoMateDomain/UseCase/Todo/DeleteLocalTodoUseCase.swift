@@ -5,22 +5,23 @@
 //  Created by hs on 07/02/25.
 //
 
-protocol DeleteLocalTodoUseCase {
+public protocol DeleteLocalTodoUseCase {
   func run(_ todoId: String) async throws
 }
 
-final class DeleteLocalTodoUseCaseImpl: DeleteLocalTodoUseCase {
+public final class DeleteLocalTodoUseCaseImpl: DeleteLocalTodoUseCase {
   private let repository: TodoRepository
 
-  init(repository: TodoRepository) {
+  public init(repository: TodoRepository) {
     self.repository = repository
   }
 
-  func run(_ todoId: String) async throws {
+  public func run(_ todoId: String) async throws {
     try await repository.delete(todoId)
   }
 }
 
-final class StubDeleteLocalTodoUseCase: DeleteLocalTodoUseCase {
-  func run(_: String) async throws {}
+public final class StubDeleteLocalTodoUseCase: DeleteLocalTodoUseCase {
+  public init() {}
+  public func run(_: String) async throws {}
 }

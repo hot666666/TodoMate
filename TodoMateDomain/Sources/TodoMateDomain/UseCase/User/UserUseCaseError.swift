@@ -7,6 +7,11 @@
 
 import Foundation
 
-enum UserUseCaseError: Error {
+public enum UserUseCaseError: Error {
   case userNotFound
+}
+
+public enum UpdateUserError: Error, Equatable {
+  case emptyDisplayName
+  case displayNameTooLong(maxLength: Int)
 }

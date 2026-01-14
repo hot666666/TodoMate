@@ -5,8 +5,10 @@
 //  Created by agent on 1/11/26.
 //
 
+import Common
 import Foundation
 import Observation
+import TodoMateDomain
 
 @Observable
 @MainActor
@@ -49,7 +51,7 @@ final class PrivateMemoStore {
 
   func load() async {
     do {
-      memos = try await readUseCase.run().sorted(by: { $0.createdAt > $1.createdAt })
+      memos = try await readUseCase.run(userId: "").sorted(by: { $0.createdAt > $1.createdAt })
     } catch {
       Log.error("Failed to load private memos: \(error)", category: .data)
     }

@@ -7,18 +7,18 @@
 
 import Foundation
 
-protocol TogglePublicConnectivityUseCase {
+public protocol TogglePublicConnectivityUseCase {
   func execute(isOnline: Bool) async
 }
 
-final class TogglePublicConnectivityUseCaseImpl: TogglePublicConnectivityUseCase {
+public final class TogglePublicConnectivityUseCaseImpl: TogglePublicConnectivityUseCase {
   private let repository: ConnectivityRepository
 
-  init(repository: ConnectivityRepository) {
+  public init(repository: ConnectivityRepository) {
     self.repository = repository
   }
 
-  func execute(isOnline: Bool) async {
+  public func execute(isOnline: Bool) async {
     try? await repository.setNetworkEnabled(isOnline)
   }
 }

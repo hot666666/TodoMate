@@ -13,6 +13,7 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../TodoMateDomain"),
+    .package(path: "../Common"),
     .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "12.7.0"),
     .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "9.0.0"),
   ],
@@ -21,6 +22,7 @@ let package = Package(
       name: "TodoMateData",
       dependencies: [
         "TodoMateDomain",
+        "Common",
         .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
         .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
         .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),

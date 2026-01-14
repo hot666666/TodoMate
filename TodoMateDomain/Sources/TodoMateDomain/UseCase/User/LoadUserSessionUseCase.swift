@@ -5,21 +5,21 @@
 //  Created by hs on 6/30/25.
 //
 
-enum LoadUserSessionPhase {
+public enum LoadUserSessionPhase {
   case initial // 최초 진입/가입/캐시 우선
   case refresh // 로그인 후/항상 최신 fetch
 }
 
-protocol LoadUserSessionUseCase {
+public protocol LoadUserSessionUseCase {
   func run(for userId: String, phase: LoadUserSessionPhase) async throws -> UserSession
 }
 
-final class LoadUserSessionUseCaseImpl: LoadUserSessionUseCase {
+public final class LoadUserSessionUseCaseImpl: LoadUserSessionUseCase {
   private let readUserUseCase: ReadUserUseCase
   private let readUserGroupUseCase: ReadUserGroupUseCase
   private let userRepository: UserRepository
 
-  init(
+  public init(
     readUserUseCase: ReadUserUseCase,
     readUserGroupUseCase: ReadUserGroupUseCase,
     userRepository: UserRepository,
@@ -29,7 +29,7 @@ final class LoadUserSessionUseCaseImpl: LoadUserSessionUseCase {
     self.userRepository = userRepository
   }
 
-  func run(for userId: String, phase: LoadUserSessionPhase) async throws -> UserSession {
+  public func run(for userId: String, phase: LoadUserSessionPhase) async throws -> UserSession {
     switch phase {
     case .initial:
       // 1. 캐시 우선
@@ -60,8 +60,9 @@ final class LoadUserSessionUseCaseImpl: LoadUserSessionUseCase {
   }
 }
 
-final class StubLoadUserSessionUseCase: LoadUserSessionUseCase {
-  func run(for _: String, phase _: LoadUserSessionPhase) async throws -> UserSession {
+public final class StubLoadUserSessionUseCase: LoadUserSessionUseCase {
+  public init() {}
+  public func run(for _: String, phase _: LoadUserSessionPhase) async throws -> UserSession {
     UserSession(currentUser: User.stub, groupMembers: User.stubs)
   }
 }

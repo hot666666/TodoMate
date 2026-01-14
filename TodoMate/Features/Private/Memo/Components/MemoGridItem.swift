@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TodoMateDomain
 
 struct MemoGridItem: View {
   let memo: Memo

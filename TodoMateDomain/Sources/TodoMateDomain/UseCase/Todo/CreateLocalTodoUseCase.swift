@@ -5,22 +5,23 @@
 //  Created by hs on 07/02/25.
 //
 
-protocol CreateLocalTodoUseCase {
+public protocol CreateLocalTodoUseCase {
   func run(_ todo: Todo) async throws
 }
 
-final class CreateLocalTodoUseCaseImpl: CreateLocalTodoUseCase {
+public final class CreateLocalTodoUseCaseImpl: CreateLocalTodoUseCase {
   private let repository: TodoRepository
 
-  init(repository: TodoRepository) {
+  public init(repository: TodoRepository) {
     self.repository = repository
   }
 
-  func run(_ todo: Todo) async throws {
+  public func run(_ todo: Todo) async throws {
     try await repository.create(todo)
   }
 }
 
-final class StubCreateLocalTodoUseCase: CreateLocalTodoUseCase {
-  func run(_: Todo) async throws {}
+public final class StubCreateLocalTodoUseCase: CreateLocalTodoUseCase {
+  public init() {}
+  public func run(_: Todo) async throws {}
 }

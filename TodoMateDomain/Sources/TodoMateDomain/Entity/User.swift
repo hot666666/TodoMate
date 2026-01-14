@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct User: Identifiable, Codable, Equatable, Sendable {
+public struct User: Identifiable, Codable, Equatable, Hashable, Sendable {
   public let id: String
   /// DocumentID
   public var displayName: String
@@ -67,7 +67,7 @@ public extension User {
 
 // MARK: - Array Extension
 
-extension [User] {
+public extension [User] {
   func placingFirst(_ user: User) -> [User] {
     [user] + filter { $0.id != user.id }
   }

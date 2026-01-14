@@ -7,33 +7,33 @@
 
 import Foundation
 
-protocol SidebarCacheUseCase {
+public protocol SidebarCacheUseCase {
   func saveProfileName(_ name: String)
   func saveGroup(name: String, id: String)
   func clearGroupCache()
   func clearCache()
 }
 
-final class SidebarCacheUseCaseImpl: SidebarCacheUseCase {
+public final class SidebarCacheUseCaseImpl: SidebarCacheUseCase {
   private let repository: SidebarCacheRepository
 
-  init(repository: SidebarCacheRepository) {
+  public init(repository: SidebarCacheRepository) {
     self.repository = repository
   }
 
-  func saveProfileName(_ name: String) {
+  public func saveProfileName(_ name: String) {
     repository.saveProfileName(name)
   }
 
-  func saveGroup(name: String, id: String) {
+  public func saveGroup(name: String, id: String) {
     repository.saveGroup(name: name, id: id)
   }
 
-  func clearGroupCache() {
+  public func clearGroupCache() {
     repository.clearGroupCache()
   }
 
-  func clearCache() {
+  public func clearCache() {
     repository.clearCache()
   }
 }

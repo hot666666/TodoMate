@@ -1,13 +1,13 @@
 //
-//  Color+Extension.swift
-//  Todo
+//  Color+.swift
+//  TodoMate
 //
-//  Created by hs on 5/24/25.
+//  Created by hs on 1/14/26.
 //
 
 import SwiftUI
 
-extension Color {
+public extension Color {
   static let customBlue = Color(red: 0x28 / 255, green: 0x45 / 255, blue: 0x6C / 255)
   static let customGray = Color(red: 0x5A / 255, green: 0x5A / 255, blue: 0x5A / 255)
   static let customGreen = Color(red: 0x2B / 255, green: 0x59 / 255, blue: 0x3F / 255)

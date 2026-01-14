@@ -6,6 +6,7 @@
 //
 
 import Observation
+import TodoMateDomain
 
 @MainActor
 @Observable

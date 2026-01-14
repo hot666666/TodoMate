@@ -7,6 +7,8 @@
 
 import Foundation
 import SwiftData
+import TodoMateData
+import TodoMateDomain
 
 @MainActor
 final class CoreDIContainer {

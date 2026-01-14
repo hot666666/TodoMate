@@ -1,6 +1,14 @@
-import SwiftUI
+//
+//  TodoStatus+.swift
+//  TodoMate
+//
+//  Created by hs on 1/14/26.
+//
 
-public extension TodoStatus {
+import SwiftUI
+import TodoMateDomain
+
+extension TodoStatus {
   var color: Color {
     switch self {
     case .todo: .gray

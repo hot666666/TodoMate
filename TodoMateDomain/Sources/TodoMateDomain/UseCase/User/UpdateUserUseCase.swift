@@ -5,25 +5,22 @@
 //  Created by hs on 7/12/25.
 //
 
-protocol UpdateUserUseCase {
+import Foundation
+
+public protocol UpdateUserUseCase {
   func execute(_ user: User) async throws
 }
 
-enum UpdateUserError: Error, Equatable {
-  case emptyDisplayName
-  case displayNameTooLong(maxLength: Int)
-}
-
-final class UpdateUserUseCaseImpl: UpdateUserUseCase {
+public final class UpdateUserUseCaseImpl: UpdateUserUseCase {
   private let userRepository: UserRepository
 
-  static let maxDisplayNameLength = 20
+  public static let maxDisplayNameLength = 20
 
-  init(userRepository: UserRepository) {
+  public init(userRepository: UserRepository) {
     self.userRepository = userRepository
   }
 
-  func execute(_ user: User) async throws {
+  public func execute(_ user: User) async throws {
     // Validation
     guard !user.displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
       throw UpdateUserError.emptyDisplayName
@@ -37,6 +34,7 @@ final class UpdateUserUseCaseImpl: UpdateUserUseCase {
   }
 }
 
-final class StubUpdateUserUseCase: UpdateUserUseCase {
-  func execute(_: User) async throws {}
+public final class StubUpdateUserUseCase: UpdateUserUseCase {
+  public init() {}
+  public func execute(_: User) async throws {}
 }

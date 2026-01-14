@@ -88,13 +88,25 @@ public final class StubUserRepository: UserRepository, @unchecked Sendable {
 // MARK: - StubAuthService
 
 public final class StubAuthService: AuthService {
-  public init() {}
-  public var signedInUserId: String? { "stubUser" }
+  private let userId: String?
+
+  public init(signedInUserId: String? = "stub") {
+    userId = signedInUserId
+  }
+
+  public var signedInUserId: String? { userId }
   public func signIn() async throws {}
   public func signOut() throws {}
   public func listenToAuthStateChanges() -> AsyncStream<String?> {
     AsyncStream { continuation in
-      continuation.yield("stubUser")
+      continuation.yield(userId)
     }
   }
+}
+
+// MARK: - StubConnectivityRepository
+
+public final class StubConnectivityRepository: ConnectivityRepository {
+  public init() {}
+  public func setNetworkEnabled(_: Bool) async throws {}
 }

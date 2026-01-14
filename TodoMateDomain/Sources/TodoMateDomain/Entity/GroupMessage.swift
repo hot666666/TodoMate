@@ -25,7 +25,7 @@ public struct GroupMessage: Identifiable, Codable, Sendable {
     updatedAt = now
   }
 
-  func withUpdatedContent(_ content: String) -> GroupMessage? {
+  public func withUpdatedContent(_ content: String) -> GroupMessage? {
     let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmed.isEmpty else { return nil }
 

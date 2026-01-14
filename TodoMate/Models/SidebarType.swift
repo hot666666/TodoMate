@@ -5,6 +5,8 @@
 //  Created by hs on 8/24/25.
 //
 
+import TodoMateDomain
+
 enum SidebarType: Identifiable, Hashable, Equatable {
   case profile
   case user(User)

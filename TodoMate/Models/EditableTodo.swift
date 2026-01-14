@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TodoMateDomain
 
 @Observable
 class EditableTodo: Identifiable {
