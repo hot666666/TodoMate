@@ -86,6 +86,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		455B43FD2F17AB2100849861 /* Infra */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = Infra;
 			sourceTree = "<group>";
 		};
@@ -99,39 +101,42 @@
 		};
 		45A242C42F0BCCE8006B9A72 /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = Shared;
 			sourceTree = "<group>";
 		};
 		45B526B12F0F8A450095C87F /* TodoMateFirebaseTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = TodoMateFirebaseTests;
 			sourceTree = "<group>";
 		};
 		45DA69ED2E238B00007183E3 /* TodoMate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = TodoMate;
 			sourceTree = "<group>";
 		};
 		45E0A0E42D78497C000FDC24 /* TodoMateTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = TodoMateTests;
 			sourceTree = "<group>";
 		};
 		45E45A042F0CE76000BFEF01 /* TodoMateUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = TodoMateUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		45B526AD2F0F8A450095C87F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		45E0A0E02D78497C000FDC24 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -195,29 +200,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		45B526AF2F0F8A450095C87F /* TodoMateFirebaseTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 45B526B62F0F8A450095C87F /* Build configuration list for PBXNativeTarget "TodoMateFirebaseTests" */;
-			buildPhases = (
-				45B526AC2F0F8A450095C87F /* Sources */,
-				45B526AD2F0F8A450095C87F /* Frameworks */,
-				45B526AE2F0F8A450095C87F /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				45B526B52F0F8A450095C87F /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				45B526B12F0F8A450095C87F /* TodoMateFirebaseTests */,
-			);
-			name = TodoMateFirebaseTests;
-			packageProductDependencies = (
-			);
-			productName = TodoMateFirebaseTests;
-			productReference = 45B526B02F0F8A450095C87F /* TodoMateFirebaseTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		45E0A0E22D78497C000FDC24 /* TodoMateTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 45E0A0E92D78497C000FDC24 /* Build configuration list for PBXNativeTarget "TodoMateTests" */;
@@ -235,8 +217,6 @@
 				45E0A0E42D78497C000FDC24 /* TodoMateTests */,
 			);
 			name = TodoMateTests;
-			packageProductDependencies = (
-			);
 			productName = TodoMateTests;
 			productReference = 45E0A0E32D78497C000FDC24 /* TodoMateTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -292,8 +272,6 @@
 				45E45A042F0CE76000BFEF01 /* TodoMateUITests */,
 			);
 			name = TodoMateUITests;
-			packageProductDependencies = (
-			);
 			productName = TodoMateUITests;
 			productReference = 45E45A032F0CE76000BFEF01 /* TodoMateUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -349,19 +327,11 @@
 				45E10B8E2C69B77300FC31CD /* TodoMate */,
 				45E0A0E22D78497C000FDC24 /* TodoMateTests */,
 				45E45A022F0CE76000BFEF01 /* TodoMateUITests */,
-				45B526AF2F0F8A450095C87F /* TodoMateFirebaseTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		45B526AE2F0F8A450095C87F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		45E0A0E12D78497C000FDC24 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -410,13 +380,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		45B526AC2F0F8A450095C87F /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		45E0A0DF2D78497C000FDC24 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -441,11 +404,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		45B526B52F0F8A450095C87F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 45E10B8E2C69B77300FC31CD /* TodoMate */;
-			targetProxy = 45B526B42F0F8A450095C87F /* PBXContainerItemProxy */;
-		};
 		45C1A5872D7D704B005293BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			targetProxy = 45C1A5862D7D704B005293BD /* PBXContainerItemProxy */;
@@ -803,15 +761,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		45B526B62F0F8A450095C87F /* Build configuration list for PBXNativeTarget "TodoMateFirebaseTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				45B526B72F0F8A450095C87F /* Debug */,
-				45B526B82F0F8A450095C87F /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		45E0A0E92D78497C000FDC24 /* Build configuration list for PBXNativeTarget "TodoMateTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
