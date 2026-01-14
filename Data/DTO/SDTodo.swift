@@ -18,6 +18,7 @@ final class SDTodo {
   var createdAt: Date
   var updatedAt: Date
   var owner: String
+  var isDeleted: Bool
 
   init(
     id: String = UUID().uuidString,
@@ -28,6 +29,7 @@ final class SDTodo {
     createdAt: Date,
     updatedAt: Date,
     owner: String,
+    isDeleted: Bool = false,
   ) {
     self.id = id
     self.content = content
@@ -37,6 +39,7 @@ final class SDTodo {
     self.createdAt = createdAt
     self.updatedAt = updatedAt
     self.owner = owner
+    self.isDeleted = isDeleted
   }
 }
 
@@ -52,6 +55,7 @@ extension SDTodo {
       createdAt: todo.createdAt,
       updatedAt: todo.updatedAt,
       owner: todo.owner,
+      isDeleted: todo.isDeleted,
     )
   }
 
@@ -66,6 +70,7 @@ extension SDTodo {
       createdAt: createdAt,
       updatedAt: updatedAt,
       owner: owner,
+      isDeleted: isDeleted,
     )
   }
 }

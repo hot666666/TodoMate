@@ -45,6 +45,7 @@ struct Todo: Identifiable, Codable {
   var updatedAt: Date
   let owner: String
   /// UserID
+  var isDeleted: Bool
 
   init(
     id: String = UUID().uuidString,
@@ -55,6 +56,7 @@ struct Todo: Identifiable, Codable {
     createdAt: Date,
     updatedAt: Date,
     owner: String,
+    isDeleted: Bool = false,
   ) {
     self.id = id
     self.content = content
@@ -64,6 +66,7 @@ struct Todo: Identifiable, Codable {
     self.createdAt = createdAt
     self.updatedAt = updatedAt
     self.owner = owner
+    self.isDeleted = isDeleted
   }
 
   init(owner: String, content: String = "", detail: String = "", in date: Date? = nil) {

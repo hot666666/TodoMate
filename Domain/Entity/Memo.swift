@@ -15,6 +15,7 @@ struct Memo: Identifiable, Codable, Equatable, Hashable {
   var updatedAt: Date
   let owner: String
   /// UserID
+  var isDeleted: Bool
 
   init(
     id: String = UUID().uuidString,
@@ -22,12 +23,14 @@ struct Memo: Identifiable, Codable, Equatable, Hashable {
     createdAt: Date,
     updatedAt: Date,
     owner: String,
+    isDeleted: Bool = false,
   ) {
     self.id = id
     self.content = content
     self.createdAt = createdAt
     self.updatedAt = updatedAt
     self.owner = owner
+    self.isDeleted = isDeleted
   }
 
   init(owner: String, content: String = "") {
