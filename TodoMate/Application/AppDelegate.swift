@@ -7,6 +7,7 @@
 
 import Sparkle
 import SwiftUI
+import TodoMateData
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
@@ -45,11 +46,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
   }
 
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-    // 앱 종료 전 모든 리스너/스트림 정리 (gRPC timeout 방지)
+    // 앱 종료 전 모든 리스너/스트림 정리
     cleanupHandler?()
 
-    // gRPC 연결이 정상적으로 닫힐 시간을 주기 위해 잠시 지연 후 종료
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+    // Firestore gRPC 연결 종료 후 앱 종료
+    Task { @MainActor in
+      do {
+        try await FirestoreReference.shared.terminate()
+      } catch {
+        // 종료 실패해도 앱은 종료되어야 함
+      }
       sender.reply(toApplicationShouldTerminate: true)
     }
     return .terminateLater

@@ -27,6 +27,9 @@ struct MainView: View {
     .task {
       sessionStore.startListeningToAuthChanges()
     }
+    .onDisappear {
+      sessionStore.cleanup()
+    }
   }
 }
 

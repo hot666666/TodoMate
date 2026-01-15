@@ -74,6 +74,12 @@ public final class FirestoreReference: @unchecked Sendable {
     try await db.clearPersistence()
   }
 
+  /// Firestore gRPC 연결 종료 (앱 종료 시 호출)
+  @MainActor
+  public func terminate() async throws {
+    try await db.terminate()
+  }
+
   /// 테스트용: 모든 컬렉션의 문서 삭제
   /// - Emulator 모드에서만 사용 가능
   public func resetAllCollections() async throws {

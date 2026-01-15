@@ -66,10 +66,10 @@ final class MessageStore {
 
   /// 리스너 정리
   func cleanup() {
-    sessionListener?.cancel()
-    sessionListener = nil
     messageObserver?.cancel()
     messageObserver = nil
+    sessionListener?.cancel()
+    sessionListener = nil
   }
 
   // MARK: - Public Methods
