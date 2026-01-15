@@ -1,13 +1,14 @@
 //
 //  SDMemo.swift
-//  TodoMate
+//  TodoMateDomain
+//
+//  SwiftData model for Memo persistence.
 //
 //  Created by agent on 1/11/26.
 //
 
 import Foundation
 import SwiftData
-import TodoMateDomain
 
 @Model
 public final class SDMemo {

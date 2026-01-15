@@ -7,11 +7,13 @@
 
 import SimpleOverlaySystem
 import SwiftUI
+import WidgetKit
 
 // MARK: - MainView
 
 struct MainView: View {
   @Environment(AppDIContainer.self) private var container
+  @Environment(\.scenePhase) private var scenePhase
   /// SessionStore 생성
   @State private var sessionStore: SessionStore
 
@@ -29,6 +31,11 @@ struct MainView: View {
     }
     .onDisappear {
       sessionStore.cleanup()
+    }
+    .onChange(of: scenePhase) { _, newPhase in
+      if newPhase != .active {
+        WidgetCenter.shared.reloadAllTimelines()
+      }
     }
   }
 }
