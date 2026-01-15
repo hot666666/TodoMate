@@ -52,7 +52,7 @@ struct UpdateTodoIntent: AppIntent {
     // Domain Todo로 변환하여 업데이트
     // 먼저 최신 상태 조회
     guard let currentTodo = try await container.localTodoRepository.read(id: todo.id) else {
-      throw AppIntentError.unknown // Not Found 에러 처리 필요
+      throw AppIntentError.todoNotFound(id: todo.id)
     }
 
     var updatedTodo = currentTodo

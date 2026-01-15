@@ -38,9 +38,13 @@ struct ReadTodosIntent: AppIntent {
     var query = TodoQuery()
     if dateFilter == .today {
       let today = Calendar.current.startOfDay(for: .now)
-      let endOfDay = Calendar.current.date(
-        bySettingHour: 23, minute: 59, second: 59, of: today,
-      )!
+      guard
+        let endOfDay = Calendar.current.date(
+          bySettingHour: 23, minute: 59, second: 59, of: today,
+        )
+      else {
+        throw AppIntentError.unknown
+      }
       query = query.dateRange(today ... endOfDay)
     }
 

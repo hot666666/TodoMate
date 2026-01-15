@@ -49,17 +49,3 @@ struct AddTodoIntent: AppIntent {
     return .result(value: entity)
   }
 }
-
-enum AppIntentError: Swift.Error, CustomLocalizedStringResourceConvertible {
-  case containerNotFound
-  case unknown
-
-  var localizedStringResource: LocalizedStringResource {
-    switch self {
-    case .containerNotFound:
-      "App Services not available."
-    case .unknown:
-      "An unknown error has occurred."
-    }
-  }
-}
