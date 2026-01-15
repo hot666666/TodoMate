@@ -16,10 +16,14 @@ public final class FirestoreConnectivityRepository: ConnectivityRepository {
   }
 
   public func setNetworkEnabled(_ isEnabled: Bool) async throws {
-    if isEnabled {
-      try await reference.db.enableNetwork()
-    } else {
-      try await reference.db.disableNetwork()
+    do {
+      if isEnabled {
+        try await reference.db.enableNetwork()
+      } else {
+        try await reference.db.disableNetwork()
+      }
+    } catch {
+      throw FirestoreRepositoryError.networkOperationFailed(underlying: error)
     }
   }
 }

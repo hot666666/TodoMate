@@ -24,7 +24,11 @@ public final class FirebaseAuthService: AuthService {
       guard let window = NSApplication.shared.windows.first else {
         throw AuthServiceError.noActiveWindowScene
       }
-      signInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: window)
+      do {
+        signInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: window)
+      } catch {
+        throw AuthServiceError.signInFailed(underlying: error)
+      }
     #elseif os(iOS)
       guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
             let window = windowScene.windows.first,
@@ -32,7 +36,11 @@ public final class FirebaseAuthService: AuthService {
       else {
         throw AuthServiceError.noActiveWindowScene
       }
-      signInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+      do {
+        signInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+      } catch {
+        throw AuthServiceError.signInFailed(underlying: error)
+      }
     #endif
 
     guard let idToken = signInResult.user.idToken?.tokenString else {
@@ -44,14 +52,22 @@ public final class FirebaseAuthService: AuthService {
       accessToken: accessToken,
     )
 
-    try await Auth.auth().signIn(with: credential)
+    do {
+      try await Auth.auth().signIn(with: credential)
+    } catch {
+      throw AuthServiceError.signInFailed(underlying: error)
+    }
   }
 
   public func signOut() throws {
-    try Auth.auth().signOut()
-    GIDSignIn.sharedInstance.signOut()
-    Task { @MainActor in
-      try? await FirestoreReference.shared.clearPersistence()
+    do {
+      try Auth.auth().signOut()
+      GIDSignIn.sharedInstance.signOut()
+      Task { @MainActor in
+        try? await FirestoreReference.shared.clearPersistence()
+      }
+    } catch {
+      throw AuthServiceError.signOutFailed(underlying: error)
     }
   }
 

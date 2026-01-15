@@ -16,24 +16,40 @@ public final class FirestoreMessageRepository: MessageRepository {
   }
 
   public func create(_ message: GroupMessage) throws {
-    try reference.messageCollection().document(message.id).setData(from: message)
+    do {
+      try reference.messageCollection().document(message.id).setData(from: message)
+    } catch {
+      throw FirestoreRepositoryError.createFailed(underlying: error)
+    }
   }
 
   public func update(_ message: GroupMessage) throws {
-    try reference.messageCollection().document(message.id).setData(from: message)
+    do {
+      try reference.messageCollection().document(message.id).setData(from: message)
+    } catch {
+      throw FirestoreRepositoryError.updateFailed(underlying: error)
+    }
   }
 
   public func delete(_ messageId: String) async throws {
-    try await reference.messageCollection().document(messageId).delete()
+    do {
+      try await reference.messageCollection().document(messageId).delete()
+    } catch {
+      throw FirestoreRepositoryError.deleteFailed(underlying: error)
+    }
   }
 
   public func readAll(groupId: String, useCache: Bool) async throws -> [GroupMessage] {
     let source: FirestoreSource = useCache ? .cache : .default
-    let snapshot = try await reference.messageCollection()
-      .whereField("groupId", isEqualTo: groupId)
-      .order(by: "createdAt", descending: false)
-      .getDocuments(source: source)
-    return snapshot.documents.compactMap { try? $0.data(as: GroupMessage.self) }
+    do {
+      let snapshot = try await reference.messageCollection()
+        .whereField("groupId", isEqualTo: groupId)
+        .order(by: "createdAt", descending: false)
+        .getDocuments(source: source)
+      return snapshot.documents.compactMap { try? $0.data(as: GroupMessage.self) }
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
   }
 
   public func observeAll(groupId: String) -> AsyncStream<RepositoryEvent<GroupMessage>> {

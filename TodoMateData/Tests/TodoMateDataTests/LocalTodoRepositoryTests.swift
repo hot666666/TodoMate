@@ -35,7 +35,7 @@ struct LocalTodoRepositoryTests {
     try await repository.create(todo)
 
     let query = TodoQuery().owner(userId: testUserId)
-    let results = try await repository.readAll(query: query, source: .cache)
+    let results = try await repository.readAll(query: query, useCache: true)
 
     let found = results.first { $0.id == todo.id }
     #expect(found != nil)
@@ -55,7 +55,7 @@ struct LocalTodoRepositoryTests {
     try await repository.update(todo)
 
     let query = TodoQuery().owner(userId: testUserId)
-    let results = try await repository.readAll(query: query, source: .cache)
+    let results = try await repository.readAll(query: query, useCache: true)
     let updated = results.first { $0.id == todo.id }
 
     #expect(updated?.content == "Updated")
@@ -72,7 +72,7 @@ struct LocalTodoRepositoryTests {
     try await repository.delete(todo.id)
 
     let query = TodoQuery().owner(userId: testUserId)
-    let results = try await repository.readAll(query: query, source: .cache)
+    let results = try await repository.readAll(query: query, useCache: true)
     #expect(!results.contains { $0.id == todo.id })
   }
 }

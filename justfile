@@ -1,41 +1,94 @@
+# 테스트 로그 디렉토리
+LOG_DIR := ".test-logs"
+
 build:
-    set -o pipefail && xcodebuild -scheme TodoMate -destination 'platform=macOS' -quiet 2>&1 | xcbeautify --quieter
+    @mkdir -p {{LOG_DIR}}
+    set -o pipefail && xcodebuild \
+        -scheme TodoMate \
+        -destination 'platform=macOS' \
+        -quiet 2>&1 \
+        | tee {{LOG_DIR}}/build.log \
+        | xcbeautify --quieter \
+        || { echo "❌ Build failed. See {{LOG_DIR}}/build.log"; exit 1; }
 
-test:
-    set -o pipefail && xcodebuild test -scheme TodoMate -destination 'platform=macOS' 2>&1 | xcbeautify
+# =============================================================================
+# Domain Tests (SPM)
+# =============================================================================
+test-domain:
+    @mkdir -p {{LOG_DIR}}
+    @echo "🧪 Running TodoMateDomain tests..."
+    set -o pipefail && cd TodoMateDomain && swift test 2>&1 \
+        | tee ../{{LOG_DIR}}/domain.log \
+        | xcbeautify \
+        || { echo "❌ Test failed. See {{LOG_DIR}}/domain.log"; exit 1; }
 
-# TodoMateTests 내 테스트만 실행 (Firebase 테스트는 별도 타겟)
-test-unit:
+# =============================================================================
+# Data Tests (SPM)
+# =============================================================================
+# Data unit tests (SwiftData 등)
+test-data:
+    @mkdir -p {{LOG_DIR}}
+    @echo "🧪 Running TodoMateData unit tests..."
+    set -o pipefail && cd TodoMateData && swift test --filter TodoMateDataTests 2>&1 \
+        | tee ../{{LOG_DIR}}/data.log \
+        | xcbeautify \
+        || { echo "❌ Test failed. See {{LOG_DIR}}/data.log"; exit 1; }
+
+# Data integration tests (Firebase 에뮬레이터 필요)
+test-data-integration: start-emulator
+    @mkdir -p {{LOG_DIR}}
+    @echo "🧪 Running TodoMateData integration tests..."
+    set -o pipefail && cd TodoMateData && swift test --filter TodoMateDataFirebaseTests 2>&1 \
+        | tee ../{{LOG_DIR}}/data-integration.log \
+        | xcbeautify \
+        || { echo "❌ Test failed. See {{LOG_DIR}}/data-integration.log"; just stop-emulator; exit 1; }
+    just stop-emulator
+
+# =============================================================================
+# App Tests (xcodebuild)
+# =============================================================================
+# App unit tests (Store, Service 등)
+test-app:
+    @mkdir -p {{LOG_DIR}}
+    @echo "🧪 Running TodoMate app unit tests..."
     set -o pipefail && xcodebuild test \
         -scheme TodoMate \
         -destination 'platform=macOS' \
         -only-testing:TodoMateTests \
-        2>&1 | xcbeautify
+        2>&1 \
+        | tee {{LOG_DIR}}/app.log \
+        | xcbeautify \
+        || { echo "❌ Test failed. See {{LOG_DIR}}/app.log"; exit 1; }
 
-# Firebase 에뮬레이터와 함께 통합 테스트 실행
-test-integration: start-emulator
-    set -o pipefail && xcodebuild test \
-        -scheme TodoMate \
-        -destination 'platform=macOS' \
-        -only-testing:TodoMateFirebaseTests \
-        SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) USE_FIREBASE_EMULATOR' \
-        2>&1 | xcbeautify; \
-    just stop-emulator
-
-# UI 테스트 (에뮬레이터 필요, 스크린샷 테스트 제외)
-test-ui: start-emulator
-    set -o pipefail && xcodebuild test \
+# App runtime tests (빌드 후 런타임 문제 검증, 스크린샷 제외)
+test-app-runtime: start-emulator
+    @mkdir -p {{LOG_DIR}}
+    @echo "🧪 Running TodoMate runtime tests..."
+    set -o pipefail && TEST_RUNNER_USE_EMULATOR=YES xcodebuild test \
         -scheme TodoMate \
         -destination 'platform=macOS' \
         -only-testing:TodoMateUITests \
         -skip-testing:TodoMateUITests/ScreenshotTests \
-        SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) USE_FIREBASE_EMULATOR' \
-        2>&1 | xcbeautify; \
+        2>&1 \
+        | tee {{LOG_DIR}}/app-runtime.log \
+        | xcbeautify \
+        || { echo "❌ Test failed. See {{LOG_DIR}}/app-runtime.log"; just stop-emulator; exit 1; }
     just stop-emulator
 
-# 전체 테스트 (유닛 → Firebase → UI 순서)
-test-all: test-unit test-integration test-ui
+# =============================================================================
+# Combined Tests
+# =============================================================================
+# 전체 테스트 (Domain → Data → App 순서)
+test-all: test-domain test-data test-data-integration test-app test-app-runtime
 
+# 로그 정리
+clean-logs:
+    @rm -rf {{LOG_DIR}}
+    @echo "🧹 Test logs cleaned"
+
+# =============================================================================
+# Screenshots
+# =============================================================================
 # UI 스크린샷 캡처 (특정 화면만 캡처하려면: SCREENSHOT_SCREENS=personal_board,memo just ui-screenshots)
 ui-screenshots SCREENS="":
     @mkdir -p screenshots
@@ -54,8 +107,9 @@ ui-screenshots SCREENS="":
     @python3 script/rename_screenshots.py ./screenshots
     @echo "📸 Screenshots saved to ./screenshots/"
 
-
-# 에뮬레이터 시작
+# =============================================================================
+# Emulator
+# =============================================================================
 start-emulator:
     @-lsof -ti:8080 | xargs kill -9 2>/dev/null || true
     @-lsof -ti:4000 | xargs kill -9 2>/dev/null || true
@@ -64,10 +118,7 @@ start-emulator:
     @sleep 5
     @nc -z localhost 8080 && echo "✅ Emulator ready on port 8080"
     @echo ""
-    @echo "🧪 Running tests..."
-    @echo ""
 
-# 에뮬레이터 중지
 stop-emulator:
     @echo ""
     @-lsof -ti:8080 | xargs kill -9 2>/dev/null || true

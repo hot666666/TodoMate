@@ -16,30 +16,52 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
   public func create(_ todo: Todo) async throws {
     let sdTodo = SDTodo(from: todo)
     modelContext.insert(sdTodo)
-    try modelContext.save()
+    do {
+      try modelContext.save()
+    } catch {
+      throw SwiftDataError.saveFailed(underlying: error)
+    }
   }
 
   public func update(_ todo: Todo) async throws {
     let id = todo.id
     let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == id })
 
-    if let existing = try modelContext.fetch(descriptor).first {
-      existing.content = todo.content
-      existing.statusRawValue = todo.status.rawValue
-      existing.detail = todo.detail
-      existing.date = todo.date
-      existing.updatedAt = Date()
-      existing.owner = todo.owner
+    do {
+      if let existing = try modelContext.fetch(descriptor).first {
+        existing.content = todo.content
+        existing.statusRawValue = todo.status.rawValue
+        existing.detail = todo.detail
+        existing.date = todo.date
+        existing.updatedAt = Date()
+        existing.owner = todo.owner
+      }
+    } catch {
+      throw SwiftDataError.fetchFailed(underlying: error)
     }
-    try modelContext.save()
+
+    do {
+      try modelContext.save()
+    } catch {
+      throw SwiftDataError.saveFailed(underlying: error)
+    }
   }
 
   public func delete(_ todoId: String) async throws {
     let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == todoId })
-    if let existing = try modelContext.fetch(descriptor).first {
-      modelContext.delete(existing)
+    do {
+      if let existing = try modelContext.fetch(descriptor).first {
+        modelContext.delete(existing)
+      }
+    } catch {
+      throw SwiftDataError.fetchFailed(underlying: error)
     }
-    try modelContext.save()
+
+    do {
+      try modelContext.save()
+    } catch {
+      throw SwiftDataError.deleteFailed(underlying: error)
+    }
   }
 
   public func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
@@ -62,7 +84,11 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
       descriptor = FetchDescriptor<SDTodo>(sortBy: [SortDescriptor(\.date)])
     }
 
-    let allSDTodos = try modelContext.fetch(descriptor)
-    return allSDTodos.map { $0.toDomain() }
+    do {
+      let allSDTodos = try modelContext.fetch(descriptor)
+      return allSDTodos.map { $0.toDomain() }
+    } catch {
+      throw SwiftDataError.fetchFailed(underlying: error)
+    }
   }
 }
