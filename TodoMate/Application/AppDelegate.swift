@@ -8,6 +8,7 @@
 import Sparkle
 import SwiftUI
 import TodoMateData
+import WidgetKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
@@ -43,6 +44,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
       /// 업데이트를 자동으로 확인
       updater?.checkForUpdatesInBackground()
     #endif
+  }
+
+  func applicationDidResignActive(_: Notification) {
+    WidgetCenter.shared.reloadAllTimelines()
   }
 
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
