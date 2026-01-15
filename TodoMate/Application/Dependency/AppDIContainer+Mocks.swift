@@ -280,7 +280,7 @@ import TodoMateDomain
     }
   }
 
-  final class MockTodoRepository: TodoRepository {
+  final class MockTodoRepository: TodoRepository, @unchecked Sendable {
     var todos: [Todo]
 
     init(todos: [Todo]) {
@@ -320,7 +320,7 @@ import TodoMateDomain
     }
   }
 
-  final class MockMemoRepository: MemoRepository {
+  final class MockMemoRepository: MemoRepository, @unchecked Sendable {
     var memos: [Memo]
     let currentUser: User
 

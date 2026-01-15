@@ -10,6 +10,7 @@
   import SwiftData
   import SwiftUI
   import TodoMateData
+  import TodoMateDomain
 
   // MARK: - Debug Configuration
 
