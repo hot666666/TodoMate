@@ -68,6 +68,12 @@ public final class FirestoreReference: @unchecked Sendable {
     db.collection(DocumentCollection.GROUP)
   }
 
+  /// Firestore 로컬 캐시 삭제 (로그아웃 시 호출)
+  @MainActor
+  public func clearPersistence() async throws {
+    try await db.clearPersistence()
+  }
+
   /// 테스트용: 모든 컬렉션의 문서 삭제
   /// - Emulator 모드에서만 사용 가능
   public func resetAllCollections() async throws {
@@ -90,7 +96,9 @@ public final class FirestoreReference: @unchecked Sendable {
       }
     }
   }
+}
 
+extension FirestoreReference {
   enum DocumentCollection {
     static let VERSION = "v2"
     static let USER = "\(VERSION)-users"

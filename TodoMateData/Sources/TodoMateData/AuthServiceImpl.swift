@@ -50,6 +50,9 @@ public final class FirebaseAuthService: AuthService {
   public func signOut() throws {
     try Auth.auth().signOut()
     GIDSignIn.sharedInstance.signOut()
+    Task { @MainActor in
+      try? await FirestoreReference.shared.clearPersistence()
+    }
   }
 
   public func listenToAuthStateChanges() -> AsyncStream<String?> {
