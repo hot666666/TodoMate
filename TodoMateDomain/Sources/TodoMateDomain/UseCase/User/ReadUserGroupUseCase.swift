@@ -17,7 +17,7 @@ public final class ReadUserGroupUseCaseImpl: ReadUserGroupUseCase {
   }
 
   public func run(groupId: String, useCache: Bool) async throws -> [User] {
-    try await userRepository.readAll(groupId: groupId, source: useCache ? .cache : .server)
+    try await userRepository.readAll(groupId: groupId, useCache: useCache)
   }
 }
 

@@ -17,7 +17,11 @@ public final class SignOutUseCaseImpl: SignOutUseCase {
   }
 
   public func run() throws {
-    try authService.signOut()
+    do {
+      try authService.signOut()
+    } catch {
+      throw AuthError.signOutFailed(error)
+    }
   }
 }
 

@@ -5,8 +5,6 @@
 //  Created by agent on 1/12/26.
 //
 
-import Foundation
-
 public protocol SidebarCacheUseCase {
   func saveProfileName(_ name: String)
   func saveGroup(name: String, id: String)

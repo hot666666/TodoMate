@@ -42,7 +42,7 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
     try modelContext.save()
   }
 
-  public func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
+  public func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
     var dateRange: ClosedRange<Date>?
     for filter in query.filters {
       if case let .dateRange(range) = filter {

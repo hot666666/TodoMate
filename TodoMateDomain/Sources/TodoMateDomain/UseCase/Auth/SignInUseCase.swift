@@ -17,7 +17,11 @@ public final class SignInUseCaseImpl: SignInUseCase {
   }
 
   public func run() async throws {
-    try await authService.signIn()
+    do {
+      try await authService.signIn()
+    } catch {
+      throw AuthError.signInFailed(error)
+    }
   }
 }
 

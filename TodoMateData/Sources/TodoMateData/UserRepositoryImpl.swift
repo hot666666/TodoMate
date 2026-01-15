@@ -20,20 +20,23 @@ public final class FirestoreUserRepository: UserRepository {
     return newUser
   }
 
-  public func read(userId: String, source: DataSource) async throws -> User? {
+  public func read(userId: String, useCache: Bool) async throws -> User? {
+    let source: FirestoreSource = useCache ? .cache : .default
     let snapshot = try await reference.userCollection().document(userId).getDocument(
-      source: source.firestoreSource)
+      source: source)
     return try? snapshot.data(as: User.self)
   }
 
-  public func readAll(groupId: String, source: DataSource) async throws -> [User] {
+  public func readAll(groupId: String, useCache: Bool) async throws -> [User] {
+    let source: FirestoreSource = useCache ? .cache : .default
     let snapshot = try await reference.userCollection().whereField("groupId", isEqualTo: groupId)
-      .getDocuments(source: source.firestoreSource)
+      .getDocuments(source: source)
     return snapshot.documents.compactMap { try? $0.data(as: User.self) }
   }
 
-  public func readAll(source: DataSource) async throws -> [User] {
-    let snapshot = try await reference.userCollection().getDocuments(source: source.firestoreSource)
+  public func readAll(useCache: Bool) async throws -> [User] {
+    let source: FirestoreSource = useCache ? .cache : .default
+    let snapshot = try await reference.userCollection().getDocuments(source: source)
     return snapshot.documents.compactMap { try? $0.data(as: User.self) }
   }
 

@@ -39,7 +39,7 @@ public actor InMemoryTodoRepository: TodoRepository {
     todos = newTodos
   }
 
-  public func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
+  public func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
     readCallCount += 1
     lastQuery = query
 

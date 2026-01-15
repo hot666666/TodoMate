@@ -17,13 +17,13 @@ public final class ReadMessageUseCaseImpl: ReadMessageUseCase {
   }
 
   public func run(in groupId: String, useCache: Bool) async throws -> [GroupMessage] {
-    try await repository.readAll(groupId: groupId, source: useCache ? .cache : .server)
+    try await repository.readAll(groupId: groupId, useCache: useCache)
   }
 }
 
 public final class StubReadMessageUseCase: ReadMessageUseCase {
   public init() {}
   public func run(in groupId: String, useCache: Bool) async throws -> [GroupMessage] {
-    try await StubMessageRepository().readAll(groupId: groupId, source: useCache ? .cache : .server)
+    try await StubMessageRepository().readAll(groupId: groupId, useCache: useCache)
   }
 }

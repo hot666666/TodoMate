@@ -27,11 +27,12 @@ public final class FirestoreMessageRepository: MessageRepository {
     try await reference.messageCollection().document(messageId).delete()
   }
 
-  public func readAll(groupId: String, source: DataSource) async throws -> [GroupMessage] {
+  public func readAll(groupId: String, useCache: Bool) async throws -> [GroupMessage] {
+    let source: FirestoreSource = useCache ? .cache : .default
     let snapshot = try await reference.messageCollection()
       .whereField("groupId", isEqualTo: groupId)
       .order(by: "createdAt", descending: false)
-      .getDocuments(source: source.firestoreSource)
+      .getDocuments(source: source)
     return snapshot.documents.compactMap { try? $0.data(as: GroupMessage.self) }
   }
 
@@ -70,10 +71,4 @@ public final class FirestoreMessageRepository: MessageRepository {
       continuation.onTermination = { @Sendable _ in listener.remove() }
     }
   }
-}
-
-public enum FirestoreRepositoryError: Error {
-  case snapshotNotFound
-  case decodingError(documentID: String)
-  case unknownChangeType
 }

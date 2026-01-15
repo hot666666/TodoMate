@@ -261,17 +261,17 @@ import TodoMateDomain
       newUser
     }
 
-    func read(userId: String, source _: DataSource) async throws -> User? {
+    func read(userId: String, useCache _: Bool) async throws -> User? {
       if let currentUser, userId == currentUser.id { return currentUser }
       return groupMembers.first { $0.id == userId }
     }
 
-    func readAll(groupId: String, source _: DataSource) async throws -> [User] {
+    func readAll(groupId: String, useCache _: Bool) async throws -> [User] {
       if let currentUser, groupId == currentUser.groupId { return groupMembers }
       return []
     }
 
-    func readAll(source _: DataSource) async throws -> [User] {
+    func readAll(useCache _: Bool) async throws -> [User] {
       groupMembers
     }
 
@@ -301,7 +301,7 @@ import TodoMateDomain
       todos.removeAll { $0.id == todoId }
     }
 
-    func readAll(query: TodoQuery, source _: DataSource) async throws -> [Todo] {
+    func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
       todos.filter { todo in
         for filter in query.filters {
           switch filter {
@@ -358,7 +358,7 @@ import TodoMateDomain
     func update(_: GroupMessage) throws { /* no-op */ }
     func delete(_ messageId: String) async throws { messages.removeAll { $0.id == messageId } }
 
-    func readAll(groupId: String, source _: DataSource) async throws -> [GroupMessage] {
+    func readAll(groupId: String, useCache _: Bool) async throws -> [GroupMessage] {
       messages.filter { $0.groupId == groupId }
     }
 

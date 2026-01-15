@@ -22,7 +22,7 @@ public final class ReadMonthlyTodoUseCaseImpl: ReadMonthlyTodoUseCase {
     let query = TodoQuery()
       .owner(userId: userId)
       .dateRange(range)
-    return try await repository.readAll(query: query, source: useCache ? .cache : .server)
+    return try await repository.readAll(query: query, useCache: useCache)
   }
 }
 

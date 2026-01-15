@@ -28,8 +28,3 @@ public struct LeaveGroupUseCaseImpl: LeaveGroupUseCase {
     )
   }
 }
-
-public enum LeaveGroupError: Error {
-  case groupNotFound
-  case notMember
-}

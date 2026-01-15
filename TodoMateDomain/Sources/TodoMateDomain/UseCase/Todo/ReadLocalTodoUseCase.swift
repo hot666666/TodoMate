@@ -29,14 +29,14 @@ public final class ReadLocalTodoUseCaseImpl: ReadLocalTodoUseCase {
     }
 
     let query = TodoQuery().dateRange(startOfDay ... endOfDay)
-    // source is ignored, placeholder for TodoRepository protocol requirement
-    return try await repository.readAll(query: query, source: .cache)
+    // useCache is true for local repository (always uses cache)
+    return try await repository.readAll(query: query, useCache: true)
   }
 
   public func run(in range: ClosedRange<Date>) async throws -> [Todo] {
     let query = TodoQuery().dateRange(range)
-    // source is ignored, placeholder for TodoRepository protocol requirement
-    return try await repository.readAll(query: query, source: .cache)
+    // useCache is true for local repository (always uses cache)
+    return try await repository.readAll(query: query, useCache: true)
   }
 }
 

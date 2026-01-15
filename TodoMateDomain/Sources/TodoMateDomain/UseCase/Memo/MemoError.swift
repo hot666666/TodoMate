@@ -1,5 +1,5 @@
 //
-//  MemoUseCaseError.swift
+//  MemoError.swift
 //  Todo
 //
 //  Created by hs on 7/8/25.

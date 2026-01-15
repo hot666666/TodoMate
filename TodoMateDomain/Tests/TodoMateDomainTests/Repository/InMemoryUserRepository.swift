@@ -17,15 +17,15 @@ public actor InMemoryUserRepository: UserRepository {
     return newUser
   }
 
-  public func read(userId: String, source _: DataSource) async throws -> User? {
+  public func read(userId: String, useCache _: Bool) async throws -> User? {
     users.first { $0.id == userId }
   }
 
-  public func readAll(groupId: String, source _: DataSource) async throws -> [User] {
+  public func readAll(groupId: String, useCache _: Bool) async throws -> [User] {
     users.filter { $0.groupId == groupId }
   }
 
-  public func readAll(source _: DataSource) async throws -> [User] {
+  public func readAll(useCache _: Bool) async throws -> [User] {
     users
   }
 

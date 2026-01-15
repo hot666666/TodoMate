@@ -17,7 +17,7 @@ public final class ReadUserUseCaseImpl: ReadUserUseCase {
   }
 
   public func run(for userId: String, useCache: Bool) async throws -> User? {
-    try await userRepository.read(userId: userId, source: useCache ? .cache : .server)
+    try await userRepository.read(userId: userId, useCache: useCache)
   }
 }
 

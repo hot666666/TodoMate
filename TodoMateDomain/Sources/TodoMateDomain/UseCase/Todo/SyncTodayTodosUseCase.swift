@@ -30,8 +30,8 @@ public final class SyncTodayTodosUseCaseImpl: SyncTodayTodosUseCase {
     let localRepo = localRepository
     let remoteRepo = remoteRepository
 
-    async let localTodos = try localRepo.readAll(query: query, source: .cache)
-    async let remoteTodos = try remoteRepo.readAll(query: query, source: .server)
+    async let localTodos = try localRepo.readAll(query: query, useCache: true)
+    async let remoteTodos = try remoteRepo.readAll(query: query, useCache: false)
 
     let (local, remote) = try await (localTodos, remoteTodos)
 

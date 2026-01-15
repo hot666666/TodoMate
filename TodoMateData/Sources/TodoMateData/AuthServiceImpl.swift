@@ -69,8 +69,3 @@ public final class FirebaseAuthService: AuthService {
     }
   }
 }
-
-public enum AuthServiceError: Error {
-  case noActiveWindowScene
-  case userTokenNotFound
-}

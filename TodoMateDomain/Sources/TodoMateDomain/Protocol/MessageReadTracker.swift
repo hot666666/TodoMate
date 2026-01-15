@@ -11,6 +11,8 @@ public protocol MessageReadTracker {
   func clearReadHistory()
 }
 
+// MARK: - StubMessageReadTracker
+
 public final class StubMessageReadTracker: MessageReadTracker {
   private var isMarkedAsRead: Bool = false
 

@@ -24,7 +24,7 @@ public final class ReadGroupTodoUseCaseImpl: ReadGroupTodoUseCase {
     let query = TodoQuery()
       .owners(userIds: userIds)
       .dateRange(range)
-    let result = try await repository.readAll(query: query, source: useCache ? .cache : .server)
+    let result = try await repository.readAll(query: query, useCache: useCache)
     let groupedResult = Dictionary(grouping: result) { $0.owner }
     return Dictionary(
       uniqueKeysWithValues: userIds.map { userId in (userId, groupedResult[userId] ?? []) })

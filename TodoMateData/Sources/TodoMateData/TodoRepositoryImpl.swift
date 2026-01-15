@@ -26,9 +26,10 @@ public final class FirestoreTodoRepository: TodoRepository {
     try await reference.todoCollection().document(todoId).delete()
   }
 
-  public func readAll(query: TodoQuery, source: DataSource) async throws -> [Todo] {
+  public func readAll(query: TodoQuery, useCache: Bool) async throws -> [Todo] {
     let firestoreQuery = buildFirestoreQuery(from: query)
-    let snapshot = try await firestoreQuery.getDocuments(source: source.firestoreSource)
+    let source: FirestoreSource = useCache ? .cache : .default
+    let snapshot = try await firestoreQuery.getDocuments(source: source)
     return snapshot.documents.compactMap { try? $0.data(as: Todo.self) }
   }
 

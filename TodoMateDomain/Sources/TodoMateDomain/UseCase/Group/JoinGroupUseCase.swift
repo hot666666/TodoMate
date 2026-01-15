@@ -27,8 +27,3 @@ public struct JoinGroupUseCaseImpl: JoinGroupUseCase {
     )
   }
 }
-
-public enum JoinGroupError: Error {
-  case groupNotFound
-  case alreadyMember
-}
