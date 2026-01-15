@@ -2,6 +2,8 @@
 description: Commit with proper commit message.
 ---
 
-Based on `.agent/rules/git-conventions.md`, commit with proper commit messages.
+Review all changes and follow the commit conventions defined in `.agent/rules/git-conventions.md`.
 
-If there are no explicit requirements for the current changes, group related changes together and commit them with appropriate commit messages.
+Group related changes logically and create separate commits for each group with clear, descriptive commit messages.
+
+Before committing, run `just clean-logs` to clean up log files.

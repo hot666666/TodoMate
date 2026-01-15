@@ -1,146 +1,146 @@
 # Agent Guide for TodoMate
 
-## Purpose
+This file provides guidance to the agent when working with code in this repository.
 
-Agents act as senior Swift collaborators for TodoMate.
-Keep responses concise, clarify uncertainty before coding, and align suggestions with the rules linked below.
+## Project Overview
 
-Overall rules are in `.agent/rules/project-rules.md`.
+TodoMate is a native macOS todo application built entirely in SwiftUI following Clean Architecture principles.
+It supports personal todos with SwiftData, group collaboration features including shared feeds and chat, and syncs data through Firebase.
 
-## App description
+**Target Platform**: macOS 26+
 
-TodoMate is a simple todo app that allows users to create, read, update, and delete todos.
+## Build Commands
 
-It is built based on Clean Architecture.
+All commands use `just` (command runner). Logs are saved to `.test-logs/`.
 
-- Data layer: Firebase, SwiftData...
-- Domain layer: Swift
-- Presentation layer: SwiftUI
-- Test: XCTest, Swift Testing
+```bash
+# Build
+just build
 
-### Target
+# Tests (by layer)
+just test-domain          # Domain layer unit tests (swift test)
+just test-data            # Data layer unit tests (swift test)
+just test-data-integration # Data layer Firebase tests (requires emulator)
+just test-app             # App unit tests (xcodebuild)
+just test-app-runtime     # App runtime/UI tests (requires emulator)
+just test-all             # Run all tests in order
 
-- macOS26
+# Screenshots
+just ui-screenshots       # Capture all screens
+SCREENS=personal_board,memo just ui-screenshots  # Specific screens
+
+# Utilities
+just clean-logs           # Clear test logs
+just start-emulator       # Start Firebase emulator
+just stop-emulator        # Stop Firebase emulator
+```
 
 ## Architecture
 
-### Layer Structure
+### Modular Package Structure
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  Presentation (TodoMate/)                               │
-│  ├─ Features/     → SwiftUI Views per feature           │
-│  ├─ Models/       → @Observable stores (SessionStore,   │
-│  │                  TodoStore, MemoStore, MessageStore) │
-│  └─ Application/  → App entry, DI, Navigation           │
-├─────────────────────────────────────────────────────────┤
-│  Domain (Domain/)                                       │
-│  ├─ Entity/       → Core business models (User, Todo..) │
-│  └─ UseCase/      → Business logic protocols & impls    │
-├─────────────────────────────────────────────────────────┤
-│  Data (Data/)                                           │
-│  └─ *RepositoryImpl.swift → Firebase/Firestore impls    │
-└─────────────────────────────────────────────────────────┘
+TodoMate/                    # Xcode project (Presentation layer)
+├── Application/             # App entry, DI, Navigation
+├── Features/                # SwiftUI Views per feature
+└── Models/                  # @Observable stores
+
+TodoMateDomain/              # SPM package (Domain layer)
+├── Entity/                  # Business models (User, Todo, Memo, etc.)
+└── UseCase/                 # Business logic protocols & implementations
+
+TodoMateData/                # SPM package (Data layer)
+├── *Impl.swift              # Firebase/SwiftData implementations
+├── Configuration/           # Firebase/emulator setup
+└── Errors/                  # Domain-specific error types
+
+Common/                      # SPM package (Shared utilities)
+└── Logger, Extensions, etc.
 ```
+
+### Key Architectural Patterns
+
+- **Clean Architecture**: Domain layer is pure Swift with no framework dependencies
+- **Protocol-based DI**: All dependencies managed through `DIContainer`
+- **@Observable Stores**: App-wide state via `Store`
+- **Swift Concurrency**: `async/await` throughout, strict concurrency compliance
 
 ### Dependency Injection
 
-All dependencies are managed through `DIContainer` (`Application/Dependency/DIContainer.swift`):
+`DIContainer` (in `Application/Dependency/`) wires up all dependencies:
 
-- **Repositories**: Protocol-based data access (`UserRepository`, `TodoRepository`, etc.)
-- **UseCases**: Single-responsibility business logic units
-- **Services**: Auth, Calendar, Network utilities
-- **System**: `UserDefaults`, `NetworkController`
-
-`DIContainer` is injected into the SwiftUI environment at app launch and accessed via `@Environment(DIContainer.self)` in stores/views.
-
-### Observable Stores
-
-App-wide state is managed by `@Observable` store classes in `Models/`:
-
-| Store | Responsibility |
-|-------|----------------|
-| `SessionStore` | Auth state, current user, group members |
-| `TodoStore` | Todo CRUD, caching, date filtering |
-| `MemoStore` | Memo management |
-| `MessageStore` | Group chat messages, real-time observation |
-
-Stores receive UseCases via `DIContainer` and expose state to views.
+```swift
+// Access in views/stores
+@Environment(DIContainer.self) private var container
+```
 
 ### Adding New Features
 
-1. **Define Entity** (`Domain/Entity/`) – Create or extend domain models if needed.
-2. **Create UseCase** (`Domain/UseCase/`) – Define protocol + implementation for business logic.
-3. **Update Repository** (`Data/`) – Add data access methods if new persistence is required.
-4. **Register in DIContainer** – Wire up the new UseCase in the container's init.
-5. **Use in Store or View** – Inject via `DIContainer` and call from `@Observable` store or directly in view methods.
+1. **Entity** → Define in `TodoMateDomain/Sources/Entity/`
+2. **Repository Protocol** → Define in `TodoMateDomain/Sources/UseCase/Protocols/`
+3. **UseCase** → Protocol + implementation in `TodoMateDomain/Sources/UseCase/`
+4. **RepositoryImpl** → Implement in `TodoMateData/Sources/`
+5. **DIContainer** → Register the dependency
+6. **Store/View** → Use via `DIContainer`
 
-**Example flow for "Delete All Completed Todos":**
-```
-Domain/UseCase/Todo/DeleteCompletedTodosUseCase.swift  (protocol + impl)
-    ↓ uses
-Data/TodoRepositoryImpl.swift  (add batch delete method)
-    ↓ registered in
-DIContainer.swift  (deletedCompletedTodosUseCase property)
-    ↓ called from
-Models/TodoStore.swift  (exposed as async method)
-    ↓ triggered by
-Features/Home/BoardView.swift  (button action)
-```
 
-### Navigation
+### Build Verification
 
-Navigation is managed by `NavigationManager` (`Application/Navigation/`):
-
-- `NavigationDestination` enum defines all navigable screens
-- `NavigationManager` holds `selection`, `viewMode`, and `columnVisibility` state
-- Persistence of sidebar state uses `UserDefaults` via `DIContainer`
-
-## Pre-commit Hooks
-
-This project utilizes pre-commit hooks to ensure code quality and consistency. Before a commit is finalized, the following checks are run:
-
-1.  **SwiftFormat**: Enforces code formatting rules.
-2.  **SwiftLint**: Checks for coding style violations and conventions.
-
-If a commit fails due to these checks, you can automatically fix most issues by running:
+Always verify builds after code changes:
 
 ```bash
-swiftformat .
-swiftlint --config .swiftlint.yml --fix
+just build
 ```
 
-## Docs
-You can find useful docs in `docs/`. Some of them are in the below.
+## Skills
 
-- [Understanding Hangs in Your App](docs/understanding-hangs-in-your-app.md)
-- [Understanding and Improving SwiftUI Performance](docs/understanding-improving-swiftui-performance.md)
-- [Liquid Glass](docs/liquid-glass-guide.md)
-- [MV Architecture](docs/mv-patterns.md)
-- [Latest Swift Concurrency Usage](docs/mediator-with-swift-concurrency.md)
-- [Swift Testing Guide](docs/swift-testing-guide.md)
+Specialized agent skills are available in `.agent/skills/`:
 
+| Skill | Purpose |
+|-------|---------|
+| `swift-concurrency-expert` | Review/fix Swift 6.2+ concurrency issues |
+| `swiftui-liquid-glass` | Implement iOS 26+ Liquid Glass UI |
+| `swiftui-performance-audit` | Diagnose SwiftUI performance issues |
+| `swiftui-ui-patterns` | Best practices for SwiftUI components |
+| `swiftui-view-refactor` | Refactor views for consistency |
+| `gh-issue-fix-flow` | End-to-end GitHub issue fix workflow |
+| `app-store-changelog` | Generate release notes from git history |
+| `pre-commit-hooks` | Run pre-commit hooks |
 
-## Commands
+Read skill instructions with `view_file` on `SKILL.md` before use.
 
-| 명령어 | 설명 | 에뮬레이터 |
-|--------|------|:----------:|
-| `just build` | 프로젝트 빌드 | ❌ |
-| `just test` | 전체 테스트 | ❌ |
-| `just test-unit` | `TodoMateTests` 유닛 테스트만 | ❌ |
-| `just test-integration` | `TodoMateFirebaseTests` 통합 테스트만 | ✅ |
-| `just test-ui` | `TodoMateUITests` 테스트만 | ✅ |
-| `just test-all` | 유닛 → Firebase → UI 순서로 실행 | ✅ |
+## Workflows
 
-> Firebase 에뮬레이터가 필요한 테스트는 자동으로 에뮬레이터를 시작/종료합니다.
+Agent workflows are in `.agent/workflows/`:
+
+- `/development-workflow` - TDD-based development process
+- `/commit` - Commit with proper conventional messages
+- `/gh-create-pr` - Create GitHub PR
+
+## Documentation
+
+Reference docs in `docs/`:
+
+- [Liquid Glass Guide](docs/liquid-glass-guide.md) - iOS 26+ design system
+- [Swift Concurrency](docs/mediator-with-swift-concurreny.md) - Modern async patterns
+- [Swift Testing](docs/swift-testing-guide.md) - Testing framework guide
+- [XCTest UI Testing](docs/xctest-ui-test.md) - UI testing patterns
+
+Additional rules in `.agent/rules/`:
+
+- `project-rules.md` - Swift/SwiftUI coding standards
+- `git-conventions.md` - Commit message and merge guidelines
+- `DDD.md` - Domain-driven development guide
 
 ## UI Screens
 
-현재 UI 스크린샷 테스팅이 가능한 화면 목록입니다. 새로운 화면이 추가되거나 화면 구성이 변경되면 이 목록을 업데이트해주세요.
+Available for screenshot testing:
 
-- **Personal Board**: 개인 할 일 보드 (`personal_board.png`)
-- **Personal Calendar**: 개인 할 일 캘린더 (`personal_calendar.png`)
-- **Memo**: 메모 목록 (`memo.png`)
-- **Group Feed**: 그룹 피드 (`group_feed.png`)
-- **No Groups**: 그룹이 없는 경우의 피드 화면 (`no_groups.png`)
-- **Settings**: 설정 화면 (`settings.png`)
+| Screen | File |
+|--------|------|
+| Personal Board | `personal_board.png` |
+| Personal Calendar | `personal_calendar.png` |
+| Memo | `memo.png` |
+| Group Feed | `group_feed.png` |
+| No Groups | `no_groups.png` |
+| Settings | `settings.png` |
