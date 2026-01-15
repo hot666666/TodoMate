@@ -5,134 +5,155 @@
 //  Created by hs on 6/2/25.
 //
 
-import FirebaseCore
-import GoogleSignIn
+import Common
 import SwiftData
 import SwiftUI
+import TodoMateData
+import TodoMateDomain
 
 @main
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-  @State private var container: DIContainer
-  private let modelContainer: ModelContainer
+  private let appDIContainer: AppDIContainer
+
+  // MARK: - Global States(App Lifetime)
+
+  @State private var todoStore: PrivateTodoStore
+  @State private var memoStore: PrivateMemoStore
 
   init() {
-    modelContainer = TodoMateApp.makeModelContainer()
-    container = TodoMateApp.makeContainer(with: modelContainer)
+    // Firebase 및 인증 설정 후, DI Container 생성
+    #if DEBUG
+      DebugConfiguration.configureFirebase()
+      appDIContainer = DebugConfiguration.makeContainer() ?? Self.composeContainer()
+    #else
+      TodoMateDataConfiguration.configure()
+      appDIContainer = Self.composeContainer()
+    #endif
 
     // 앱 업데이트 체크 및 처리
-    TodoMateApp.checkAndHandleAppUpdate(modelContainer: modelContainer, container: container)
+    Self.checkAndHandleAppUpdate(container: appDIContainer)
+
+    // Store 초기화
+    _todoStore = State(initialValue: PrivateTodoStore(container: appDIContainer.core))
+    _memoStore = State(initialValue: PrivateMemoStore(container: appDIContainer.core))
   }
 
   var body: some Scene {
     WindowGroup {
-      RootView()
-        .frame(minWidth: 720)
+      MainView(container: appDIContainer)
+        .defaultAppStorage(appDIContainer.core.userDefaults)
+        .modelContainer(appDIContainer.core.modelContainer)
+        .environment(appDIContainer)
+        .environment(todoStore)
+        .environment(memoStore)
         .environment(\.colorScheme, .dark)
-        .environment(container)
-        .background(Color.customDarkBg)
         .background(.ultraThickMaterial)
+        .frame(minWidth: 720, minHeight: 540)
+        .task {
+          #if DEBUG
+            MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
+          #endif
+          await todoStore.loadTodos()
+          await memoStore.load()
+        }
     }
-    .modelContainer(modelContainer)
     #if os(macOS)
-      .windowToolbarStyle(.unifiedCompact)
-      .windowStyle(.hiddenTitleBar)
+    .windowStyle(.hiddenTitleBar)
     #endif
   }
 }
 
+// MARK: - Container Composition
+
 private extension TodoMateApp {
-  static func makeModelContainer() -> ModelContainer {
-    let schema = Schema([WidgetTodo.self])
+  @MainActor
+  static func composeContainer() -> AppDIContainer {
+    let userDefaults = UserDefaults.standard
+    let hotKeyManager = HotKeyManager()
+    let coreDI = createCoreDIContainer(userDefaults: userDefaults, hotKeyManager: hotKeyManager)
+    let publicDI = createPublicDIContainer(userDefaults: userDefaults)
 
-    #if DEBUG
-      let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-    #else
-      let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-    #endif
-
-    do {
-      return try ModelContainer(for: schema, configurations: [modelConfiguration])
-    } catch {
-      fatalError("[TodoMateApp] - Could not create ModelContainer: \(error)")
-    }
+    return AppDIContainer(coreContainer: coreDI, publicContainer: publicDI)
   }
 
-  static func makeContainer(with modelContainer: ModelContainer) -> DIContainer {
-    if isPreview {
-      return .preview
-    }
+  static func createCoreDIContainer(
+    userDefaults: UserDefaults,
+    hotKeyManager: HotKeyManager,
+  ) -> CoreDIContainer {
+    let container = Self.createSwiftDataModelContainer()
 
-    configureFirebase()
-    configureGoogleSignIn()
-
-    let userRepo = FirestoreUserRepository()
-    let todoRepo = FirestoreTodoRepository()
-    let todoOrderRepo = UserDefaultsTodoOrderRepository()
-    let messageRepo = FirestoreMessageRepository()
-    let memoRepo = FirestoreMemoRepository()
-    let authService = FirebaseAuthService()
-    let calendarDayService = CalendarDayServiceImpl()
-    let widgetSyncService = SwiftDataWidgetSyncService(
-      todoRepository: todoRepo,
-      modelContext: modelContainer.mainContext
+    return CoreDIContainer(
+      modelContainer: container,
+      userDefaults: userDefaults,
+      hotKeyManager: hotKeyManager,
     )
-    let messageReadTracker = MessageReadTrackerImpl()
+  }
 
-    return DIContainer(
+  static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
+    let firestoreReference = FirestoreReference.shared
+    let authService = FirebaseAuthService()
+    let userRepo = FirestoreUserRepository(reference: firestoreReference)
+    let todoRepo = FirestoreTodoRepository(reference: firestoreReference)
+    let messageRepo = FirestoreMessageRepository(reference: firestoreReference)
+    let groupRepo = FirestoreGroupRepository(reference: firestoreReference)
+
+    let connectivityRepo = FirestoreConnectivityRepository(reference: firestoreReference)
+    let messageReadTracker = MessageReadTrackerImpl(userDefaults: userDefaults)
+
+    return PublicDIContainer(
       userRepository: userRepo,
       todoRepository: todoRepo,
-      todoOrderRepository: todoOrderRepo,
       messageRepository: messageRepo,
-      memoRepository: memoRepo,
+      groupRepository: groupRepo,
+      connectivityRepository: connectivityRepo,
       authService: authService,
-      calendarDayService: calendarDayService,
-      widgetSyncService: widgetSyncService,
-      messageReadTracker: messageReadTracker
+      messageReadTracker: messageReadTracker,
     )
   }
 
-  static var isPreview: Bool {
-    ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
-  }
+  static func createSwiftDataModelContainer() -> ModelContainer {
+    let schema = Schema([SDTodo.self, SDMemo.self])
+    let config = ModelConfiguration(isStoredInMemoryOnly: false)
 
-  static func configureFirebase() {
-    FirebaseApp.configure()
-  }
-
-  static func configureGoogleSignIn() {
-    guard let clientId = FirebaseApp.app()?.options.clientID else {
-      print("[TodoMateApp] - Firebase client ID is not configured.")
-      return
+    do {
+      let container = try ModelContainer(for: schema, configurations: [config])
+      Log.info("SwiftData ModelContainer created successfully.")
+      return container
+    } catch {
+      Log.error("Failed to create SwiftData ModelContainer: \(error)")
+      fatalError("Failed to create ModelContainer: \(error)")
     }
-    GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
   }
+}
 
-  static func checkAndHandleAppUpdate(modelContainer: ModelContainer, container: DIContainer) {
-    let userDefaults = UserDefaults.standard
+// MARK: - App Update Handling
 
-    let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-    let lastVersion = userDefaults.string(forKey: "app_last_version")
+private extension TodoMateApp {
+  static func checkAndHandleAppUpdate(container: AppDIContainer) {
+    let userDefaults = container.core.userDefaults
 
-    print("[TodoMateApp] - Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
+    let currentVersion =
+      Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    let lastVersion = userDefaults.string(for: .appLastVersion)
+
+    Log.info("Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
+
+    #if DEBUG
+      guard DebugConfiguration.isUsingMock else { return }
+    #endif
 
     // 업데이트 기록이 존재하면 작업 x -> 3.0.0 이전버전에서 업데이트 시, 수행
     if lastVersion == nil {
-      print("[TodoMateApp] - First launch detected. Initializing app state...")
-      try? container.authService.signOut()
+      Log.info("First launch detected. Initializing app state...")
+      try? container.pub.authService.signOut()
 
-      // 앱의 모든 UserDefaults 데이터 삭제
       if let bundleIdentifier = Bundle.main.bundleIdentifier {
         userDefaults.removePersistentDomain(forName: bundleIdentifier)
       }
-
-      // 앱의 모든 SwiftData 데이터 삭제
-      let context = modelContainer.mainContext
-      try? context.delete(model: WidgetTodo.self)
-      try? context.save()
     }
 
     // 현재 버전 저장
-    userDefaults.set(currentVersion, forKey: "app_last_version")
+    userDefaults.set(currentVersion, for: .appLastVersion)
   }
 }

@@ -1,13 +1,16 @@
 //
 //  TodoStore.swift
-//  Todo
+//  TodoMate
 //
 //  Created by hs on 7/9/25.
 //
 
+import Common
 import SwiftUI
+import TodoMateDomain
 
 @Observable
+@MainActor
 final class TodoStore {
   // MARK: - Dependencies
 
@@ -15,93 +18,99 @@ final class TodoStore {
   private let readGroupTodoUseCase: ReadGroupTodoUseCase
   private let updateTodoUseCase: UpdateTodoUseCase
   private let deleteTodoUseCase: DeleteTodoUseCase
-  private let observeGroupTodoUseCase: ObserveGroupTodoUseCase
-  private let applyTodoOrderUseCase: ApplyTodoOrderUseCase
-  private let reorderTodosUseCase: ReorderTodosUseCase
-  private let widgetSyncService: WidgetSyncService
+
+  // MARK: - Listener
+
+  @ObservationIgnored private var listener: Task<Void, Never>?
 
   // MARK: - State
 
   private(set) var todos: [String: [Todo]] = [:]
   private var currentDate: Date = .now
+  private var currentUserId: String = ""
 
-  init(container: DIContainer) {
+  init(container: PublicDIContainer) {
     createTodoUseCase = container.createTodoUseCase
     readGroupTodoUseCase = container.readGroupTodoUseCase
     updateTodoUseCase = container.updateTodoUseCase
     deleteTodoUseCase = container.deleteTodoUseCase
-    observeGroupTodoUseCase = container.observeGroupTodoUseCase
-    applyTodoOrderUseCase = container.applyTodoOrderUseCase
-    reorderTodosUseCase = container.reorderTodosUseCase
-    widgetSyncService = container.widgetSyncService
+  }
+
+  // MARK: - Subscriber
+
+  /// SessionStore 이벤트 구독 시작
+  func startListening(to events: AsyncStream<SessionEvent>) {
+    listener?.cancel()
+    listener = Task { [weak self] in
+      for await event in events {
+        guard let self else { return }
+        switch event {
+        case let .loggedIn(userId, _, memberIds):
+          currentUserId = userId
+          await load(for: memberIds, range: Date().dayRange, useCache: true)
+          await load(for: memberIds, range: Date().dayRange, useCache: false)
+
+          Log.info(
+            "Received loggedIn event, loaded todos for \(memberIds.count) users", category: .data,
+          )
+        case .loggedOut:
+          clear()
+          Log.info("Received loggedOut event, cleared todos", category: .data)
+        }
+      }
+    }
+  }
+
+  /// 리스너 정리
+  func cleanup() {
+    listener?.cancel()
+    listener = nil
   }
 
   // MARK: - Public Methods
 
-  @MainActor
-  func refresh(for userIds: [String], currentUserId: String) async {
-    await load(for: userIds, currentUserId: currentUserId, useCache: true)
-    await observe(for: userIds)
+  func refresh(for userIds: [String]) async {
+    await load(for: userIds, range: Date().dayRange, useCache: false)
   }
 
-  @MainActor
-  func load(for userIds: [String], currentUserId: String, useCache: Bool = true) async {
+  func load(for userIds: [String], range: ClosedRange<Date>, useCache: Bool = true) async {
     currentDate = .now
 
     do {
-      todos = try await readGroupTodoUseCase.run(for: userIds, in: currentDate, useCache: useCache)
-
-      updateUserTodos(for: currentUserId) { userTodos in
-        userTodos = applyTodoOrderUseCase.run(todos: userTodos, currentUserId: currentUserId, currentDate: currentDate)
-      }
+      let result = try await readGroupTodoUseCase.run(for: userIds, in: range, useCache: useCache)
+      merge(result, in: range)
     } catch {
-      print("[TodoStore] - Failed to load todos for users \(userIds): \(error)")
-      todos = [:]
-    }
-  }
-
-  @MainActor
-  func observe(for userIds: [String]) async {
-    for await event in observeGroupTodoUseCase.run(for: userIds, in: currentDate) {
-      switch event {
-      case let .added(todo):
-        handleTodoAdded(todo)
-      case let .modified(todo):
-        handleTodoModified(todo)
-      case let .removed(todo):
-        handleTodoRemoved(todo)
-      case let .error(error):
-        print("[TodoStore] - Error observing todos for users \(userIds): \(error)")
-      }
+      Log.error("Failed to load todos for users \(userIds): \(error)", category: .data)
     }
   }
 
   func add(_ todo: Todo, userId: String) {
-    do {
-      try createTodoUseCase.run(for: userId, todo)
-      // Optimistic update
-      updateUserTodos(for: todo.owner) { userTodos in
-        userTodos.append(todo)
+    Task {
+      do {
+        try await createTodoUseCase.run(for: userId, todo)
+        // Optimistic update
+        updateUserTodos(for: todo.owner) { userTodos in
+          userTodos.append(todo)
+        }
+      } catch {
+        Log.error("Failed to add todo: \(error)", category: .data)
       }
-    } catch {
-      print("[TodoStore] - Failed to add todo: \(error)")
     }
   }
 
   func update(_ todo: Todo, userId: String) {
-    do {
-      try updateTodoUseCase.run(for: userId, todo)
-      // Optimistic update
-      updateUserTodos(for: todo.owner) { userTodos in
-        if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
-          userTodos[index] = todo
+    Task {
+      do {
+        try await updateTodoUseCase.run(for: userId, todo)
+        // Optimistic update
+        updateUserTodos(for: todo.owner) { userTodos in
+          if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
+            userTodos[index] = todo
+          }
         }
+      } catch {
+        Log.error("Failed to update todo: \(error)", category: .data)
       }
-
-      // Widget sync for the todo owner
-      syncWidgetForUser(todo.owner)
-    } catch {
-      print("[TodoStore] - Failed to update todo: \(error)")
     }
   }
 
@@ -114,23 +123,14 @@ final class TodoStore {
           userTodos.removeAll { $0.id == todo.id }
         }
       } catch {
-        print("[TodoStore] - Failed to delete todo: \(error)")
+        Log.error("Failed to delete todo: \(error)", category: .data)
       }
     }
   }
 
-  func reorderTodos(from: Int, to: Int, currentUserId: String) {
-    let currentTodos = todos[currentUserId] ?? []
-
-    updateUserTodos(for: currentUserId) { userTodos in
-      userTodos = reorderTodosUseCase.run(
-        todos: currentTodos,
-        currentUserId: currentUserId,
-        currentDate: currentDate,
-        from: from,
-        to: to
-      )
-    }
+  func clear() {
+    todos = [:]
+    currentUserId = ""
   }
 }
 
@@ -143,48 +143,29 @@ extension TodoStore {
     todos[userId] = userTodos
   }
 
-  private func syncWidgetForUser(_ userId: String) {
-    Task.detached(priority: .background) { [weak self] in
-      guard let self else { return }
-      let userTodos = todos[userId, default: []]
-      await widgetSyncService.sync(with: userTodos)
-    }
-  }
+  private func merge(_ newTodos: [String: [Todo]], in range: ClosedRange<Date>) {
+    for (userId, fetchedTodos) in newTodos {
+      var currentTodos = todos[userId, default: []]
 
-  private func handleTodoAdded(_ todo: Todo) {
-    updateUserTodos(for: todo.owner) { userTodos in
-      if let index = userTodos.firstIndex(where: { $0.id == todo.id }) {
-        // 이미 존재하는데 업데이트된 경우
-        if todo.updatedAt > userTodos[index].updatedAt {
-          userTodos[index] = todo
-        }
-      } else {
-        // 새로 추가된 경우
-        userTodos.append(todo)
+      // 1. Remove existing todos in the fetch range
+      currentTodos.removeAll { todo in
+        range.contains(todo.date)
       }
-    }
-  }
 
-  private func handleTodoModified(_ todo: Todo) {
-    updateUserTodos(for: todo.owner) { userTodos in
-      if let index = userTodos.firstIndex(where: { $0.id == todo.id }),
-         todo.updatedAt > userTodos[index].updatedAt
-      {
-        userTodos[index] = todo
-      }
-    }
-  }
+      // 2. Append new fetched todos
+      currentTodos.append(contentsOf: fetchedTodos)
 
-  private func handleTodoRemoved(_ todo: Todo) {
-    updateUserTodos(for: todo.owner) { userTodos in
-      userTodos.removeAll { $0.id == todo.id }
+      // 3. Sort by date descending
+      currentTodos.sort { $0.date > $1.date }
+
+      todos[userId] = currentTodos
     }
   }
 }
 
 extension TodoStore {
   static let preview: TodoStore = {
-    let store = TodoStore(container: DIContainer.preview)
+    let store = TodoStore(container: PublicDIContainer.preview)
     store.todos = [User.stub.id: [Todo.stub]]
     return store
   }()

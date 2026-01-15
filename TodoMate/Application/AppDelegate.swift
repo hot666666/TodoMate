@@ -7,10 +7,14 @@
 
 import Sparkle
 import SwiftUI
+import TodoMateData
+import WidgetKit
 
-class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
-  var syncWidgetData: (() async -> Void)?
+
+  /// 앱 종료 시 호출될 cleanup 핸들러 (Store 정리용)
+  var cleanupHandler: (() -> Void)?
 
   func applicationWillFinishLaunching(_: Notification) {
     /// 새 윈도우 생성 메뉴 삭제
@@ -34,29 +38,32 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdater
       let updaterController = SPUStandardUpdaterController(
         startingUpdater: true,
         updaterDelegate: self,
-        userDriverDelegate: nil
+        userDriverDelegate: nil,
       )
       updater = updaterController.updater
-
       /// 업데이트를 자동으로 확인
       updater?.checkForUpdatesInBackground()
     #endif
+  }
 
-    /// WindowDelegate 설정
-    if let window = NSApplication.shared.windows.first {
-      window.delegate = self
+  func applicationDidResignActive(_: Notification) {
+    WidgetCenter.shared.reloadAllTimelines()
+  }
+
+  func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+    // 앱 종료 전 모든 리스너/스트림 정리
+    cleanupHandler?()
+
+    // Firestore gRPC 연결 종료 후 앱 종료
+    Task { @MainActor in
+      do {
+        try await FirestoreReference.shared.terminate()
+      } catch {
+        // 종료 실패해도 앱은 종료되어야 함
+      }
+      sender.reply(toApplicationShouldTerminate: true)
     }
-  }
-
-  func windowShouldClose(_: NSWindow) -> Bool {
-    // 창 닫기 버튼(X)을 누르면 즉시 앱 종료
-    NSApplication.shared.terminate(nil)
-    return false
-  }
-
-  func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {
-    /// 즉시 종료 허가
-    .terminateNow
+    return .terminateLater
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {

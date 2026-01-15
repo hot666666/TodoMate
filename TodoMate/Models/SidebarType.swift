@@ -1,0 +1,27 @@
+//
+//  SidebarType.swift
+//  TodoMate
+//
+//  Created by hs on 8/24/25.
+//
+
+import TodoMateDomain
+
+enum SidebarType: Identifiable, Hashable, Equatable {
+  case profile
+  case user(User)
+
+  var id: String {
+    switch self {
+    case .profile: "profile"
+    case let .user(user): "user_\(user.id)"
+    }
+  }
+
+  var title: String {
+    switch self {
+    case .profile: "계정"
+    case let .user(user): user.displayName
+    }
+  }
+}

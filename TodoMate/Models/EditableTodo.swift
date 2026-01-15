@@ -1,11 +1,12 @@
 //
 //  EditableTodo.swift
-//  Todo
+//  TodoMate
 //
 //  Created by hs on 6/7/25.
 //
 
 import SwiftUI
+import TodoMateDomain
 
 @Observable
 class EditableTodo: Identifiable {
@@ -68,7 +69,7 @@ extension Todo {
       date: editable.date,
       createdAt: editable.createdAt,
       updatedAt: editable.isNew ? editable.createdAt : .now,
-      owner: editable.owner
+      owner: editable.owner,
     )
   }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1620"
-   version = "1.7">
+   LastUpgradeVersion = "2620"
+   version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
@@ -28,12 +28,6 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <TestPlans>
-         <TestPlanReference
-            reference = "container:TodoMate.xctestplan"
-            default = "YES">
-         </TestPlanReference>
-      </TestPlans>
       <Testables>
          <TestableReference
             skipped = "NO"
@@ -43,6 +37,17 @@
                BlueprintIdentifier = "45E0A0E22D78497C000FDC24"
                BuildableName = "TodoMateTests.xctest"
                BlueprintName = "TodoMateTests"
+               ReferencedContainer = "container:TodoMate.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "45E45A022F0CE76000BFEF01"
+               BuildableName = "TodoMateUITests.xctest"
+               BlueprintName = "TodoMateUITests"
                ReferencedContainer = "container:TodoMate.xcodeproj">
             </BuildableReference>
          </TestableReference>

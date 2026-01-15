@@ -63,16 +63,27 @@ fastlane/test_output
 
 # Firebase
 GoogleService-Info.plist
+FirebaseConfig/
 
-# Firebase emulator
-Firestore/firebase-debug.log
-Firestore/firestore-debug.log
-Firestore/exported-data/*
+# Firebase Emulator
+FirebaseEmulator/.firebase/
+FirebaseEmulator/firebase-debug.log
+FirebaseEmulator/firestore-debug.log
+FirebaseEmulator/ui-debug.log
 
 # Certificate & Profile
-private/
+/private/
 
-# AI
-GEMINI.md
-CLAUDE.md
-.claude/
+# memo
+taskmemo.md
+
+# test result
+*.xcresult
+
+# TEMP - url 제공방안 생각
+screenshots/
+
+SheetExample/
+
+# IDE
+.vscode/
