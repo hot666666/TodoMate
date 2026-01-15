@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftUIIntrospect
+import TodoMateDomain
 
 struct MemoDetailView: View {
   @State private var cleared = false

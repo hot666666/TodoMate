@@ -5,10 +5,11 @@
 //  Created by hs on 6/2/25.
 //
 
-import FirebaseCore
-import GoogleSignIn
+import Common
 import SwiftData
 import SwiftUI
+import TodoMateData
+import TodoMateDomain
 
 @main
 struct TodoMateApp: App {
@@ -22,12 +23,13 @@ struct TodoMateApp: App {
 
   init() {
     /// Firebase 및 인증 설정
-    Self.configureFirebaseAndAuth()
+    TodoMateDataConfiguration.configure()
     /// DI Container 생성
     let container = Self.makeContainer()
-    appDIContainer = container
     /// 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: container)
+
+    appDIContainer = container
     /// Store 초기화
     _todoStore = State(initialValue: PrivateTodoStore(container: container.core))
     _memoStore = State(initialValue: PrivateMemoStore(container: container.core))
@@ -91,18 +93,6 @@ private extension TodoMateApp {
 }
 
 private extension TodoMateApp {
-  static func configureFirebaseAndAuth() {
-    FirebaseApp.configure()
-    Log.info("Firebase configured successfully.")
-
-    if let clientId = FirebaseApp.app()?.options.clientID {
-      GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
-      Log.info("Google Sign-In configured with client ID: \(clientId)")
-    } else {
-      Log.warning("Firebase client ID is not configured.")
-    }
-  }
-
   static func createCoreDIContainer(
     userDefaults: UserDefaults,
     hotKeyManager: HotKeyManager,

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import TodoMateDomain
 
 /// Presentation layer model for User
 struct ViewUser: Identifiable, Equatable {

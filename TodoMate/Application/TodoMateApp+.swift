@@ -1,5 +1,7 @@
+import Common
 import SwiftData
 import SwiftUI
+import TodoMateData
 
 extension TodoMateApp {
   static func checkAndHandleAppUpdate(container: AppDIContainer) {

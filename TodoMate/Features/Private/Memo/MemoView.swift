@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TodoMateDomain
 
 struct MemoView: View {
   @Environment(AppDIContainer.self) private var container

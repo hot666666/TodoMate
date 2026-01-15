@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import TodoMateDomain
 
 /// Presentation layer model for Chat Messages
 struct ViewGroupMessage: Identifiable, Equatable {

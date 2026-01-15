@@ -7,6 +7,7 @@
 
 import SimpleOverlaySystem
 import SwiftUI
+import TodoMateDomain
 
 struct TodoStatusButton: View {
   @Environment(\.overlayManager) private var overlay

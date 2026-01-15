@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TodoMateDomain
 
 struct TodoStatusPicker: View {
   let selectedStatus: TodoStatus

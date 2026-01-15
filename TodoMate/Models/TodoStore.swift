@@ -5,7 +5,9 @@
 //  Created by hs on 7/9/25.
 //
 
+import Common
 import SwiftUI
+import TodoMateDomain
 
 @Observable
 @MainActor
@@ -45,9 +47,7 @@ final class TodoStore {
         switch event {
         case let .loggedIn(userId, _, memberIds):
           currentUserId = userId
-          // Cache-first: ±1달 (Wide Range) 캐시 로드
-          await load(for: memberIds, range: Date().monthRange, useCache: true)
-          // Server: 오늘 (Narrow Range) 최신 데이터 동기화
+          await load(for: memberIds, range: Date().dayRange, useCache: true)
           await load(for: memberIds, range: Date().dayRange, useCache: false)
 
           Log.info(
@@ -70,7 +70,6 @@ final class TodoStore {
   // MARK: - Public Methods
 
   func refresh(for userIds: [String]) async {
-    await load(for: userIds, range: Date().monthRange, useCache: true)
     await load(for: userIds, range: Date().dayRange, useCache: false)
   }
 

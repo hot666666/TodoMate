@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TodoMateDomain
 
 struct TodoStatusChip: View {
   let status: TodoStatus
