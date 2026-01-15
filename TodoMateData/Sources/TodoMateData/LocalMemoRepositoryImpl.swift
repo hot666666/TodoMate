@@ -56,6 +56,15 @@ public actor SwiftDataMemoRepositoryImpl: MemoRepository {
     }
   }
 
+  public func read(id: String) async throws -> Memo? {
+    let descriptor = FetchDescriptor<SDMemo>(predicate: #Predicate<SDMemo> { $0.id == id })
+    do {
+      return try modelContext.fetch(descriptor).first?.toDomain()
+    } catch {
+      throw SwiftDataError.fetchFailed(underlying: error)
+    }
+  }
+
   public func readAllByUserId(_: String, useCache _: Bool) async throws -> [Memo] {
     let descriptor = FetchDescriptor<SDMemo>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
     do {

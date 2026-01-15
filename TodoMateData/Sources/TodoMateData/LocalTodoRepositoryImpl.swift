@@ -64,6 +64,15 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
     }
   }
 
+  public func read(id: String) async throws -> Todo? {
+    let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == id })
+    do {
+      return try modelContext.fetch(descriptor).first?.toDomain()
+    } catch {
+      throw SwiftDataError.fetchFailed(underlying: error)
+    }
+  }
+
   public func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
     var dateRange: ClosedRange<Date>?
     for filter in query.filters {

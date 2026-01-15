@@ -301,6 +301,10 @@ import TodoMateDomain
       todos.removeAll { $0.id == todoId }
     }
 
+    func read(id: String) async throws -> Todo? {
+      todos.first { $0.id == id }
+    }
+
     func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
       todos.filter { todo in
         for filter in query.filters {
@@ -337,6 +341,10 @@ import TodoMateDomain
     }
 
     func delete(_ memo: Memo) async throws { memos.removeAll { $0.id == memo.id } }
+
+    func read(id: String) async throws -> Memo? {
+      memos.first { $0.id == id }
+    }
 
     func readAllByUserId(_ userId: String, useCache _: Bool) async throws -> [Memo] {
       memos.filter { $0.owner == userId }
