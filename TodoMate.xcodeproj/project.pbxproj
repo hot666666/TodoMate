@@ -267,7 +267,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 45E10B9E2C69B77400FC31CD /* Build configuration list for PBXNativeTarget "TodoMate" */;
 			buildPhases = (
-				45A236DA2F0B4D52006B9A72 /* ShellScript */,
 				45E10B8B2C69B77300FC31CD /* Sources */,
 				45E10B8C2C69B77300FC31CD /* Frameworks */,
 				45E10B8D2C69B77300FC31CD /* Resources */,
@@ -406,29 +405,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		45A236DA2F0B4D52006B9A72 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/FirebaseConfig/GoogleService-Info-dev.plist",
-				"$(SRCROOT)/FirebaseConfig/GoogleService-Info-prod.plist",
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${SRCROOT}/GoogleService-Info.plist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# 대소문자 구분 없이 처리\nCONFIG_LOWER=$(echo \"${CONFIGURATION}\" | tr '[:upper:]' '[:lower:]')\n\necho \"Configuration: ${CONFIGURATION} (normalized: ${CONFIG_LOWER})\"\n\ncase \"${CONFIG_LOWER}\" in\n    *debug*|*dev*)\n        PLIST_NAME=\"GoogleService-Info-Dev.plist\"\n        echo \"✅ Using DEV\"\n        ;;\n    *release*|*prod*)\n        PLIST_NAME=\"GoogleService-Info-Prod.plist\"\n        echo \"✅ Using PROD\"\n        ;;\n    *)\n        echo \"❌ Unknown configuration: ${CONFIGURATION}\"\n        exit 1\n        ;;\nesac\n\nPLIST_SOURCE=\"${PROJECT_DIR}/FirebaseConfig/${PLIST_NAME}\"\nPLIST_DEST=\"${PROJECT_DIR}/GoogleService-Info.plist\"\n\ncp \"${PLIST_SOURCE}\" \"${PLIST_DEST}\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		458449532F18E88700B05106 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -489,7 +465,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = Resources/TodoMateWidgetExtensionDebug.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/TodoMateWidgetDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -524,9 +500,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = Resources/TodoMateWidgetExtensionRelease.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Resources/TodoMateWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
