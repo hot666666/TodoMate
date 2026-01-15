@@ -22,17 +22,21 @@ struct TodoMateApp: App {
   @State private var memoStore: PrivateMemoStore
 
   init() {
-    /// Firebase 및 인증 설정
-    TodoMateDataConfiguration.configure()
-    /// DI Container 생성
-    let container = Self.makeContainer()
-    /// 앱 업데이트 체크 및 처리
-    Self.checkAndHandleAppUpdate(container: container)
+    // Firebase 및 인증 설정 후, DI Container 생성
+    #if DEBUG
+      DebugConfiguration.configureFirebase()
+      appDIContainer = DebugConfiguration.makeContainer() ?? Self.composeContainer()
+    #else
+      TodoMateDataConfiguration.configure()
+      appDIContainer = Self.composeContainer()
+    #endif
 
-    appDIContainer = container
-    /// Store 초기화
-    _todoStore = State(initialValue: PrivateTodoStore(container: container.core))
-    _memoStore = State(initialValue: PrivateMemoStore(container: container.core))
+    // 앱 업데이트 체크 및 처리
+    Self.checkAndHandleAppUpdate(container: appDIContainer)
+
+    // Store 초기화
+    _todoStore = State(initialValue: PrivateTodoStore(container: appDIContainer.core))
+    _memoStore = State(initialValue: PrivateMemoStore(container: appDIContainer.core))
   }
 
   var body: some Scene {
@@ -48,9 +52,7 @@ struct TodoMateApp: App {
         .frame(minWidth: 720, minHeight: 540)
         .task {
           #if DEBUG
-            if Self.isUITesting {
-              MockDataSeeder.seed(container: appDIContainer.core.modelContainer)
-            }
+            MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
           #endif
           await todoStore.loadTodos()
           await memoStore.load()
@@ -60,27 +62,11 @@ struct TodoMateApp: App {
     .windowStyle(.hiddenTitleBar)
     #endif
   }
-
-  #if DEBUG
-    static var isUITesting: Bool {
-      ProcessInfo.processInfo.arguments.contains("-useMockContainer")
-    }
-  #endif
 }
 
+// MARK: - Container Composition
+
 private extension TodoMateApp {
-  @MainActor
-  static func makeContainer() -> AppDIContainer {
-    #if DEBUG
-      if isUITesting {
-        let scenario = parseSenarioFromArguments()
-        return AppDIContainer.makeMock(for: scenario)
-      }
-    #endif
-
-    return composeContainer()
-  }
-
   @MainActor
   static func composeContainer() -> AppDIContainer {
     let userDefaults = UserDefaults.standard
@@ -90,9 +76,7 @@ private extension TodoMateApp {
 
     return AppDIContainer(coreContainer: coreDI, publicContainer: publicDI)
   }
-}
 
-private extension TodoMateApp {
   static func createCoreDIContainer(
     userDefaults: UserDefaults,
     hotKeyManager: HotKeyManager,
@@ -140,5 +124,36 @@ private extension TodoMateApp {
       Log.error("Failed to create SwiftData ModelContainer: \(error)")
       fatalError("Failed to create ModelContainer: \(error)")
     }
+  }
+}
+
+// MARK: - App Update Handling
+
+private extension TodoMateApp {
+  static func checkAndHandleAppUpdate(container: AppDIContainer) {
+    let userDefaults = container.core.userDefaults
+
+    let currentVersion =
+      Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    let lastVersion = userDefaults.string(for: .appLastVersion)
+
+    Log.info("Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
+
+    #if DEBUG
+      guard DebugConfiguration.isUsingMock else { return }
+    #endif
+
+    // 업데이트 기록이 존재하면 작업 x -> 3.0.0 이전버전에서 업데이트 시, 수행
+    if lastVersion == nil {
+      Log.info("First launch detected. Initializing app state...")
+      try? container.pub.authService.signOut()
+
+      if let bundleIdentifier = Bundle.main.bundleIdentifier {
+        userDefaults.removePersistentDomain(forName: bundleIdentifier)
+      }
+    }
+
+    // 현재 버전 저장
+    userDefaults.set(currentVersion, for: .appLastVersion)
   }
 }

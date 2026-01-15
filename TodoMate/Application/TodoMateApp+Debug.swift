@@ -1,60 +1,70 @@
-import Common
-import SwiftData
-import SwiftUI
-import TodoMateData
+//
+//  TodoMateApp+Debug.swift
+//  TodoMate
+//
+//  Created by agent on 1/15/26.
+//
 
-extension TodoMateApp {
-  static func checkAndHandleAppUpdate(container: AppDIContainer) {
-    let userDefaults = container.core.userDefaults
+#if DEBUG
+  import Common
+  import SwiftData
+  import SwiftUI
+  import TodoMateData
 
-    let currentVersion =
-      Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-    let lastVersion = userDefaults.string(for: .appLastVersion)
+  // MARK: - Debug Configuration
 
-    Log.info(
-      "Current version: \(currentVersion), Last version: \(lastVersion ?? "none")")
+  enum DebugConfiguration {
+    /// Mock 컨테이너 사용 여부 (스크린샷 테스트용)
+    static var isUsingMock: Bool {
+      ProcessInfo.processInfo.arguments.contains("-use-mock-container")
+    }
 
-    #if DEBUG
-      guard Self.isUITesting else { return }
-    #endif
+    /// 에뮬레이터 사용 여부 (런타임 테스트용)
+    static var isUsingEmulator: Bool {
+      ProcessInfo.processInfo.arguments.contains("-use-emulator")
+    }
 
-    // 업데이트 기록이 존재하면 작업 x -> 3.0.0 이전버전에서 업데이트 시, 수행
-    if lastVersion == nil {
-      Log.info("First launch detected. Initializing app state...")
-      // Public 컨테이너가 있으면 로그아웃 시도 (실질적으로 첫 실행시에는 없을 가능성이 큼)
-      try? container.pub.authService.signOut()
-
-      // 앱의 모든 UserDefaults 데이터 삭제
-      if let bundleIdentifier = Bundle.main.bundleIdentifier {
-        userDefaults.removePersistentDomain(forName: bundleIdentifier)
+    /// Firebase 설정 (에뮬레이터 또는 프로덕션)
+    @MainActor
+    static func configureFirebase() {
+      if isUsingEmulator {
+        TodoMateDataConfiguration.configure(mode: .emulator)
+      } else {
+        TodoMateDataConfiguration.configure()
       }
     }
 
-    // 현재 버전 저장
-    userDefaults.set(currentVersion, for: .appLastVersion)
-  }
+    /// DI Container 생성 (Mock 또는 실제)
+    @MainActor
+    static func makeContainer() -> AppDIContainer? {
+      guard isUsingMock else { return nil }
 
-  #if DEBUG
-    static func parseSenarioFromArguments() -> String {
-      var scenario = "group_user" // Default
+      let scenario = parseScenarioFromArguments()
+      return AppDIContainer.makeMock(for: scenario)
+    }
 
+    /// Launch Argument에서 시나리오 파싱
+    private static func parseScenarioFromArguments() -> String {
       Log.debug("Arguments: \(CommandLine.arguments)")
 
       if let index = CommandLine.arguments.firstIndex(of: "-scenario"),
          index + 1 < CommandLine.arguments.count {
-        scenario = CommandLine.arguments[index + 1]
+        let scenario = CommandLine.arguments[index + 1]
+        Log.debug("Selected Scenario: \(scenario)")
+        return scenario
       }
 
-      Log.debug("Selected Scenario: \(scenario)")
-      return scenario
+      return "group_user" // Default
     }
-  #endif
-}
+  }
 
-#if DEBUG
+  // MARK: - Mock Data Seeder
+
   enum MockDataSeeder {
     @MainActor
-    static func seed(container: ModelContainer) {
+    static func seedIfNeeded(container: ModelContainer) {
+      guard DebugConfiguration.isUsingMock else { return }
+
       let context = container.mainContext
       let todoDescriptor = FetchDescriptor<SDTodo>()
 

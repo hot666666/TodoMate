@@ -12,11 +12,11 @@ import GoogleSignIn
 public enum TodoMateDataConfiguration {
   /// TodoMateData 및 관련 설정(Firebase 등) 초기화
   @MainActor
-  public static func configure() {
+  public static func configure(mode: FirestoreReference.Mode = .production) {
     configureFirebaseAndAuth()
 
     // FirestoreReference 초기화
-    FirestoreReference.configure(mode: .production)
+    FirestoreReference.configure(mode: mode)
   }
 
   @MainActor
