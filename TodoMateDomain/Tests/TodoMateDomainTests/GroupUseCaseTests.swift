@@ -42,7 +42,7 @@ struct GroupUseCaseTests {
     #expect(createdGroup.memberIds.contains(userId))
 
     // Verify user is updated
-    let updatedUser = try await userRepository.read(userId: userId, source: .server)
+    let updatedUser = try await userRepository.read(userId: userId, useCache: false)
     #expect(updatedUser?.groupId == createdGroup.id)
   }
 
