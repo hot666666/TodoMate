@@ -25,6 +25,9 @@ final class TodoMateUITests: XCTestCase {
   func testExample() throws {
     // UI tests must launch the application that they test.
     let app = XCUIApplication()
+    if ProcessInfo.processInfo.environment["USE_EMULATOR"] != nil {
+      app.launchArguments.append("-use-emulator")
+    }
     app.launch()
 
     // Use XCTAssert and related functions to verify your tests produce the correct results.

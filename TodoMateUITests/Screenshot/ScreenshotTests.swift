@@ -26,7 +26,7 @@ final class ScreenshotTests: XCTestCase {
 
   private func launchApp(args: [String] = []) {
     app = XCUIApplication()
-    app.launchArguments = ["--ui-testing", "-useMockContainer"] + args
+    app.launchArguments = ["--ui-testing", "-use-mock-container"] + args
     app.launch()
     app.activate()
 
