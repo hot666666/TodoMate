@@ -16,7 +16,11 @@ struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   private let appDIContainer: AppDIContainer
 
-  // MARK: - Global States(App Lifetime)
+  // MARK: - ViewController
+
+  @State private var overlayViewController: OverlayViewController?
+
+  // MARK: - Global States
 
   @State private var todoStore: PrivateTodoStore
   @State private var memoStore: PrivateMemoStore
@@ -57,6 +61,13 @@ struct TodoMateApp: App {
           #if DEBUG
             MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
           #endif
+          if overlayViewController == nil {
+            overlayViewController = OverlayViewController(
+              diContainer: appDIContainer,
+              modelContainer: appDIContainer.core.modelContainer,
+              todoStore: todoStore,
+            )
+          }
           await todoStore.loadTodos()
           await memoStore.load()
         }
@@ -64,6 +75,16 @@ struct TodoMateApp: App {
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)
     #endif
+
+    // MARK: - Menu Bar
+
+    MenuBarExtra("TodoMate", systemImage: "checklist") {
+      MenuBarView { todo in
+        overlayViewController?.show(with: todo)
+      }
+      .environment(todoStore)
+    }
+    .menuBarExtraStyle(.menu)
   }
 }
 
