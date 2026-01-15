@@ -161,7 +161,7 @@ Each layer can be tested independently:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Presentation (SwiftUI)                                 │
+│  Presentation (SwiftUI App)                             │
 │  ├─ Views        → UI components                        │
 │  └─ Stores       → @Observable state containers         │
 ├─────────────────────────────────────────────────────────┤
@@ -174,7 +174,7 @@ Each layer can be tested independently:
 │  └─ *RepositoryImpl → Firebase/SwiftData implementations│
 └─────────────────────────────────────────────────────────┘
 
-Dependencies flow INWARD: Presentation → Domain ← Data
+* Dependencies flow INWARD: Presentation → Domain ← Data
 ```
 
 ---
@@ -205,9 +205,3 @@ Dependencies flow INWARD: Presentation → Domain ← Data
 ```
 
 ---
-
-## Further Reading
-
-- [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [The Composable Architecture (TCA)](https://github.com/pointfreeco/swift-composable-architecture)
-- [Swift Concurrency Best Practices](https://developer.apple.com/documentation/swift/concurrency)

@@ -1,5 +1,6 @@
 ---
-description: Audit and improve SwiftUI runtime performance via code/architecture review. Use to diagnose slow rendering, janky scrolling, high CPU/memory, excessive updates, or layout thrash, and suggest Instruments profiling steps when review isn’t enough.
+name: swiftui-performance-audit
+description: Audit and improve SwiftUI runtime performance from code review and architecture. Use for requests to diagnose slow rendering, janky scrolling, high CPU/memory usage, excessive view updates, or layout thrash in SwiftUI apps, and to provide guidance for user-run Instruments profiling when code review alone is insufficient.
 ---
 
 # SwiftUI Performance Audit
@@ -179,8 +180,8 @@ Provide:
 
 ## References
 
-Add Apple documentation and WWDC resources under `docs/` as they are supplied by the user.
-- Optimizing SwiftUI performance with Instruments: `docs/optimizing-swiftui-performance-instruments.md`
-- Understanding and improving SwiftUI performance: `docs/understanding-improving-swiftui-performance.md`
-- Understanding hangs in your app: `docs/understanding-hangs-in-your-app.md`
-- Demystify SwiftUI performance (WWDC23): `docs/demystify-swiftui-performance-wwdc23.md`
+Add Apple documentation and WWDC resources under `references/` as they are supplied by the user.
+- Optimizing SwiftUI performance with Instruments: `references/optimizing-swiftui-performance-instruments.md`
+- Understanding and improving SwiftUI performance: `references/understanding-improving-swiftui-performance.md`
+- Understanding hangs in your app: `references/understanding-hangs-in-your-app.md`
+- Demystify SwiftUI performance (WWDC23): `references/demystify-swiftui-performance-wwdc23.md`
