@@ -78,3 +78,9 @@ extension CoreDIContainer {
     )
   }()
 }
+
+// MARK: - AppIntent Support
+
+extension CoreDIContainer {
+  nonisolated(unsafe) static var shared: CoreDIContainer?
+}

@@ -38,6 +38,15 @@ public final class FirestoreTodoRepository: TodoRepository {
     }
   }
 
+  public func read(id: String) async throws -> Todo? {
+    do {
+      let document = try await reference.todoCollection().document(id).getDocument()
+      return try? document.data(as: Todo.self)
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
+  }
+
   public func readAll(query: TodoQuery, useCache: Bool) async throws -> [Todo] {
     let firestoreQuery = buildFirestoreQuery(from: query)
     let source: FirestoreSource = useCache ? .cache : .default

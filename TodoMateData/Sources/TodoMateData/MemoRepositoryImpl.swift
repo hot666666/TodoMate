@@ -39,6 +39,15 @@ public final class FirestoreMemoRepository: MemoRepository {
     }
   }
 
+  public func read(id: String) async throws -> Memo? {
+    do {
+      let document = try await reference.memoCollection().document(id).getDocument()
+      return try? document.data(as: Memo.self)
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
+  }
+
   public func readAllByUserId(_ userId: String, useCache: Bool = true) async throws -> [Memo] {
     let source: FirestoreSource = useCache ? .cache : .server
     do {
