@@ -15,22 +15,38 @@ public final class FirestoreTodoRepository: TodoRepository {
   }
 
   public func create(_ todo: Todo) async throws {
-    try reference.todoCollection().document(todo.id).setData(from: todo)
+    do {
+      try reference.todoCollection().document(todo.id).setData(from: todo)
+    } catch {
+      throw FirestoreRepositoryError.createFailed(underlying: error)
+    }
   }
 
   public func update(_ todo: Todo) async throws {
-    try reference.todoCollection().document(todo.id).setData(from: todo)
+    do {
+      try reference.todoCollection().document(todo.id).setData(from: todo)
+    } catch {
+      throw FirestoreRepositoryError.updateFailed(underlying: error)
+    }
   }
 
   public func delete(_ todoId: String) async throws {
-    try await reference.todoCollection().document(todoId).delete()
+    do {
+      try await reference.todoCollection().document(todoId).delete()
+    } catch {
+      throw FirestoreRepositoryError.deleteFailed(underlying: error)
+    }
   }
 
   public func readAll(query: TodoQuery, useCache: Bool) async throws -> [Todo] {
     let firestoreQuery = buildFirestoreQuery(from: query)
     let source: FirestoreSource = useCache ? .cache : .default
-    let snapshot = try await firestoreQuery.getDocuments(source: source)
-    return snapshot.documents.compactMap { try? $0.data(as: Todo.self) }
+    do {
+      let snapshot = try await firestoreQuery.getDocuments(source: source)
+      return snapshot.documents.compactMap { try? $0.data(as: Todo.self) }
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
   }
 
   private func buildFirestoreQuery(from todoQuery: TodoQuery) -> Query {

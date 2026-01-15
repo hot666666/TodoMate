@@ -7,12 +7,6 @@
 
 import FirebaseFirestore
 
-/// Firestore 연결 모드
-public enum FirestoreMode: Sendable {
-  case production // 실제 Firebase 서버 (Dev/Prod)
-  case emulator // 로컬 에뮬레이터 (테스트용)
-}
-
 public final class FirestoreReference: @unchecked Sendable {
   // MainActor에서만 설정 가능하도록 제한
   @MainActor private static var _instance: FirestoreReference?
@@ -71,13 +65,21 @@ public final class FirestoreReference: @unchecked Sendable {
   /// Firestore 로컬 캐시 삭제 (로그아웃 시 호출)
   @MainActor
   public func clearPersistence() async throws {
-    try await db.clearPersistence()
+    do {
+      try await db.clearPersistence()
+    } catch {
+      throw FirestoreRepositoryError.networkOperationFailed(underlying: error)
+    }
   }
 
   /// Firestore gRPC 연결 종료 (앱 종료 시 호출)
   @MainActor
   public func terminate() async throws {
-    try await db.terminate()
+    do {
+      try await db.terminate()
+    } catch {
+      throw FirestoreRepositoryError.networkOperationFailed(underlying: error)
+    }
   }
 
   /// 테스트용: 모든 컬렉션의 문서 삭제
@@ -96,15 +98,19 @@ public final class FirestoreReference: @unchecked Sendable {
     ]
 
     for collectionName in collections {
-      let snapshot = try await db.collection(collectionName).getDocuments()
-      for document in snapshot.documents {
-        try await document.reference.delete()
+      do {
+        let snapshot = try await db.collection(collectionName).getDocuments()
+        for document in snapshot.documents {
+          try await document.reference.delete()
+        }
+      } catch {
+        throw FirestoreRepositoryError.deleteFailed(underlying: error)
       }
     }
   }
 }
 
-extension FirestoreReference {
+public extension FirestoreReference {
   enum DocumentCollection {
     static let VERSION = "v2"
     static let USER = "\(VERSION)-users"
@@ -112,5 +118,11 @@ extension FirestoreReference {
     static let MESSAGE = "\(VERSION)-group_messages"
     static let MEMO = "\(VERSION)-memos"
     static let GROUP = "\(VERSION)-groups"
+  }
+
+  /// Firestore 연결 모드
+  enum FirestoreMode: Sendable {
+    case production // 실제 Firebase 서버 (Dev/Prod)
+    case emulator // 로컬 에뮬레이터 (테스트용)
   }
 }

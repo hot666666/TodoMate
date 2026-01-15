@@ -16,33 +16,53 @@ public final class FirestoreMemoRepository: MemoRepository {
   }
 
   public func create(_ memo: Memo) async throws {
-    try reference.memoCollection().document(memo.id).setData(from: memo)
+    do {
+      try reference.memoCollection().document(memo.id).setData(from: memo)
+    } catch {
+      throw FirestoreRepositoryError.createFailed(underlying: error)
+    }
   }
 
   public func update(_ memo: Memo) async throws {
-    try reference.memoCollection().document(memo.id).setData(from: memo)
+    do {
+      try reference.memoCollection().document(memo.id).setData(from: memo)
+    } catch {
+      throw FirestoreRepositoryError.updateFailed(underlying: error)
+    }
   }
 
   public func delete(_ memo: Memo) async throws {
-    try await reference.memoCollection().document(memo.id).delete()
+    do {
+      try await reference.memoCollection().document(memo.id).delete()
+    } catch {
+      throw FirestoreRepositoryError.deleteFailed(underlying: error)
+    }
   }
 
   public func readAllByUserId(_ userId: String, useCache: Bool = true) async throws -> [Memo] {
     let source: FirestoreSource = useCache ? .cache : .server
-    let snapshot = try await reference.memoCollection()
-      .whereField("owner", isEqualTo: userId)
-      .order(by: "updatedAt", descending: true)
-      .getDocuments(source: source)
-    return snapshot.documents.compactMap { try? $0.data(as: Memo.self) }
+    do {
+      let snapshot = try await reference.memoCollection()
+        .whereField("owner", isEqualTo: userId)
+        .order(by: "updatedAt", descending: true)
+        .getDocuments(source: source)
+      return snapshot.documents.compactMap { try? $0.data(as: Memo.self) }
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
   }
 
   public func readAllByUserIds(_ userIds: [String], useCache: Bool = true) async throws -> [Memo] {
     guard !userIds.isEmpty else { return [] }
     let source: FirestoreSource = useCache ? .cache : .server
-    let snapshot = try await reference.memoCollection()
-      .whereField("owner", in: userIds)
-      .order(by: "updatedAt", descending: true)
-      .getDocuments(source: source)
-    return snapshot.documents.compactMap { try? $0.data(as: Memo.self) }
+    do {
+      let snapshot = try await reference.memoCollection()
+        .whereField("owner", in: userIds)
+        .order(by: "updatedAt", descending: true)
+        .getDocuments(source: source)
+      return snapshot.documents.compactMap { try? $0.data(as: Memo.self) }
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
   }
 }
