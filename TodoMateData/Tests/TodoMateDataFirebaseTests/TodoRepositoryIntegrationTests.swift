@@ -21,7 +21,7 @@ extension FirestoreIntegrationTests {
 
     init() async throws {
       try await FirestoreIntegrationTests.setup()
-      let reference = FirestoreReference.shared!
+      let reference = await FirestoreReference.shared
       repository = FirestoreTodoRepository(reference: reference)
     }
 
@@ -37,7 +37,7 @@ extension FirestoreIntegrationTests {
 
       // Then
       let query = TodoQuery().owner(userId: testUserId)
-      let results = try await repository.readAll(query: query, source: .server)
+      let results = try await repository.readAll(query: query, useCache: false)
 
       let found = results.first { $0.id == todo.id }
       #expect(found != nil)
@@ -60,7 +60,7 @@ extension FirestoreIntegrationTests {
 
       // Then
       let query = TodoQuery().owner(userId: testUserId)
-      let results = try await repository.readAll(query: query, source: .server)
+      let results = try await repository.readAll(query: query, useCache: false)
       let updated = results.first { $0.id == todo.id }
 
       #expect(updated?.content == "수정 후")
@@ -80,7 +80,7 @@ extension FirestoreIntegrationTests {
 
       // Then
       let query = TodoQuery().owner(userId: testUserId)
-      let results = try await repository.readAll(query: query, source: .server)
+      let results = try await repository.readAll(query: query, useCache: false)
       #expect(!results.contains { $0.id == todo.id })
     }
 
@@ -100,7 +100,7 @@ extension FirestoreIntegrationTests {
 
       // When
       let query = TodoQuery().owners(userIds: [testUserId, otherUserId])
-      let results = try await repository.readAll(query: query, source: .server)
+      let results = try await repository.readAll(query: query, useCache: false)
 
       // Then
       let ids = Set(results.map(\.id))
@@ -125,7 +125,7 @@ extension FirestoreIntegrationTests {
       // When: 오늘만 조회
       let range = today.startOfDay ... today.endOfDay
       let query = TodoQuery().owner(userId: testUserId).dateRange(range)
-      let results = try await repository.readAll(query: query, source: .server)
+      let results = try await repository.readAll(query: query, useCache: false)
 
       // Then
       #expect(results.count == 1)
@@ -145,7 +145,7 @@ extension FirestoreIntegrationTests {
 
       // When
       let query = TodoQuery().owner(userId: testUserId).status(.complete)
-      let results = try await repository.readAll(query: query, source: .server)
+      let results = try await repository.readAll(query: query, useCache: false)
 
       // Then
       #expect(results.count == 1)

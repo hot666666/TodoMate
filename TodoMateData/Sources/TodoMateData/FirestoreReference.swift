@@ -20,13 +20,13 @@ public final class FirestoreReference: @unchecked Sendable {
   }
 
   @MainActor
-  public static func configure(mode: FirestoreMode = .production) {
+  public static func configure(mode: Mode = .production) {
     guard _instance == nil else { return }
     _instance = (mode == .production) ? FirestoreReference() : FirestoreReference(emulator: ())
   }
 
   public let db: Firestore
-  public let mode: FirestoreMode
+  public let mode: Mode
 
   /// Production 모드로 초기화 (앱 타겟에서 사용)
   /// - 앱 시작 시 `FirebaseApp.configure()` 호출 후 사용
@@ -121,7 +121,7 @@ public extension FirestoreReference {
   }
 
   /// Firestore 연결 모드
-  enum FirestoreMode: Sendable {
+  enum Mode: Sendable {
     case production // 실제 Firebase 서버 (Dev/Prod)
     case emulator // 로컬 에뮬레이터 (테스트용)
   }
