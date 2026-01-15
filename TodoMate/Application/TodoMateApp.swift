@@ -31,6 +31,9 @@ struct TodoMateApp: App {
       appDIContainer = Self.composeContainer()
     #endif
 
+    // AppIntent에서 사용할 수 있도록 공유 인스턴스 설정
+    CoreDIContainer.shared = appDIContainer.core
+
     // 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: appDIContainer)
 
