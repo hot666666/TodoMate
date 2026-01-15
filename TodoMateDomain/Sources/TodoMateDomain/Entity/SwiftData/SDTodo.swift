@@ -1,13 +1,14 @@
 //
 //  SDTodo.swift
-//  TodoMate
+//  TodoMateDomain
+//
+//  SwiftData model for Todo persistence.
 //
 //  Created by hs on 07/02/25.
 //
 
 import Foundation
 import SwiftData
-import TodoMateDomain
 
 @Model
 public final class SDTodo {

@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
   name: "TodoMateDomain",
   platforms: [
-    .macOS(.v12),
+    .macOS(.v26),
   ],
   products: [
     // Products define the executables and libraries a package produces, making them visible to other packages.
