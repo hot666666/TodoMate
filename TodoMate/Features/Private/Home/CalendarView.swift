@@ -132,7 +132,7 @@ struct CalendarView: View {
 // MARK: - CalendarQueryWrapper
 
 private struct CalendarQueryWrapper: View {
-  @Environment(PrivateTodoStore.self) private var todoStore
+  @Environment(LocalTodoHelper.self) private var todoStore
   @Query private var sdTodos: [SDTodo]
 
   let currentDate: Date
@@ -359,5 +359,5 @@ struct CalendarCell: View {
 #Preview {
   CalendarView()
     .environment(NavigationManager.preview)
-    .environment(PrivateTodoStore.preview)
+    .environment(LocalTodoHelper.preview)
 }

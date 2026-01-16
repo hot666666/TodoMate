@@ -15,14 +15,14 @@ struct OverlayWindowRootView: View {
 
   let todo: Todo?
   let onClose: () -> Void
-  let todoStore: PrivateTodoStore
+  let todoStore: LocalTodoHelper
 
   // 임시 상태 관라 (실제 구현 시 Store 등 사용 고려)
   @State private var localTodo: EditableTodo
 
   init(
     todo: Todo?, onClose: @escaping () -> Void,
-    todoStore: PrivateTodoStore,
+    todoStore: LocalTodoHelper,
   ) {
     self.todo = todo
     self.onClose = onClose

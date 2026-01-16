@@ -1,5 +1,5 @@
 //
-//  PrivateMemoStore.swift
+//  LocalMemoHelper.swift
 //  TodoMate
 //
 //  Created by agent on 1/11/26.
@@ -13,7 +13,7 @@ import TodoMateDomain
 
 @Observable
 @MainActor
-final class PrivateMemoStore {
+final class LocalMemoHelper {
   // MARK: - Dependencies
 
   private let createUseCase: CreateLocalMemoUseCase
@@ -82,8 +82,8 @@ final class PrivateMemoStore {
   }
 }
 
-extension PrivateMemoStore {
-  static var preview: PrivateMemoStore {
-    PrivateMemoStore(container: .preview)
+extension LocalMemoHelper {
+  static var preview: LocalMemoHelper {
+    LocalMemoHelper(container: .preview)
   }
 }

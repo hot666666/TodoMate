@@ -45,7 +45,7 @@ struct PrivateTodoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = PrivateTodoStore(
+    let store = LocalTodoHelper(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
@@ -72,7 +72,7 @@ struct PrivateTodoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = PrivateTodoStore(
+    let store = LocalTodoHelper(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
@@ -100,7 +100,7 @@ struct PrivateTodoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = PrivateTodoStore(
+    let store = LocalTodoHelper(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,

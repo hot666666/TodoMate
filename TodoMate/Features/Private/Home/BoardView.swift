@@ -15,7 +15,7 @@ import TodoMateDomain
 // MARK: - BoardView (Container)
 
 struct BoardView: View {
-  @Environment(PrivateTodoStore.self) private var todoStore
+  @Environment(LocalTodoHelper.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
   @State private var dateFilter: DateFilter = .today
@@ -81,7 +81,7 @@ struct BoardView: View {
 // MARK: - BoardQueryWrapper (Data Access)
 
 private struct BoardQueryWrapper: View {
-  @Environment(PrivateTodoStore.self) private var todoStore
+  @Environment(LocalTodoHelper.self) private var todoStore
   @Query private var sdTodos: [SDTodo]
 
   let dateFilter: DateFilter
@@ -342,6 +342,6 @@ private struct TodoColumn: View {
 
 #Preview {
   BoardView()
-    .environment(PrivateTodoStore.preview)
+    .environment(LocalTodoHelper.preview)
     .environment(OverlayManager())
 }

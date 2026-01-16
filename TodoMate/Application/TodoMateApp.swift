@@ -18,13 +18,13 @@ struct TodoMateApp: App {
   private let coreDIContainer: CoreDIContainer
   private let overlayViewController: OverlayViewController
 
-  // MARK: - Global States
+  // MARK: - SwiftData(Todo, Memo) Helper
 
-  @State private var todoStore: PrivateTodoStore
-  @State private var memoStore: PrivateMemoStore
+  @State private var todoStore: LocalTodoHelper
+  @State private var memoStore: LocalMemoHelper
 
   init() {
-    // Firebase 및 인증 설정 후, DI Container 생성
+    // Firebase 및 GoogleSignIn 설정 후, DI Container 생성
     #if DEBUG
       DebugConfiguration.configureFirebase()
       appDIContainer = DebugConfiguration.makeContainer() ?? Self.composeContainer()
@@ -40,15 +40,15 @@ struct TodoMateApp: App {
     // 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: appDIContainer)
 
-    // Store 초기화
-    let store = PrivateTodoStore(container: appDIContainer.core)
-    _todoStore = State(initialValue: store)
-    _memoStore = State(initialValue: PrivateMemoStore(container: appDIContainer.core))
+    // Helper 초기화
+    let todoHelper = LocalTodoHelper(container: appDIContainer.core)
+    _todoStore = State(initialValue: todoHelper)
+    _memoStore = State(initialValue: LocalMemoHelper(container: appDIContainer.core))
 
     // OverlayViewController 초기화
     overlayViewController = OverlayViewController(
       coreContainer: coreDIContainer,
-      todoStore: store,
+      todoStore: todoHelper,
     )
 
     // 글로벌 단축키 등록 (⇧⌘Space)

@@ -44,7 +44,7 @@ struct PrivateMemoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = PrivateMemoStore(
+    let store = LocalMemoHelper(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
@@ -70,7 +70,7 @@ struct PrivateMemoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = PrivateMemoStore(
+    let store = LocalMemoHelper(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
@@ -97,7 +97,7 @@ struct PrivateMemoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = PrivateMemoStore(
+    let store = LocalMemoHelper(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,

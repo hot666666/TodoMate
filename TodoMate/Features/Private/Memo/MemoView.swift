@@ -15,7 +15,7 @@ import TodoMateDomain
 
 struct MemoView: View {
   @Environment(AppDIContainer.self) private var container
-  @Environment(PrivateMemoStore.self) private var memoStore
+  @Environment(LocalMemoHelper.self) private var memoStore
 
   @State private var selectedMemo: Memo?
   @State private var escToken: HotKeyManager.RegistrationToken?
@@ -204,6 +204,6 @@ private struct MemoContent: View {
 
 #Preview {
   MemoView()
-    .environment(PrivateMemoStore.preview)
+    .environment(LocalMemoHelper.preview)
     .environment(OverlayManager())
 }

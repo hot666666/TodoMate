@@ -175,7 +175,7 @@ private struct DayTodoContent: View {
     date: Date(),
     onTapTodo: { _ in },
   )
-  .environment(PrivateTodoStore.preview)
+  .environment(LocalTodoHelper.preview)
   .environment(OverlayManager())
   .padding()
 }

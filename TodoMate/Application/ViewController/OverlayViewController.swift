@@ -18,7 +18,7 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
   // MARK: - Dependency
 
   private let coreContainer: CoreDIContainer
-  private let todoStore: PrivateTodoStore
+  private let todoStore: LocalTodoHelper
 
   // MARK: - View, ViewController
 
@@ -54,7 +54,7 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     return window
   }()
 
-  init(coreContainer: CoreDIContainer, todoStore: PrivateTodoStore) {
+  init(coreContainer: CoreDIContainer, todoStore: LocalTodoHelper) {
     self.coreContainer = coreContainer
     self.todoStore = todoStore
     super.init()

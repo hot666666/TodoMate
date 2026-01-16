@@ -1,5 +1,5 @@
 //
-//  PrivateTodoStore.swift
+//  LocalTodoHelper.swift
 //  TodoMate
 //
 //  Created by hs on 07/02/25.
@@ -13,7 +13,7 @@ import TodoMateDomain
 
 @Observable
 @MainActor
-final class PrivateTodoStore {
+final class LocalTodoHelper {
   private let createUseCase: CreateLocalTodoUseCase
   private let readUseCase: ReadLocalTodoUseCase
   private let updateUseCase: UpdateLocalTodoUseCase
@@ -90,8 +90,8 @@ final class PrivateTodoStore {
   }
 }
 
-extension PrivateTodoStore {
-  static var preview: PrivateTodoStore {
-    PrivateTodoStore(container: .preview)
+extension LocalTodoHelper {
+  static var preview: LocalTodoHelper {
+    LocalTodoHelper(container: .preview)
   }
 }

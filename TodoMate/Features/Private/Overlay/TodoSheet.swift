@@ -11,7 +11,7 @@ import TodoMateDomain
 
 struct TodoSheet: View {
   @Environment(CoreDIContainer.self) private var coreContainer
-  @Environment(PrivateTodoStore.self) private var todoStore
+  @Environment(LocalTodoHelper.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
   @State private var escToken: HotKeyManager.RegistrationToken?
@@ -143,6 +143,6 @@ extension TodoSheet {
 
 #Preview {
   TodoSheet(editableTodo: EditableTodo(owner: "local_user"))
-    .environment(PrivateTodoStore.preview)
+    .environment(LocalTodoHelper.preview)
     .frame(width: 600, height: 400)
 }
