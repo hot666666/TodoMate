@@ -205,18 +205,10 @@ struct GroupFeedView: View {
         appDI.core.sidebarCacheUseCase.saveGroup(name: group.name, id: group.id)
       }
     }
-    .task {
+    .task(id: isPublicModeEnabled) {
+      guard isPublicModeEnabled else { return }
       guard sessionStore.isAuthenticated, !sessionStore.userId.isEmpty else { return }
-      if isPublicModeEnabled {
-        await refreshData()
-      }
-    }
-    .onChange(of: isPublicModeEnabled) { _, isEnabled in
-      if isEnabled {
-        Task {
-          await refreshData()
-        }
-      }
+      await refreshData()
     }
     .onChange(of: sessionStore.currentGroup) { _, group in
       if let group {
