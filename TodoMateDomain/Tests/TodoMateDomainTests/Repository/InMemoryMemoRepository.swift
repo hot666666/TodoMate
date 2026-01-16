@@ -32,6 +32,10 @@ public actor InMemoryMemoRepository: MemoRepository {
     memos.removeAll { $0.id == memo.id }
   }
 
+  public func read(id: String) async throws -> Memo? {
+    memos.first { $0.id == id }
+  }
+
   public func readAllByUserId(_ userId: String, useCache _: Bool) async throws -> [Memo] {
     readCallCount += 1
     return memos.filter { $0.owner == userId }

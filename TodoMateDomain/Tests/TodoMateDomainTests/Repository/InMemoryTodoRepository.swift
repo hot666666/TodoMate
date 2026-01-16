@@ -39,6 +39,10 @@ public actor InMemoryTodoRepository: TodoRepository {
     todos = newTodos
   }
 
+  public func read(id: String) async throws -> Todo? {
+    todos.first { $0.id == id }
+  }
+
   public func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
     readCallCount += 1
     lastQuery = query
