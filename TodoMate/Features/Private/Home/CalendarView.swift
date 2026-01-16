@@ -198,6 +198,15 @@ private struct CalendarQueryWrapper: View {
       onTapMore: { date, _ in
         onPresentDayList(date)
       },
+      onStatusChange: { viewTodo, status in
+        updateTaskStatus(viewTodo, to: status)
+      },
+      onDuplicateTask: { viewTodo in
+        duplicateTask(viewTodo)
+      },
+      onDeleteTask: { viewTodo in
+        deleteTask(viewTodo)
+      },
     )
   }
 
@@ -213,6 +222,23 @@ private struct CalendarQueryWrapper: View {
     todo.updatedAt = Date()
     todoStore.updateTodo(todo)
   }
+
+  private func updateTaskStatus(_ task: ViewTodo, to newStatus: ViewTodoStatus) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    todoStore.updateStatus(todo, status: newStatus.toDomainStatus())
+  }
+
+  private func duplicateTask(_ task: ViewTodo) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    var newTodo = Todo.copy(from: todo)
+    newTodo.detail = ""
+    todoStore.addTodo(newTodo)
+  }
+
+  private func deleteTask(_ task: ViewTodo) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    todoStore.deleteTodo(todo)
+  }
 }
 
 // MARK: - CalendarContent
@@ -227,6 +253,10 @@ private struct CalendarContent: View {
   let onTapTask: (ViewTodo) -> Void
   let onTapDate: (Date, [ViewTodo]) -> Void
   let onTapMore: (Date, [ViewTodo]) -> Void
+
+  let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
+  let onDuplicateTask: (ViewTodo) -> Void
+  let onDeleteTask: (ViewTodo) -> Void
 
   private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
   private let calendar = Calendar.current
@@ -250,6 +280,9 @@ private struct CalendarContent: View {
             onTapTask: onTapTask,
             onTapDate: onTapDate,
             onTapMore: onTapMore,
+            onStatusChange: onStatusChange,
+            onDuplicateTask: onDuplicateTask,
+            onDeleteTask: onDeleteTask,
           )
           .frame(height: cellHeight)
         }
@@ -270,6 +303,10 @@ struct CalendarCell: View {
   let onTapTask: (ViewTodo) -> Void
   let onTapDate: (Date, [ViewTodo]) -> Void
   let onTapMore: (Date, [ViewTodo]) -> Void
+
+  let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
+  let onDuplicateTask: (ViewTodo) -> Void
+  let onDeleteTask: (ViewTodo) -> Void
 
   private let calendar = Calendar.current
 
@@ -314,15 +351,21 @@ struct CalendarCell: View {
       // Tasks
       VStack(alignment: .leading, spacing: 2) {
         ForEach(tasks.prefix(visibleCount)) { task in
-          TaskCard(task: task, style: .compact)
-            .draggable(task)
-            .onTapGesture {
-              onTapTask(task)
-            }
-            .opacity(
-              selectedTask?.id == task.id
-                ? 1.0 : (selectedTask == nil ? 1.0 : 0.6),
-            )
+          TaskCard(
+            task: task,
+            style: .compact,
+            onStatusChange: { status in onStatusChange(task, status) },
+            onDuplicate: { onDuplicateTask(task) },
+            onDelete: { onDeleteTask(task) },
+          )
+          .draggable(task)
+          .onTapGesture {
+            onTapTask(task)
+          }
+          .opacity(
+            selectedTask?.id == task.id
+              ? 1.0 : (selectedTask == nil ? 1.0 : 0.6),
+          )
         }
 
         if showMore {

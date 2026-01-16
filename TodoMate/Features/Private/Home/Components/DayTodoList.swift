@@ -39,6 +39,7 @@ struct DayTodoList: View {
 // MARK: - Wrapper
 
 private struct DayTodoQueryWrapper: View {
+  @Environment(LocalTodoHelper.self) private var todoStore
   @Query private var sdTodos: [SDTodo]
   let date: Date
   let onTapTodo: (ViewTodo) -> Void
@@ -66,7 +67,35 @@ private struct DayTodoQueryWrapper: View {
 
   var body: some View {
     let viewTodos = sdTodos.map { ViewTodo(from: $0.toDomain()) }
-    DayTodoContent(date: date, todos: viewTodos, onTapTodo: onTapTodo)
+    DayTodoContent(
+      date: date,
+      todos: viewTodos,
+      onTapTodo: onTapTodo,
+      onStatusChange: updateStatus,
+      onDuplicateTask: duplicateTask,
+      onDeleteTask: deleteTask,
+    )
+  }
+
+  private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
+    sdTodos.first(where: { $0.id == viewTodo.id })?.toDomain()
+  }
+
+  private func updateStatus(_ task: ViewTodo, _ status: ViewTodoStatus) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    todoStore.updateStatus(todo, status: status.toDomainStatus())
+  }
+
+  private func duplicateTask(_ task: ViewTodo) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    var newTodo = Todo.copy(from: todo)
+    newTodo.detail = ""
+    todoStore.addTodo(newTodo)
+  }
+
+  private func deleteTask(_ task: ViewTodo) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    todoStore.deleteTodo(todo)
   }
 }
 
@@ -76,6 +105,9 @@ private struct DayTodoContent: View {
   let date: Date
   let todos: [ViewTodo]
   let onTapTodo: (ViewTodo) -> Void
+  let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
+  let onDuplicateTask: (ViewTodo) -> Void
+  let onDeleteTask: (ViewTodo) -> Void
 
   private var title: String {
     date.formatted(.dateTime.month().day().weekday(.wide))
@@ -86,6 +118,20 @@ private struct DayTodoContent: View {
   private var inProgressTasks: [ViewTodo] { todos.filter { $0.status == .inProgress } }
   private var doneTasks: [ViewTodo] { todos.filter { $0.status == .done } }
   private var incompleteTasks: [ViewTodo] { todos.filter { $0.status == .inComplete } }
+
+  // State for status update (if needed locally or via store access which DayTodoQueryWrapper handles implicitly via ViewTodo update? No, wrapper handles structural changes. Status change context menu in TaskCard handles it via its own binding or callback? TaskCard receives onStatusChange.
+  // Wait, TaskCard in DayTodoList calls onTapTodo. It DOES NOT handle status change currently in this file.
+  // The TaskCard in BoardView receives onStatusChange.
+  // In DayTodoList, we just show them.
+  // But context menu allows status change.
+  // TaskCard context menu calls `updateStatus`.
+  // TaskCard needs `onStatusChange` to be functional for menu.
+  // `DayTodoList` does NOT act as a full board.
+  // However, if we add Context Menu to change status, we need to handle it.
+  // `TaskCard.swift` calls `onStatusChange` when menu item is selected.
+  // So I need to implement `onStatusChange` here too!
+  // `DayTodoQueryWrapper` lacks `onStatusChange` handling.
+  // I should add `onStatusChange` to support context menu fully.
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
@@ -159,10 +205,16 @@ private struct DayTodoContent: View {
   private func taskColumn(tasks: [ViewTodo]) -> some View {
     VStack(alignment: .leading, spacing: 6) {
       ForEach(tasks) { task in
-        TaskCard(task: task, style: .compact)
-          .onTapGesture {
-            onTapTodo(task)
-          }
+        TaskCard(
+          task: task,
+          style: .compact,
+          onStatusChange: { status in onStatusChange(task, status) },
+          onDuplicate: { onDuplicateTask(task) },
+          onDelete: { onDeleteTask(task) },
+        )
+        .onTapGesture {
+          onTapTodo(task)
+        }
       }
       Spacer(minLength: 0)
     }

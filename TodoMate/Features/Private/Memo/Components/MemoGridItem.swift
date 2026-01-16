@@ -10,6 +10,7 @@ import TodoMateDomain
 
 struct MemoGridItem: View {
   let memo: Memo
+  var onDelete: (() -> Void)?
 
   private var previewContent: String {
     let lines = memo.content.components(separatedBy: .newlines)
@@ -35,6 +36,17 @@ struct MemoGridItem: View {
     .frame(minHeight: 150)
     .background(.regularMaterial)
     .clipShape(.rect(cornerRadius: 12))
+    .contextMenu {
+      Button("Copy", systemImage: "doc.on.doc") {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(memo.content, forType: .string)
+      }
+
+      Button("Delete", systemImage: "trash", role: .destructive) {
+        onDelete?()
+      }
+    }
   }
 }
 

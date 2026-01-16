@@ -53,6 +53,7 @@ struct MemoView: View {
               isDetailViewPresented = true
             }
           },
+          onDeleteMemo: deleteMemo,
         )
       }
     }
@@ -141,6 +142,7 @@ private struct MemoQueryWrapper: View {
 
   let heroNamespace: Namespace.ID
   let onTapMemo: (Memo) -> Void
+  let onDeleteMemo: (Memo) -> Void
 
   var body: some View {
     // Convert SDMemo -> Memo (Domain)
@@ -150,6 +152,7 @@ private struct MemoQueryWrapper: View {
       memos: memos,
       heroNamespace: heroNamespace,
       onTapMemo: onTapMemo,
+      onDeleteMemo: onDeleteMemo,
     )
   }
 }
@@ -160,6 +163,7 @@ private struct MemoContent: View {
   let memos: [Memo]
   let heroNamespace: Namespace.ID
   let onTapMemo: (Memo) -> Void
+  let onDeleteMemo: (Memo) -> Void
 
   private let columns = [
     GridItem(.adaptive(minimum: 180, maximum: 300), spacing: 16),
@@ -187,11 +191,14 @@ private struct MemoContent: View {
         ScrollView {
           LazyVGrid(columns: columns, spacing: 16) {
             ForEach(memos) { memo in
-              MemoGridItem(memo: memo)
-                .matchedGeometryEffect(id: memo.id, in: heroNamespace)
-                .onTapGesture {
-                  onTapMemo(memo)
-                }
+              MemoGridItem(
+                memo: memo,
+                onDelete: { onDeleteMemo(memo) },
+              )
+              .matchedGeometryEffect(id: memo.id, in: heroNamespace)
+              .onTapGesture {
+                onTapMemo(memo)
+              }
             }
           }
           .padding(.horizontal, 20)

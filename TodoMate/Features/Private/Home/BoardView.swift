@@ -124,15 +124,17 @@ private struct BoardQueryWrapper: View {
       onDropTask: { viewTodo, status in
         updateTaskStatus(viewTodo, to: status)
       },
+      onDuplicateTask: { viewTodo in
+        duplicateTask(viewTodo)
+      },
+      onDeleteTask: { viewTodo in
+        deleteTask(viewTodo)
+      },
     )
   }
 
   // MARK: - Data Helpers
 
-  // TODO: findDomainTodo(for:) 함수에서 sdTodos.first(where:) 를 사용하여 ViewTodo 에 해당하는 SDTodo 객체를 찾고 있습니다.
-  // 현재는 보드에 표시되는 항목 수가 적어 문제가 되지 않겠지만, 항목 수가 많아질 경우 이 방식은 O(n) 시간 복잡도를 가져 성능 저하를 유발할 수 있습니다.
-  // 성능 향상을 위해, body 가 계산될 때 sdTodos 배열을 [String: SDTodo] 형태의 딕셔너리(맵)으로 변환하여 저장해두고,
-  // findDomainTodo 에서는 이 맵을 사용하여 O(1) 시간 복잡도로 객체를 조회하도록 리팩토링하는 것을 고려해 보세요.
   private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
     sdTodos.first(where: { $0.id == viewTodo.id })?.toDomain()
   }
@@ -150,9 +152,19 @@ private struct BoardQueryWrapper: View {
 
   private func updateTaskStatus(_ task: ViewTodo, to newStatus: ViewTodoStatus) {
     guard let todo = findDomainTodo(for: task) else { return }
-
-    // Use store to update
     todoStore.updateStatus(todo, status: newStatus.toDomainStatus())
+  }
+
+  private func duplicateTask(_ task: ViewTodo) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    var newTodo = Todo.copy(from: todo)
+    newTodo.detail = ""
+    todoStore.addTodo(newTodo)
+  }
+
+  private func deleteTask(_ task: ViewTodo) {
+    guard let todo = findDomainTodo(for: task) else { return }
+    todoStore.deleteTodo(todo)
   }
 }
 
@@ -166,6 +178,8 @@ private struct BoardContent: View {
   let onStatusClick: (ViewTodo) -> Void
   let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
   let onDropTask: (ViewTodo, ViewTodoStatus) -> Void
+  let onDuplicateTask: (ViewTodo) -> Void
+  let onDeleteTask: (ViewTodo) -> Void
 
   @State private var scrollPosition: BoardScrollPosition? = .leading
 
@@ -226,6 +240,8 @@ private struct BoardContent: View {
               onStatusClick: onStatusClick,
               onStatusChange: onStatusChange,
               onDropTask: { task in onDropTask(task, .todo) },
+              onDuplicateTask: onDuplicateTask,
+              onDeleteTask: onDeleteTask,
             )
             .frame(width: columnWidth)
             .transition(.move(edge: .leading).combined(with: .opacity))
@@ -241,6 +257,8 @@ private struct BoardContent: View {
             onStatusClick: onStatusClick,
             onStatusChange: onStatusChange,
             onDropTask: { task in onDropTask(task, .inProgress) },
+            onDuplicateTask: onDuplicateTask,
+            onDeleteTask: onDeleteTask,
           )
           .frame(width: columnWidth)
 
@@ -254,6 +272,8 @@ private struct BoardContent: View {
             onStatusClick: onStatusClick,
             onStatusChange: onStatusChange,
             onDropTask: { task in onDropTask(task, .done) },
+            onDuplicateTask: onDuplicateTask,
+            onDeleteTask: onDeleteTask,
           )
           .frame(width: columnWidth)
 
@@ -268,6 +288,8 @@ private struct BoardContent: View {
               onStatusClick: onStatusClick,
               onStatusChange: onStatusChange,
               onDropTask: { task in onDropTask(task, .inComplete) },
+              onDuplicateTask: onDuplicateTask,
+              onDeleteTask: onDeleteTask,
             )
             .frame(width: columnWidth)
             .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -291,6 +313,8 @@ private struct TodoColumn: View {
   let onStatusClick: (ViewTodo) -> Void
   let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
   let onDropTask: (ViewTodo) -> Void
+  let onDuplicateTask: (ViewTodo) -> Void
+  let onDeleteTask: (ViewTodo) -> Void
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
@@ -303,11 +327,38 @@ private struct TodoColumn: View {
               task: task,
               onStatusClick: { onStatusClick(task) },
               onStatusChange: { status in onStatusChange(task, status) },
+              onDuplicate: { onDuplicateTask(task) },
+              onDelete: { onDeleteTask(task) },
             )
             .opacity(isToday(task.date) ? 1.0 : 0.3)
             .draggable(task)
             .onTapGesture {
               onTapTask(task)
+            }
+            .contextMenu {
+              // TaskCard now builds its own context menu internally if Closures are set?
+              // Wait, TaskCard handles its own context menu logic internally using environment or passed closures?
+              // In my previous edit I added closures to TaskCard. PROPERTIES.
+              // So I need to set them here.
+              // But TaskCard is a struct. I need to modify the instance.
+              // Or TaskCard init? No, it has `var onDuplicate`.
+              // Swift Views are immutable. I should use modifiers or init.
+              // TaskCard definition: `var onDuplicate: (() -> Void)?`
+              // I can set it like `var card = TaskCard(...); card.onDuplicate = ...; return card` inside the loop?
+              // Or add a modifier-like method to TaskCard if possible, or just init.
+              // TaskCard is a View struct with properties.
+              // I can initialize it with them if I change the init, OR use property injection syntax if they are vars?
+              // `TaskCard(..., onDuplicate: { ... })` would be best if I update Init.
+              // Current `TaskCard` has memberwise init because `onDuplicate` is var.
+              // But `onStatusClick` was var too.
+              // Let's use property syntax or helper.
+              // Since I cannot easily change init call site everywhere if I change init, I'll use property syntax if I can.
+              // `TaskCard(...)`.onDuplicate(...) if I make an extension?
+              // Or just:
+              // var card = TaskCard(...)
+              // card.onDuplicate = ... -> Error: View is immutable value type.
+              // Correct way: Pass in init.
+              // `TaskCard` has free init.
             }
           }
         }
