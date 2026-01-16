@@ -5,6 +5,7 @@
 //  Created by hs on 6/27/25.
 //
 
+import Common
 import Sparkle
 import SwiftUI
 import TodoMateData
@@ -13,26 +14,27 @@ import WidgetKit
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
 
-  /// 앱 종료 시 호출될 cleanup 핸들러 (Store 정리용)
-  var cleanupHandler: (() -> Void)?
-
-  func applicationWillFinishLaunching(_: Notification) {
-    /// 새 윈도우 생성 메뉴 삭제
-    if let mainMenu = NSApplication.shared.mainMenu {
-      for item in mainMenu.items {
-        if item.title == "File", let submenu = item.submenu {
-          for (index, subItem) in submenu.items.enumerated() {
-            if subItem.title == "New Window" {
-              submenu.removeItem(at: index)
-              break
-            }
-          }
-        }
-      }
-    }
+  private var mainWindowURL: URL? {
+    #if DEBUG
+      URL(string: "todomatedebug://main")
+    #else
+      URL(string: "todomate://main")
+    #endif
   }
 
   func applicationDidFinishLaunching(_: Notification) {
+    // Dock 표시 설정 적용 (기본값: true/regular)
+    let showInDock = UserDefaults.standard.bool(
+      for: .showInDock,
+      default: true,
+    )
+    NSApp.setActivationPolicy(showInDock ? .regular : .accessory)
+
+    // 앱 실행 시 Main Window 강제 오픈 (LSUIElement 대응)
+    if let url = mainWindowURL {
+      NSWorkspace.shared.open(url)
+    }
+
     #if !DEBUG
       /// Sparkle Controller 설정
       let updaterController = SPUStandardUpdaterController(
@@ -51,9 +53,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
   }
 
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-    // 앱 종료 전 모든 리스너/스트림 정리
-    cleanupHandler?()
-
     // Firestore gRPC 연결 종료 후 앱 종료
     Task { @MainActor in
       do {
@@ -72,11 +71,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
 
   func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
     if !flag {
-      for window in NSApplication.shared.windows {
-        // Status Bar Window 등 시스템 윈도우 제외하고 메인 윈도우만 찾아서 활성화
-        if window.canBecomeKey, window.isVisible == false {
-          window.makeKeyAndOrderFront(nil)
-        }
+      if let url = mainWindowURL {
+        NSWorkspace.shared.open(url)
       }
     }
     return true

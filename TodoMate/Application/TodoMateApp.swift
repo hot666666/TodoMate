@@ -91,8 +91,9 @@ struct TodoMateApp: App {
           #endif
         }
     }
+    .handlesExternalEvents(matching: [AppSceneID.mainApp.rawValue])
     #if os(macOS)
-    .windowStyle(.hiddenTitleBar)
+      .windowStyle(.hiddenTitleBar)
     #endif
   }
 }
