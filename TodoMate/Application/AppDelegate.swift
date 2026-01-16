@@ -61,7 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
-    false
+    UserDefaults.standard.bool(for: .quitOnWindowClose)
   }
 
   func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

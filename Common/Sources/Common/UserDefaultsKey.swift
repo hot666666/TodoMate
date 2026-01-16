@@ -28,6 +28,9 @@ public enum UserDefaultsKey: String {
   /// Dock 아이콘 표시 여부
   case showInDock = "show_in_dock"
 
+  /// 창 닫을 때 앱 종료 여부
+  case quitOnWindowClose = "quit_on_window_close"
+
   /// Public 기능 활성화 여부
   case isPublicModeEnabled = "is_public_mode_enabled"
 
