@@ -12,6 +12,16 @@
 				<string>com.googleusercontent.apps.937643864657-13cj5pccsikovhaqa4e4qivolanp9fd7</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.hotcs6.TodoMate</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>todomate</string>
+			</array>
+		</dict>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>

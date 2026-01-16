@@ -25,6 +25,9 @@ public enum UserDefaultsKey: String {
   /// 채팅 패널 표시 상태
   case chatPanelVisibility = "chat_panel_visibility"
 
+  /// Dock 아이콘 표시 여부
+  case showInDock = "show_in_dock"
+
   /// Public 기능 활성화 여부
   case isPublicModeEnabled = "is_public_mode_enabled"
 
