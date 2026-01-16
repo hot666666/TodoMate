@@ -19,6 +19,8 @@ struct GroupFeedView: View {
   @State private var chatPanelWidth: CGFloat = DesignSystem.GroupFeed.chatPanelWidth
 
   @State private var vm = GroupFeedViewModel()
+  @AppStorage(UserDefaultsKey.isPublicModeEnabled.rawValue)
+  private var isPublicModeEnabled: Bool = false
 
   private let minChatWidth: CGFloat = DesignSystem.GroupFeed.minChatWidth
   private let maxChatWidth: CGFloat = DesignSystem.GroupFeed.maxChatWidth
@@ -205,20 +207,33 @@ struct GroupFeedView: View {
     }
     .task {
       guard sessionStore.isAuthenticated, !sessionStore.userId.isEmpty else { return }
-      do {
-        // 1. Sync local todos to server
-        try await appDI.syncTodayTodosUseCase.run(for: sessionStore.userId, in: Date())
-
-        // 2. Fetch latest data from server to update UI
-        await todoStore.refresh(for: [sessionStore.userId])
-      } catch {
-        Log.error("Failed to sync/refresh in GroupFeed: \(error)", category: .data)
+      if isPublicModeEnabled {
+        await refreshData()
+      }
+    }
+    .onChange(of: isPublicModeEnabled) { _, isEnabled in
+      if isEnabled {
+        Task {
+          await refreshData()
+        }
       }
     }
     .onChange(of: sessionStore.currentGroup) { _, group in
       if let group {
         appDI.core.sidebarCacheUseCase.saveGroup(name: group.name, id: group.id)
       }
+    }
+  }
+
+  private func refreshData() async {
+    do {
+      // 1. Sync local todos to server
+      try await appDI.syncTodayTodosUseCase.run(for: sessionStore.userId, in: Date())
+
+      // 2. Fetch latest data from server to update UI
+      await todoStore.refresh(for: [sessionStore.userId])
+    } catch {
+      Log.error("Failed to sync/refresh in GroupFeed: \(error)", category: .data)
     }
   }
 }
