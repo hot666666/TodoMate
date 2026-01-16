@@ -12,9 +12,9 @@ struct SharedTodoRow: View {
 
   var body: some View {
     HStack(alignment: .top, spacing: 12) {
-      Image(systemName: iconName)
+      Image(systemName: todo.status.toDomainStatus().iconName)
         .font(.system(size: 20))
-        .foregroundStyle(iconColor)
+        .foregroundStyle(todo.status.toDomainStatus().color)
 
       VStack(alignment: .leading, spacing: 4) {
         Text(todo.content)
@@ -43,24 +43,6 @@ struct SharedTodoRow: View {
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
-  }
-
-  private var iconName: String {
-    switch todo.status {
-    case .done: "checkmark.circle.fill"
-    case .inProgress: "circle.inset.filled"
-    case .inComplete: "xmark.circle.fill"
-    case .todo: "circle"
-    }
-  }
-
-  private var iconColor: Color {
-    switch todo.status {
-    case .done: .blue
-    case .inProgress: .blue
-    case .inComplete: .red
-    case .todo: .gray.opacity(0.3)
-    }
   }
 
   func tagColor(for tag: String) -> Color {
