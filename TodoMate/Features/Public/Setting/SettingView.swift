@@ -109,11 +109,7 @@ struct SettingView: View {
       .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     .onChange(of: showInDock) { _, newValue in
-      NSApp.setActivationPolicy(newValue ? .regular : .accessory)
-      if newValue {
-        // Dock에 표시될 때, 필요하면 앱을 활성화하여 윈도우가 앞으로 오게 할 수도 있음
-        NSApp.activate(ignoringOtherApps: true)
-      }
+      NSApp.updateActivationPolicy(showInDock: newValue, activate: true)
     }
   }
 

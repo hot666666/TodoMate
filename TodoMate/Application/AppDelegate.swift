@@ -28,12 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
       for: .showInDock,
       default: true,
     )
-    NSApp.setActivationPolicy(showInDock ? .regular : .accessory)
-
-    // 앱 실행 시 Main Window 강제 오픈 (LSUIElement 대응)
-    if let url = mainWindowURL {
-      NSWorkspace.shared.open(url)
-    }
+    NSApp.updateActivationPolicy(showInDock: showInDock)
 
     #if !DEBUG
       /// Sparkle Controller 설정
