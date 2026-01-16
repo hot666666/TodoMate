@@ -10,7 +10,7 @@ import SwiftUI
 import TodoMateDomain
 
 struct TodoSheet: View {
-  @Environment(AppDIContainer.self) private var container
+  @Environment(CoreDIContainer.self) private var coreContainer
   @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
@@ -67,7 +67,7 @@ struct TodoSheet: View {
             overlay?.dismissTop()
           },
         )
-        overlay?.presentCentered {
+        overlay?.presentCentered(backdropOpacity: 0) {
           confirmationView
         }
       } else {
@@ -111,7 +111,7 @@ extension TodoSheet {
       perform(.focusContentField)
 
       // Register ESC handler (Pushes to top of stack)
-      escToken = container.core.hotKeyManager.register(key: .escape, modifiers: []) {
+      escToken = coreContainer.hotKeyManager.register(key: .escape, modifiers: []) {
         Task { @MainActor in
           perform(.dismissWithConfirmation)
         }
@@ -119,7 +119,7 @@ extension TodoSheet {
     }
     .onDisappear {
       if let token = escToken {
-        container.core.hotKeyManager.unregister(token)
+        coreContainer.hotKeyManager.unregister(token)
       }
     }
     .onTapBackground {

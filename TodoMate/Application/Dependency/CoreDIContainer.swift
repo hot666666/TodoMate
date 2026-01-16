@@ -10,6 +10,7 @@ import SwiftData
 import TodoMateData
 import TodoMateDomain
 
+@Observable
 @MainActor
 final class CoreDIContainer {
   @ObservationIgnored let modelContainer: ModelContainer
