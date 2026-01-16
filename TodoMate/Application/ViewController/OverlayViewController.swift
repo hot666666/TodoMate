@@ -17,8 +17,7 @@ import TodoMateDomain
 final class OverlayViewController: NSObject, NSWindowDelegate {
   // MARK: - Dependency
 
-  private let diContainer: AppDIContainer
-  private let modelContainer: ModelContainer
+  private let coreContainer: CoreDIContainer
   private let todoStore: PrivateTodoStore
 
   // MARK: - View, ViewController
@@ -55,9 +54,8 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     return window
   }()
 
-  init(diContainer: AppDIContainer, modelContainer: ModelContainer, todoStore: PrivateTodoStore) {
-    self.diContainer = diContainer
-    self.modelContainer = modelContainer
+  init(coreContainer: CoreDIContainer, todoStore: PrivateTodoStore) {
+    self.coreContainer = coreContainer
     self.todoStore = todoStore
     super.init()
   }
@@ -77,8 +75,12 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     guard !isVisible else { return }
 
     updateRootView(with: todo)
-    resizeAndCenterWindow()
-    activateApp()
+
+    // 레이아웃 재귀 경고 방지를 위해 다음 런루프로 윈도우 크기 조정 연기
+    DispatchQueue.main.async { [weak self] in
+      self?.resizeAndCenterWindow()
+      self?.activateApp()
+    }
   }
 
   // SwiftUI Root View를 업데이트하고 HostingController에 주입
@@ -89,26 +91,24 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
         onClose: { [weak self] in
           self?.close()
         },
-        diContainer: self.diContainer,
         todoStore: self.todoStore,
       )
       .id(UUID()) /// 새로 생성 시, onAppear 재수행
     }
-    .environment(diContainer)
     .environment(todoStore)
-    .modelContainer(modelContainer)
+    .environment(coreContainer)
+    .modelContainer(coreContainer.modelContainer)
 
     hostingController.rootView = AnyView(rootView)
   }
 
   // 뷰의 크기를 계산하고 윈도우를 화면 정중앙에 배치
   private func resizeAndCenterWindow() {
-    /// 뷰 레이아웃 강제 업데이트 및 크기 계산
-    hostingController.view.layoutSubtreeIfNeeded()
+    /// fittingSize 접근 시 레이아웃 계산이 트리거될 수 있음 (Async로 호출되어야 안전)
     let fittingSize = hostingController.view.fittingSize
 
     /// 최소 크기 보장 (TodoSheet size aligned)
-    let minSize = CGSize(width: 450, height: 200)
+    let minSize = CGSize(width: 500, height: 800)
 
     let targetSize = CGSize(
       width: max(fittingSize.width, minSize.width),
@@ -128,10 +128,10 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     NSApp.activate(ignoringOtherApps: true)
   }
 
-  // 화면 중앙 프레임을 계산
+  // 화면 상단 쪽에 프레임을 배치 (캘린더 팝업 공간 확보)
   private func calculateCenteredFrame(size: CGSize, in screen: NSScreen) -> NSRect {
     let x = screen.visibleFrame.midX - size.width / 2
-    let y = screen.visibleFrame.midY - size.height / 2
+    let y = screen.visibleFrame.minY + screen.visibleFrame.height * 0.75 - size.height / 2
     return NSRect(origin: CGPoint(x: x, y: y), size: size)
   }
 }
