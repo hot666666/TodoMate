@@ -15,7 +15,6 @@ import TodoMateDomain
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   private let appDIContainer: AppDIContainer
-  private let coreDIContainer: CoreDIContainer
   private let overlayViewController: OverlayViewController
 
   // MARK: - SwiftData(Todo, Memo) Helper
@@ -36,19 +35,17 @@ struct TodoMateApp: App {
     // AppIntent에서 사용할 수 있도록 공유 인스턴스 설정
     CoreDIContainer.shared = appDIContainer.core
 
-    coreDIContainer = appDIContainer.core
-
     // 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: appDIContainer)
 
     // Helper 초기화
-    let todoHelper = LocalTodoHelper(container: coreDIContainer)
+    let todoHelper = LocalTodoHelper(container: appDIContainer.core)
     _todoHelper = State(initialValue: todoHelper)
-    _memoHelper = State(initialValue: LocalMemoHelper(container: coreDIContainer))
+    _memoHelper = State(initialValue: LocalMemoHelper(container: appDIContainer.core))
 
     // OverlayViewController 초기화
     overlayViewController = OverlayViewController(
-      coreDI: coreDIContainer,
+      coreDI: appDIContainer.core,
       todoHelper: todoHelper,
     )
 
@@ -68,7 +65,7 @@ struct TodoMateApp: App {
     MenuBarExtra("TodoMate", systemImage: "checklist") {
       MenuBarView()
         .environment(todoHelper)
-        .modelContainer(coreDIContainer.modelContainer)
+        .modelContainer(appDIContainer.core.modelContainer)
     }
     .menuBarExtraStyle(.menu)
 
@@ -76,9 +73,9 @@ struct TodoMateApp: App {
 
     Window("TodoMate", id: AppSceneID.mainApp.rawValue) {
       MainView(container: appDIContainer)
-        .defaultAppStorage(coreDIContainer.userDefaults)
-        .modelContainer(coreDIContainer.modelContainer)
-        .environment(coreDIContainer)
+        .defaultAppStorage(appDIContainer.core.userDefaults)
+        .modelContainer(appDIContainer.core.modelContainer)
+        .environment(appDIContainer.core)
         .environment(todoHelper)
         .environment(memoHelper)
         .environment(appDIContainer)
