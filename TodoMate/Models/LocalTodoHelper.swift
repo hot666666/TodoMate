@@ -44,6 +44,10 @@ final class LocalTodoHelper {
     )
   }
 
+  func getTodo(id: String) async -> Todo? {
+    try? await readUseCase.run(id: id)
+  }
+
   // MARK: - Actions
 
   func addTodo(_ todo: Todo) {

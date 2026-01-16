@@ -60,6 +60,24 @@ struct LocalTodoUseCaseTests {
     }
   }
 
+  @Test("Read Local Todo by ID")
+  func readTodoById() async throws {
+    let repository = InMemoryTodoRepository()
+    let todo = Todo(owner: "user1", content: "Target Todo", in: Date())
+    await repository.setTodos([todo])
+
+    let useCase = ReadLocalTodoUseCaseImpl(repository: repository)
+
+    let result = try await useCase.run(id: todo.id)
+
+    #expect(result?.id == todo.id)
+    #expect(result?.content == "Target Todo")
+
+    // Verify non-existent
+    let nonExistent = try await useCase.run(id: "non-existent")
+    #expect(nonExistent == nil)
+  }
+
   @Test("Read Local Todos by Range")
   func readTodosByRange() async throws {
     let repository = InMemoryTodoRepository()

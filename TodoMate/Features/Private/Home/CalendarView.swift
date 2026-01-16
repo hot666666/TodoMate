@@ -15,6 +15,7 @@ import TodoMateDomain
 
 struct CalendarView: View {
   @Environment(\.overlayManager) private var overlay
+  @Environment(LocalTodoHelper.self) private var todoStore
   @State private var currentDate = Date()
   @State private var selectedTask: ViewTodo?
 
@@ -112,17 +113,8 @@ struct CalendarView: View {
     ) {
       DayTodoList(
         date: date,
-        onTapTodo: { _ in
-          // Need to find original Todo from ViewTodo...
-          // But DayTodoList provides ViewTodo.
-          // Ideally onTapTodo logic in DayTodoList should also handle finding Todo.
-          // Or we just rely on ID in presentTodoSheet if we change it to take ID or refetch?
-          // Wait, presentTodoSheet inside CalendarView expects Todo.
-          // But DayTodoList passes ViewTodo.
-          // We should fix this interaction.
-          // However, for this step, let's assume we can fetch it or handle it.
-          // Let's defer this specific fix. We can fetch using PrivateTodoStore if needed? No reading there.
-          // SwiftData context is available.
+        onTapTodo: { todo in
+          presentTodoSheet(for: todo)
         },
       )
     }

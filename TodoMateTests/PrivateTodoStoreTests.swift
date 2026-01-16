@@ -25,6 +25,7 @@ struct PrivateTodoStoreTests {
   final class MockReadUseCase: ReadLocalTodoUseCase {
     func run(date _: Date) async throws -> [Todo] { [] }
     func run(in _: ClosedRange<Date>) async throws -> [Todo] { [] }
+    func run(id _: String) async throws -> Todo? { nil }
   }
 
   final class MockUpdateUseCase: UpdateLocalTodoUseCase {
