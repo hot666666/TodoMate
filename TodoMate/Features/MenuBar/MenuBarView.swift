@@ -13,24 +13,17 @@ import SwiftUI
 import TodoMateDomain
 
 struct MenuBarView: View {
-  let onShowOverlay: (Todo?) -> Void
-
   var body: some View {
-    MenuBarQueryWrapper(onShowOverlay: onShowOverlay)
+    MenuBarQueryWrapper()
   }
 }
 
 // MARK: - Wrapper
 
 private struct MenuBarQueryWrapper: View {
-  @Environment(\.openWindow) private var openWindow
   @Query private var sdTodos: [SDTodo]
 
-  let onShowOverlay: (Todo?) -> Void
-
-  init(onShowOverlay: @escaping (Todo?) -> Void) {
-    self.onShowOverlay = onShowOverlay
-
+  init() {
     let calendar = Calendar.current
     let startOfDay = calendar.startOfDay(for: Date())
     guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
@@ -40,21 +33,24 @@ private struct MenuBarQueryWrapper: View {
       return
     }
 
-    // Filter: Date is Today AND Not Deleted
+    // Filter: Date is Today AND Not Deleted AND (Todo OR InProgress)
+    // Note: Using literals/constants for status to avoid Predicate capture issues
+    let splitStatus_todo = TodoStatus.todo.rawValue
+    let splitStatus_inProgress = TodoStatus.inProgress.rawValue
+
     let predicate = #Predicate<SDTodo> { todo in
       todo.date >= startOfDay && todo.date < endOfDay && !todo.isDeleted
+        && (todo.statusRawValue == splitStatus_todo
+          || todo.statusRawValue == splitStatus_inProgress)
     }
 
     _sdTodos = Query(filter: predicate, sort: \.date)
   }
 
   var body: some View {
-    let todos =
-      sdTodos
-        .map { $0.toDomain() }
-        .filter { $0.status == .todo || $0.status == .inProgress }
+    let todos = sdTodos.map { $0.toDomain() }
 
-    MenuBarContent(todos: todos, onShowOverlay: onShowOverlay)
+    MenuBarContent(todos: todos)
   }
 }
 
@@ -62,13 +58,13 @@ private struct MenuBarQueryWrapper: View {
 
 private struct MenuBarContent: View {
   @Environment(\.openWindow) private var openWindow
+  @Environment(LocalTodoHelper.self) private var todoHelper
   let todos: [Todo]
-  let onShowOverlay: (Todo?) -> Void
 
   var body: some View {
-    // 1. 새 할일
+    // 1. 새 할일 (Opens Main App)
     Button("새 할일") {
-      onShowOverlay(nil)
+      openWindow(id: AppSceneID.mainApp.rawValue)
     }
     .keyboardShortcut(" ", modifiers: [.command, .shift])
 
@@ -76,6 +72,7 @@ private struct MenuBarContent: View {
     Button("TodoMate 열기") {
       openWindow(id: AppSceneID.mainApp.rawValue)
     }
+    .keyboardShortcut("O", modifiers: [.command])
 
     Divider()
 
@@ -86,7 +83,16 @@ private struct MenuBarContent: View {
           .foregroundStyle(.secondary)
       } else {
         ForEach(todos) { todo in
-          MenuTodoRow(todo: todo, onShowOverlay: onShowOverlay)
+          MenuTodoRow(todo: todo) { todo in
+            switch todo.status {
+            case .todo:
+              todoHelper.updateStatus(todo, status: .inProgress)
+            case .inProgress:
+              todoHelper.updateStatus(todo, status: .complete)
+            default:
+              break
+            }
+          }
         }
       }
     } header: {
@@ -99,6 +105,7 @@ private struct MenuBarContent: View {
     Button("종료") {
       NSApplication.shared.terminate(nil)
     }
+    .keyboardShortcut("Q", modifiers: [.command])
   }
 }
 
@@ -106,27 +113,14 @@ private struct MenuBarContent: View {
 
 private struct MenuTodoRow: View {
   let todo: Todo
-  let onShowOverlay: (Todo?) -> Void
-
-  private var statusIcon: String {
-    switch todo.status {
-    case .inComplete:
-      "exclamationmark.circle"
-    case .todo:
-      "circle"
-    case .inProgress:
-      "circle.fill"
-    case .complete:
-      "checkmark.circle"
-    }
-  }
+  let action: (Todo) -> Void
 
   var body: some View {
-    Button {
-      onShowOverlay(todo)
-    } label: {
-      HStack(spacing: 4) {
-        Image(systemName: statusIcon)
+    HStack(spacing: 4) {
+      Button {
+        action(todo)
+      } label: {
+        Image(systemName: todo.status.iconName)
         Text(todo.content.isEmpty ? "제목 없음" : todo.content)
           .lineLimit(1)
       }

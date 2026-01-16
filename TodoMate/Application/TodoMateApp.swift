@@ -20,8 +20,8 @@ struct TodoMateApp: App {
 
   // MARK: - SwiftData(Todo, Memo) Helper
 
-  @State private var todoStore: LocalTodoHelper
-  @State private var memoStore: LocalMemoHelper
+  @State private var todoHelper: LocalTodoHelper
+  @State private var memoHelper: LocalMemoHelper
 
   init() {
     // Firebase 및 GoogleSignIn 설정 후, DI Container 생성
@@ -35,20 +35,21 @@ struct TodoMateApp: App {
 
     // AppIntent에서 사용할 수 있도록 공유 인스턴스 설정
     CoreDIContainer.shared = appDIContainer.core
+
     coreDIContainer = appDIContainer.core
 
     // 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: appDIContainer)
 
     // Helper 초기화
-    let todoHelper = LocalTodoHelper(container: appDIContainer.core)
-    _todoStore = State(initialValue: todoHelper)
-    _memoStore = State(initialValue: LocalMemoHelper(container: appDIContainer.core))
+    let todoHelper = LocalTodoHelper(container: coreDIContainer)
+    _todoHelper = State(initialValue: todoHelper)
+    _memoHelper = State(initialValue: LocalMemoHelper(container: coreDIContainer))
 
     // OverlayViewController 초기화
     overlayViewController = OverlayViewController(
-      coreContainer: coreDIContainer,
-      todoStore: todoHelper,
+      coreDI: coreDIContainer,
+      todoHelper: todoHelper,
     )
 
     // 글로벌 단축키 등록 (⇧⌘Space)
@@ -65,11 +66,9 @@ struct TodoMateApp: App {
     // MARK: - Menu Bar
 
     MenuBarExtra("TodoMate", systemImage: "checklist") {
-      MenuBarView { [weak overlayViewController] todo in
-        overlayViewController?.show(with: todo)
-      }
-      .environment(todoStore)
-      .modelContainer(coreDIContainer.modelContainer)
+      MenuBarView()
+        .environment(todoHelper)
+        .modelContainer(coreDIContainer.modelContainer)
     }
     .menuBarExtraStyle(.menu)
 
@@ -77,12 +76,12 @@ struct TodoMateApp: App {
 
     Window("TodoMate", id: AppSceneID.mainApp.rawValue) {
       MainView(container: appDIContainer)
-        .defaultAppStorage(appDIContainer.core.userDefaults)
-        .modelContainer(appDIContainer.core.modelContainer)
+        .defaultAppStorage(coreDIContainer.userDefaults)
+        .modelContainer(coreDIContainer.modelContainer)
+        .environment(coreDIContainer)
+        .environment(todoHelper)
+        .environment(memoHelper)
         .environment(appDIContainer)
-        .environment(appDIContainer.core)
-        .environment(todoStore)
-        .environment(memoStore)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
         .frame(minWidth: 720, minHeight: 540)
@@ -164,6 +163,7 @@ private extension TodoMateApp {
 // MARK: - App Update Handling
 
 private extension TodoMateApp {
+  // TODO: - 정리
   static func checkAndHandleAppUpdate(container: AppDIContainer) {
     let userDefaults = container.core.userDefaults
 

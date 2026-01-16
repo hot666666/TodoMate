@@ -17,8 +17,8 @@ import TodoMateDomain
 final class OverlayViewController: NSObject, NSWindowDelegate {
   // MARK: - Dependency
 
-  private let coreContainer: CoreDIContainer
-  private let todoStore: LocalTodoHelper
+  private let coreDI: CoreDIContainer
+  private let todoHelper: LocalTodoHelper
 
   // MARK: - View, ViewController
 
@@ -54,9 +54,9 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     return window
   }()
 
-  init(coreContainer: CoreDIContainer, todoStore: LocalTodoHelper) {
-    self.coreContainer = coreContainer
-    self.todoStore = todoStore
+  init(coreDI: CoreDIContainer, todoHelper: LocalTodoHelper) {
+    self.coreDI = coreDI
+    self.todoHelper = todoHelper
     super.init()
   }
 
@@ -91,13 +91,13 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
         onClose: { [weak self] in
           self?.close()
         },
-        todoStore: self.todoStore,
+        todoStore: self.todoHelper,
       )
       .id(UUID()) /// 새로 생성 시, onAppear 재수행
     }
-    .environment(todoStore)
-    .environment(coreContainer)
-    .modelContainer(coreContainer.modelContainer)
+    .environment(todoHelper)
+    .environment(coreDI)
+    .modelContainer(coreDI.modelContainer)
 
     hostingController.rootView = AnyView(rootView)
   }
