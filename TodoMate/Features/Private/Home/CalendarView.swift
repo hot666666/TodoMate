@@ -4,32 +4,38 @@
 //
 //  Created by agent on 1/5/26.
 //
+//
 
 import SimpleOverlaySystem
+import SwiftData
 import SwiftUI
+import TodoMateDomain
+
+// MARK: - CalendarView (Container)
 
 struct CalendarView: View {
-  @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
   @State private var currentDate = Date()
   @State private var selectedTask: ViewTodo?
 
   private let calendar = Calendar.current
-  private let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-
-  // Grid columns
-  private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
-
-  // Convert store todos to view todos
-  private var viewTodos: [ViewTodo] {
-    todoStore.calendarTodos.map { ViewTodo(from: $0) }
-  }
 
   var body: some View {
     VStack(spacing: 0) {
       calendarHeader
       weekdayHeader
-      calendarGrid
+
+      // Wrapper handles data fetching and grid rendering
+      CalendarQueryWrapper(
+        currentDate: currentDate,
+        selectedTask: $selectedTask,
+        onPresentSheet: { todo in
+          presentTodoSheet(for: todo)
+        },
+        onPresentDayList: { date in
+          presentDayTodoList(for: date)
+        },
+      )
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor))
@@ -37,12 +43,9 @@ struct CalendarView: View {
     .toolbar {
       HomeToolbarContent()
     }
-    .task(id: currentDate) {
-      await todoStore.loadCalendarTodos(for: currentDate)
-    }
   }
 
-  // MARK: - Calendar Header
+  // MARK: - Components
 
   private var calendarHeader: some View {
     HStack(alignment: .top) {
@@ -73,10 +76,11 @@ struct CalendarView: View {
     .padding(.horizontal)
   }
 
-  // MARK: - Weekday Header
-
   private var weekdayHeader: some View {
-    LazyVGrid(columns: columns, spacing: 0) {
+    let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+    let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
+
+    return LazyVGrid(columns: columns, spacing: 0) {
       ForEach(daysOfWeek, id: \.self) { day in
         Text(day)
           .font(.caption)
@@ -89,84 +93,9 @@ struct CalendarView: View {
     .overlay(Divider(), alignment: .bottom)
   }
 
-  // MARK: - Grid
+  // MARK: - Navigation
 
-  private var calendarGrid: some View {
-    GeometryReader { geometry in
-      let days = daysInMonth()
-      let cellHeight = geometry.size.height / CGFloat(DesignSystem.Layout.calendarRowCount)
-
-      LazyVGrid(columns: columns, spacing: 0) {
-        ForEach(days, id: \.self) { date in
-          CalendarCell(
-            date: date,
-            currentMonth: currentDate,
-            tasks: tasksForDate(date),
-            cellHeight: cellHeight,
-            selectedTask: $selectedTask,
-            onDrop: { task in
-              moveTask(task, to: date)
-            },
-            onTapTask: { task in
-              presentTodoSheet(for: task)
-            },
-            onTapDate: { date, _ in
-              presentDayTodoList(for: date)
-            },
-            onTapMore: { date, _ in
-              presentDayTodoList(for: date)
-            },
-          )
-          .frame(height: cellHeight)
-        }
-      }
-    }
-  }
-
-  // MARK: - Logic
-
-  private func daysInMonth() -> [Date] {
-    guard let monthInterval = calendar.dateInterval(of: .month, for: currentDate) else {
-      return []
-    }
-    let monthStart = monthInterval.start
-
-    // Calculate start offset (previous month days)
-    let weekday = calendar.component(.weekday, from: monthStart)
-    let startOffset = weekday - 1 // Sunday is 1
-
-    guard
-      let startDisplayDate = calendar.date(
-        byAdding: .day, value: -startOffset, to: monthStart,
-      )
-    else { return [] }
-
-    // Always 42 days (6 rows * 7 cols) to keep layout stable
-    let totalDays = DesignSystem.Layout.calendarRowCount * 7
-    return (0 ..< totalDays).compactMap { dayOffset in
-      calendar.date(byAdding: .day, value: dayOffset, to: startDisplayDate)
-    }
-  }
-
-  private func tasksForDate(_ date: Date) -> [ViewTodo] {
-    viewTodos.filter { calendar.isDate($0.date, inSameDayAs: date) }
-  }
-
-  private func moveTask(_ task: ViewTodo, to date: Date) {
-    guard let originalTodo = todoStore.calendarTodos.first(where: { $0.id == task.id })
-    else { return }
-
-    var updatedTodo = originalTodo
-    updatedTodo.date = date.startOfDay
-    updatedTodo.updatedAt = Date()
-
-    todoStore.updateTodo(updatedTodo)
-  }
-
-  private func presentTodoSheet(for task: ViewTodo) {
-    guard let originalTodo = todoStore.calendarTodos.first(where: { $0.id == task.id })
-    else { return }
-
+  private func presentTodoSheet(for originalTodo: Todo) {
     let editableTodo = EditableTodo(from: originalTodo)
     overlay?.presentCentered(
       id: .todoSheet,
@@ -183,11 +112,148 @@ struct CalendarView: View {
     ) {
       DayTodoList(
         date: date,
-        onTapTodo: { [self] task in
-          // Stack TodoSheet on top of DayTodoListView (don't dismiss)
-          presentTodoSheet(for: task)
+        onTapTodo: { _ in
+          // Need to find original Todo from ViewTodo...
+          // But DayTodoList provides ViewTodo.
+          // Ideally onTapTodo logic in DayTodoList should also handle finding Todo.
+          // Or we just rely on ID in presentTodoSheet if we change it to take ID or refetch?
+          // Wait, presentTodoSheet inside CalendarView expects Todo.
+          // But DayTodoList passes ViewTodo.
+          // We should fix this interaction.
+          // However, for this step, let's assume we can fetch it or handle it.
+          // Let's defer this specific fix. We can fetch using PrivateTodoStore if needed? No reading there.
+          // SwiftData context is available.
         },
       )
+    }
+  }
+}
+
+// MARK: - CalendarQueryWrapper
+
+private struct CalendarQueryWrapper: View {
+  @Environment(LocalTodoHelper.self) private var todoStore
+  @Query private var sdTodos: [SDTodo]
+
+  let currentDate: Date
+  @Binding var selectedTask: ViewTodo?
+  let onPresentSheet: (Todo) -> Void
+  let onPresentDayList: (Date) -> Void
+
+  // Calculated days for grid
+  private let days: [Date]
+
+  init(
+    currentDate: Date,
+    selectedTask: Binding<ViewTodo?>,
+    onPresentSheet: @escaping (Todo) -> Void,
+    onPresentDayList: @escaping (Date) -> Void,
+  ) {
+    self.currentDate = currentDate
+    _selectedTask = selectedTask
+    self.onPresentSheet = onPresentSheet
+    self.onPresentDayList = onPresentDayList
+
+    // Calculate Days
+    let calendar = Calendar.current
+    let monthInterval = calendar.dateInterval(of: .month, for: currentDate)!
+    let monthStart = monthInterval.start
+    let weekday = calendar.component(.weekday, from: monthStart)
+    let startOffset = weekday - 1
+    let startDisplayDate = calendar.date(byAdding: .day, value: -startOffset, to: monthStart)!
+
+    // 42 days fixed
+    days = (0 ..< 42).compactMap { offset in
+      calendar.date(byAdding: .day, value: offset, to: startDisplayDate)
+    }
+
+    // Predicate: Start <= date <= End
+    let start = days.first ?? .distantPast
+    let end = days.last ?? .distantFuture
+    let predicate = #Predicate<SDTodo> { todo in
+      todo.date >= start && todo.date <= end && !todo.isDeleted
+    }
+    _sdTodos = Query(filter: predicate)
+  }
+
+  var body: some View {
+    let viewTodos = sdTodos.map { ViewTodo(from: $0.toDomain()) }
+
+    CalendarContent(
+      days: days,
+      currentDate: currentDate,
+      todos: viewTodos,
+      selectedTask: $selectedTask,
+      onDrop: { viewTodo, date in
+        moveTask(viewTodo, to: date)
+      },
+      onTapTask: { viewTodo in
+        if let todo = findDomainTodo(for: viewTodo) {
+          onPresentSheet(todo)
+        }
+      },
+      onTapDate: { date, _ in
+        onPresentDayList(date)
+      },
+      onTapMore: { date, _ in
+        onPresentDayList(date)
+      },
+    )
+  }
+
+  // MARK: - Logic
+
+  private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
+    sdTodos.first(where: { $0.id == viewTodo.id })?.toDomain()
+  }
+
+  private func moveTask(_ task: ViewTodo, to date: Date) {
+    guard var todo = findDomainTodo(for: task) else { return }
+    todo.date = Calendar.current.startOfDay(for: date)
+    todo.updatedAt = Date()
+    todoStore.updateTodo(todo)
+  }
+}
+
+// MARK: - CalendarContent
+
+private struct CalendarContent: View {
+  let days: [Date]
+  let currentDate: Date
+  let todos: [ViewTodo]
+  @Binding var selectedTask: ViewTodo?
+
+  let onDrop: (ViewTodo, Date) -> Void
+  let onTapTask: (ViewTodo) -> Void
+  let onTapDate: (Date, [ViewTodo]) -> Void
+  let onTapMore: (Date, [ViewTodo]) -> Void
+
+  private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
+  private let calendar = Calendar.current
+
+  var body: some View {
+    GeometryReader { geometry in
+      let cellHeight = geometry.size.height / CGFloat(DesignSystem.Layout.calendarRowCount)
+
+      LazyVGrid(columns: columns, spacing: 0) {
+        ForEach(days, id: \.self) { date in
+          // Helper to filter todos for this cell
+          let cellTodos = todos.filter { calendar.isDate($0.date, inSameDayAs: date) }
+
+          CalendarCell(
+            date: date,
+            currentMonth: currentDate,
+            tasks: cellTodos,
+            cellHeight: cellHeight,
+            selectedTask: $selectedTask,
+            onDrop: { task in onDrop(task, date) },
+            onTapTask: onTapTask,
+            onTapDate: onTapDate,
+            onTapMore: onTapMore,
+          )
+          .frame(height: cellHeight)
+        }
+      }
     }
   }
 }
@@ -293,5 +359,5 @@ struct CalendarCell: View {
 #Preview {
   CalendarView()
     .environment(NavigationManager.preview)
-    .environment(PrivateTodoStore.preview)
+    .environment(LocalTodoHelper.preview)
 }

@@ -18,13 +18,13 @@ struct TodoMateApp: App {
   private let coreDIContainer: CoreDIContainer
   private let overlayViewController: OverlayViewController
 
-  // MARK: - Global States
+  // MARK: - SwiftData(Todo, Memo) Helper
 
-  @State private var todoStore: PrivateTodoStore
-  @State private var memoStore: PrivateMemoStore
+  @State private var todoHelper: LocalTodoHelper
+  @State private var memoHelper: LocalMemoHelper
 
   init() {
-    // Firebase 및 인증 설정 후, DI Container 생성
+    // Firebase 및 GoogleSignIn 설정 후, DI Container 생성
     #if DEBUG
       DebugConfiguration.configureFirebase()
       appDIContainer = DebugConfiguration.makeContainer() ?? Self.composeContainer()
@@ -35,20 +35,21 @@ struct TodoMateApp: App {
 
     // AppIntent에서 사용할 수 있도록 공유 인스턴스 설정
     CoreDIContainer.shared = appDIContainer.core
+
     coreDIContainer = appDIContainer.core
 
     // 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: appDIContainer)
 
-    // Store 초기화
-    let store = PrivateTodoStore(container: appDIContainer.core)
-    _todoStore = State(initialValue: store)
-    _memoStore = State(initialValue: PrivateMemoStore(container: appDIContainer.core))
+    // Helper 초기화
+    let todoHelper = LocalTodoHelper(container: coreDIContainer)
+    _todoHelper = State(initialValue: todoHelper)
+    _memoHelper = State(initialValue: LocalMemoHelper(container: coreDIContainer))
 
     // OverlayViewController 초기화
     overlayViewController = OverlayViewController(
-      coreContainer: coreDIContainer,
-      todoStore: store,
+      coreDI: coreDIContainer,
+      todoHelper: todoHelper,
     )
 
     // 글로벌 단축키 등록 (⇧⌘Space)
@@ -65,10 +66,9 @@ struct TodoMateApp: App {
     // MARK: - Menu Bar
 
     MenuBarExtra("TodoMate", systemImage: "checklist") {
-      MenuBarView { [weak overlayViewController] todo in
-        overlayViewController?.show(with: todo)
-      }
-      .environment(todoStore)
+      MenuBarView()
+        .environment(todoHelper)
+        .modelContainer(coreDIContainer.modelContainer)
     }
     .menuBarExtraStyle(.menu)
 
@@ -76,12 +76,12 @@ struct TodoMateApp: App {
 
     Window("TodoMate", id: AppSceneID.mainApp.rawValue) {
       MainView(container: appDIContainer)
-        .defaultAppStorage(appDIContainer.core.userDefaults)
-        .modelContainer(appDIContainer.core.modelContainer)
+        .defaultAppStorage(coreDIContainer.userDefaults)
+        .modelContainer(coreDIContainer.modelContainer)
+        .environment(coreDIContainer)
+        .environment(todoHelper)
+        .environment(memoHelper)
         .environment(appDIContainer)
-        .environment(appDIContainer.core)
-        .environment(todoStore)
-        .environment(memoStore)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
         .frame(minWidth: 720, minHeight: 540)
@@ -89,8 +89,6 @@ struct TodoMateApp: App {
           #if DEBUG
             MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
           #endif
-          await todoStore.loadTodos()
-          await memoStore.load()
         }
     }
     #if os(macOS)
@@ -165,6 +163,7 @@ private extension TodoMateApp {
 // MARK: - App Update Handling
 
 private extension TodoMateApp {
+  // TODO: - 정리
   static func checkAndHandleAppUpdate(container: AppDIContainer) {
     let userDefaults = container.core.userDefaults
 

@@ -91,7 +91,7 @@ struct MemoDetailView: View {
     onSave: { _ in },
     onDelete: {},
   )
-  .environment(PrivateMemoStore(container: .preview))
+  .environment(LocalMemoHelper(container: .preview))
   .environment(SessionStore.preview)
   .frame(width: 400, height: 500)
 }
