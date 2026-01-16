@@ -51,7 +51,8 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
     let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == todoId })
     do {
       if let existing = try modelContext.fetch(descriptor).first {
-        modelContext.delete(existing)
+        existing.isDeleted = true
+        existing.updatedAt = Date()
       }
     } catch {
       throw SwiftDataError.fetchFailed(underlying: error)
@@ -65,7 +66,7 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
   }
 
   public func read(id: String) async throws -> Todo? {
-    let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == id })
+    let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == id && !$0.isDeleted })
     do {
       return try modelContext.fetch(descriptor).first?.toDomain()
     } catch {
@@ -86,16 +87,47 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
       let start = dateRange.lowerBound
       let end = dateRange.upperBound
       descriptor = FetchDescriptor<SDTodo>(
-        predicate: #Predicate<SDTodo> { $0.date >= start && $0.date <= end },
+        predicate: #Predicate<SDTodo> { $0.date >= start && $0.date <= end && !$0.isDeleted },
         sortBy: [SortDescriptor(\.date)],
       )
     } else {
-      descriptor = FetchDescriptor<SDTodo>(sortBy: [SortDescriptor(\.date)])
+      descriptor = FetchDescriptor<SDTodo>(
+        predicate: #Predicate<SDTodo> { !$0.isDeleted },
+        sortBy: [SortDescriptor(\.date)],
+      )
     }
 
     do {
       let allSDTodos = try modelContext.fetch(descriptor)
       return allSDTodos.map { $0.toDomain() }
+    } catch {
+      throw SwiftDataError.fetchFailed(underlying: error)
+    }
+  }
+
+  public func fetchCount(query: TodoQuery) async throws -> Int {
+    var dateRange: ClosedRange<Date>?
+    for filter in query.filters {
+      if case let .dateRange(range) = filter {
+        dateRange = range
+      }
+    }
+
+    let descriptor: FetchDescriptor<SDTodo>
+    if let dateRange {
+      let start = dateRange.lowerBound
+      let end = dateRange.upperBound
+      descriptor = FetchDescriptor<SDTodo>(
+        predicate: #Predicate<SDTodo> { $0.date >= start && $0.date <= end && !$0.isDeleted },
+      )
+    } else {
+      descriptor = FetchDescriptor<SDTodo>(
+        predicate: #Predicate<SDTodo> { !$0.isDeleted },
+      )
+    }
+
+    do {
+      return try modelContext.fetchCount(descriptor)
     } catch {
       throw SwiftDataError.fetchFailed(underlying: error)
     }

@@ -48,7 +48,8 @@ public actor SwiftDataMemoRepositoryImpl: MemoRepository {
 
     do {
       if let sdMemo = try modelContext.fetch(descriptor).first {
-        modelContext.delete(sdMemo)
+        sdMemo.isDeleted = true
+        sdMemo.updatedAt = Date()
         try modelContext.save()
       }
     } catch {
@@ -57,7 +58,8 @@ public actor SwiftDataMemoRepositoryImpl: MemoRepository {
   }
 
   public func read(id: String) async throws -> Memo? {
-    let descriptor = FetchDescriptor<SDMemo>(predicate: #Predicate<SDMemo> { $0.id == id })
+    let descriptor = FetchDescriptor<SDMemo>(
+      predicate: #Predicate<SDMemo> { $0.id == id && !$0.isDeleted })
     do {
       return try modelContext.fetch(descriptor).first?.toDomain()
     } catch {
@@ -66,7 +68,10 @@ public actor SwiftDataMemoRepositoryImpl: MemoRepository {
   }
 
   public func readAllByUserId(_: String, useCache _: Bool) async throws -> [Memo] {
-    let descriptor = FetchDescriptor<SDMemo>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
+    let descriptor = FetchDescriptor<SDMemo>(
+      predicate: #Predicate<SDMemo> { !$0.isDeleted },
+      sortBy: [SortDescriptor(\.createdAt, order: .reverse)],
+    )
     do {
       let sdMemos = try modelContext.fetch(descriptor)
       return sdMemos.map { $0.toDomain() }
@@ -77,5 +82,14 @@ public actor SwiftDataMemoRepositoryImpl: MemoRepository {
 
   public func readAllByUserIds(_: [String], useCache _: Bool) async throws -> [Memo] {
     []
+  }
+
+  public func fetchCount(userId _: String) async throws -> Int {
+    let descriptor = FetchDescriptor<SDMemo>(predicate: #Predicate<SDMemo> { !$0.isDeleted })
+    do {
+      return try modelContext.fetchCount(descriptor)
+    } catch {
+      throw SwiftDataError.fetchFailed(underlying: error)
+    }
   }
 }

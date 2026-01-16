@@ -14,6 +14,8 @@ import TodoMateDomain
 @Observable
 @MainActor
 final class LocalTodoHelper {
+  var refreshClock: Int = 0
+
   private let createUseCase: CreateLocalTodoUseCase
   private let readUseCase: ReadLocalTodoUseCase
   private let updateUseCase: UpdateLocalTodoUseCase
@@ -48,6 +50,7 @@ final class LocalTodoHelper {
     Task {
       do {
         try await createUseCase.run(todo)
+        refreshClock = (refreshClock + 1) % 100_000_000
       } catch {
         self.error = error
         Log.error("Failed to create local todo: \(error)")
@@ -59,6 +62,7 @@ final class LocalTodoHelper {
     Task {
       do {
         try await updateUseCase.run(todo)
+        refreshClock = (refreshClock + 1) % 100_000_000
       } catch {
         self.error = error
         Log.error("Failed to update local todo: \(error)")
@@ -78,6 +82,7 @@ final class LocalTodoHelper {
     Task {
       do {
         try await deleteUseCase.run(todoId)
+        refreshClock = (refreshClock + 1) % 100_000_000
       } catch {
         self.error = error
         Log.error("Failed to delete local todo: \(error)")

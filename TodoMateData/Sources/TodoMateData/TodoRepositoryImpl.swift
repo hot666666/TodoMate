@@ -58,6 +58,16 @@ public final class FirestoreTodoRepository: TodoRepository {
     }
   }
 
+  public func fetchCount(query: TodoQuery) async throws -> Int {
+    let firestoreQuery = buildFirestoreQuery(from: query)
+    do {
+      let snapshot = try await firestoreQuery.count.getAggregation(source: .server)
+      return Int(truncating: snapshot.count)
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
+  }
+
   private func buildFirestoreQuery(from todoQuery: TodoQuery) -> Query {
     var firestoreQuery: Query = reference.todoCollection()
 

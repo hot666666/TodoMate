@@ -14,6 +14,8 @@ import TodoMateDomain
 @Observable
 @MainActor
 final class LocalMemoHelper {
+  var refreshClock: Int = 0
+
   // MARK: - Dependencies
 
   private let createUseCase: CreateLocalMemoUseCase
@@ -53,6 +55,7 @@ final class LocalMemoHelper {
     Task {
       do {
         try await createUseCase.run(memo)
+        refreshClock = (refreshClock + 1) % 100_000_000
       } catch {
         Log.error("Failed to create private memo: \(error)", category: .data)
       }
@@ -65,6 +68,7 @@ final class LocalMemoHelper {
     Task {
       do {
         try await updateUseCase.run(updatedMemo)
+        refreshClock = (refreshClock + 1) % 100_000_000
       } catch {
         Log.error("Failed to update private memo: \(error)", category: .data)
       }
@@ -75,6 +79,7 @@ final class LocalMemoHelper {
     Task {
       do {
         try await deleteUseCase.run(memo)
+        refreshClock = (refreshClock + 1) % 100_000_000
       } catch {
         Log.error("Failed to delete private memo: \(error)", category: .data)
       }

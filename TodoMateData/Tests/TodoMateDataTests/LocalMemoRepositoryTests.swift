@@ -69,4 +69,38 @@ struct LocalMemoRepositoryTests {
     let results = try await repository.readAllByUserId(testUserId, useCache: false)
     #expect(!results.contains { $0.id == memo.id })
   }
+
+  // MARK: - Fetch Count
+
+  @Test("Fetches memo count respecting isDeleted")
+  func fetchCount() async throws {
+    let now = Date()
+
+    // 1. One active
+    let memo1 = Memo(
+      id: UUID().uuidString,
+      content: "Active",
+      createdAt: now,
+      updatedAt: now,
+      owner: testUserId,
+      isDeleted: false,
+    )
+
+    // 2. One deleted
+    let memo2 = Memo(
+      id: UUID().uuidString,
+      content: "Deleted",
+      createdAt: now,
+      updatedAt: now,
+      owner: testUserId,
+      isDeleted: true,
+    )
+
+    try await repository.create(memo1)
+    try await repository.create(memo2)
+
+    let count = try await repository.fetchCount(userId: testUserId)
+
+    #expect(count == 1)
+  }
 }

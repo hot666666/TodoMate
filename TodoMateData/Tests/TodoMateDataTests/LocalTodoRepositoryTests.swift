@@ -75,4 +75,57 @@ struct LocalTodoRepositoryTests {
     let results = try await repository.readAll(query: query, useCache: true)
     #expect(!results.contains { $0.id == todo.id })
   }
+
+  // MARK: - Fetch Count
+
+  @Test("Fetches todo count with query and respects isDeleted")
+  func fetchCount() async throws {
+    let today = Date()
+    let calendar = Calendar.current
+    let startOfDay = calendar.startOfDay(for: today)
+    let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!.addingTimeInterval(-1)
+
+    // 1. One active today
+    let todo1 = Todo(
+      id: UUID().uuidString,
+      content: "Active Today",
+      date: today,
+      createdAt: today,
+      updatedAt: today,
+      owner: testUserId,
+      isDeleted: false,
+    )
+
+    // 2. One deleted today
+    let todo2 = Todo(
+      id: UUID().uuidString,
+      content: "Deleted Today",
+      date: today,
+      createdAt: today,
+      updatedAt: today,
+      owner: testUserId,
+      isDeleted: true,
+    )
+
+    // 3. One active tomorrow (out of range)
+    let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+    let todo3 = Todo(
+      id: UUID().uuidString,
+      content: "Active Tomorrow",
+      date: tomorrow,
+      createdAt: tomorrow,
+      updatedAt: tomorrow,
+      owner: testUserId,
+      isDeleted: false,
+    )
+
+    try await repository.create(todo1)
+    try await repository.create(todo2)
+    try await repository.create(todo3)
+
+    let query = TodoQuery(filters: [.dateRange(startOfDay ... endOfDay)])
+    let count = try await repository.fetchCount(query: query)
+
+    #expect(count == 1)
+  }
 }
