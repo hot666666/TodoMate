@@ -335,31 +335,6 @@ private struct TodoColumn: View {
             .onTapGesture {
               onTapTask(task)
             }
-            .contextMenu {
-              // TaskCard now builds its own context menu internally if Closures are set?
-              // Wait, TaskCard handles its own context menu logic internally using environment or passed closures?
-              // In my previous edit I added closures to TaskCard. PROPERTIES.
-              // So I need to set them here.
-              // But TaskCard is a struct. I need to modify the instance.
-              // Or TaskCard init? No, it has `var onDuplicate`.
-              // Swift Views are immutable. I should use modifiers or init.
-              // TaskCard definition: `var onDuplicate: (() -> Void)?`
-              // I can set it like `var card = TaskCard(...); card.onDuplicate = ...; return card` inside the loop?
-              // Or add a modifier-like method to TaskCard if possible, or just init.
-              // TaskCard is a View struct with properties.
-              // I can initialize it with them if I change the init, OR use property injection syntax if they are vars?
-              // `TaskCard(..., onDuplicate: { ... })` would be best if I update Init.
-              // Current `TaskCard` has memberwise init because `onDuplicate` is var.
-              // But `onStatusClick` was var too.
-              // Let's use property syntax or helper.
-              // Since I cannot easily change init call site everywhere if I change init, I'll use property syntax if I can.
-              // `TaskCard(...)`.onDuplicate(...) if I make an extension?
-              // Or just:
-              // var card = TaskCard(...)
-              // card.onDuplicate = ... -> Error: View is immutable value type.
-              // Correct way: Pass in init.
-              // `TaskCard` has free init.
-            }
           }
         }
       }

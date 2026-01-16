@@ -48,8 +48,10 @@ struct TaskCard: View {
     switch style {
     case .normal:
       normalBody
+        .contextMenu { contextMenuContent }
     case .compact:
       compactBody
+        .contextMenu { contextMenuContent }
     }
   }
 
@@ -105,27 +107,6 @@ struct TaskCard: View {
               .foregroundStyle(task.status.displayColor)
           }
           .buttonStyle(.plain)
-          .contextMenu {
-            // Status Change
-            ForEach(ViewTodoStatus.allCases, id: \.self) { status in
-              if status != task.status {
-                Button(status.displayName, systemImage: status.iconName) {
-                  onStatusChange?(status)
-                }
-              }
-            }
-
-            Divider()
-
-            // Actions
-            Button("Duplicate", systemImage: "plus.square.on.square") {
-              onDuplicate?()
-            }
-
-            Button("Delete", systemImage: "trash", role: .destructive) {
-              onDelete?()
-            }
-          }
           .frame(width: 24, height: 24)
         }
         .foregroundStyle(.secondary)
@@ -166,6 +147,37 @@ struct TaskCard: View {
       RoundedRectangle(cornerRadius: 4)
         .strokeBorder(tagColor.opacity(0.3), lineWidth: 0.5),
     )
+  }
+}
+
+// MARK: - Context Menu Extension
+
+private extension TaskCard {
+  @ViewBuilder
+  var contextMenuContent: some View {
+    // Status Change
+    Menu {
+      ForEach(ViewTodoStatus.allCases, id: \.self) { status in
+        if status != task.status {
+          Button(status.displayName, systemImage: status.iconName) {
+            onStatusChange?(status)
+          }
+        }
+      }
+    } label: {
+      Label("Change Status", systemImage: "arrow.triangle.2.circlepath")
+    }
+
+    Divider()
+
+    // Actions
+    Button("Duplicate", systemImage: "plus.square.on.square") {
+      onDuplicate?()
+    }
+
+    Button("Delete", systemImage: "trash", role: .destructive) {
+      onDelete?()
+    }
   }
 }
 
