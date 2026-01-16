@@ -67,7 +67,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
-    true
+    false
+  }
+
+  func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    if !flag {
+      for window in NSApplication.shared.windows {
+        // Status Bar Window 등 시스템 윈도우 제외하고 메인 윈도우만 찾아서 활성화
+        if window.canBecomeKey, window.isVisible == false {
+          window.makeKeyAndOrderFront(nil)
+        }
+      }
+    }
+    return true
   }
 }
 
