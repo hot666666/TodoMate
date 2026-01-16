@@ -12,9 +12,9 @@ struct SharedTodoRow: View {
 
   var body: some View {
     HStack(alignment: .top, spacing: 12) {
-      Image(systemName: todo.status == .done ? "checkmark.circle.fill" : "circle")
+      Image(systemName: todo.status.toDomainStatus().iconName)
         .font(.system(size: 20))
-        .foregroundStyle(todo.status == .done ? .blue : .gray.opacity(0.3))
+        .foregroundStyle(todo.status.toDomainStatus().color)
 
       VStack(alignment: .leading, spacing: 4) {
         Text(todo.content)
@@ -69,6 +69,13 @@ struct SharedTodoRow: View {
         content: "Completed Task",
         status: .done,
         tags: ["System"],
+      ))
+    SharedTodoRow(
+      todo: ViewTodo(
+        owner: "user1",
+        content: "In Progress Task",
+        status: .inProgress,
+        tags: [],
       ))
   }
 }
