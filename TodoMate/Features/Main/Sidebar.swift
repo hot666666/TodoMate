@@ -4,14 +4,15 @@
 //
 //  Created by agent on 1/5/26.
 //
+//
 
 import Common
+import SwiftData
 import SwiftUI
+import TodoMateDomain
 
 struct Sidebar: View {
   @Environment(AppDIContainer.self) private var diContainer
-  @Environment(PrivateTodoStore.self) private var todoStore
-  @Environment(PrivateMemoStore.self) private var memoStore
 
   @AppStorage(UserDefaultsKey.cachedProfileName.rawValue)
   private var cachedProfileName: String = ""
@@ -22,12 +23,20 @@ struct Sidebar: View {
 
   @Binding var selection: NavigationDestination?
 
+  // Queries for counts
+  // Optimization: Only fetch what is needed for count if possible, but SwiftData loads models.
+  // We assume volume is manageable.
+  @Query(filter: #Predicate<SDTodo> { !$0.isDeleted }) private var allTodos: [SDTodo]
+  @Query(filter: #Predicate<SDMemo> { !$0.isDeleted }) private var allMemos: [SDMemo]
+
   private var todayTodoCount: Int {
-    todoStore.todos.count
+    // Filter for today
+    let calendar = Calendar.current
+    return allTodos.count(where: { calendar.isDateInToday($0.date) })
   }
 
   private var memoCount: Int {
-    memoStore.memos.count
+    allMemos.count
   }
 
   private var hasGroup: Bool {
@@ -136,8 +145,6 @@ struct Sidebar: View {
 #Preview {
   NavigationSplitView {
     Sidebar(selection: .constant(.todo))
-      .environment(PrivateTodoStore.preview)
-      .environment(PrivateMemoStore.preview)
       .environment(AppDIContainer.preview)
   } detail: {
     Text("Detail")

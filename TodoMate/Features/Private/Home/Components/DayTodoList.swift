@@ -4,45 +4,88 @@
 //
 //  Created by agent on 1/7/26.
 //
+//
 
 import SimpleOverlaySystem
+import SwiftData
 import SwiftUI
+import TodoMateDomain
 
 /// 특정 날짜의 모든 할 일 목록을 4열 상태별 레이아웃으로 보여주는 오버레이 뷰
 struct DayTodoList: View {
-  @Environment(PrivateTodoStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
   let date: Date
   let onTapTodo: (ViewTodo) -> Void
 
-  private var todos: [ViewTodo] {
-    todoStore.todos
-      .filter { Calendar.current.isDate($0.date, inSameDayAs: date) }
-      .map { ViewTodo(from: $0) }
+  var body: some View {
+    DayTodoQueryWrapper(date: date, onTapTodo: onTapTodo)
+      .padding(20)
+      .frame(width: 700, height: 400)
+      .background(.regularMaterial)
+      .clipShape(.rect(cornerRadius: 12))
+      .overlay(
+        RoundedRectangle(cornerRadius: 12)
+          .stroke(Color.gray.opacity(0.3), lineWidth: 1),
+      )
+      .shadow(color: .black.opacity(0.2), radius: 10)
+      .onKeyPress(.escape) {
+        overlay?.dismissTop()
+        return .handled
+      }
   }
+}
+
+// MARK: - Wrapper
+
+private struct DayTodoQueryWrapper: View {
+  @Query private var sdTodos: [SDTodo]
+  let date: Date
+  let onTapTodo: (ViewTodo) -> Void
+
+  init(date: Date, onTapTodo: @escaping (ViewTodo) -> Void) {
+    self.date = date
+    self.onTapTodo = onTapTodo
+
+    // Predicate: Start of Day <= date < End of Day
+    let calendar = Calendar.current
+    let startOfDay = calendar.startOfDay(for: date)
+    guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
+      // Fallback (safe)
+      let distantFuture = Date.distantFuture
+      let predicate = #Predicate<SDTodo> { $0.date == distantFuture }
+      _sdTodos = Query(filter: predicate)
+      return
+    }
+
+    let predicate = #Predicate<SDTodo> { todo in
+      todo.date >= startOfDay && todo.date < endOfDay && !todo.isDeleted
+    }
+    _sdTodos = Query(filter: predicate, sort: \SDTodo.date)
+  }
+
+  var body: some View {
+    let viewTodos = sdTodos.map { ViewTodo(from: $0.toDomain()) }
+    DayTodoContent(date: date, todos: viewTodos, onTapTodo: onTapTodo)
+  }
+}
+
+// MARK: - Content
+
+private struct DayTodoContent: View {
+  let date: Date
+  let todos: [ViewTodo]
+  let onTapTodo: (ViewTodo) -> Void
 
   private var title: String {
     date.formatted(.dateTime.month().day().weekday(.wide))
   }
 
-  // MARK: - Filtered Tasks by Status
-
-  private var todoTasks: [ViewTodo] {
-    todos.filter { $0.status == .todo }
-  }
-
-  private var inProgressTasks: [ViewTodo] {
-    todos.filter { $0.status == .inProgress }
-  }
-
-  private var doneTasks: [ViewTodo] {
-    todos.filter { $0.status == .done }
-  }
-
-  private var incompleteTasks: [ViewTodo] {
-    todos.filter { $0.status == .inComplete }
-  }
+  // Filtered Tasks
+  private var todoTasks: [ViewTodo] { todos.filter { $0.status == .todo } }
+  private var inProgressTasks: [ViewTodo] { todos.filter { $0.status == .inProgress } }
+  private var doneTasks: [ViewTodo] { todos.filter { $0.status == .done } }
+  private var incompleteTasks: [ViewTodo] { todos.filter { $0.status == .inComplete } }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
@@ -92,19 +135,6 @@ struct DayTodoList: View {
         .scrollIndicators(.hidden)
       }
     }
-    .padding(20)
-    .frame(width: 700, height: 400)
-    .background(.regularMaterial)
-    .clipShape(.rect(cornerRadius: 12))
-    .overlay(
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(Color.gray.opacity(0.3), lineWidth: 1),
-    )
-    .shadow(color: .black.opacity(0.2), radius: 10)
-    .onKeyPress(.escape) {
-      overlay?.dismissTop()
-      return .handled
-    }
   }
 
   // MARK: - Helper Views
@@ -146,5 +176,6 @@ struct DayTodoList: View {
     onTapTodo: { _ in },
   )
   .environment(PrivateTodoStore.preview)
+  .environment(OverlayManager())
   .padding()
 }

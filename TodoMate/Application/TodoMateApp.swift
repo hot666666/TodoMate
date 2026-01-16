@@ -69,6 +69,7 @@ struct TodoMateApp: App {
         overlayViewController?.show(with: todo)
       }
       .environment(todoStore)
+      .modelContainer(coreDIContainer.modelContainer)
     }
     .menuBarExtraStyle(.menu)
 
@@ -89,8 +90,6 @@ struct TodoMateApp: App {
           #if DEBUG
             MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
           #endif
-          await todoStore.loadTodos()
-          await memoStore.load()
         }
     }
     #if os(macOS)

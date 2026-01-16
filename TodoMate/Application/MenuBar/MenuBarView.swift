@@ -4,6 +4,7 @@
 //
 //  Created by hs on 6/7/25.
 //
+//
 
 import AppKit
 import Common
@@ -12,9 +13,56 @@ import SwiftUI
 import TodoMateDomain
 
 struct MenuBarView: View {
-  @Environment(\.openWindow) private var openWindow
-  @Environment(PrivateTodoStore.self) private var todoStore
+  let onShowOverlay: (Todo?) -> Void
 
+  var body: some View {
+    MenuBarQueryWrapper(onShowOverlay: onShowOverlay)
+  }
+}
+
+// MARK: - Wrapper
+
+private struct MenuBarQueryWrapper: View {
+  @Environment(\.openWindow) private var openWindow
+  @Query private var sdTodos: [SDTodo]
+
+  let onShowOverlay: (Todo?) -> Void
+
+  init(onShowOverlay: @escaping (Todo?) -> Void) {
+    self.onShowOverlay = onShowOverlay
+
+    let calendar = Calendar.current
+    let startOfDay = calendar.startOfDay(for: Date())
+    guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
+      let distantFuture = Date.distantFuture
+      let predicate = #Predicate<SDTodo> { $0.date == distantFuture }
+      _sdTodos = Query(filter: predicate)
+      return
+    }
+
+    // Filter: Date is Today AND Not Deleted
+    let predicate = #Predicate<SDTodo> { todo in
+      todo.date >= startOfDay && todo.date < endOfDay && !todo.isDeleted
+    }
+
+    _sdTodos = Query(filter: predicate, sort: \.date)
+  }
+
+  var body: some View {
+    let todos =
+      sdTodos
+        .map { $0.toDomain() }
+        .filter { $0.status == .todo || $0.status == .inProgress }
+
+    MenuBarContent(todos: todos, onShowOverlay: onShowOverlay)
+  }
+}
+
+// MARK: - Content
+
+private struct MenuBarContent: View {
+  @Environment(\.openWindow) private var openWindow
+  let todos: [Todo]
   let onShowOverlay: (Todo?) -> Void
 
   var body: some View {
@@ -31,15 +79,13 @@ struct MenuBarView: View {
 
     Divider()
 
-    // 3. 오늘 할일 목록 (미완료/진행중 우선)
+    // 3. 오늘 할일 목록
     Section {
-      let activeTodos = todoStore.todos.filter { $0.status == .todo || $0.status == .inProgress }
-
-      if activeTodos.isEmpty {
+      if todos.isEmpty {
         Text("오늘 할일 없음")
           .foregroundStyle(.secondary)
       } else {
-        ForEach(activeTodos) { todo in
+        ForEach(todos) { todo in
           MenuTodoRow(todo: todo, onShowOverlay: onShowOverlay)
         }
       }
@@ -81,8 +127,6 @@ private struct MenuTodoRow: View {
     } label: {
       HStack(spacing: 4) {
         Image(systemName: statusIcon)
-        // MenuBarExtra style .menu does not support color rendering well in standard menu items
-        // but we try. If it doesn't show, it falls back to monochrome.
         Text(todo.content.isEmpty ? "제목 없음" : todo.content)
           .lineLimit(1)
       }
