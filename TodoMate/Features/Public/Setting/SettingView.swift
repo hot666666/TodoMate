@@ -16,6 +16,8 @@ struct SettingView: View {
   private var isPublicModeEnabled: Bool = false
   @AppStorage(UserDefaultsKey.showInDock.rawValue)
   private var showInDock: Bool = true
+  @AppStorage(UserDefaultsKey.quitOnWindowClose.rawValue)
+  private var quitOnWindowClose: Bool = true
   @State private var showLogoutConfirmation = false
   @State private var showLeaveGroupConfirmation = false
   @State private var showEditNameSheet = false
@@ -33,10 +35,10 @@ struct SettingView: View {
     ScrollView {
       VStack(spacing: 30) {
         profileSection
-        dockSection
         if sessionStore.user != nil {
           groupSection
         }
+        dockSection
       }
       .accessibilityIdentifier("setting_view")
       .padding(32)
@@ -97,23 +99,16 @@ struct SettingView: View {
         .foregroundStyle(.secondary)
 
       VStack(alignment: .leading, spacing: 12) {
-        Toggle("Dock에 표시", isOn: $showInDock)
-          .toggleStyle(.switch)
+        Toggle("Dock에 앱 표시", isOn: $showInDock)
+          .toggleStyle(.checkbox)
 
-        Text("앱을 다시 실행하지 않아도 즉시 반영됩니다.")
-          .font(.caption)
-          .foregroundStyle(.secondary)
+        Toggle("창을 닫으면 앱 종료", isOn: $quitOnWindowClose)
+          .toggleStyle(.checkbox)
       }
-      .padding(16)
-      .background(Color(nsColor: .controlBackgroundColor))
-      .clipShape(RoundedRectangle(cornerRadius: 12))
+      .frame(maxWidth: .infinity, alignment: .leading)
     }
     .onChange(of: showInDock) { _, newValue in
-      NSApp.setActivationPolicy(newValue ? .regular : .accessory)
-      if newValue {
-        // Dock에 표시될 때, 필요하면 앱을 활성화하여 윈도우가 앞으로 오게 할 수도 있음
-        NSApp.activate(ignoringOtherApps: true)
-      }
+      NSApp.updateActivationPolicy(showInDock: newValue, activate: true)
     }
   }
 
