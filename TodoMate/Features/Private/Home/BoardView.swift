@@ -129,6 +129,10 @@ private struct BoardQueryWrapper: View {
 
   // MARK: - Data Helpers
 
+  // TODO: findDomainTodo(for:) 함수에서 sdTodos.first(where:) 를 사용하여 ViewTodo 에 해당하는 SDTodo 객체를 찾고 있습니다.
+  // 현재는 보드에 표시되는 항목 수가 적어 문제가 되지 않겠지만, 항목 수가 많아질 경우 이 방식은 O(n) 시간 복잡도를 가져 성능 저하를 유발할 수 있습니다.
+  // 성능 향상을 위해, body 가 계산될 때 sdTodos 배열을 [String: SDTodo] 형태의 딕셔너리(맵)으로 변환하여 저장해두고,
+  // findDomainTodo 에서는 이 맵을 사용하여 O(1) 시간 복잡도로 객체를 조회하도록 리팩토링하는 것을 고려해 보세요.
   private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
     sdTodos.first(where: { $0.id == viewTodo.id })?.toDomain()
   }
