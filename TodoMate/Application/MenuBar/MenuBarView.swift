@@ -26,14 +26,7 @@ struct MenuBarView: View {
 
     // 2. 앱 열기
     Button("TodoMate 열기") {
-      // Main Window 열기 (WindowGroup id 확인 필요, 보통 main or nil)
-      // TodoMateApp에서 WindowGroup에 handlesExternalEvents 설정이 필요할 수 있음
-      // 현재는 openWindow로 시도
-      NSApp.activate(ignoringOtherApps: true)
-      // 첫 번째 윈도우(메인)를 보이게 함
-      if let window = NSApp.windows.first {
-        window.makeKeyAndOrderFront(nil)
-      }
+      openWindow(id: AppSceneID.mainApp.rawValue)
     }
 
     Divider()
