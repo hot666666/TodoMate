@@ -16,7 +16,7 @@ struct DayTodoList: View {
   @Environment(\.overlayManager) private var overlay
 
   let date: Date
-  let onTapTodo: (ViewTodo) -> Void
+  let onTapTodo: (Todo) -> Void
 
   var body: some View {
     DayTodoQueryWrapper(date: date, onTapTodo: onTapTodo)
@@ -42,9 +42,9 @@ private struct DayTodoQueryWrapper: View {
   @Environment(LocalTodoHelper.self) private var todoStore
   @Query private var sdTodos: [SDTodo]
   let date: Date
-  let onTapTodo: (ViewTodo) -> Void
+  let onTapTodo: (Todo) -> Void
 
-  init(date: Date, onTapTodo: @escaping (ViewTodo) -> Void) {
+  init(date: Date, onTapTodo: @escaping (Todo) -> Void) {
     self.date = date
     self.onTapTodo = onTapTodo
 
@@ -70,7 +70,12 @@ private struct DayTodoQueryWrapper: View {
     DayTodoContent(
       date: date,
       todos: viewTodos,
-      onTapTodo: onTapTodo,
+      onTapTodo: { viewTodo in
+        if let todo = findDomainTodo(for: viewTodo) {
+          onTapTodo(todo)
+        }
+      },
+
       onStatusChange: updateStatus,
       onDuplicateTask: duplicateTask,
       onDeleteTask: deleteTask,

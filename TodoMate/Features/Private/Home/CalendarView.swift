@@ -113,12 +113,8 @@ struct CalendarView: View {
     ) {
       DayTodoList(
         date: date,
-        onTapTodo: { viewTodo in
-          Task { @MainActor in
-            if let todo = await todoStore.getTodo(id: viewTodo.id) {
-              presentTodoSheet(for: todo)
-            }
-          }
+        onTapTodo: { todo in
+          presentTodoSheet(for: todo)
         },
       )
     }
