@@ -19,6 +19,8 @@ struct TaskCard: View {
   var style: TaskCardStyle = .normal
   var onStatusClick: (() -> Void)?
   var onStatusChange: ((ViewTodoStatus) -> Void)?
+  var onDuplicate: (() -> Void)?
+  var onDelete: (() -> Void)?
 
   private var tagColor: Color {
     guard let firstTag = task.tags.first?.lowercased() else {
@@ -104,12 +106,24 @@ struct TaskCard: View {
           }
           .buttonStyle(.plain)
           .contextMenu {
+            // Status Change
             ForEach(ViewTodoStatus.allCases, id: \.self) { status in
               if status != task.status {
                 Button(status.displayName, systemImage: status.iconName) {
                   onStatusChange?(status)
                 }
               }
+            }
+
+            Divider()
+
+            // Actions
+            Button("Duplicate", systemImage: "plus.square.on.square") {
+              onDuplicate?()
+            }
+
+            Button("Delete", systemImage: "trash", role: .destructive) {
+              onDelete?()
             }
           }
           .frame(width: 24, height: 24)

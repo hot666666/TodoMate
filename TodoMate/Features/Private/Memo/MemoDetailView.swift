@@ -5,6 +5,7 @@
 //  Created by agent on 1/8/26.
 //
 
+import AppKit
 import SwiftUI
 import SwiftUIIntrospect
 import TodoMateDomain
@@ -64,6 +65,31 @@ struct MemoDetailView: View {
           saveOrDeleteAndDismiss()
         } label: {
           Image(systemName: "chevron.left")
+        }
+      }
+
+      ToolbarItem(placement: .secondaryAction) {
+        Menu {
+          Button {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(memo.content, forType: .string)
+          } label: {
+            Label("Copy Text", systemImage: "doc.on.doc")
+          }
+
+          Divider()
+
+          Button(role: .destructive) {
+            onDelete()
+            // onDismiss is called by helper in MemoView usually, but here onDelete is passed from MemoView which includes dismiss.
+            // Let's check MemoView: deleteMemo calls store.delete() AND dismissDetail().
+            // So we just call onDelete().
+          } label: {
+            Label("Delete", systemImage: "trash")
+          }
+        } label: {
+          Image(systemName: "ellipsis.circle")
         }
       }
     }
