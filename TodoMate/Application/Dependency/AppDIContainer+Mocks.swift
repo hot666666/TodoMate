@@ -322,6 +322,25 @@ import TodoMateDomain
         return true
       }
     }
+
+    func fetchCount(query: TodoQuery) async throws -> Int {
+      let filtered = todos.filter { todo in
+        for filter in query.filters {
+          switch filter {
+          case let .owner(userId):
+            if todo.owner != userId { return false }
+          case let .owners(userIds):
+            if !userIds.contains(todo.owner) { return false }
+          case let .dateRange(range):
+            if !range.contains(todo.date) { return false }
+          case let .status(status):
+            if todo.status != status { return false }
+          }
+        }
+        return true
+      }
+      return filtered.count
+    }
   }
 
   final class MockMemoRepository: MemoRepository, @unchecked Sendable {
@@ -352,6 +371,10 @@ import TodoMateDomain
 
     func readAllByUserIds(_ userIds: [String], useCache _: Bool) async throws -> [Memo] {
       memos.filter { userIds.contains($0.owner) }
+    }
+
+    func fetchCount(userId: String) async throws -> Int {
+      memos.count(where: { $0.owner == userId && !$0.isDeleted })
     }
   }
 

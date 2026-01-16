@@ -33,6 +33,9 @@ final class CoreDIContainer {
   @ObservationIgnored let updateLocalMemoUseCase: UpdateLocalMemoUseCase
   @ObservationIgnored let deleteLocalMemoUseCase: DeleteLocalMemoUseCase
 
+  @ObservationIgnored let fetchTodoCountUseCase: FetchTodoCountUseCase
+  @ObservationIgnored let fetchMemoCountUseCase: FetchMemoCountUseCase
+
   init(
     modelContainer: ModelContainer,
     userDefaults: UserDefaults = .standard,
@@ -59,6 +62,9 @@ final class CoreDIContainer {
     readLocalMemoUseCase = ReadLocalMemoUseCaseImpl(repository: localMemoRepository)
     updateLocalMemoUseCase = UpdateLocalMemoUseCaseImpl(repository: localMemoRepository)
     deleteLocalMemoUseCase = DeleteLocalMemoUseCaseImpl(repository: localMemoRepository)
+
+    fetchTodoCountUseCase = FetchTodoCountUseCaseImpl(repository: localTodoRepository)
+    fetchMemoCountUseCase = FetchMemoCountUseCaseImpl(repository: localMemoRepository)
 
     sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)

@@ -13,6 +13,8 @@ import TodoMateDomain
 
 struct Sidebar: View {
   @Environment(AppDIContainer.self) private var diContainer
+  @Environment(LocalTodoHelper.self) private var todoHelper
+  @Environment(LocalMemoHelper.self) private var memoHelper
 
   @AppStorage(UserDefaultsKey.cachedProfileName.rawValue)
   private var cachedProfileName: String = ""
@@ -23,29 +25,8 @@ struct Sidebar: View {
 
   @Binding var selection: NavigationDestination?
 
-  // Queries for counts
-  // Optimization: Only fetch what is needed for count if possible, but SwiftData loads models.
-  // We assume volume is manageable.
-  @Query(filter: #Predicate<SDTodo> { !$0.isDeleted }) private var allTodos: [SDTodo]
-  @Query(filter: #Predicate<SDMemo> { !$0.isDeleted }) private var allMemos: [SDMemo]
-
-  private var todayTodoCount: Int {
-    // Filter for today
-    let calendar = Calendar.current
-    return allTodos.count(where: { calendar.isDateInToday($0.date) })
-  }
-
-  private var memoCount: Int {
-    allMemos.count
-  }
-
-  private var hasGroup: Bool {
-    !cachedUserGroupId.isEmpty
-  }
-
-  private var groupName: String {
-    (cachedGroupName.isEmpty ? nil : cachedGroupName) ?? "그룹"
-  }
+  @State private var todayTodoCount: Int = 0
+  @State private var memoCount: Int = 0
 
   var body: some View {
     List(selection: $selection) {
@@ -119,6 +100,9 @@ struct Sidebar: View {
     }
     .frame(minWidth: 200)
     .listStyle(.sidebar)
+    .task(id: [todoHelper.refreshClock, memoHelper.refreshClock]) {
+      await refreshCounts()
+    }
   }
 
   private var groupLabel: some View {
@@ -140,12 +124,42 @@ struct Sidebar: View {
         .foregroundStyle(.secondary)
     }
   }
+
+  private var hasGroup: Bool {
+    !cachedUserGroupId.isEmpty
+  }
+
+  private var groupName: String {
+    (cachedGroupName.isEmpty ? nil : cachedGroupName) ?? "그룹"
+  }
+
+  private func refreshCounts() async {
+    let calendar = Calendar.current
+    let now = Date()
+    let startOfDay = calendar.startOfDay(for: now)
+
+    // TODO: All todos for today
+    if let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)?.addingTimeInterval(
+      -1) {
+      let query = TodoQuery(filters: [.dateRange(startOfDay ... endOfDay)])
+      if let count = try? await diContainer.core.fetchTodoCountUseCase.execute(query: query) {
+        todayTodoCount = count
+      }
+    }
+
+    // Memo: All memos
+    if let count = try? await diContainer.core.fetchMemoCountUseCase.execute(userId: "") {
+      memoCount = count
+    }
+  }
 }
 
 #Preview {
   NavigationSplitView {
     Sidebar(selection: .constant(.todo))
       .environment(AppDIContainer.preview)
+      .environment(LocalTodoHelper.preview)
+      .environment(LocalMemoHelper.preview)
   } detail: {
     Text("Detail")
   }

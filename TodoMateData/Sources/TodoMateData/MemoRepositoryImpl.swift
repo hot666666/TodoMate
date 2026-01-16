@@ -74,4 +74,15 @@ public final class FirestoreMemoRepository: MemoRepository {
       throw FirestoreRepositoryError.readFailed(underlying: error)
     }
   }
+
+  public func fetchCount(userId: String) async throws -> Int {
+    do {
+      let snapshot = try await reference.memoCollection()
+        .whereField("owner", isEqualTo: userId)
+        .count.getAggregation(source: .server)
+      return Int(truncating: snapshot.count)
+    } catch {
+      throw FirestoreRepositoryError.readFailed(underlying: error)
+    }
+  }
 }

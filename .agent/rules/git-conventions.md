@@ -107,3 +107,6 @@ merge: feature/study-session into main
 ### 4. After Rebase
 - Resolve conflicts carefully without changing original intent.
 - Run tests to ensure behavior is unchanged.
+
+## Do not commit .test-logs/
+- It's used only in Debug for Agent.
