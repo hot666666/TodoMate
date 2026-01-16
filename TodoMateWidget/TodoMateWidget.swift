@@ -30,6 +30,22 @@ struct WidgetTodo: Identifiable {
   let detail: String
 }
 
+// MARK: - Shared Model Container
+
+@MainActor
+enum WidgetDataContainer {
+  static let shared: ModelContainer = {
+    let schema = Schema([SDTodo.self, SDMemo.self])
+    let config = ModelConfiguration(isStoredInMemoryOnly: false)
+
+    do {
+      return try ModelContainer(for: schema, configurations: [config])
+    } catch {
+      fatalError("Failed to create widget model container: \(error)")
+    }
+  }()
+}
+
 // MARK: - Timeline Provider
 
 struct TodoMateTimelineProvider: TimelineProvider {
@@ -81,9 +97,7 @@ struct TodoMateTimelineProvider: TimelineProvider {
   @MainActor
   private func fetchInProgressTodos() -> [WidgetTodo] {
     do {
-      let schema = Schema([SDTodo.self])
-      let config = ModelConfiguration(for: SDTodo.self)
-      let container = try ModelContainer(for: schema, configurations: [config])
+      let container = WidgetDataContainer.shared
       let context = ModelContext(container)
 
       let today = Calendar.current.startOfDay(for: .now)
@@ -108,9 +122,7 @@ struct TodoMateTimelineProvider: TimelineProvider {
   @MainActor
   private func hasAnyTodosToday() -> Bool {
     do {
-      let schema = Schema([SDTodo.self])
-      let config = ModelConfiguration(for: SDTodo.self)
-      let container = try ModelContainer(for: schema, configurations: [config])
+      let container = WidgetDataContainer.shared
       let context = ModelContext(container)
 
       let today = Calendar.current.startOfDay(for: .now)

@@ -15,8 +15,10 @@ import TodoMateDomain
 struct TodoMateApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   private let appDIContainer: AppDIContainer
+  private let coreDIContainer: CoreDIContainer
+  private let overlayViewController: OverlayViewController
 
-  // MARK: - Global States(App Lifetime)
+  // MARK: - Global States
 
   @State private var todoStore: PrivateTodoStore
   @State private var memoStore: PrivateMemoStore
@@ -33,21 +35,51 @@ struct TodoMateApp: App {
 
     // AppIntent에서 사용할 수 있도록 공유 인스턴스 설정
     CoreDIContainer.shared = appDIContainer.core
+    coreDIContainer = appDIContainer.core
 
     // 앱 업데이트 체크 및 처리
     Self.checkAndHandleAppUpdate(container: appDIContainer)
 
     // Store 초기화
-    _todoStore = State(initialValue: PrivateTodoStore(container: appDIContainer.core))
+    let store = PrivateTodoStore(container: appDIContainer.core)
+    _todoStore = State(initialValue: store)
     _memoStore = State(initialValue: PrivateMemoStore(container: appDIContainer.core))
+
+    // OverlayViewController 초기화
+    overlayViewController = OverlayViewController(
+      coreContainer: coreDIContainer,
+      todoStore: store,
+    )
+
+    // 글로벌 단축키 등록 (⇧⌘Space)
+    appDIContainer.core.hotKeyManager.register(
+      key: .space,
+      modifiers: [.command, .shift],
+      handler: { [weak overlayViewController] in
+        overlayViewController?.show()
+      },
+    )
   }
 
   var body: some Scene {
-    WindowGroup {
+    // MARK: - Menu Bar
+
+    MenuBarExtra("TodoMate", systemImage: "checklist") {
+      MenuBarView { [weak overlayViewController] todo in
+        overlayViewController?.show(with: todo)
+      }
+      .environment(todoStore)
+    }
+    .menuBarExtraStyle(.menu)
+
+    // MARK: - Window
+
+    Window("TodoMate", id: AppSceneID.mainApp.rawValue) {
       MainView(container: appDIContainer)
         .defaultAppStorage(appDIContainer.core.userDefaults)
         .modelContainer(appDIContainer.core.modelContainer)
         .environment(appDIContainer)
+        .environment(appDIContainer.core)
         .environment(todoStore)
         .environment(memoStore)
         .environment(\.colorScheme, .dark)
