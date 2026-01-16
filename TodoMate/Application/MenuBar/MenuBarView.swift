@@ -75,15 +75,6 @@ private struct MenuTodoRow: View {
     }
   }
 
-  private var statusColor: Color {
-    switch todo.status {
-    case .inComplete: .red
-    case .todo: .secondary
-    case .inProgress: .blue
-    case .complete: .green
-    }
-  }
-
   var body: some View {
     Button {
       onShowOverlay(todo)

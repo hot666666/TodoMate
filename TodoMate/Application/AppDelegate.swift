@@ -5,6 +5,7 @@
 //  Created by hs on 6/27/25.
 //
 
+import Common
 import Sparkle
 import SwiftUI
 import TodoMateData
@@ -72,10 +73,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
 
   func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
     if !flag {
-      for window in NSApplication.shared.windows {
-        // Status Bar Window 등 시스템 윈도우 제외하고 메인 윈도우만 찾아서 활성화
-        if window.canBecomeKey, window.isVisible == false {
-          window.makeKeyAndOrderFront(nil)
+      // "main" ID를 가진 메인 윈도우를 명시적으로 찾습니다.
+      if let mainWindow = NSApplication.shared.windows.first(where: {
+        $0.identifier?.rawValue == AppSceneID.mainApp.rawValue
+      }) {
+        if !mainWindow.isVisible {
+          mainWindow.makeKeyAndOrderFront(nil)
         }
       }
     }
