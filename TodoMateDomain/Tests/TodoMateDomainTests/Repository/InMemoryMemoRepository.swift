@@ -45,4 +45,8 @@ public actor InMemoryMemoRepository: MemoRepository {
     readCallCount += 1
     return memos.filter { userIds.contains($0.owner) }
   }
+
+  public func fetchCount(userId: String) async throws -> Int {
+    try await readAllByUserId(userId, useCache: true).count
+  }
 }

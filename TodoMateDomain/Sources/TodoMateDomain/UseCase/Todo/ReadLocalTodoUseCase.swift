@@ -10,6 +10,7 @@ import Foundation
 public protocol ReadLocalTodoUseCase {
   func run(date: Date) async throws -> [Todo]
   func run(in range: ClosedRange<Date>) async throws -> [Todo]
+  func run(id: String) async throws -> Todo?
 }
 
 public final class ReadLocalTodoUseCaseImpl: ReadLocalTodoUseCase {
@@ -38,6 +39,10 @@ public final class ReadLocalTodoUseCaseImpl: ReadLocalTodoUseCase {
     // useCache is true for local repository (always uses cache)
     return try await repository.readAll(query: query, useCache: true)
   }
+
+  public func run(id: String) async throws -> Todo? {
+    try await repository.read(id: id)
+  }
 }
 
 public final class StubReadLocalTodoUseCase: ReadLocalTodoUseCase {
@@ -49,5 +54,9 @@ public final class StubReadLocalTodoUseCase: ReadLocalTodoUseCase {
 
   public func run(in _: ClosedRange<Date>) async throws -> [Todo] {
     []
+  }
+
+  public func run(id _: String) async throws -> Todo? {
+    nil
   }
 }

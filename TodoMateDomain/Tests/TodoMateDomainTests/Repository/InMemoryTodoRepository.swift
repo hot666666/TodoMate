@@ -61,4 +61,9 @@ public actor InMemoryTodoRepository: TodoRepository {
       return true
     }
   }
+
+  public func fetchCount(query: TodoQuery) async throws -> Int {
+    // Reuse readAll logic for simplicity
+    try await readAll(query: query, useCache: true).count
+  }
 }
