@@ -12,7 +12,6 @@ import SwiftUI
 import TodoMateDomain
 
 struct Sidebar: View {
-  @Environment(AppDIContainer.self) private var diContainer
   @Environment(TodoBoardStore.self) private var todoStore
   @Environment(MemoStore.self) private var memoStore
 
@@ -140,7 +139,6 @@ struct Sidebar: View {
 #Preview {
   NavigationSplitView {
     Sidebar(selection: .constant(.todo))
-      .environment(AppDIContainer.preview)
       .environment(TodoBoardStore.preview)
       .environment(MemoStore.preview)
   } detail: {

@@ -14,15 +14,19 @@ struct MainView: View {
   @Environment(AppDIContainer.self) private var container
   /// SessionStore 생성
   @State private var sessionStore: SessionStore
+  /// NavigationManager 생성
+  @State private var naviManager: NavigationManager
 
   init(container: AppDIContainer) {
     _sessionStore = State(initialValue: SessionStore(container: container))
+    _naviManager = State(initialValue: NavigationManager(container: container))
   }
 
   var body: some View {
     OverlayContainer {
-      MainContent(naviManager: .init(container: container))
+      MainContent(naviManager: naviManager)
         .environment(sessionStore)
+        .environment(naviManager)
     }
     .task {
       sessionStore.startListeningToAuthChanges()
@@ -38,23 +42,17 @@ struct MainView: View {
 private struct MainContent: View {
   @Environment(AppDIContainer.self) private var container
   @Environment(\.overlayManager) private var overlay
-  @State private var naviManager: NavigationManager
   @State private var sidebarToken: HotKeyManager.RegistrationToken?
 
-  init(naviManager: NavigationManager) {
-    _naviManager = State(initialValue: naviManager)
-  }
+  @Bindable var naviManager: NavigationManager
 
   var body: some View {
-    @Bindable var naviManager = naviManager
-
     NavigationSplitView(columnVisibility: $naviManager.columnVisibility) {
       Sidebar(selection: $naviManager.selection)
     } detail: {
       detailView
     }
     .navigationSplitViewStyle(.prominentDetail)
-    .environment(naviManager)
     .onAppear {
       registerHotKeys()
     }
@@ -88,14 +86,14 @@ private struct MainContent: View {
   private var detailView: some View {
     if let selection = naviManager.selection {
       switch selection {
+      case .settings:
+        SettingView()
+
       case .todo:
-        HomeView(naviManager: naviManager, container: container.core)
+        HomeView(container: container.core)
 
       case .memo:
         MemoView()
-
-      case .settings:
-        SettingView()
 
       case .group:
         AuthenticatedView {

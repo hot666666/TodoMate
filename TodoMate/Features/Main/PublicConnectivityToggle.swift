@@ -29,7 +29,6 @@ struct PublicConnectivityToggle: View {
         await executeToggle(isOnline: isPublicModeEnabled)
       }
       .onChange(of: isPublicModeEnabled) { _, newValue in
-        // TODO: - SessionStore, TodoStore, MessageStore 최신화 필요
         Task {
           await executeToggle(isOnline: newValue)
         }

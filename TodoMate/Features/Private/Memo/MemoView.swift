@@ -7,7 +7,6 @@
 //
 
 import SimpleOverlaySystem
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 
@@ -16,10 +15,11 @@ import TodoMateDomain
 struct MemoView: View {
   @Environment(AppDIContainer.self) private var container
   @Environment(MemoStore.self) private var memoStore
-
-  @State private var selectedMemo: Memo?
-  @State private var escToken: HotKeyManager.RegistrationToken?
   @Namespace private var heroNamespace
+
+  @State private var escToken: HotKeyManager.RegistrationToken?
+  // 애니메이션 중 데이터가 사라지는 것을 방지하기 위해 데이터(selectedMemo)와 표시 여부(isDetailViewPresented)를 분리합니다.
+  @State private var selectedMemo: Memo?
   @State private var isDetailViewPresented = false
 
   var body: some View {
@@ -44,8 +44,9 @@ struct MemoView: View {
         .transition(.asymmetric(insertion: .identity, removal: .opacity))
         .zIndex(1)
       } else {
-        // Query Wrapper & Content
-        MemoQueryWrapper(
+        // Content
+        MemoContent(
+          memos: memoStore.memos,
           heroNamespace: heroNamespace,
           onTapMemo: { memo in
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
@@ -103,7 +104,7 @@ struct MemoView: View {
 
   private func dismissDetail() {
     withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-      selectedMemo = nil
+      // selectedMemo = nil // 애니메이션 도중 데이터가 nil이 되면 UI 글리치가 발생할 수 있으므로 유지
       isDetailViewPresented = false
     }
   }
@@ -127,33 +128,6 @@ struct MemoView: View {
       container.core.hotKeyManager.unregister(token)
       escToken = nil
     }
-  }
-}
-
-// MARK: - MemoQueryWrapper (Data Access)
-
-private struct MemoQueryWrapper: View {
-  @Query(
-    filter: #Predicate<SDMemo> { !$0.isDeleted },
-    sort: \SDMemo.createdAt,
-    order: .reverse,
-  )
-  private var sdMemos: [SDMemo]
-
-  let heroNamespace: Namespace.ID
-  let onTapMemo: (Memo) -> Void
-  let onDeleteMemo: (Memo) -> Void
-
-  var body: some View {
-    // Convert SDMemo -> Memo (Domain)
-    let memos = sdMemos.map { $0.toDomain() }
-
-    MemoContent(
-      memos: memos,
-      heroNamespace: heroNamespace,
-      onTapMemo: onTapMemo,
-      onDeleteMemo: onDeleteMemo,
-    )
   }
 }
 

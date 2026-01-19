@@ -9,24 +9,25 @@ import SwiftUI
 
 struct HomeView: View {
   @Environment(AppDIContainer.self) private var container
+  @Environment(NavigationManager.self) private var naviManager
   @Environment(\.overlayManager) private var overlay
 
-  let naviManager: NavigationManager
-  @State private var viewModel: HomeViewModel
+  @State private var boardViewModel: BoardViewModel
+  @State private var calendarViewModel: TodoCalendarViewModel
   @State private var escToken: HotKeyManager.RegistrationToken?
 
-  init(naviManager: NavigationManager, container: CoreDIContainer) {
-    self.naviManager = naviManager
-    _viewModel = State(initialValue: HomeViewModel(container: container))
+  init(container: CoreDIContainer) {
+    _boardViewModel = State(initialValue: BoardViewModel())
+    _calendarViewModel = State(initialValue: TodoCalendarViewModel(container: container))
   }
 
   var body: some View {
     Group {
       switch naviManager.viewMode {
       case .board:
-        BoardView(viewModel: viewModel.boardViewModel)
+        BoardView(viewModel: boardViewModel)
       case .calendar:
-        CalendarView(viewModel: viewModel.calendarViewModel)
+        CalendarView(viewModel: calendarViewModel)
       }
     }
     .onAppear {
