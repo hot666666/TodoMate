@@ -14,7 +14,7 @@ public actor SwiftDataMemoRepositoryImpl: MemoRepository {
   // @ModelActor provides `modelContext` and `modelExecutor`
 
   public func create(_ memo: Memo) async throws {
-    let sdMemo = memo.toSDMemo()
+    let sdMemo = SDMemo(from: memo)
     modelContext.insert(sdMemo)
     do {
       try modelContext.save()

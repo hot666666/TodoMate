@@ -14,7 +14,6 @@ import TodoMateDomain
 @Observable
 @MainActor
 final class MemoStore {
-  var lastUpdated = Date()
   var memos: [Memo] = []
 
   // MARK: - Dependencies
@@ -62,7 +61,6 @@ final class MemoStore {
     observationTask = Task {
       for await newMemos in observeMemosUseCase.execute() {
         self.memos = newMemos
-        self.lastUpdated = Date()
       }
     }
   }
@@ -76,7 +74,7 @@ final class MemoStore {
     Task {
       do {
         try await createUseCase.run(memo)
-        self.lastUpdated = Date()
+
       } catch {
         Log.error("Failed to create private memo: \(error)", category: .data)
       }
@@ -89,7 +87,7 @@ final class MemoStore {
     Task {
       do {
         try await updateUseCase.run(updatedMemo)
-        self.lastUpdated = Date()
+
       } catch {
         Log.error("Failed to update private memo: \(error)", category: .data)
       }
@@ -100,7 +98,7 @@ final class MemoStore {
     Task {
       do {
         try await deleteUseCase.run(memo)
-        self.lastUpdated = Date()
+
       } catch {
         Log.error("Failed to delete private memo: \(error)", category: .data)
       }

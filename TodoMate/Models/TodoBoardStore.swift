@@ -14,7 +14,6 @@ import TodoMateDomain
 @Observable
 @MainActor
 final class TodoBoardStore {
-  var lastUpdated = Date()
   var todos: [Todo] = []
 
   // Dependencies
@@ -63,7 +62,6 @@ final class TodoBoardStore {
     observationTask = Task {
       for await newTodos in observeTodosUseCase.execute(dateRange: range) {
         self.todos = newTodos
-        self.lastUpdated = Date()
       }
     }
   }
@@ -78,7 +76,7 @@ final class TodoBoardStore {
     Task {
       do {
         try await createUseCase.run(todo)
-        self.lastUpdated = Date()
+
       } catch {
         self.error = error
         Log.error("Failed to create local todo: \(error)")
@@ -90,7 +88,7 @@ final class TodoBoardStore {
     Task {
       do {
         try await updateUseCase.run(todo)
-        self.lastUpdated = Date()
+
       } catch {
         self.error = error
         Log.error("Failed to update local todo: \(error)")
@@ -110,7 +108,7 @@ final class TodoBoardStore {
     Task {
       do {
         try await deleteUseCase.run(todoId)
-        self.lastUpdated = Date()
+
       } catch {
         self.error = error
         Log.error("Failed to delete local todo: \(error)")
