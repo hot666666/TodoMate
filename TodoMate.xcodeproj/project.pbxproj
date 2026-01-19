@@ -15,6 +15,7 @@
 		4584495B2F18E88700B05106 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4584495A2F18E88700B05106 /* SwiftUI.framework */; };
 		458449662F18E88900B05106 /* TodoMateWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 458449572F18E88700B05106 /* TodoMateWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		458449752F18FC2300B05106 /* TodoMateDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 458449742F18FC2300B05106 /* TodoMateDomain */; };
+		458449862F18E99900B05106 /* TodoMateData in Frameworks */ = {isa = PBXBuildFile; productRef = 458449852F18E99900B05106 /* TodoMateData */; };
 		45962D2C2D4B128300089A48 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; platformFilters = (macos, ); productRef = 45962D2B2D4B128300089A48 /* Sparkle */; };
 		45A238022F0B66D6006B9A72 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 45A238012F0B66D6006B9A72 /* GoogleService-Info.plist */; };
 		45B526A92F0F82480095C87F /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 45B526A82F0F82480095C87F /* SwiftUIIntrospect */; };
@@ -150,6 +151,7 @@
 				4584495B2F18E88700B05106 /* SwiftUI.framework in Frameworks */,
 				458449592F18E88700B05106 /* WidgetKit.framework in Frameworks */,
 				458449752F18FC2300B05106 /* TodoMateDomain in Frameworks */,
+				458449862F18E99900B05106 /* TodoMateData in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,6 +239,7 @@
 			name = TodoMateWidgetExtension;
 			packageProductDependencies = (
 				458449742F18FC2300B05106 /* TodoMateDomain */,
+				458449852F18E99900B05106 /* TodoMateData */,
 			);
 			productName = TodoMateWidgetExtension;
 			productReference = 458449572F18E88700B05106 /* TodoMateWidgetExtension.appex */;
@@ -943,6 +946,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 456ECA9F2F17B44400DB8E88 /* XCLocalSwiftPackageReference "TodoMateDomain" */;
 			productName = TodoMateDomain;
+		};
+		458449852F18E99900B05106 /* TodoMateData */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 456ECA9C2F17B40100DB8E88 /* XCLocalSwiftPackageReference "TodoMateData" */;
+			productName = TodoMateData;
 		};
 		45962D2B2D4B128300089A48 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -9,6 +9,7 @@
 
 import AppIntents
 import SwiftData
+import TodoMateData
 import TodoMateDomain
 import WidgetKit
 
