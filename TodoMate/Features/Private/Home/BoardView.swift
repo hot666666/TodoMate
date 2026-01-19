@@ -15,19 +15,42 @@ import TodoMateDomain
 // MARK: - BoardView (Container)
 
 struct BoardView: View {
-  @Environment(LocalTodoHelper.self) private var todoStore
+  @Environment(TodoBoardStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
-  @State private var dateFilter: DateFilter = .today
+  @Bindable var viewModel: BoardViewModel
+  // dateFilter is now in viewModel
+  // scrollPosition is now in viewModel
+
+  private var viewTodos: [ViewTodo] {
+    todoStore.todos.map { ViewTodo(from: $0) }
+  }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      // Date Header (Toolbar handles filter, but we might show title here or in Toolbar)
-      // Original code had date header in body. We keep similar layout.
-
-      BoardQueryWrapper(
-        dateFilter: dateFilter,
-        onPresentSheet: presentTodoSheet,
+      BoardContent(
+        todos: viewTodos,
+        scrollPosition: $viewModel.scrollPosition,
+        onTapTask: { viewTodo in
+          if let todo = findDomainTodo(for: viewTodo) {
+            presentTodoSheet(for: todo)
+          }
+        },
+        onStatusClick: { viewTodo in
+          cycleStatus(viewTodo)
+        },
+        onStatusChange: { viewTodo, status in
+          updateTaskStatus(viewTodo, to: status)
+        },
+        onDropTask: { viewTodo, status in
+          updateTaskStatus(viewTodo, to: status)
+        },
+        onDuplicateTask: { viewTodo in
+          duplicateTask(viewTodo)
+        },
+        onDeleteTask: { viewTodo in
+          deleteTask(viewTodo)
+        },
       )
     }
     .background(Color(nsColor: .windowBackgroundColor))
@@ -35,7 +58,7 @@ struct BoardView: View {
     .toolbar {
       ToolbarItem(placement: .primaryAction) {
         Menu {
-          Picker("Date Filter", selection: $dateFilter) {
+          Picker("Date Filter", selection: $viewModel.dateFilter) {
             ForEach(DateFilter.allCases, id: \.self) { filter in
               Text(filter.rawValue).tag(filter)
             }
@@ -43,12 +66,12 @@ struct BoardView: View {
           .pickerStyle(.inline)
         } label: {
           Image(
-            systemName: dateFilter == .today
+            systemName: viewModel.dateFilter == .today
               ? "line.3.horizontal.decrease.circle"
               : "line.3.horizontal.decrease.circle.fill",
           )
           .foregroundStyle(
-            dateFilter == .today ? .secondary : DesignSystem.Colors.primary,
+            viewModel.dateFilter == .today ? .secondary : DesignSystem.Colors.primary,
           )
           .contentTransition(.symbolEffect(.replace))
         }
@@ -57,16 +80,14 @@ struct BoardView: View {
 
       HomeToolbarContent()
     }
+    .task(id: viewModel.dateFilter) {
+      todoStore.updateObservation(range: viewModel.dateFilter.dateRange)
+    }
   }
 
   // MARK: - Actions (Navigation/Sheet)
 
   private func presentTodoSheet(for originalTodo: Todo) {
-    // Note: We need Todo, not ViewTodo, to create EditableTodo.
-    // The Wrapper will provide the domain Todo object potentially,
-    // or we fetch it? Wrapper has access to Domain Todo via SDTodo.
-    // Let's make onPresentSheet take Todo.
-
     let editableTodo = EditableTodo(from: originalTodo)
     overlay?.presentCentered(
       id: .todoSheet,
@@ -76,67 +97,11 @@ struct BoardView: View {
       TodoSheet(editableTodo: editableTodo)
     }
   }
-}
-
-// MARK: - BoardQueryWrapper (Data Access)
-
-private struct BoardQueryWrapper: View {
-  @Environment(LocalTodoHelper.self) private var todoStore
-  @Query private var sdTodos: [SDTodo]
-
-  let dateFilter: DateFilter
-  let onPresentSheet: (Todo) -> Void
-
-  init(dateFilter: DateFilter, onPresentSheet: @escaping (Todo) -> Void) {
-    self.dateFilter = dateFilter
-    self.onPresentSheet = onPresentSheet
-
-    let range = dateFilter.dateRange
-    let start = range.lowerBound
-    let end = range.upperBound
-
-    // Predicate
-    let predicate = #Predicate<SDTodo> { todo in
-      todo.date >= start && todo.date <= end && !todo.isDeleted
-    }
-
-    _sdTodos = Query(filter: predicate, sort: \SDTodo.date, order: .reverse)
-  }
-
-  var body: some View {
-    // Mapping: SDTodo -> Todo -> ViewTodo
-    // We compute viewTodos for rendering
-    let viewTodos = sdTodos.map { ViewTodo(from: $0.toDomain()) }
-
-    BoardContent(
-      todos: viewTodos,
-      onTapTask: { viewTodo in
-        if let todo = findDomainTodo(for: viewTodo) {
-          onPresentSheet(todo)
-        }
-      },
-      onStatusClick: { viewTodo in
-        cycleStatus(viewTodo)
-      },
-      onStatusChange: { viewTodo, status in
-        updateTaskStatus(viewTodo, to: status)
-      },
-      onDropTask: { viewTodo, status in
-        updateTaskStatus(viewTodo, to: status)
-      },
-      onDuplicateTask: { viewTodo in
-        duplicateTask(viewTodo)
-      },
-      onDeleteTask: { viewTodo in
-        deleteTask(viewTodo)
-      },
-    )
-  }
 
   // MARK: - Data Helpers
 
   private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
-    sdTodos.first(where: { $0.id == viewTodo.id })?.toDomain()
+    todoStore.todos.first { $0.id == viewTodo.id }
   }
 
   private func cycleStatus(_ task: ViewTodo) {
@@ -172,6 +137,7 @@ private struct BoardQueryWrapper: View {
 
 private struct BoardContent: View {
   let todos: [ViewTodo]
+  @Binding var scrollPosition: BoardScrollPosition?
 
   // Actions
   let onTapTask: (ViewTodo) -> Void
@@ -180,8 +146,6 @@ private struct BoardContent: View {
   let onDropTask: (ViewTodo, ViewTodoStatus) -> Void
   let onDuplicateTask: (ViewTodo) -> Void
   let onDeleteTask: (ViewTodo) -> Void
-
-  @State private var scrollPosition: BoardScrollPosition? = .leading
 
   // Filtered lists
   private var todoTasks: [ViewTodo] { todos.filter { $0.status == .todo } }
@@ -371,7 +335,7 @@ private struct TodoColumn: View {
 }
 
 #Preview {
-  BoardView()
-    .environment(LocalTodoHelper.preview)
+  BoardView(viewModel: BoardViewModel())
+    .environment(TodoBoardStore.preview)
     .environment(OverlayManager())
 }

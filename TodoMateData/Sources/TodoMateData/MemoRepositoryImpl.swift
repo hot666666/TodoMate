@@ -75,6 +75,10 @@ public final class FirestoreMemoRepository: MemoRepository {
     }
   }
 
+  public func observeMemos() -> AsyncStream<[Memo]> {
+    AsyncStream { $0.finish() }
+  }
+
   public func fetchCount(userId: String) async throws -> Int {
     do {
       let snapshot = try await reference.memoCollection()

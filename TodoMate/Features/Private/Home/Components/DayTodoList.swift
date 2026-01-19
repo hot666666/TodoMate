@@ -14,76 +14,60 @@ import TodoMateDomain
 /// 특정 날짜의 모든 할 일 목록을 4열 상태별 레이아웃으로 보여주는 오버레이 뷰
 struct DayTodoList: View {
   @Environment(\.overlayManager) private var overlay
+  @Environment(TodoBoardStore.self) private var todoStore
+  @Environment(CoreDIContainer.self) private var diContainer
 
   let date: Date
   let onTapTodo: (Todo) -> Void
 
-  var body: some View {
-    DayTodoQueryWrapper(date: date, onTapTodo: onTapTodo)
-      .padding(20)
-      .frame(width: 700, height: 400)
-      .background(.regularMaterial)
-      .clipShape(.rect(cornerRadius: 12))
-      .overlay(
-        RoundedRectangle(cornerRadius: 12)
-          .stroke(Color.gray.opacity(0.3), lineWidth: 1),
-      )
-      .shadow(color: .black.opacity(0.2), radius: 10)
-      .onKeyPress(.escape) {
-        overlay?.dismissTop()
-        return .handled
-      }
-  }
-}
-
-// MARK: - Wrapper
-
-private struct DayTodoQueryWrapper: View {
-  @Environment(LocalTodoHelper.self) private var todoStore
-  @Query private var sdTodos: [SDTodo]
-  let date: Date
-  let onTapTodo: (Todo) -> Void
-
-  init(date: Date, onTapTodo: @escaping (Todo) -> Void) {
-    self.date = date
-    self.onTapTodo = onTapTodo
-
-    // Predicate: Start of Day <= date < End of Day
-    let calendar = Calendar.current
-    let startOfDay = calendar.startOfDay(for: date)
-    guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
-      // Fallback (safe)
-      let distantFuture = Date.distantFuture
-      let predicate = #Predicate<SDTodo> { $0.date == distantFuture }
-      _sdTodos = Query(filter: predicate)
-      return
-    }
-
-    let predicate = #Predicate<SDTodo> { todo in
-      todo.date >= startOfDay && todo.date < endOfDay && !todo.isDeleted
-    }
-    _sdTodos = Query(filter: predicate, sort: \SDTodo.date)
-  }
+  @State private var todos: [Todo] = []
 
   var body: some View {
-    let viewTodos = sdTodos.map { ViewTodo(from: $0.toDomain()) }
     DayTodoContent(
       date: date,
-      todos: viewTodos,
+      todos: todos.map { ViewTodo(from: $0) },
       onTapTodo: { viewTodo in
-        if let todo = findDomainTodo(for: viewTodo) {
+        if let todo = todos.first(where: { $0.id == viewTodo.id }) {
           onTapTodo(todo)
         }
       },
-
       onStatusChange: updateStatus,
       onDuplicateTask: duplicateTask,
       onDeleteTask: deleteTask,
     )
-  }
+    .padding(20)
+    .frame(width: 700, height: 400)
+    .background(.regularMaterial)
+    .clipShape(.rect(cornerRadius: 12))
+    .overlay(
+      RoundedRectangle(cornerRadius: 12)
+        .stroke(Color.gray.opacity(0.3), lineWidth: 1),
+    )
+    .shadow(color: .black.opacity(0.2), radius: 10)
+    .onKeyPress(.escape) {
+      overlay?.dismissTop()
+      return .handled
+    }
+    .task(id: date) {
+      // Create a 1-day range
+      let calendar = Calendar.current
+      let startOfDay = calendar.startOfDay(for: date)
+      let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+      // -1 sec? or < endOfDay?
+      // Range is ClosedRange. So date <= endOfDay.
+      // Day is start...start+24h.
+      // If endOfDay is next day 00:00:00.
+      // date <= endOfDay will include next day's 00:00:00.
+      // Typically we want < endOfDay.
+      // But ClosedRange requires <=.
+      // Use date(byAdding: .second, value: -1, to: endOfDay).
+      let endOfRange = calendar.date(byAdding: .second, value: -1, to: endOfDay)!
+      let range = startOfDay ... endOfRange
 
-  private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
-    sdTodos.first(where: { $0.id == viewTodo.id })?.toDomain()
+      for await newTodos in diContainer.observeTodosUseCase.execute(dateRange: range) {
+        todos = newTodos
+      }
+    }
   }
 
   private func updateStatus(_ task: ViewTodo, _ status: ViewTodoStatus) {
@@ -101,6 +85,10 @@ private struct DayTodoQueryWrapper: View {
   private func deleteTask(_ task: ViewTodo) {
     guard let todo = findDomainTodo(for: task) else { return }
     todoStore.deleteTodo(todo)
+  }
+
+  private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
+    todos.first(where: { $0.id == viewTodo.id })
   }
 }
 
@@ -232,7 +220,8 @@ private struct DayTodoContent: View {
     date: Date(),
     onTapTodo: { _ in },
   )
-  .environment(LocalTodoHelper.preview)
+  .environment(TodoBoardStore.preview)
+  .environment(CoreDIContainer.preview)
   .environment(OverlayManager())
   .padding()
 }

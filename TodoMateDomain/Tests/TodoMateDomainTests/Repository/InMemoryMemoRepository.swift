@@ -49,4 +49,14 @@ public actor InMemoryMemoRepository: MemoRepository {
   public func fetchCount(userId: String) async throws -> Int {
     try await readAllByUserId(userId, useCache: true).count
   }
+
+  public nonisolated func observeMemos() -> AsyncStream<[Memo]> {
+    AsyncStream { continuation in
+      Task {
+        let currentMemos = await self.memos
+        continuation.yield(currentMemos)
+        continuation.finish()
+      }
+    }
+  }
 }

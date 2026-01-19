@@ -18,7 +18,7 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
   // MARK: - Dependency
 
   private let coreDI: CoreDIContainer
-  private let todoHelper: LocalTodoHelper
+  private let todoBoardStore: TodoBoardStore
 
   // MARK: - View, ViewController
 
@@ -54,9 +54,9 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     return window
   }()
 
-  init(coreDI: CoreDIContainer, todoHelper: LocalTodoHelper) {
+  init(coreDI: CoreDIContainer, todoBoardStore: TodoBoardStore) {
     self.coreDI = coreDI
-    self.todoHelper = todoHelper
+    self.todoBoardStore = todoBoardStore
     super.init()
   }
 
@@ -91,11 +91,11 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
         onClose: { [weak self] in
           self?.close()
         },
-        todoStore: self.todoHelper,
+        todoBoardStore: self.todoBoardStore,
       )
       .id(UUID()) /// 새로 생성 시, onAppear 재수행
     }
-    .environment(todoHelper)
+    .environment(todoBoardStore)
     .environment(coreDI)
     .modelContainer(coreDI.modelContainer)
 

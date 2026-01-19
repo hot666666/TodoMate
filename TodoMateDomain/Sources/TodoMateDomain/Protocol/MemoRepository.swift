@@ -13,6 +13,7 @@ public protocol MemoRepository: Sendable {
   func readAllByUserId(_ userId: String, useCache: Bool) async throws -> [Memo]
   func readAllByUserIds(_ userIds: [String], useCache: Bool) async throws -> [Memo]
   func fetchCount(userId: String) async throws -> Int
+  func observeMemos() -> AsyncStream<[Memo]>
 }
 
 // MARK: - StubMemoRepository
@@ -26,4 +27,5 @@ public final class StubMemoRepository: MemoRepository, Sendable {
   public func readAllByUserId(_: String, useCache _: Bool = true) async throws -> [Memo] { [] }
   public func readAllByUserIds(_: [String], useCache _: Bool = true) async throws -> [Memo] { [] }
   public func fetchCount(userId _: String) async throws -> Int { 0 }
+  public func observeMemos() -> AsyncStream<[Memo]> { AsyncStream { $0.finish() } }
 }

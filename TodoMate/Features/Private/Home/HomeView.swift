@@ -10,16 +10,23 @@ import SwiftUI
 struct HomeView: View {
   @Environment(AppDIContainer.self) private var container
   @Environment(\.overlayManager) private var overlay
+
   let naviManager: NavigationManager
+  @State private var viewModel: HomeViewModel
   @State private var escToken: HotKeyManager.RegistrationToken?
+
+  init(naviManager: NavigationManager, container: CoreDIContainer) {
+    self.naviManager = naviManager
+    _viewModel = State(initialValue: HomeViewModel(container: container))
+  }
 
   var body: some View {
     Group {
       switch naviManager.viewMode {
       case .board:
-        BoardView()
+        BoardView(viewModel: viewModel.boardViewModel)
       case .calendar:
-        CalendarView()
+        CalendarView(viewModel: viewModel.calendarViewModel)
       }
     }
     .onAppear {

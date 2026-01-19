@@ -92,4 +92,37 @@ public actor SwiftDataMemoRepositoryImpl: MemoRepository {
       throw SwiftDataError.fetchFailed(underlying: error)
     }
   }
+
+  public nonisolated func observeMemos() -> AsyncStream<[Memo]> {
+    AsyncStream { continuation in
+      let task = Task {
+        // Initial fetch
+        // Note: For memos, we typically read all for current user or just all local memos.
+        // Assuming readAllByUserId with empty string fetches all local memos as per usage context or simplified logic.
+        // However, looking at readAllByUserId, it filters by !isDeleted and sorts.
+        // Let's use readAllByUserId with empty string as seen in Sidebar usage: diContainer.core.fetchMemoCountUseCase.execute(userId: "")
+
+        let fetchMemos = {
+          try await self.readAllByUserId("", useCache: false)
+        }
+
+        if let initialMemos = try? await fetchMemos() {
+          continuation.yield(initialMemos)
+        }
+
+        let center = NotificationCenter.default
+        let notifications = center.notifications(named: ModelContext.didSave)
+
+        for await _ in notifications {
+          if let updatedMemos = try? await fetchMemos() {
+            continuation.yield(updatedMemos)
+          }
+        }
+      }
+
+      continuation.onTermination = { _ in
+        task.cancel()
+      }
+    }
+  }
 }

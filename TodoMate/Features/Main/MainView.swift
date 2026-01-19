@@ -89,7 +89,7 @@ private struct MainContent: View {
     if let selection = naviManager.selection {
       switch selection {
       case .todo:
-        HomeView(naviManager: naviManager)
+        HomeView(naviManager: naviManager, container: container.core)
 
       case .memo:
         MemoView()

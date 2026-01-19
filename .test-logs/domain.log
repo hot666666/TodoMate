@@ -1,0 +1,114 @@
+Building for debugging...
+[0/2] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.13s)
+Test Suite 'All tests' started at 2026-01-19 14:18:39.975.
+Test Suite 'All tests' passed at 2026-01-19 14:18:39.977.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.002) seconds
+◇ Test run started.
+↳ Testing Library Version: 1501
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite "UpdateMemoUseCase Tests" started.
+◇ Suite "SyncTodayTodosUseCase Unit Tests" started.
+◇ Suite "DeleteTodoUseCase Unit Tests" started.
+◇ Suite "UpdateUserUseCase Tests" started.
+◇ Suite "Local Memo UseCases Tests" started.
+◇ Suite "ReadGroupTodoUseCase Unit Tests" started.
+◇ Suite "LeaveGroupUseCase Tests" started.
+◇ Suite "CreateMemoUseCase Tests" started.
+◇ Suite "DeleteMemoUseCase Tests" started.
+◇ Suite "ReadGroupMemoUseCase Tests" started.
+◇ Suite "UpdateTodoUseCase Unit Tests" started.
+◇ Suite "GroupUseCase Tests" started.
+◇ Suite "Local Todo UseCases Tests" started.
+◇ Suite "CreateTodoUseCase Unit Tests" started.
+◇ Test "Local New -> Remote Create" started.
+◇ Test "Remote Newer -> No Update" started.
+◇ Test "다른 사용자의 Todo 삭제 시도 시 에러" started.
+◇ Test "Todo 삭제" started.
+◇ Test "Update Local Memo" started.
+◇ Test "Read Local Memos" started.
+◇ Test "메모 내용 업데이트 성공" started.
+◇ Test "Local Newer UpdatedAt -> Remote Update" started.
+◇ Test "Todo가 없는 유저도 빈 배열로 반환" started.
+◇ Test "Delete Local Memo" started.
+◇ Test "그룹 멤버 Todo 조회" started.
+◇ Test "LeaveGroupUseCase는 groupRepository.leaveGroup을 호출함" started.
+◇ Test "최대 글자 수와 동일한 이름은 성공" started.
+◇ Test "글자 수 초과 시 에러 발생" started.
+◇ Test "유효한 이름으로 사용자 업데이트 성공" started.
+◇ Test "권한 없는 사용자가 메모 생성 시 에러" started.
+◇ Test "공백만 있는 이름으로 업데이트 시 에러 발생" started.
+◇ Test "Create Local Memo" started.
+◇ Test "권한 없는 사용자가 메모 삭제 시 에러" started.
+◇ Test "메모 삭제 성공" started.
+◇ Test "빈 이름으로 업데이트 시 에러 발생" started.
+◇ Test "Read Local Todo by ID" started.
+◇ Test "날짜 필터링 동작 확인" started.
+◇ Test "Update Local Todo" started.
+◇ Test "새 메모 생성 성공" started.
+◇ Test "Read Local Todos by Date" started.
+◇ Test "Read Local Todos by Range" started.
+◇ Test "Create Local Todo" started.
+◇ Test "Delete Local Todo" started.
+◇ Test "다른 사용자의 Todo 수정 시도 시 에러" started.
+◇ Test "기존 Todo 업데이트" started.
+◇ Test "존재하지 않는 그룹 조회시 nil 반환" started.
+◇ Test "새 그룹 생성" started.
+◇ Test "그룹 조회" started.
+◇ Test "새 Todo 생성 및 저장" started.
+◇ Test "다른 사용자의 Todo 생성 시도 시 에러" started.
+◇ Test "메모가 없는 사용자는 빈 배열 반환" started.
+◇ Test "여러 사용자의 메모 조회" started.
+✔ Test "메모 내용 업데이트 성공" passed after 0.005 seconds.
+✔ Test "Update Local Memo" passed after 0.005 seconds.
+✔ Test "최대 글자 수와 동일한 이름은 성공" passed after 0.005 seconds.
+✔ Test "글자 수 초과 시 에러 발생" passed after 0.005 seconds.
+✔ Test "LeaveGroupUseCase는 groupRepository.leaveGroup을 호출함" passed after 0.005 seconds.
+✔ Test "유효한 이름으로 사용자 업데이트 성공" passed after 0.005 seconds.
+✔ Test "권한 없는 사용자가 메모 생성 시 에러" passed after 0.005 seconds.
+✔ Test "Delete Local Memo" passed after 0.005 seconds.
+✔ Test "메모 삭제 성공" passed after 0.005 seconds.
+✔ Test "Read Local Memos" passed after 0.005 seconds.
+✔ Test "공백만 있는 이름으로 업데이트 시 에러 발생" passed after 0.005 seconds.
+✔ Test "Create Local Memo" passed after 0.005 seconds.
+✔ Test "다른 사용자의 Todo 삭제 시도 시 에러" passed after 0.005 seconds.
+✔ Test "권한 없는 사용자가 메모 삭제 시 에러" passed after 0.005 seconds.
+✔ Test "빈 이름으로 업데이트 시 에러 발생" passed after 0.005 seconds.
+✔ Test "Todo 삭제" passed after 0.005 seconds.
+✔ Test "Update Local Todo" passed after 0.005 seconds.
+✔ Test "새 메모 생성 성공" passed after 0.004 seconds.
+✔ Test "날짜 필터링 동작 확인" passed after 0.005 seconds.
+✔ Test "존재하지 않는 그룹 조회시 nil 반환" passed after 0.004 seconds.
+✔ Test "그룹 조회" passed after 0.004 seconds.
+✔ Test "새 그룹 생성" passed after 0.004 seconds.
+✔ Test "Todo가 없는 유저도 빈 배열로 반환" passed after 0.005 seconds.
+✔ Test "Read Local Todo by ID" passed after 0.005 seconds.
+✔ Test "Read Local Todos by Range" passed after 0.004 seconds.
+✔ Test "기존 Todo 업데이트" passed after 0.004 seconds.
+✔ Test "Create Local Todo" passed after 0.004 seconds.
+✔ Test "그룹 멤버 Todo 조회" passed after 0.005 seconds.
+✔ Test "다른 사용자의 Todo 수정 시도 시 에러" passed after 0.004 seconds.
+✔ Test "Read Local Todos by Date" passed after 0.005 seconds.
+✔ Test "여러 사용자의 메모 조회" passed after 0.004 seconds.
+✔ Test "새 Todo 생성 및 저장" passed after 0.004 seconds.
+✔ Test "다른 사용자의 Todo 생성 시도 시 에러" passed after 0.004 seconds.
+✔ Test "메모가 없는 사용자는 빈 배열 반환" passed after 0.004 seconds.
+✔ Suite "UpdateMemoUseCase Tests" passed after 0.005 seconds.
+✔ Suite "Local Memo UseCases Tests" passed after 0.005 seconds.
+✔ Suite "UpdateUserUseCase Tests" passed after 0.005 seconds.
+✔ Suite "LeaveGroupUseCase Tests" passed after 0.005 seconds.
+✔ Suite "DeleteMemoUseCase Tests" passed after 0.005 seconds.
+✔ Suite "DeleteTodoUseCase Unit Tests" passed after 0.005 seconds.
+✔ Test "Local Newer UpdatedAt -> Remote Update" passed after 0.005 seconds.
+✔ Suite "CreateMemoUseCase Tests" passed after 0.005 seconds.
+✔ Test "Remote Newer -> No Update" passed after 0.005 seconds.
+✔ Test "Delete Local Todo" passed after 0.004 seconds.
+✔ Suite "UpdateTodoUseCase Unit Tests" passed after 0.005 seconds.
+✔ Suite "ReadGroupMemoUseCase Tests" passed after 0.005 seconds.
+✔ Suite "GroupUseCase Tests" passed after 0.005 seconds.
+✔ Test "Local New -> Remote Create" passed after 0.005 seconds.
+✔ Suite "CreateTodoUseCase Unit Tests" passed after 0.005 seconds.
+✔ Suite "ReadGroupTodoUseCase Unit Tests" passed after 0.005 seconds.
+✔ Suite "SyncTodayTodosUseCase Unit Tests" passed after 0.005 seconds.
+✔ Suite "Local Todo UseCases Tests" passed after 0.005 seconds.
+✔ Test run with 38 tests in 14 suites passed after 0.006 seconds.

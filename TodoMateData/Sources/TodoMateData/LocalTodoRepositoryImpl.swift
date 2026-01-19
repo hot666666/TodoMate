@@ -132,4 +132,29 @@ public actor SwiftDataTodoRepositoryImpl: TodoRepository {
       throw SwiftDataError.fetchFailed(underlying: error)
     }
   }
+
+  public nonisolated func observeTodos(query: TodoQuery) -> AsyncStream<[Todo]> {
+    AsyncStream { continuation in
+      let task = Task {
+        // Initial fetch
+        if let initialTodos = try? await readAll(query: query, useCache: false) {
+          continuation.yield(initialTodos)
+        }
+
+        // Observe didSave
+        let center = NotificationCenter.default
+        let notifications = center.notifications(named: ModelContext.didSave)
+
+        for await _ in notifications {
+          if let updatedTodos = try? await readAll(query: query, useCache: false) {
+            continuation.yield(updatedTodos)
+          }
+        }
+      }
+
+      continuation.onTermination = { _ in
+        task.cancel()
+      }
+    }
+  }
 }

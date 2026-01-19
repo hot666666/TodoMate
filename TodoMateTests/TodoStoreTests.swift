@@ -57,7 +57,7 @@ struct TodoStoreTests {
 
     // Update Repository (Server Update)
     let todoTodayUpdated = todoToday.withUpdatedStatus(.complete)
-    try mockRepo.update(todoTodayUpdated)
+    try await mockRepo.update(todoTodayUpdated)
 
     // When: Load Narrow Range (Today)
     await store.load(for: [userId], range: today.dayRange, useCache: false)

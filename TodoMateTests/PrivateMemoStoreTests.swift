@@ -36,6 +36,14 @@ struct PrivateMemoStoreTests {
     func run(userId _: String) async throws -> [Memo] { [] }
   }
 
+  final class MockObserveUseCase: ObserveMemosUseCase {
+    func execute() -> AsyncStream<[Memo]> {
+      AsyncStream { continuation in
+        continuation.finish()
+      }
+    }
+  }
+
   @Test("Add Memo calls CreateUseCase")
   func add_callsUseCase() async throws {
     // Given
@@ -44,11 +52,14 @@ struct PrivateMemoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = LocalMemoHelper(
+    let observeUC = MockObserveUseCase()
+
+    let store = MemoStore(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
+      observeMemosUseCase: observeUC,
     )
 
     var capturedMemo: Memo?
@@ -70,11 +81,14 @@ struct PrivateMemoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = LocalMemoHelper(
+    let observeUC = MockObserveUseCase()
+
+    let store = MemoStore(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
+      observeMemosUseCase: observeUC,
     )
 
     let memo = Memo(owner: "me", content: "Updated")
@@ -97,11 +111,14 @@ struct PrivateMemoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = LocalMemoHelper(
+    let observeUC = MockObserveUseCase()
+
+    let store = MemoStore(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
+      observeMemosUseCase: observeUC,
     )
 
     let memo = Memo(owner: "me", content: "Delete me")

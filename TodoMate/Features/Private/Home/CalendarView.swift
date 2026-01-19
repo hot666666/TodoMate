@@ -15,8 +15,10 @@ import TodoMateDomain
 
 struct CalendarView: View {
   @Environment(\.overlayManager) private var overlay
-  @Environment(LocalTodoHelper.self) private var todoStore
-  @State private var currentDate = Date()
+  @Environment(TodoBoardStore.self) private var todoStore
+
+  let viewModel: TodoCalendarViewModel
+
   @State private var selectedTask: ViewTodo?
 
   private let calendar = Calendar.current
@@ -27,8 +29,9 @@ struct CalendarView: View {
       weekdayHeader
 
       // Wrapper handles data fetching and grid rendering
-      CalendarQueryWrapper(
-        currentDate: currentDate,
+      CalendarContentWrapper(
+        viewModel: viewModel,
+        todoStore: todoStore,
         selectedTask: $selectedTask,
         onPresentSheet: { todo in
           presentTodoSheet(for: todo)
@@ -50,24 +53,28 @@ struct CalendarView: View {
 
   private var calendarHeader: some View {
     HStack(alignment: .top) {
-      Text(currentDate.formatted(.dateTime.month(.wide).year()))
+      Text(viewModel.currentDate.formatted(.dateTime.month(.wide).year()))
         .font(.title)
 
       Spacer()
 
       HStack(spacing: 8) {
         Button {
-          currentDate = calendar.date(byAdding: .month, value: -1, to: currentDate) ?? currentDate
+          viewModel.currentDate =
+            calendar.date(byAdding: .month, value: -1, to: viewModel.currentDate)
+              ?? viewModel.currentDate
         } label: {
           Image(systemName: "chevron.left")
         }
 
         Button("Today") {
-          currentDate = Date()
+          viewModel.currentDate = Date()
         }
 
         Button {
-          currentDate = calendar.date(byAdding: .month, value: 1, to: currentDate) ?? currentDate
+          viewModel.currentDate =
+            calendar.date(byAdding: .month, value: 1, to: viewModel.currentDate)
+              ?? viewModel.currentDate
         } label: {
           Image(systemName: "chevron.right")
         }
@@ -121,59 +128,27 @@ struct CalendarView: View {
   }
 }
 
-// MARK: - CalendarQueryWrapper
+// MARK: - CalendarContentWrapper
 
-private struct CalendarQueryWrapper: View {
-  @Environment(LocalTodoHelper.self) private var todoStore
-  @Query private var sdTodos: [SDTodo]
+private struct CalendarContentWrapper: View {
+  var viewModel: TodoCalendarViewModel
+  var todoStore: TodoBoardStore
 
-  let currentDate: Date
   @Binding var selectedTask: ViewTodo?
   let onPresentSheet: (Todo) -> Void
   let onPresentDayList: (Date) -> Void
 
-  // Calculated days for grid
-  private let days: [Date]
-
-  init(
-    currentDate: Date,
-    selectedTask: Binding<ViewTodo?>,
-    onPresentSheet: @escaping (Todo) -> Void,
-    onPresentDayList: @escaping (Date) -> Void,
-  ) {
-    self.currentDate = currentDate
-    _selectedTask = selectedTask
-    self.onPresentSheet = onPresentSheet
-    self.onPresentDayList = onPresentDayList
-
-    // Calculate Days
-    let calendar = Calendar.current
-    let monthInterval = calendar.dateInterval(of: .month, for: currentDate)!
-    let monthStart = monthInterval.start
-    let weekday = calendar.component(.weekday, from: monthStart)
-    let startOffset = weekday - 1
-    let startDisplayDate = calendar.date(byAdding: .day, value: -startOffset, to: monthStart)!
-
-    // 42 days fixed
-    days = (0 ..< 42).compactMap { offset in
-      calendar.date(byAdding: .day, value: offset, to: startDisplayDate)
-    }
-
-    // Predicate: Start <= date <= End
-    let start = days.first ?? .distantPast
-    let end = days.last ?? .distantFuture
-    let predicate = #Predicate<SDTodo> { todo in
-      todo.date >= start && todo.date <= end && !todo.isDeleted
-    }
-    _sdTodos = Query(filter: predicate)
-  }
-
   var body: some View {
-    let viewTodos = sdTodos.map { ViewTodo(from: $0.toDomain()) }
+    let viewTodos = viewModel.todos.map { ViewTodo(from: $0) }
+
+    // Calculate Days (Logic moved from VM for display, or can access if exposed?
+    // VM calculates range but not the array of days. Let's recalculate or expose.
+    // Recalculating here is cheap and keeps VM purely data.
+    let days = calculateDays(for: viewModel.currentDate)
 
     CalendarContent(
       days: days,
-      currentDate: currentDate,
+      currentDate: viewModel.currentDate,
       todos: viewTodos,
       selectedTask: $selectedTask,
       onDrop: { viewTodo, date in
@@ -202,10 +177,23 @@ private struct CalendarQueryWrapper: View {
     )
   }
 
+  private func calculateDays(for date: Date) -> [Date] {
+    let calendar = Calendar.current
+    guard let monthInterval = calendar.dateInterval(of: .month, for: date) else { return [] }
+    let monthStart = monthInterval.start
+    let weekday = calendar.component(.weekday, from: monthStart)
+    let startOffset = weekday - 1
+    let startDisplayDate = calendar.date(byAdding: .day, value: -startOffset, to: monthStart)!
+
+    return (0 ..< 42).compactMap { offset in
+      calendar.date(byAdding: .day, value: offset, to: startDisplayDate)
+    }
+  }
+
   // MARK: - Logic
 
   private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
-    sdTodos.first(where: { $0.id == viewTodo.id })?.toDomain()
+    viewModel.todos.first(where: { $0.id == viewTodo.id })
   }
 
   private func moveTask(_ task: ViewTodo, to date: Date) {
@@ -392,7 +380,7 @@ struct CalendarCell: View {
 }
 
 #Preview {
-  CalendarView()
+  CalendarView(viewModel: TodoCalendarViewModel.preview)
     .environment(NavigationManager.preview)
-    .environment(LocalTodoHelper.preview)
+    .environment(TodoBoardStore.preview)
 }
