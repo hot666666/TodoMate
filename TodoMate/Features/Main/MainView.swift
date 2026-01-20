@@ -29,10 +29,7 @@ struct MainView: View {
         .environment(naviManager)
     }
     .task {
-      sessionStore.startListeningToAuthChanges()
-    }
-    .onDisappear {
-      sessionStore.cleanup()
+      await sessionStore.startListeningToAuthChanges()
     }
   }
 }
@@ -40,8 +37,8 @@ struct MainView: View {
 // MARK: - MainContent
 
 private struct MainContent: View {
-  @Environment(AppDIContainer.self) private var container
   @Environment(\.overlayManager) private var overlay
+  @Environment(AppDIContainer.self) private var container
   @Environment(TodoBoardStore.self) private var todoBoardStore
   @Environment(MemoStore.self) private var memoStore
   @State private var sidebarToken: HotKeyManager.RegistrationToken?
@@ -63,28 +60,7 @@ private struct MainContent: View {
     }
   }
 
-  // ... (hotkey methods skipped, assumed unchanged)
-
-  private func registerHotKeys() {
-    // Command+B: Toggle Sidebar
-    sidebarToken = container.core.hotKeyManager.register(
-      key: .b, modifiers: [.command],
-    ) { [weak naviManager] in
-      Task { @MainActor in
-        guard let naviManager else { return }
-        withAnimation {
-          naviManager.columnVisibility =
-            naviManager.columnVisibility == .all ? .detailOnly : .all
-        }
-      }
-    }
-  }
-
-  private func unregisterHotKeys() {
-    if let token = sidebarToken {
-      container.core.hotKeyManager.unregister(token)
-    }
-  }
+  // MARK: - Subviews
 
   @ViewBuilder
   private var detailView: some View {
@@ -115,6 +91,29 @@ private struct MainContent: View {
       systemImage: "sidebar.left",
       description: Text("Choose a category from the sidebar"),
     )
+  }
+
+  // MARK: - Helpers
+
+  private func registerHotKeys() {
+    // Command+B: Toggle Sidebar
+    sidebarToken = container.core.hotKeyManager.register(
+      key: .b, modifiers: [.command],
+    ) { [weak naviManager] in
+      Task { @MainActor in
+        guard let naviManager else { return }
+        withAnimation {
+          naviManager.columnVisibility =
+            naviManager.columnVisibility == .all ? .detailOnly : .all
+        }
+      }
+    }
+  }
+
+  private func unregisterHotKeys() {
+    if let token = sidebarToken {
+      container.core.hotKeyManager.unregister(token)
+    }
   }
 }
 

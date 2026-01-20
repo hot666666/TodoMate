@@ -26,10 +26,7 @@ final class SessionStore {
   @ObservationIgnored private let leaveGroupUseCase: LeaveGroupUseCase
   @ObservationIgnored private let sidebarCacheUseCase: SidebarCacheUseCase
 
-  // MARK: - Listenter & Publisher
-
-  /// Firebase Auth 상태 변화를 비동기적으로 감지하는 리스너 태스크
-  @ObservationIgnored private var authListener: Task<Void, Never>?
+  // MARK: - Publisher
 
   /// 구독자 관리: UUID를 키로 사용하여 여러 구독자에게 동시에 이벤트 전송
   @ObservationIgnored private var continuations: [UUID: AsyncStream<SessionEvent>.Continuation] =
@@ -90,23 +87,20 @@ final class SessionStore {
   // MARK: - Auth Listening
 
   /// Firebase Auth 상태 변화를 감지하고 자동으로 이벤트 방출
-  func startListeningToAuthChanges() {
-    authListener?.cancel()
-    authListener = Task {
-      for await storedUid in listenAuthStateUseCase.run() {
-        if let uid = storedUid {
-          await authenticate(with: uid)
-        } else {
-          handleLogout()
-        }
+  func startListeningToAuthChanges() async {
+    for await storedUid in listenAuthStateUseCase.run() {
+      if let uid = storedUid {
+        await authenticate(with: uid)
+      } else {
+        handleLogout()
       }
     }
+
+    cleanupContinuations()
   }
 
-  /// 모든 리스너 및 continuation 정리
-  func cleanup() {
-    authListener?.cancel()
-    authListener = nil
+  /// 모든 continuation 정리
+  private func cleanupContinuations() {
     for continuation in continuations.values {
       continuation.finish()
     }
