@@ -11,11 +11,7 @@ import SwiftUI
 
 struct AuthenticatedView<Content: View>: View {
   @Environment(SessionStore.self) private var sessionStore
-  let content: Content
-
-  init(@ViewBuilder content: () -> Content) {
-    self.content = content()
-  }
+  @ViewBuilder let content: Content
 
   var body: some View {
     Group {

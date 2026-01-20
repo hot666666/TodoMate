@@ -14,18 +14,22 @@ import TodoMateDomain
 final class TodoCalendarViewModel {
   var todos: [Todo] = []
   var currentDate: Date = .init()
+  var selectedTodoId: String?
 
+  private let calendar: Calendar
   private let observeTodosUseCase: ObserveTodosUseCase
   private let createTodoUseCase: CreateLocalTodoUseCase
   private let updateTodoUseCase: UpdateLocalTodoUseCase
   private let deleteTodoUseCase: DeleteLocalTodoUseCase
 
   init(
+    calendar: Calendar = .current,
     observeTodosUseCase: ObserveTodosUseCase,
     createTodoUseCase: CreateLocalTodoUseCase,
     updateTodoUseCase: UpdateLocalTodoUseCase,
     deleteTodoUseCase: DeleteLocalTodoUseCase,
   ) {
+    self.calendar = calendar
     self.observeTodosUseCase = observeTodosUseCase
     self.createTodoUseCase = createTodoUseCase
     self.updateTodoUseCase = updateTodoUseCase
@@ -34,6 +38,7 @@ final class TodoCalendarViewModel {
 
   convenience init(container: CoreDIContainer) {
     self.init(
+      calendar: container.calendar,
       observeTodosUseCase: container.observeTodosUseCase,
       createTodoUseCase: container.createLocalTodoUseCase,
       updateTodoUseCase: container.updateLocalTodoUseCase,
@@ -42,7 +47,6 @@ final class TodoCalendarViewModel {
   }
 
   var days: [Date] {
-    let calendar = Calendar.current
     guard let monthInterval = calendar.dateInterval(of: .month, for: currentDate) else { return [] }
     let monthStart = monthInterval.start
     let weekday = calendar.component(.weekday, from: monthStart)
@@ -54,9 +58,45 @@ final class TodoCalendarViewModel {
     }
   }
 
+  var headerTitle: String {
+    currentDate.formatted(.dateTime.month(.wide).year())
+  }
+
+  var weekdays: [String] {
+    ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+  }
+
   func todos(for date: Date) -> [Todo] {
-    let calendar = Calendar.current
-    return todos.filter { calendar.isDate($0.date, inSameDayAs: date) }
+    todos.filter { calendar.isDate($0.date, inSameDayAs: date) }
+  }
+
+  func isCurrentMonth(_ date: Date) -> Bool {
+    calendar.isDate(date, equalTo: currentDate, toGranularity: .month)
+  }
+
+  func isToday(_ date: Date) -> Bool {
+    calendar.isDateInToday(date)
+  }
+
+  func nextMonth() {
+    guard let newDate = calendar.date(byAdding: .month, value: 1, to: currentDate) else { return }
+    currentDate = newDate
+  }
+
+  func previousMonth() {
+    guard let newDate = calendar.date(byAdding: .month, value: -1, to: currentDate) else { return }
+    currentDate = newDate
+  }
+
+  func goToday() {
+    currentDate = Date()
+  }
+
+  func updateDate(of todo: Todo, to date: Date) {
+    var updatedTodo = todo
+    updatedTodo.date = calendar.startOfDay(for: date)
+    updatedTodo.updatedAt = Date()
+    update(updatedTodo)
   }
 
   func startObserving() async {
