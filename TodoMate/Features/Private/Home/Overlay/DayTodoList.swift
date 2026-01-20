@@ -13,12 +13,16 @@ import TodoMateDomain
 
 /// 특정 날짜의 모든 할 일 목록을 4열 상태별 레이아웃으로 보여주는 오버레이 뷰
 struct DayTodoList: View {
+  // MARK: - Properties
+
   @Environment(\.overlayManager) private var overlay
 
   let date: Date
   let viewModel: TodoCalendarViewModel
 
   let onTapTodo: (Todo) -> Void
+
+  // MARK: - Body
 
   var body: some View {
     DayTodoContent(
@@ -54,12 +58,16 @@ struct DayTodoList: View {
 // MARK: - Content
 
 private struct DayTodoContent: View {
+  // MARK: - Properties
+
   let date: Date
   let todos: [Todo]
   let onTapTodo: (Todo) -> Void
   let onStatusChange: (Todo, TodoStatus) -> Void
   let onDeleteTask: (Todo) -> Void
   let onDuplicateTask: (Todo) -> Void
+
+  // MARK: - Computed Properties
 
   private var title: String {
     date.formatted(.dateTime.month().day().weekday(.wide))
@@ -73,6 +81,8 @@ private struct DayTodoContent: View {
 
   // Tasks count for badge
   private var totalCount: Int { todos.count }
+
+  // MARK: - Body
 
   var body: some View {
     VStack(alignment: .leading, spacing: 20) {

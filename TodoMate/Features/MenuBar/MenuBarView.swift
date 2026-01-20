@@ -13,6 +13,8 @@ import SwiftUI
 import TodoMateDomain
 
 struct MenuBarView: View {
+  // MARK: - Properties
+
   @Environment(TodoBoardStore.self) private var todoStore
 
   private var todayTodos: [Todo] {
@@ -23,6 +25,8 @@ struct MenuBarView: View {
     }
     .sorted { $0.date < $1.date }
   }
+
+  // MARK: - Body
 
   var body: some View {
     MenuBarContent(todos: todayTodos)

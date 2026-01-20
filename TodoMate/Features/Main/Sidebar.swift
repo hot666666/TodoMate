@@ -12,6 +12,8 @@ import SwiftUI
 import TodoMateDomain
 
 struct Sidebar: View {
+  // MARK: - Properties
+
   @Environment(TodoBoardStore.self) private var todoStore
   @Environment(MemoStore.self) private var memoStore
 
@@ -24,6 +26,8 @@ struct Sidebar: View {
 
   @Binding var selection: NavigationDestination?
 
+  // MARK: - Computed Properties
+
   private var todayTodoCount: Int {
     let calendar = Calendar.current
     return todoStore.todos.count(where: { calendar.isDateInToday($0.date) })
@@ -32,6 +36,8 @@ struct Sidebar: View {
   private var memoCount: Int {
     memoStore.memos.count
   }
+
+  // MARK: - Body
 
   var body: some View {
     List(selection: $selection) {
@@ -106,6 +112,8 @@ struct Sidebar: View {
     .frame(minWidth: 200)
     .listStyle(.sidebar)
   }
+
+  // MARK: - Subviews
 
   private var groupLabel: some View {
     Label {

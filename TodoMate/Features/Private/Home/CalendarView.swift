@@ -14,10 +14,14 @@ import TodoMateDomain
 // MARK: - CalendarView (Container)
 
 struct CalendarView: View {
+  // MARK: - Properties
+
   @Environment(\.overlayManager) private var overlay
   @Environment(CoreDIContainer.self) private var coreDI
 
   let viewModel: TodoCalendarViewModel
+
+  // MARK: - Body
 
   var body: some View {
     VStack(spacing: 0) {
@@ -83,7 +87,7 @@ struct CalendarView: View {
     }
   }
 
-  // MARK: - Components
+  // MARK: - Subviews
 
   private var calendarHeader: some View {
     HStack(alignment: .top) {
