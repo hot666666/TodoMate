@@ -243,16 +243,22 @@ private struct CalendarCell: View {
   private var tasksList: some View {
     VStack(alignment: .leading, spacing: 2) {
       ForEach(todos.prefix(visibleCount)) { todo in
-        CalendarTodoCard(todo: todo)
-          .draggable(todo)
-          .onTapGesture {
-            onTapTodo(todo)
-          }
-          .contextMenu {
-            Button("Duplicate") { onDuplicate(todo) }
-            Button("Delete", role: .destructive) { onDelete(todo) }
-          }
-          .opacity(opacity(for: todo))
+        TodoCard(
+          style: .compact,
+          todo: todo,
+          onStatusChange: { newStatus in
+            var updated = todo
+            updated.status = newStatus
+            onStatusChange(updated)
+          },
+          onDuplicate: { onDuplicate(todo) },
+          onDelete: { onDelete(todo) },
+        )
+        .draggable(todo)
+        .onTapGesture {
+          onTapTodo(todo)
+        }
+        .opacity(opacity(for: todo))
       }
 
       if showMore {

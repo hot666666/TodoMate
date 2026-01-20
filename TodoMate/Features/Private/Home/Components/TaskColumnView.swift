@@ -16,14 +16,13 @@ struct TaskColumnView<Content: View>: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
-      // Header
       HStack {
         HStack(spacing: 8) {
           Circle()
             .fill(color)
             .frame(width: 8, height: 8)
           Text(title)
-            .font(.system(size: 14, weight: .bold)) // Bold as per screenshot
+            .font(.system(size: 14, weight: .bold))
             .foregroundStyle(.primary)
         }
 
@@ -39,16 +38,11 @@ struct TaskColumnView<Content: View>: View {
       }
       .padding(.horizontal, 16)
       .padding(.vertical, 12)
-      .background(Color.white.opacity(0.02)) // Very subtle header background for differentiation within the column
+      .background(Color.white.opacity(0.02))
 
-      // Content List
       content
     }
-    // Container Style - The "Card" look for the column itself
-    .background(Color(nsColor: .windowBackgroundColor).opacity(0.5)) // Slightly distinct from main background
-    // Or closer to screenshot: Dark gray container?
-    // Screenshot shows a container that is distinctly visible against the black background.
-    // Let's use Color.secondary.opacity(0.05) or Material.
+    .background(Color(nsColor: .windowBackgroundColor).opacity(0.5))
     .background(.regularMaterial)
     .clipShape(RoundedRectangle(cornerRadius: 16))
     .overlay(
@@ -70,9 +64,13 @@ struct TaskColumnView<Content: View>: View {
             .background(Color.gray.opacity(0.2))
             .cornerRadius(8)
             .padding(12)
+
+          TodoCard(todo: .stub)
+            .padding(5)
         }
       }
-      .frame(width: 300, height: 500)
+      .frame(width: 300, height: 400)
     }
   }
+  .frame(width: 400, height: 500)
 }
