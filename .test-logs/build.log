@@ -1,0 +1,27 @@
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:00008112-000D58EE0CDBC01E, name:My Mac }
+{ platform:macOS, arch:x86_64, id:00008112-000D58EE0CDBC01E, name:My Mac }
+/Users/hs/Programming/project/TodoMate/TodoMate/AppIntent/Intent/AddTodoIntent.swift:46:25: warning: non-Sendable type 'any CreateLocalTodoUseCase' of property 'createLocalTodoUseCase' cannot exit main actor-isolated context; this is an error in the Swift 6 language mode
+    try await container.createLocalTodoUseCase.run(todo)
+                        ^
+TodoMateDomain.CreateLocalTodoUseCase:1:17: note: protocol 'CreateLocalTodoUseCase' does not conform to the 'Sendable' protocol
+public protocol CreateLocalTodoUseCase {
+                ^
+eyJibHVlcHJpbnRfYmx1ZXByaW50SWRlbnRpZmllciI6IlRvZG9NYXRlRGF0YSIsImJsdWVwcmludF9wcm92aWRlckZpbGVQYXRoU3RyaW5nIjoiXC9Vc2Vyc1wvaHNcL1Byb2dyYW1taW5nXC9wcm9qZWN0XC9Ub2RvTWF0ZVwvVG9kb01hdGVEYXRhIiwidHlwZSI6eyJibHVlcHJpbnQiOnt9fX0=
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/Testing.framework'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/XCTAutomationSupport.framework'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/XCTest.framework'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/XCTestCore.framework'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/XCTestSupport.framework'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/XCUIAutomation.framework'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/XCUnit.framework'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/libXCTestBundleInject.dylib'
+
+note: Removed stale file '/Users/hs/Library/Developer/Xcode/DerivedData/TodoMate-daydbkwjujvdgthizfxvyfaywyrr/Build/Products/Debug/TodoMate.app/Contents/Frameworks/libXCTestSwiftSupport.dylib'

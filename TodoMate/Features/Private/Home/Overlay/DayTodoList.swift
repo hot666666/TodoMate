@@ -73,12 +73,6 @@ private struct DayTodoContent: View {
     date.formatted(.dateTime.month().day().weekday(.wide))
   }
 
-  // Filtered Tasks
-  private var todoTasks: [Todo] { todos.filter { $0.status == .todo } }
-  private var inProgressTasks: [Todo] { todos.filter { $0.status == .inProgress } }
-  private var doneTasks: [Todo] { todos.filter { $0.status == .complete } }
-  private var incompleteTasks: [Todo] { todos.filter { $0.status == .inComplete } }
-
   // Tasks count for badge
   private var totalCount: Int { todos.count }
 
@@ -121,10 +115,9 @@ private struct DayTodoContent: View {
       } else {
         // Columns using reusable TaskColumnView
         HStack(alignment: .top, spacing: 16) {
-          makeColumn(status: .todo, tasks: todoTasks)
-          makeColumn(status: .inProgress, tasks: inProgressTasks)
-          makeColumn(status: .complete, tasks: doneTasks)
-          makeColumn(status: .inComplete, tasks: incompleteTasks)
+          ForEach(TodoStatus.allCases, id: \.self) { status in
+            makeColumn(status: status, tasks: todos.filter { $0.status == status })
+          }
         }
       }
     }
