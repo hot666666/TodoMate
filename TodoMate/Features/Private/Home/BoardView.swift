@@ -17,9 +17,9 @@ import TodoMateDomain
 struct BoardView: View {
   // MARK: - Properties
 
-  @Bindable var viewModel: BoardViewModel
-  @Environment(TodoBoardStore.self) private var store
   @Environment(\.overlayManager) private var overlay
+  @Environment(TodoBoardStore.self) private var store
+  @Bindable var viewModel: BoardViewModel
 
   // MARK: - Body
 
