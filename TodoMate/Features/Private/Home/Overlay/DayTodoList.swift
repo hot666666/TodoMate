@@ -136,31 +136,19 @@ private struct DayTodoContent: View {
       ScrollView(.vertical, showsIndicators: false) {
         LazyVStack(spacing: 2) {
           ForEach(tasks) { task in
-            CalendarTodoCard(todo: task)
-              .draggable(task)
-              .contextMenu {
-                // Status Change
-                Menu {
-                  ForEach(TodoStatus.allCases, id: \.self) { status in
-                    if status != task.status {
-                      Button {
-                        onStatusChange(task, status)
-                      } label: {
-                        Label(status.displayName, systemImage: status.iconName)
-                      }
-                    }
-                  }
-                } label: {
-                  Label("Change Status", systemImage: "arrow.triangle.2.circlepath")
-                }
-
-                Button("Duplicate") { onDuplicateTask(task) }
-                Divider()
-                Button("Delete", role: .destructive) { onDeleteTask(task) }
-              }
-              .onTapGesture {
-                onTapTodo(task)
-              }
+            TodoCard(
+              style: .compact,
+              todo: task,
+              onStatusChange: { status in
+                onStatusChange(task, status)
+              },
+              onDuplicate: { onDuplicateTask(task) },
+              onDelete: { onDeleteTask(task) },
+            )
+            .draggable(task)
+            .onTapGesture {
+              onTapTodo(task)
+            }
           }
         }
         .padding(2)

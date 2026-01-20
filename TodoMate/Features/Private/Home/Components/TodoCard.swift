@@ -8,14 +8,20 @@
 import SwiftUI
 import TodoMateDomain
 
+enum TodoCardStyle {
+  case normal
+  case compact
+}
+
 struct TodoCard: View {
   @Environment(\.colorScheme) private var colorScheme
 
+  let style: TodoCardStyle = .normal
   let todo: Todo
-  var onStatusClick: (() -> Void)?
-  var onStatusChange: ((TodoStatus) -> Void)?
-  var onDuplicate: (() -> Void)?
-  var onDelete: (() -> Void)?
+  let onStatusClick: (() -> Void)?
+  let onStatusChange: ((TodoStatus) -> Void)?
+  let onDuplicate: (() -> Void)?
+  let onDelete: (() -> Void)?
 
   private var accentColor: Color {
     todo.status.displayColor
@@ -26,25 +32,46 @@ struct TodoCard: View {
   }
 
   var body: some View {
-    normalBody
-      .contextMenu { contextMenuContent }
+    Group {
+      switch style {
+      case .normal:
+        normalBody
+      case .compact:
+        compactBody
+      }
+    }
+    .contextMenu { contextMenuContent }
+  }
+
+  // MARK: - Common Components
+
+  private var statusStrip: some View {
+    Rectangle()
+      .fill(accentColor)
+      .frame(width: style == .normal ? 4 : 3)
+  }
+
+  private func todoTitle(_ text: String) -> Text {
+    Text(text)
+      .foregroundStyle(isDone ? .secondary : .primary)
+      .strikethrough(isDone)
+  }
+
+  private func cardLayout(@ViewBuilder content: () -> some View) -> some View {
+    HStack(spacing: 0) {
+      statusStrip
+      content()
+    }
   }
 
   // MARK: - Normal Style (Board)
 
   private var normalBody: some View {
-    HStack(spacing: 0) {
-      // Left color strip
-      Rectangle()
-        .fill(accentColor)
-        .frame(width: 4)
-
+    cardLayout {
       VStack(alignment: .leading, spacing: 8) {
         // Title
-        Text(todo.content)
+        todoTitle(todo.content)
           .font(.subheadline.weight(.semibold))
-          .foregroundStyle(isDone ? .secondary : .primary)
-          .strikethrough(isDone)
           .lineLimit(2)
           .fixedSize(horizontal: false, vertical: true)
 
@@ -82,6 +109,27 @@ struct TodoCard: View {
     .clipShape(RoundedRectangle(cornerRadius: 12))
     .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
   }
+
+  // MARK: - Compact Style (Calendar)
+
+  private var compactBody: some View {
+    cardLayout {
+      todoTitle(todo.content)
+        .font(.caption2.weight(.medium))
+        .lineLimit(1)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+
+      Spacer(minLength: 0)
+    }
+    .frame(height: 24)
+    .background(accentColor.opacity(0.1))
+    .clipShape(.rect(cornerRadius: 4))
+    .overlay(
+      RoundedRectangle(cornerRadius: 4)
+        .strokeBorder(accentColor.opacity(0.3), lineWidth: 0.5),
+    )
+  }
 }
 
 // MARK: - Context Menu Extension
@@ -89,7 +137,6 @@ struct TodoCard: View {
 private extension TodoCard {
   @ViewBuilder
   var contextMenuContent: some View {
-    // Status Change
     Menu {
       ForEach(TodoStatus.allCases, id: \.self) { status in
         if status != todo.status {
@@ -106,7 +153,6 @@ private extension TodoCard {
 
     Divider()
 
-    // Actions
     if let onDuplicate {
       Button {
         onDuplicate()
@@ -126,8 +172,10 @@ private extension TodoCard {
 }
 
 #Preview {
-  VStack {
+  VStack(spacing: 20) {
+    // Normal Style
     TodoCard(
+      style: .normal,
       todo: Todo(
         content: "Normal Task",
         status: .todo,
@@ -141,9 +189,11 @@ private extension TodoCard {
     )
     .frame(width: 300)
 
+    // Compact Style
     TodoCard(
+      style: .compact,
       todo: Todo(
-        content: "Done Task",
+        content: "Compact Task",
         status: .complete,
         detail: "Detail text",
         date: .now,
@@ -153,7 +203,7 @@ private extension TodoCard {
         isDeleted: false,
       ),
     )
-    .frame(width: 300)
+    .frame(width: 200)
   }
   .padding()
 }
