@@ -15,49 +15,19 @@ import TodoMateDomain
 // MARK: - BoardView (Container)
 
 struct BoardView: View {
+  // MARK: - Properties
+
   @Bindable var viewModel: BoardViewModel
   @Environment(TodoBoardStore.self) private var store
   @Environment(\.overlayManager) private var overlay
 
+  // MARK: - Body
+
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
-      // Date Header & Controls
-      HStack(alignment: .bottom) {
-        VStack(alignment: .leading, spacing: 4) {
-          Text(Date().formatted(date: .complete, time: .omitted))
-            .font(.title)
-            .foregroundStyle(.primary)
-        }
-
-        Spacer()
-
-        HStack(spacing: 8) {
-          Button {
-            withAnimation(.smooth) { viewModel.scrollPosition = .leading }
-          } label: {
-            Image(systemName: "chevron.left.2")
-              .font(.system(size: 14, weight: .semibold))
-              .foregroundStyle(viewModel.scrollPosition == .leading ? .tertiary : .primary)
-          }
-          .disabled(viewModel.scrollPosition == .leading)
-          .buttonStyle(.plain)
-
-          Button {
-            withAnimation(.smooth) { viewModel.scrollPosition = .trailing }
-          } label: {
-            Image(systemName: "chevron.right.2")
-              .font(.system(size: 14, weight: .semibold))
-              .foregroundStyle(viewModel.scrollPosition == .trailing ? .tertiary : .primary)
-          }
-          .disabled(viewModel.scrollPosition == .trailing)
-          .buttonStyle(.plain)
-        }
-        .padding(8)
-        .background(.ultraThinMaterial)
-        .clipShape(Capsule())
-      }
-      .padding(.horizontal)
-      .padding(.top, 8)
+      header
+        .padding(.horizontal)
+        .padding(.top, 8)
 
       GeometryReader { proxy in
         let spacing: CGFloat = 16
@@ -167,6 +137,45 @@ struct BoardView: View {
       }
 
       HomeToolbarContent()
+    }
+  }
+
+  // MARK: - Subviews
+
+  private var header: some View {
+    HStack(alignment: .bottom) {
+      VStack(alignment: .leading, spacing: 4) {
+        Text(Date().formatted(date: .complete, time: .omitted))
+          .font(.title)
+          .foregroundStyle(.primary)
+      }
+
+      Spacer()
+
+      HStack(spacing: 8) {
+        Button {
+          withAnimation(.smooth) { viewModel.scrollPosition = .leading }
+        } label: {
+          Image(systemName: "chevron.left.2")
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(viewModel.scrollPosition == .leading ? .tertiary : .primary)
+        }
+        .disabled(viewModel.scrollPosition == .leading)
+        .buttonStyle(.plain)
+
+        Button {
+          withAnimation(.smooth) { viewModel.scrollPosition = .trailing }
+        } label: {
+          Image(systemName: "chevron.right.2")
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(viewModel.scrollPosition == .trailing ? .tertiary : .primary)
+        }
+        .disabled(viewModel.scrollPosition == .trailing)
+        .buttonStyle(.plain)
+      }
+      .padding(8)
+      .background(.ultraThinMaterial)
+      .clipShape(Capsule())
     }
   }
 

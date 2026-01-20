@@ -10,6 +10,8 @@ import SwiftUI
 import TodoMateDomain
 
 struct TodoSheet: View {
+  // MARK: - Properties
+
   @Environment(CoreDIContainer.self) private var coreContainer
   @Environment(TodoBoardStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
@@ -18,9 +20,7 @@ struct TodoSheet: View {
   @FocusState private var focusedField: SheetField?
   @Bindable var editableTodo: EditableTodo
 
-  private var isSubmitDisabled: Bool {
-    editableTodo.content.isEmpty || !editableTodo.isDirty
-  }
+  // MARK: - Types
 
   enum Action {
     case focusContentField
@@ -28,6 +28,78 @@ struct TodoSheet: View {
     case dismissWithConfirmation
   }
 
+  enum SheetField: Hashable {
+    case content
+  }
+
+  // MARK: - Computed Properties
+
+  private var isSubmitDisabled: Bool {
+    editableTodo.content.isEmpty || !editableTodo.isDirty
+  }
+
+  // MARK: - Body
+
+  var body: some View {
+    VStack(spacing: DesignSystem.TodoSheet.Spacing.small) {
+      TodoContentTextField(
+        content: $editableTodo.content,
+        focusedField: $focusedField,
+        onSubmit: { perform(.submitAndDismiss) },
+      )
+      TodoDetailTextEditor(
+        detail: $editableTodo.detail,
+        onSubmit: { perform(.submitAndDismiss) },
+      )
+      HStack(alignment: .center) {
+        TodoStatusButton(
+          status: $editableTodo.status,
+        )
+        TodoDateButton(
+          date: $editableTodo.date,
+        )
+        Spacer()
+
+        TodoSheetActionButton(
+          hasChanges: editableTodo.isDirty,
+          isNew: editableTodo.isNew,
+          onSave: { perform(.submitAndDismiss) },
+          onDismiss: { perform(.dismissWithConfirmation) },
+        )
+      }
+      .padding(.top, DesignSystem.TodoSheet.Padding.medium)
+    }
+    .onTapBackground {
+      perform(.dismissWithConfirmation)
+    }
+    .onAppear {
+      perform(.focusContentField)
+
+      // Register ESC handler (Pushes to top of stack)
+      escToken = coreContainer.hotKeyManager.register(key: .escape, modifiers: []) {
+        Task { @MainActor in
+          perform(.dismissWithConfirmation)
+        }
+      }
+    }
+    .onDisappear {
+      if let token = escToken {
+        coreContainer.hotKeyManager.unregister(token)
+      }
+    }
+    .compositingGroup()
+    .padding(DesignSystem.TodoSheet.Layout.sheetPadding)
+    .frame(width: 450)
+    .background(.regularMaterial)
+    .clipShape(.rect(cornerRadius: 12))
+    .shadow(color: .black.opacity(0.2), radius: 10)
+    .coordinateSpace(name: "TodoSheet")
+  }
+}
+
+// MARK: - Helpers
+
+extension TodoSheet {
   private func perform(_ action: Action) {
     switch action {
     case .focusContentField:
@@ -74,70 +146,6 @@ struct TodoSheet: View {
         overlay?.dismissTop()
       }
     }
-  }
-}
-
-extension TodoSheet {
-  var body: some View {
-    VStack(spacing: DesignSystem.TodoSheet.Spacing.small) {
-      TodoContentTextField(
-        content: $editableTodo.content,
-        focusedField: $focusedField,
-        onSubmit: { perform(.submitAndDismiss) },
-      )
-      TodoDetailTextEditor(
-        detail: $editableTodo.detail,
-        onSubmit: { perform(.submitAndDismiss) },
-      )
-      HStack(alignment: .center) {
-        TodoStatusButton(
-          status: $editableTodo.status,
-        )
-        TodoDateButton(
-          date: $editableTodo.date,
-        )
-        Spacer()
-
-        TodoSheetActionButton(
-          hasChanges: editableTodo.isDirty,
-          isNew: editableTodo.isNew,
-          onSave: { perform(.submitAndDismiss) },
-          onDismiss: { perform(.dismissWithConfirmation) },
-        )
-      }
-      .padding(.top, DesignSystem.TodoSheet.Padding.medium)
-    }
-    .onAppear {
-      perform(.focusContentField)
-
-      // Register ESC handler (Pushes to top of stack)
-      escToken = coreContainer.hotKeyManager.register(key: .escape, modifiers: []) {
-        Task { @MainActor in
-          perform(.dismissWithConfirmation)
-        }
-      }
-    }
-    .onDisappear {
-      if let token = escToken {
-        coreContainer.hotKeyManager.unregister(token)
-      }
-    }
-    .onTapBackground {
-      perform(.dismissWithConfirmation)
-    }
-    .compositingGroup()
-    .padding(DesignSystem.TodoSheet.Layout.sheetPadding)
-    .frame(width: 450)
-    .background(.regularMaterial)
-    .clipShape(.rect(cornerRadius: 12))
-    .shadow(color: .black.opacity(0.2), radius: 10)
-    .coordinateSpace(name: "TodoSheet")
-  }
-}
-
-extension TodoSheet {
-  enum SheetField: Hashable {
-    case content
   }
 }
 
