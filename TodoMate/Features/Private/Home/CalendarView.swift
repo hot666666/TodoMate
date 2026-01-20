@@ -7,17 +7,18 @@
 //
 
 import SimpleOverlaySystem
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 
-// MARK: - CalendarView (Container)
+// MARK: - CalendarView
 
 struct CalendarView: View {
-  // MARK: - Properties
+  // MARK: - Environment
 
   @Environment(\.overlayManager) private var overlay
   @Environment(CoreDIContainer.self) private var coreDI
+
+  // MARK: - Properties
 
   let viewModel: TodoCalendarViewModel
 
@@ -27,53 +28,7 @@ struct CalendarView: View {
     VStack(spacing: 0) {
       calendarHeader
       weekdayHeader
-
-      // Calendar Content
-      GeometryReader { geometry in
-        let cellHeight = geometry.size.height / CGFloat(DesignSystem.Layout.calendarRowCount)
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
-
-        LazyVGrid(columns: columns, spacing: 0) {
-          ForEach(viewModel.days, id: \.self) { date in
-            let cellTodos = viewModel.todos(for: date)
-            let isCurrentMonth = viewModel.isCurrentMonth(date)
-            let isToday = viewModel.isToday(date)
-            let dayString = "\(coreDI.calendar.component(.day, from: date))"
-
-            CalendarCell(
-              date: date,
-              dayString: dayString,
-              isCurrentMonth: isCurrentMonth,
-              isToday: isToday,
-              todos: cellTodos,
-              cellHeight: cellHeight,
-              selectedTodoId: viewModel.selectedTodoId,
-              onDrop: { todo in
-                viewModel.updateDate(of: todo, to: date)
-              },
-              onTapTodo: { todo in
-                presentTodoSheet(for: todo)
-              },
-              onTapDate: { date in
-                presentDayTodoList(for: date)
-              },
-              onTapMore: { date in
-                presentDayTodoList(for: date)
-              },
-              onStatusChange: { todo in
-                viewModel.update(todo)
-              },
-              onDuplicate: { todo in
-                viewModel.duplicate(todo)
-              },
-              onDelete: { todo in
-                viewModel.delete(todo)
-              },
-            )
-            .frame(height: cellHeight)
-          }
-        }
-      }
+      calendarGrid
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor))
@@ -134,37 +89,60 @@ struct CalendarView: View {
     .overlay(Divider(), alignment: .bottom)
   }
 
-  // MARK: - Navigation
+  private var calendarGrid: some View {
+    GeometryReader { geometry in
+      let cellHeight = geometry.size.height / CGFloat(DesignSystem.Layout.calendarRowCount)
+      let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
 
-  private func presentTodoSheet(for originalTodo: Todo) {
-    let editableTodo = EditableTodo(from: originalTodo)
+      LazyVGrid(columns: columns, spacing: 0) {
+        ForEach(viewModel.days, id: \.self) { date in
+          CalendarCellContent(
+            date: date,
+            dayString: "\(coreDI.calendar.component(.day, from: date))",
+            isCurrentMonth: viewModel.isCurrentMonth(date),
+            isToday: viewModel.isToday(date),
+            todos: viewModel.todos(for: date),
+            cellHeight: cellHeight,
+            selectedTodoId: viewModel.selectedTodoId,
+            onTapTodo: { presentTodoSheet(for: $0) },
+            onTapDate: { presentDayTodoList(for: $0) },
+            onDrop: { viewModel.updateDate(of: $0, to: date) },
+            onStatusChange: { viewModel.update($0) },
+            onDuplicate: { viewModel.duplicate($0) },
+            onDelete: { viewModel.delete($0) },
+          )
+          .frame(height: cellHeight)
+        }
+      }
+    }
+  }
+
+  // MARK: - Presentation
+
+  private func presentTodoSheet(for todo: Todo) {
     overlay?.presentCentered(
       id: .todoSheet,
       backdropOpacity: 0,
       offset: CGPoint(x: 0, y: -120),
     ) {
-      TodoSheet(editableTodo: editableTodo)
+      TodoSheet(editableTodo: EditableTodo(from: todo))
     }
   }
 
   private func presentDayTodoList(for date: Date) {
-    overlay?.presentCentered(
-      backdropOpacity: 0,
-    ) {
+    overlay?.presentCentered(backdropOpacity: 0) {
       DayTodoList(
         date: date,
         viewModel: viewModel,
-        onTapTodo: { todo in
-          presentTodoSheet(for: todo)
-        },
+        onTapTodo: { presentTodoSheet(for: $0) },
       )
     }
   }
 }
 
-// MARK: - Calendar Cell
+// MARK: - CalendarCellContent
 
-private struct CalendarCell: View {
+private struct CalendarCellContent: View {
   let date: Date
   let dayString: String
   let isCurrentMonth: Bool
@@ -172,11 +150,9 @@ private struct CalendarCell: View {
   let todos: [Todo]
   let cellHeight: CGFloat
   let selectedTodoId: String?
-
-  let onDrop: (Todo) -> Void
   let onTapTodo: (Todo) -> Void
   let onTapDate: (Date) -> Void
-  let onTapMore: (Date) -> Void
+  let onDrop: (Todo) -> Void
   let onStatusChange: (Todo) -> Void
   let onDuplicate: (Todo) -> Void
   let onDelete: (Todo) -> Void
@@ -252,18 +228,22 @@ private struct CalendarCell: View {
       }
 
       if showMore {
-        Button {
-          onTapMore(date)
-        } label: {
-          Text("+\(todos.count - visibleCount) more")
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 4)
-        }
-        .buttonStyle(.plain)
+        moreButton
       }
     }
     .padding(.horizontal, 2)
+  }
+
+  private var moreButton: some View {
+    Button {
+      onTapDate(date)
+    } label: {
+      Text("+\(todos.count - visibleCount) more")
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 4)
+    }
+    .buttonStyle(.plain)
   }
 
   private func opacity(for todo: Todo) -> Double {

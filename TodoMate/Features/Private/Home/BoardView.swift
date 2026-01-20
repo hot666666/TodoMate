@@ -8,23 +8,26 @@
 //
 
 import SimpleOverlaySystem
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 
-// MARK: - BoardView (Container)
+// MARK: - BoardView
 
 struct BoardView: View {
-  // MARK: - Properties
+  // MARK: - Environment
 
   @Environment(\.overlayManager) private var overlay
   @Environment(TodoBoardStore.self) private var store
-  @Bindable var viewModel: BoardViewModel
+
+  // MARK: - State
+
+  @State private var dateFilter: DateFilter = .today
+  @State private var scrollPosition: BoardScrollPosition? = .leading
 
   // MARK: - Computed Properties
 
   private var visibleStatuses: [TodoStatus] {
-    switch viewModel.scrollPosition ?? .leading {
+    switch scrollPosition ?? .leading {
     case .leading:
       [.todo, .inProgress, .complete]
     case .trailing:
@@ -40,63 +43,12 @@ struct BoardView: View {
         .padding(.horizontal)
         .padding(.top, 8)
 
-      GeometryReader { proxy in
-        let spacing: CGFloat = 16
-        let horizontalMargin: CGFloat = 16
-        let totalSpacing = spacing * 2
-        // Safe width calculation to prevent crash
-        let visibleWidth = max(0, proxy.size.width - (horizontalMargin * 2))
-        let columnWidth = max(0, floor((visibleWidth - totalSpacing) / 3))
-
-        HStack(alignment: .top, spacing: spacing) {
-          ForEach(visibleStatuses, id: \.self) { status in
-            TodoColumn(
-              status: status,
-              count: todos(for: status).count,
-              tasks: todos(for: status),
-              isToday: { Calendar.current.isDateInToday($0) },
-              onTapTask: { presentTodoSheet(for: $0) },
-              onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
-              onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
-              onDuplicate: { viewModel.duplicate($0) },
-              onDelete: { viewModel.delete($0) },
-            )
-            .dropDestination(for: Todo.self) { items, _ in
-              handleDrop(items, to: status)
-            }
-            .frame(width: columnWidth)
-            .transition(
-              .move(edge: status == .todo ? .leading : .trailing).combined(with: .opacity))
-          }
-        }
-        .padding(.horizontal, horizontalMargin)
-      }
+      columnsLayout
     }
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("privateBoardView")
     .toolbar {
-      ToolbarItem(placement: .primaryAction) {
-        Menu {
-          Picker("Date Filter", selection: $viewModel.dateFilter) {
-            ForEach(DateFilter.allCases, id: \.self) { filter in
-              Text(filter.rawValue).tag(filter)
-            }
-          }
-          .pickerStyle(.inline)
-        } label: {
-          Image(
-            systemName: viewModel.dateFilter == .today
-              ? "line.3.horizontal.decrease.circle"
-              : "line.3.horizontal.decrease.circle.fill",
-          )
-          .foregroundStyle(
-            viewModel.dateFilter == .today ? .secondary : DesignSystem.Colors.primary,
-          )
-          .contentTransition(.symbolEffect(.replace))
-        }
-        .menuIndicator(.hidden)
-      }
-
+      dateFilterMenu
       HomeToolbarContent()
     }
   }
@@ -105,124 +57,202 @@ struct BoardView: View {
 
   private var header: some View {
     HStack(alignment: .bottom) {
-      VStack(alignment: .leading, spacing: 4) {
-        Text(Date().formatted(date: .complete, time: .omitted))
-          .font(.title)
-          .foregroundStyle(.primary)
-      }
+      Text(Date().formatted(date: .complete, time: .omitted))
+        .font(.title)
+        .foregroundStyle(.primary)
 
       Spacer()
 
-      HStack(spacing: 8) {
-        Button {
-          withAnimation(.smooth) { viewModel.scrollPosition = .leading }
-        } label: {
-          Image(systemName: "chevron.left.2")
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(viewModel.scrollPosition == .leading ? .tertiary : .primary)
-        }
-        .disabled(viewModel.scrollPosition == .leading)
-        .buttonStyle(.plain)
-
-        Button {
-          withAnimation(.smooth) { viewModel.scrollPosition = .trailing }
-        } label: {
-          Image(systemName: "chevron.right.2")
-            .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(viewModel.scrollPosition == .trailing ? .tertiary : .primary)
-        }
-        .disabled(viewModel.scrollPosition == .trailing)
-        .buttonStyle(.plain)
-      }
-      .padding(8)
-      .background(.ultraThinMaterial)
-      .clipShape(Capsule())
+      scrollPositionControl
     }
   }
 
-  // MARK: - Helpers
+  private var scrollPositionControl: some View {
+    HStack(spacing: 8) {
+      Button {
+        withAnimation(.smooth) { scrollPosition = .leading }
+      } label: {
+        Image(systemName: "chevron.left.2")
+          .font(.system(size: 14, weight: .semibold))
+          .foregroundStyle(scrollPosition == .leading ? .tertiary : .primary)
+      }
+      .disabled(scrollPosition == .leading)
+      .buttonStyle(.plain)
+
+      Button {
+        withAnimation(.smooth) { scrollPosition = .trailing }
+      } label: {
+        Image(systemName: "chevron.right.2")
+          .font(.system(size: 14, weight: .semibold))
+          .foregroundStyle(scrollPosition == .trailing ? .tertiary : .primary)
+      }
+      .disabled(scrollPosition == .trailing)
+      .buttonStyle(.plain)
+    }
+    .padding(8)
+    .background(.ultraThinMaterial)
+    .clipShape(Capsule())
+  }
+
+  private var columnsLayout: some View {
+    GeometryReader { proxy in
+      let spacing: CGFloat = 16
+      let horizontalMargin: CGFloat = 16
+      let visibleWidth = max(0, proxy.size.width - (horizontalMargin * 2))
+      let columnWidth = max(0, floor((visibleWidth - spacing * 2) / 3))
+
+      HStack(alignment: .top, spacing: spacing) {
+        ForEach(visibleStatuses, id: \.self) { status in
+          TodoColumnContent(
+            status: status,
+            todos: todos(for: status),
+            onTapTodo: { presentTodoSheet(for: $0) },
+            onAdvanceStatus: advanceStatus,
+            onUpdateStatus: updateStatus,
+            onDuplicate: duplicate,
+            onDelete: delete,
+          )
+          .dropDestination(for: Todo.self) { items, _ in
+            handleDrop(items, to: status)
+          }
+          .frame(width: columnWidth)
+          .transition(.move(edge: status == .todo ? .leading : .trailing).combined(with: .opacity))
+        }
+      }
+      .padding(.horizontal, horizontalMargin)
+    }
+  }
+
+  @ToolbarContentBuilder
+  private var dateFilterMenu: some ToolbarContent {
+    ToolbarItem(placement: .primaryAction) {
+      Menu {
+        Picker("Date Filter", selection: $dateFilter) {
+          ForEach(DateFilter.allCases, id: \.self) { filter in
+            Text(filter.rawValue).tag(filter)
+          }
+        }
+        .pickerStyle(.inline)
+      } label: {
+        Image(
+          systemName: dateFilter == .today
+            ? "line.3.horizontal.decrease.circle"
+            : "line.3.horizontal.decrease.circle.fill",
+        )
+        .foregroundStyle(dateFilter == .today ? .secondary : DesignSystem.Colors.primary)
+        .contentTransition(.symbolEffect(.replace))
+      }
+      .menuIndicator(.hidden)
+    }
+  }
+
+  // MARK: - Actions
+
+  private func todos(for status: TodoStatus) -> [Todo] {
+    let dateRange = dateFilter.dateRange
+    return store.todos.filter { todo in
+      todo.status == status && dateRange.contains(todo.date)
+    }
+  }
+
+  private func advanceStatus(of todo: Todo) {
+    store.updateStatus(todo, status: todo.status.next)
+  }
+
+  private func updateStatus(_ todo: Todo, to status: TodoStatus) {
+    store.updateStatus(todo, status: status)
+  }
+
+  private func duplicate(_ todo: Todo) {
+    var newTodo = Todo.copy(from: todo)
+    newTodo.detail = ""
+    store.addTodo(newTodo)
+  }
+
+  private func delete(_ todo: Todo) {
+    store.deleteTodo(todo)
+  }
 
   @discardableResult
   private func handleDrop(_ items: [Todo], to status: TodoStatus) -> Bool {
     guard let todo = items.first else { return false }
     if todo.status != status {
-      viewModel.update(todo, to: status)
+      updateStatus(todo, to: status)
     }
     return true
   }
 
-  private func todos(for status: TodoStatus) -> [Todo] {
-    viewModel.filteredTodos.filter { $0.status == status }
-  }
+  // MARK: - Presentation
 
   private func presentTodoSheet(for todo: Todo) {
-    overlay?.presentCentered(
-      backdropOpacity: 0.2,
-    ) {
-      TodoSheet(
-        editableTodo: EditableTodo(from: todo),
-      )
+    overlay?.presentCentered(id: .todoSheet,
+                             backdropOpacity: 0,
+                             offset: CGPoint(x: 0, y: -120)) {
+      TodoSheet(editableTodo: EditableTodo(from: todo))
     }
   }
 }
 
-// MARK: - Todo Column
+// MARK: - TodoColumnContent
 
-private struct TodoColumn: View {
+private struct TodoColumnContent: View {
   let status: TodoStatus
-  let count: Int
-  let tasks: [Todo]
-  let isToday: (Date) -> Bool
-  let onTapTask: (Todo) -> Void
-  let onStatusChange: (Todo) -> Void
+  let todos: [Todo]
+  let onTapTodo: (Todo) -> Void
+  let onAdvanceStatus: (Todo) -> Void
   let onUpdateStatus: (Todo, TodoStatus) -> Void
   let onDuplicate: (Todo) -> Void
   let onDelete: (Todo) -> Void
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
-      // Header
-      HStack(spacing: 8) {
-        Image(systemName: status.iconName)
-          .font(.system(size: 16, weight: .semibold))
-          .foregroundStyle(status.displayColor)
+      columnHeader
+      todoList
+    }
+  }
 
-        Text(status.displayName)
-          .font(.headline)
-          .foregroundStyle(.primary)
+  private var columnHeader: some View {
+    HStack(spacing: 8) {
+      Image(systemName: status.iconName)
+        .font(.system(size: 16, weight: .semibold))
+        .foregroundStyle(status.displayColor)
 
-        Text("\(count)")
-          .font(.caption)
-          .foregroundStyle(.secondary)
-          .padding(.horizontal, 8)
-          .padding(.vertical, 4)
-          .background(Color(nsColor: .controlBackgroundColor))
-          .clipShape(Capsule())
+      Text(status.displayName)
+        .font(.headline)
+        .foregroundStyle(.primary)
 
-        Spacer()
-      }
-      .padding(.horizontal, 4)
+      Text("\(todos.count)")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color(nsColor: .controlBackgroundColor))
+        .clipShape(Capsule())
 
-      // List
-      ScrollView(.vertical, showsIndicators: false) {
-        LazyVStack(spacing: 12) {
-          ForEach(tasks) { task in
-            TodoCard(
-              todo: task,
-              onStatusClick: { onStatusChange(task) },
-              onStatusChange: { status in onUpdateStatus(task, status) },
-              onDuplicate: { onDuplicate(task) },
-              onDelete: { onDelete(task) },
-            )
-            .draggable(task)
-            .opacity(isToday(task.date) ? 1.0 : 0.6)
-            .onTapGesture {
-              onTapTask(task)
-            }
+      Spacer()
+    }
+    .padding(.horizontal, 4)
+  }
+
+  private var todoList: some View {
+    ScrollView(.vertical, showsIndicators: false) {
+      LazyVStack(spacing: 12) {
+        ForEach(todos) { todo in
+          TodoCard(
+            todo: todo,
+            onStatusClick: { onAdvanceStatus(todo) },
+            onStatusChange: { status in onUpdateStatus(todo, status) },
+            onDuplicate: { onDuplicate(todo) },
+            onDelete: { onDelete(todo) },
+          )
+          .draggable(todo)
+          .opacity(Calendar.current.isDateInToday(todo.date) ? 1.0 : 0.6)
+          .onTapGesture {
+            onTapTodo(todo)
           }
         }
       }
-      .contentMargins(.bottom, 20, for: .scrollContent)
     }
+    .contentMargins(.bottom, 20, for: .scrollContent)
   }
 }

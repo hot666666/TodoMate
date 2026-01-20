@@ -4,6 +4,7 @@
 //
 //  Created by hs on 6/7/25.
 //
+//
 
 import SimpleOverlaySystem
 import SwiftUI
@@ -12,13 +13,11 @@ import TodoMateDomain
 struct TodoSheet: View {
   // MARK: - Properties
 
-  @Environment(CoreDIContainer.self) private var coreContainer
   @Environment(TodoBoardStore.self) private var todoStore
   @Environment(\.overlayManager) private var overlay
 
-  @State private var escToken: HotKeyManager.RegistrationToken?
+  @State private var editableTodo: EditableTodo
   @FocusState private var focusedField: SheetField?
-  @Bindable var editableTodo: EditableTodo
 
   // MARK: - Types
 
@@ -32,6 +31,12 @@ struct TodoSheet: View {
     case content
   }
 
+  // MARK: - Init
+
+  init(editableTodo: EditableTodo) {
+    _editableTodo = State(initialValue: editableTodo)
+  }
+
   // MARK: - Computed Properties
 
   private var isSubmitDisabled: Bool {
@@ -41,22 +46,24 @@ struct TodoSheet: View {
   // MARK: - Body
 
   var body: some View {
+    @Bindable var todo = editableTodo
+
     VStack(spacing: DesignSystem.TodoSheet.Spacing.small) {
       TodoContentTextField(
-        content: $editableTodo.content,
+        content: $todo.content,
         focusedField: $focusedField,
         onSubmit: { perform(.submitAndDismiss) },
       )
       TodoDetailTextEditor(
-        detail: $editableTodo.detail,
+        detail: $todo.detail,
         onSubmit: { perform(.submitAndDismiss) },
       )
       HStack(alignment: .center) {
         TodoStatusButton(
-          status: $editableTodo.status,
+          status: $todo.status,
         )
         TodoDateButton(
-          date: $editableTodo.date,
+          date: $todo.date,
         )
         Spacer()
 
@@ -72,20 +79,13 @@ struct TodoSheet: View {
     .onTapBackground {
       perform(.dismissWithConfirmation)
     }
-    .onAppear {
-      perform(.focusContentField)
-
-      // Register ESC handler (Pushes to top of stack)
-      escToken = coreContainer.hotKeyManager.register(key: .escape, modifiers: []) {
-        Task { @MainActor in
-          perform(.dismissWithConfirmation)
-        }
+    .onGlobalHotKey(.escape) {
+      Task { @MainActor in
+        perform(.dismissWithConfirmation)
       }
     }
-    .onDisappear {
-      if let token = escToken {
-        coreContainer.hotKeyManager.unregister(token)
-      }
+    .onAppear {
+      perform(.focusContentField)
     }
     .compositingGroup()
     .padding(DesignSystem.TodoSheet.Layout.sheetPadding)
@@ -130,13 +130,11 @@ extension TodoSheet {
           destructiveActionTitle: "폐기",
           cancelTitle: "취소",
           destructiveAction: {
-            overlay?.dismissTop()
-            // Dismiss sheet
-            overlay?.dismissTop()
+            overlay?.dismissTop() // Dismiss confirmation
+            overlay?.dismissTop() // Dismiss sheet
           },
           onDismiss: {
-            // Just dismiss confirmation
-            overlay?.dismissTop()
+            overlay?.dismissTop() // Just dismiss confirmation
           },
         )
         overlay?.presentCentered(backdropOpacity: 0) {
