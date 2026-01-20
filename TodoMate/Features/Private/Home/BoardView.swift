@@ -21,6 +21,17 @@ struct BoardView: View {
   @Environment(TodoBoardStore.self) private var store
   @Bindable var viewModel: BoardViewModel
 
+  // MARK: - Computed Properties
+
+  private var visibleStatuses: [TodoStatus] {
+    switch viewModel.scrollPosition ?? .leading {
+    case .leading:
+      [.todo, .inProgress, .complete]
+    case .trailing:
+      [.inProgress, .complete, .inComplete]
+    }
+  }
+
   // MARK: - Body
 
   var body: some View {
@@ -38,11 +49,11 @@ struct BoardView: View {
         let columnWidth = max(0, floor((visibleWidth - totalSpacing) / 3))
 
         HStack(alignment: .top, spacing: spacing) {
-          if viewModel.scrollPosition == .leading {
+          ForEach(visibleStatuses, id: \.self) { status in
             TodoColumn(
-              status: .todo,
-              count: todos(for: .todo).count,
-              tasks: todos(for: .todo),
+              status: status,
+              count: todos(for: status).count,
+              tasks: todos(for: status),
               isToday: { Calendar.current.isDateInToday($0) },
               onTapTask: { presentTodoSheet(for: $0) },
               onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
@@ -51,61 +62,11 @@ struct BoardView: View {
               onDelete: { viewModel.delete($0) },
             )
             .dropDestination(for: Todo.self) { items, _ in
-              handleDrop(items, to: .todo)
+              handleDrop(items, to: status)
             }
             .frame(width: columnWidth)
-            .transition(.move(edge: .leading).combined(with: .opacity))
-          }
-
-          TodoColumn(
-            status: .inProgress,
-            count: todos(for: .inProgress).count,
-            tasks: todos(for: .inProgress),
-            isToday: { Calendar.current.isDateInToday($0) },
-            onTapTask: { presentTodoSheet(for: $0) },
-            onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
-            onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
-            onDuplicate: { viewModel.duplicate($0) },
-            onDelete: { viewModel.delete($0) },
-          )
-          .dropDestination(for: Todo.self) { items, _ in
-            handleDrop(items, to: .inProgress)
-          }
-          .frame(width: columnWidth)
-
-          TodoColumn(
-            status: .complete,
-            count: todos(for: .complete).count,
-            tasks: todos(for: .complete),
-            isToday: { Calendar.current.isDateInToday($0) },
-            onTapTask: { presentTodoSheet(for: $0) },
-            onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
-            onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
-            onDuplicate: { viewModel.duplicate($0) },
-            onDelete: { viewModel.delete($0) },
-          )
-          .dropDestination(for: Todo.self) { items, _ in
-            handleDrop(items, to: .complete)
-          }
-          .frame(width: columnWidth)
-
-          if viewModel.scrollPosition == .trailing {
-            TodoColumn(
-              status: .inComplete,
-              count: todos(for: .inComplete).count,
-              tasks: todos(for: .inComplete),
-              isToday: { Calendar.current.isDateInToday($0) },
-              onTapTask: { presentTodoSheet(for: $0) },
-              onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
-              onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
-              onDuplicate: { viewModel.duplicate($0) },
-              onDelete: { viewModel.delete($0) },
-            )
-            .dropDestination(for: Todo.self) { items, _ in
-              handleDrop(items, to: .inComplete)
-            }
-            .frame(width: columnWidth)
-            .transition(.move(edge: .trailing).combined(with: .opacity))
+            .transition(
+              .move(edge: status == .todo ? .leading : .trailing).combined(with: .opacity))
           }
         }
         .padding(.horizontal, horizontalMargin)

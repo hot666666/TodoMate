@@ -19,7 +19,6 @@ struct MemoView: View {
   @State private var viewModel: MemoViewModel
   @Namespace private var heroNamespace
 
-  @State private var escToken: HotKeyManager.RegistrationToken?
   // 애니메이션 중 데이터가 사라지는 것을 방지하기 위해 데이터(selectedMemo)와 표시 여부(isDetailViewPresented)를 분리합니다.
   @State private var selectedMemo: Memo?
   @State private var isDetailViewPresented = false
@@ -83,11 +82,9 @@ struct MemoView: View {
     }
     .accessibilityIdentifier("memoView")
     // ESC Handling
-    .onAppear { registerESCHandler() }
-    .onDisappear { unregisterESCHandler() }
-    .onChange(of: isDetailViewPresented) { _, isPresented in
-      if isPresented {
-        registerESCHandler()
+    .onGlobalHotKey(.escape) {
+      if isDetailViewPresented {
+        dismissDetail()
       }
     }
   }
@@ -116,27 +113,6 @@ struct MemoView: View {
     withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
       // selectedMemo = nil // 애니메이션 도중 데이터가 nil이 되면 UI 글리치가 발생할 수 있으므로 유지
       isDetailViewPresented = false
-    }
-  }
-
-  // MARK: - HotKey
-
-  private func registerESCHandler() {
-    if escToken == nil {
-      escToken = container.core.hotKeyManager.register(key: .escape, modifiers: []) {
-        Task { @MainActor in
-          if isDetailViewPresented {
-            dismissDetail()
-          }
-        }
-      }
-    }
-  }
-
-  private func unregisterESCHandler() {
-    if let token = escToken {
-      container.core.hotKeyManager.unregister(token)
-      escToken = nil
     }
   }
 }
