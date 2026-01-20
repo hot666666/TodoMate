@@ -42,6 +42,8 @@ struct MainView: View {
 private struct MainContent: View {
   @Environment(AppDIContainer.self) private var container
   @Environment(\.overlayManager) private var overlay
+  @Environment(TodoBoardStore.self) private var todoBoardStore
+  @Environment(MemoStore.self) private var memoStore
   @State private var sidebarToken: HotKeyManager.RegistrationToken?
 
   @Bindable var naviManager: NavigationManager
@@ -60,6 +62,8 @@ private struct MainContent: View {
       unregisterHotKeys()
     }
   }
+
+  // ... (hotkey methods skipped, assumed unchanged)
 
   private func registerHotKeys() {
     // Command+B: Toggle Sidebar
@@ -90,10 +94,10 @@ private struct MainContent: View {
         SettingView()
 
       case .todo:
-        HomeView(container: container.core)
+        HomeView(container: container.core, todoBoardStore: todoBoardStore)
 
       case .memo:
-        MemoView()
+        MemoView(store: memoStore)
 
       case .group:
         AuthenticatedView {

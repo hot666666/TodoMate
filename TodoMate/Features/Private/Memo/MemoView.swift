@@ -14,13 +14,17 @@ import TodoMateDomain
 
 struct MemoView: View {
   @Environment(AppDIContainer.self) private var container
-  @Environment(MemoStore.self) private var memoStore
+  @State private var viewModel: MemoViewModel
   @Namespace private var heroNamespace
 
   @State private var escToken: HotKeyManager.RegistrationToken?
   // 애니메이션 중 데이터가 사라지는 것을 방지하기 위해 데이터(selectedMemo)와 표시 여부(isDetailViewPresented)를 분리합니다.
   @State private var selectedMemo: Memo?
   @State private var isDetailViewPresented = false
+
+  init(store: MemoStore) {
+    _viewModel = State(initialValue: MemoViewModel(store: store))
+  }
 
   var body: some View {
     ZStack {
@@ -46,7 +50,7 @@ struct MemoView: View {
       } else {
         // Content
         MemoContent(
-          memos: memoStore.memos,
+          memos: viewModel.memos,
           heroNamespace: heroNamespace,
           onTapMemo: { memo in
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
@@ -58,6 +62,7 @@ struct MemoView: View {
         )
       }
     }
+
     .toolbar {
       if !isDetailViewPresented {
         ToolbarItem(placement: .primaryAction) {
@@ -84,20 +89,19 @@ struct MemoView: View {
   // MARK: - Actions
 
   private func addNewMemo() {
-    // Add via store (fire & forget, Query will update UI)
-    memoStore.add(content: "")
+    viewModel.addMemo()
   }
 
   private func saveMemo(_ memo: Memo, with newContent: String) {
     if newContent != memo.content {
       let updatedMemo = memo.withUpdatedContent(newContent)
-      memoStore.update(updatedMemo)
+      viewModel.updateMemo(updatedMemo)
     }
   }
 
   private func deleteMemo(_ memo: Memo) {
     Task {
-      memoStore.delete(memo)
+      viewModel.deleteMemo(memo)
       dismissDetail()
     }
   }
@@ -184,7 +188,7 @@ private struct MemoContent: View {
 }
 
 #Preview {
-  MemoView()
+  MemoView(store: .preview)
     .environment(MemoStore.preview)
     .environment(OverlayManager())
 }

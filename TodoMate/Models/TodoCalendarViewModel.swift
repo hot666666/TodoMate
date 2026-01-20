@@ -13,46 +13,91 @@ import TodoMateDomain
 @MainActor
 final class TodoCalendarViewModel {
   var todos: [Todo] = []
-  var currentDate: Date = .init() {
-    didSet {
-      updateObservation()
-    }
-  }
+  var currentDate: Date = .init()
 
   private let observeTodosUseCase: ObserveTodosUseCase
-  private var observationTask: Task<Void, Never>?
+  private let createTodoUseCase: CreateLocalTodoUseCase
+  private let updateTodoUseCase: UpdateLocalTodoUseCase
+  private let deleteTodoUseCase: DeleteLocalTodoUseCase
 
-  init(observeTodosUseCase: ObserveTodosUseCase) {
+  init(
+    observeTodosUseCase: ObserveTodosUseCase,
+    createTodoUseCase: CreateLocalTodoUseCase,
+    updateTodoUseCase: UpdateLocalTodoUseCase,
+    deleteTodoUseCase: DeleteLocalTodoUseCase,
+  ) {
     self.observeTodosUseCase = observeTodosUseCase
-    updateObservation()
+    self.createTodoUseCase = createTodoUseCase
+    self.updateTodoUseCase = updateTodoUseCase
+    self.deleteTodoUseCase = deleteTodoUseCase
   }
 
   convenience init(container: CoreDIContainer) {
-    self.init(observeTodosUseCase: container.observeTodosUseCase)
+    self.init(
+      observeTodosUseCase: container.observeTodosUseCase,
+      createTodoUseCase: container.createLocalTodoUseCase,
+      updateTodoUseCase: container.updateLocalTodoUseCase,
+      deleteTodoUseCase: container.deleteLocalTodoUseCase,
+    )
   }
 
-  func updateObservation() {
-    observationTask?.cancel()
-
-    // Calculate start/end of the 6-week calendar grid
-    // Logic must match CalendarQueryWrapper's grid calculation
+  var days: [Date] {
     let calendar = Calendar.current
-    guard let monthInterval = calendar.dateInterval(of: .month, for: currentDate) else { return }
+    guard let monthInterval = calendar.dateInterval(of: .month, for: currentDate) else { return [] }
     let monthStart = monthInterval.start
-
-    // Calendar view often shows previous month's days to fill the first row
     let weekday = calendar.component(.weekday, from: monthStart)
     let startOffset = weekday - 1
     let startDisplayDate = calendar.date(byAdding: .day, value: -startOffset, to: monthStart)!
 
-    // 42 days (6 weeks)
-    let endDisplayDate = calendar.date(byAdding: .day, value: 42, to: startDisplayDate)!
+    return (0 ..< 42).compactMap { dayOffset in
+      calendar.date(byAdding: .day, value: dayOffset, to: startDisplayDate)
+    }
+  }
 
-    let range = startDisplayDate ... endDisplayDate
+  func todos(for date: Date) -> [Todo] {
+    let calendar = Calendar.current
+    return todos.filter { calendar.isDate($0.date, inSameDayAs: date) }
+  }
 
-    observationTask = Task {
-      for await newTodos in observeTodosUseCase.execute(dateRange: range) {
-        self.todos = newTodos
+  func startObserving() async {
+    guard let start = days.first, let end = days.last else { return }
+    let range = start ... end
+
+    // Observe changes for the current date range
+    for await newTodos in observeTodosUseCase.execute(dateRange: range) {
+      todos = newTodos
+    }
+  }
+
+  func update(_ todo: Todo) {
+    Task {
+      do {
+        try await updateTodoUseCase.run(todo)
+      } catch {
+        print("Failed to update todo: \(error)")
+      }
+    }
+  }
+
+  func duplicate(_ todo: Todo) {
+    var newTodo = Todo.copy(from: todo)
+    newTodo.detail = ""
+
+    Task {
+      do {
+        try await createTodoUseCase.run(newTodo)
+      } catch {
+        print("Failed to duplicate todo: \(error)")
+      }
+    }
+  }
+
+  func delete(_ todo: Todo) {
+    Task {
+      do {
+        try await deleteTodoUseCase.run(todo.id)
+      } catch {
+        print("Failed to delete todo: \(error)")
       }
     }
   }

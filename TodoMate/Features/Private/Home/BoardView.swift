@@ -15,43 +15,131 @@ import TodoMateDomain
 // MARK: - BoardView (Container)
 
 struct BoardView: View {
-  @Environment(TodoBoardStore.self) private var todoStore
+  @Bindable var viewModel: BoardViewModel
+  @Environment(TodoBoardStore.self) private var store
   @Environment(\.overlayManager) private var overlay
 
-  @Bindable var viewModel: BoardViewModel
-  // dateFilter is now in viewModel
-  // scrollPosition is now in viewModel
-
-  private var viewTodos: [ViewTodo] {
-    todoStore.todos.map { ViewTodo(from: $0) }
-  }
-
   var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
-      BoardContent(
-        todos: viewTodos,
-        scrollPosition: $viewModel.scrollPosition,
-        onTapTask: { viewTodo in
-          if let todo = findDomainTodo(for: viewTodo) {
-            presentTodoSheet(for: todo)
+    VStack(alignment: .leading, spacing: 16) {
+      // Date Header & Controls
+      HStack(alignment: .bottom) {
+        VStack(alignment: .leading, spacing: 4) {
+          Text(Date().formatted(date: .complete, time: .omitted))
+            .font(.title)
+            .foregroundStyle(.primary)
+        }
+
+        Spacer()
+
+        HStack(spacing: 8) {
+          Button {
+            withAnimation(.smooth) { viewModel.scrollPosition = .leading }
+          } label: {
+            Image(systemName: "chevron.left.2")
+              .font(.system(size: 14, weight: .semibold))
+              .foregroundStyle(viewModel.scrollPosition == .leading ? .tertiary : .primary)
           }
-        },
-        onStatusClick: { viewTodo in
-          cycleStatus(viewTodo)
-        },
-        onStatusChange: { viewTodo, status in
-          updateTaskStatus(viewTodo, to: status)
-        },
-        onDropTask: { viewTodo, status in
-          updateTaskStatus(viewTodo, to: status)
-        },
-        onDuplicateTask: { viewTodo in
-          duplicateTask(viewTodo)
-        },
-        onDeleteTask: { viewTodo in
-          deleteTask(viewTodo)
-        },
-      )
+          .disabled(viewModel.scrollPosition == .leading)
+          .buttonStyle(.plain)
+
+          Button {
+            withAnimation(.smooth) { viewModel.scrollPosition = .trailing }
+          } label: {
+            Image(systemName: "chevron.right.2")
+              .font(.system(size: 14, weight: .semibold))
+              .foregroundStyle(viewModel.scrollPosition == .trailing ? .tertiary : .primary)
+          }
+          .disabled(viewModel.scrollPosition == .trailing)
+          .buttonStyle(.plain)
+        }
+        .padding(8)
+        .background(.ultraThinMaterial)
+        .clipShape(Capsule())
+      }
+      .padding(.horizontal)
+      .padding(.top, 8)
+
+      GeometryReader { proxy in
+        let spacing: CGFloat = 16
+        let horizontalMargin: CGFloat = 16
+        let totalSpacing = spacing * 2
+        // Safe width calculation to prevent crash
+        let visibleWidth = max(0, proxy.size.width - (horizontalMargin * 2))
+        let columnWidth = max(0, floor((visibleWidth - totalSpacing) / 3))
+
+        HStack(alignment: .top, spacing: spacing) {
+          if viewModel.scrollPosition == .leading {
+            TodoColumn(
+              status: .todo,
+              count: todos(for: .todo).count,
+              tasks: todos(for: .todo),
+              isToday: { Calendar.current.isDateInToday($0) },
+              onTapTask: { presentTodoSheet(for: $0) },
+              onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
+              onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
+              onDuplicate: { viewModel.duplicate($0) },
+              onDelete: { viewModel.delete($0) },
+            )
+            .dropDestination(for: Todo.self) { items, _ in
+              handleDrop(items, to: .todo)
+            }
+            .frame(width: columnWidth)
+            .transition(.move(edge: .leading).combined(with: .opacity))
+          }
+
+          TodoColumn(
+            status: .inProgress,
+            count: todos(for: .inProgress).count,
+            tasks: todos(for: .inProgress),
+            isToday: { Calendar.current.isDateInToday($0) },
+            onTapTask: { presentTodoSheet(for: $0) },
+            onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
+            onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
+            onDuplicate: { viewModel.duplicate($0) },
+            onDelete: { viewModel.delete($0) },
+          )
+          .dropDestination(for: Todo.self) { items, _ in
+            handleDrop(items, to: .inProgress)
+          }
+          .frame(width: columnWidth)
+
+          TodoColumn(
+            status: .complete,
+            count: todos(for: .complete).count,
+            tasks: todos(for: .complete),
+            isToday: { Calendar.current.isDateInToday($0) },
+            onTapTask: { presentTodoSheet(for: $0) },
+            onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
+            onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
+            onDuplicate: { viewModel.duplicate($0) },
+            onDelete: { viewModel.delete($0) },
+          )
+          .dropDestination(for: Todo.self) { items, _ in
+            handleDrop(items, to: .complete)
+          }
+          .frame(width: columnWidth)
+
+          if viewModel.scrollPosition == .trailing {
+            TodoColumn(
+              status: .inComplete,
+              count: todos(for: .inComplete).count,
+              tasks: todos(for: .inComplete),
+              isToday: { Calendar.current.isDateInToday($0) },
+              onTapTask: { presentTodoSheet(for: $0) },
+              onStatusChange: { todo in viewModel.advanceStatus(of: todo) },
+              onUpdateStatus: { todo, status in viewModel.update(todo, to: status) },
+              onDuplicate: { viewModel.duplicate($0) },
+              onDelete: { viewModel.delete($0) },
+            )
+            .dropDestination(for: Todo.self) { items, _ in
+              handleDrop(items, to: .inComplete)
+            }
+            .frame(width: columnWidth)
+            .transition(.move(edge: .trailing).combined(with: .opacity))
+          }
+        }
+        .padding(.horizontal, horizontalMargin)
+      }
     }
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("privateBoardView")
@@ -81,186 +169,33 @@ struct BoardView: View {
       HomeToolbarContent()
     }
     .task(id: viewModel.dateFilter) {
-      todoStore.updateObservation(range: viewModel.dateFilter.dateRange)
+      let range = viewModel.dateFilter.dateRange
+      store.updateObservation(range: range)
     }
   }
 
-  // MARK: - Actions (Navigation/Sheet)
+  // MARK: - Helpers
 
-  private func presentTodoSheet(for originalTodo: Todo) {
-    let editableTodo = EditableTodo(from: originalTodo)
+  @discardableResult
+  private func handleDrop(_ items: [Todo], to status: TodoStatus) -> Bool {
+    guard let todo = items.first else { return false }
+    if todo.status != status {
+      viewModel.update(todo, to: status)
+    }
+    return true
+  }
+
+  private func todos(for status: TodoStatus) -> [Todo] {
+    viewModel.filteredTodos.filter { $0.status == status }
+  }
+
+  private func presentTodoSheet(for todo: Todo) {
     overlay?.presentCentered(
-      id: .todoSheet,
-      backdropOpacity: 0,
-      offset: CGPoint(x: 0, y: -120),
+      backdropOpacity: 0.2,
     ) {
-      TodoSheet(editableTodo: editableTodo)
-    }
-  }
-
-  // MARK: - Data Helpers
-
-  private func findDomainTodo(for viewTodo: ViewTodo) -> Todo? {
-    todoStore.todos.first { $0.id == viewTodo.id }
-  }
-
-  private func cycleStatus(_ task: ViewTodo) {
-    let nextStatus: ViewTodoStatus =
-      switch task.status {
-      case .todo: .inProgress
-      case .inProgress: .done
-      case .done: .todo
-      case .inComplete: .todo
-      }
-    updateTaskStatus(task, to: nextStatus)
-  }
-
-  private func updateTaskStatus(_ task: ViewTodo, to newStatus: ViewTodoStatus) {
-    guard let todo = findDomainTodo(for: task) else { return }
-    todoStore.updateStatus(todo, status: newStatus.toDomainStatus())
-  }
-
-  private func duplicateTask(_ task: ViewTodo) {
-    guard let todo = findDomainTodo(for: task) else { return }
-    var newTodo = Todo.copy(from: todo)
-    newTodo.detail = ""
-    todoStore.addTodo(newTodo)
-  }
-
-  private func deleteTask(_ task: ViewTodo) {
-    guard let todo = findDomainTodo(for: task) else { return }
-    todoStore.deleteTodo(todo)
-  }
-}
-
-// MARK: - BoardContent (Pure UI)
-
-private struct BoardContent: View {
-  let todos: [ViewTodo]
-  @Binding var scrollPosition: BoardScrollPosition?
-
-  // Actions
-  let onTapTask: (ViewTodo) -> Void
-  let onStatusClick: (ViewTodo) -> Void
-  let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
-  let onDropTask: (ViewTodo, ViewTodoStatus) -> Void
-  let onDuplicateTask: (ViewTodo) -> Void
-  let onDeleteTask: (ViewTodo) -> Void
-
-  // Filtered lists
-  private var todoTasks: [ViewTodo] { todos.filter { $0.status == .todo } }
-  private var inProgressTasks: [ViewTodo] { todos.filter { $0.status == .inProgress } }
-  private var doneTasks: [ViewTodo] { todos.filter { $0.status == .done } }
-  private var inCompleteTasks: [ViewTodo] { todos.filter { $0.status == .inComplete } }
-
-  private func isToday(_ date: Date) -> Bool {
-    Calendar.current.isDateInToday(date)
-  }
-
-  var body: some View {
-    VStack(alignment: .leading, spacing: 16) {
-      // Header and Scroll Buttons
-      HStack {
-        Text(Date().formatted(.dateTime.year().month().day().weekday(.wide)))
-          .font(.title)
-
-        Spacer()
-
-        HStack(spacing: 8) {
-          Button {
-            withAnimation(.smooth) { scrollPosition = .leading }
-          } label: {
-            Image(systemName: "chevron.left.2")
-          }
-          .disabled(scrollPosition == .leading)
-
-          Button {
-            withAnimation(.smooth) { scrollPosition = .trailing }
-          } label: {
-            Image(systemName: "chevron.right.2")
-          }
-          .disabled(scrollPosition == .trailing)
-        }
-        .buttonStyle(.borderless)
-      }
-      .padding(.horizontal)
-
-      GeometryReader { proxy in
-        let spacing: CGFloat = 16
-        let horizontalMargin: CGFloat = 16
-        let totalSpacing = spacing * 2
-        let visibleWidth = proxy.size.width - (horizontalMargin * 2)
-        let columnWidth = floor((visibleWidth - totalSpacing) / 3)
-
-        HStack(alignment: .top, spacing: spacing) {
-          if scrollPosition == .leading {
-            TodoColumn(
-              title: "To Do",
-              count: todoTasks.count,
-              color: .gray,
-              tasks: todoTasks,
-              isToday: isToday,
-              onTapTask: onTapTask,
-              onStatusClick: onStatusClick,
-              onStatusChange: onStatusChange,
-              onDropTask: { task in onDropTask(task, .todo) },
-              onDuplicateTask: onDuplicateTask,
-              onDeleteTask: onDeleteTask,
-            )
-            .frame(width: columnWidth)
-            .transition(.move(edge: .leading).combined(with: .opacity))
-          }
-
-          TodoColumn(
-            title: "In Progress",
-            count: inProgressTasks.count,
-            color: DesignSystem.Colors.accentCyan,
-            tasks: inProgressTasks,
-            isToday: isToday,
-            onTapTask: onTapTask,
-            onStatusClick: onStatusClick,
-            onStatusChange: onStatusChange,
-            onDropTask: { task in onDropTask(task, .inProgress) },
-            onDuplicateTask: onDuplicateTask,
-            onDeleteTask: onDeleteTask,
-          )
-          .frame(width: columnWidth)
-
-          TodoColumn(
-            title: "Done",
-            count: doneTasks.count,
-            color: DesignSystem.Colors.accentGreen,
-            tasks: doneTasks,
-            isToday: isToday,
-            onTapTask: onTapTask,
-            onStatusClick: onStatusClick,
-            onStatusChange: onStatusChange,
-            onDropTask: { task in onDropTask(task, .done) },
-            onDuplicateTask: onDuplicateTask,
-            onDeleteTask: onDeleteTask,
-          )
-          .frame(width: columnWidth)
-
-          if scrollPosition == .trailing {
-            TodoColumn(
-              title: "Incomplete",
-              count: inCompleteTasks.count,
-              color: DesignSystem.Colors.accentRed,
-              tasks: inCompleteTasks,
-              isToday: isToday,
-              onTapTask: onTapTask,
-              onStatusClick: onStatusClick,
-              onStatusChange: onStatusChange,
-              onDropTask: { task in onDropTask(task, .inComplete) },
-              onDuplicateTask: onDuplicateTask,
-              onDeleteTask: onDeleteTask,
-            )
-            .frame(width: columnWidth)
-            .transition(.move(edge: .trailing).combined(with: .opacity))
-          }
-        }
-        .padding(.horizontal, horizontalMargin)
-      }
+      TodoSheet(
+        editableTodo: EditableTodo(from: todo),
+      )
     }
   }
 }
@@ -268,34 +203,53 @@ private struct BoardContent: View {
 // MARK: - Todo Column
 
 private struct TodoColumn: View {
-  let title: String
+  let status: TodoStatus
   let count: Int
-  let color: Color
-  let tasks: [ViewTodo]
+  let tasks: [Todo]
   let isToday: (Date) -> Bool
-  let onTapTask: (ViewTodo) -> Void
-  let onStatusClick: (ViewTodo) -> Void
-  let onStatusChange: (ViewTodo, ViewTodoStatus) -> Void
-  let onDropTask: (ViewTodo) -> Void
-  let onDuplicateTask: (ViewTodo) -> Void
-  let onDeleteTask: (ViewTodo) -> Void
+  let onTapTask: (Todo) -> Void
+  let onStatusChange: (Todo) -> Void
+  let onUpdateStatus: (Todo, TodoStatus) -> Void
+  let onDuplicate: (Todo) -> Void
+  let onDelete: (Todo) -> Void
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
-      columnHeader
+      // Header
+      HStack(spacing: 8) {
+        Image(systemName: status.iconName)
+          .font(.system(size: 16, weight: .semibold))
+          .foregroundStyle(status.displayColor)
 
-      ScrollView(.vertical) {
+        Text(status.displayName)
+          .font(.headline)
+          .foregroundStyle(.primary)
+
+        Text("\(count)")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+          .padding(.horizontal, 8)
+          .padding(.vertical, 4)
+          .background(Color(nsColor: .controlBackgroundColor))
+          .clipShape(Capsule())
+
+        Spacer()
+      }
+      .padding(.horizontal, 4)
+
+      // List
+      ScrollView(.vertical, showsIndicators: false) {
         LazyVStack(spacing: 12) {
           ForEach(tasks) { task in
-            TaskCard(
-              task: task,
-              onStatusClick: { onStatusClick(task) },
-              onStatusChange: { status in onStatusChange(task, status) },
-              onDuplicate: { onDuplicateTask(task) },
-              onDelete: { onDeleteTask(task) },
+            TodoCard(
+              todo: task,
+              onStatusClick: { onStatusChange(task) },
+              onStatusChange: { status in onUpdateStatus(task, status) },
+              onDuplicate: { onDuplicate(task) },
+              onDelete: { onDelete(task) },
             )
-            .opacity(isToday(task.date) ? 1.0 : 0.3)
             .draggable(task)
+            .opacity(isToday(task.date) ? 1.0 : 0.6)
             .onTapGesture {
               onTapTask(task)
             }
@@ -304,38 +258,5 @@ private struct TodoColumn: View {
       }
       .contentMargins(.bottom, 20, for: .scrollContent)
     }
-    .dropDestination(for: ViewTodo.self) { items, _ in
-      if let task = items.first {
-        onDropTask(task) // Callback handles status update
-        return true
-      }
-      return false
-    }
   }
-
-  private var columnHeader: some View {
-    HStack {
-      Circle()
-        .fill(color)
-        .frame(width: 10, height: 10)
-
-      Text(title)
-        .font(.headline)
-
-      Text("\(count)")
-        .font(.caption)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 2)
-        .background(Color.secondary.opacity(0.1))
-        .clipShape(.capsule)
-
-      Spacer()
-    }
-  }
-}
-
-#Preview {
-  BoardView(viewModel: BoardViewModel())
-    .environment(TodoBoardStore.preview)
-    .environment(OverlayManager())
 }

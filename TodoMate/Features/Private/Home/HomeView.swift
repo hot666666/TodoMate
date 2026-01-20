@@ -16,8 +16,8 @@ struct HomeView: View {
   @State private var calendarViewModel: TodoCalendarViewModel
   @State private var escToken: HotKeyManager.RegistrationToken?
 
-  init(container: CoreDIContainer) {
-    _boardViewModel = State(initialValue: BoardViewModel())
+  init(container: CoreDIContainer, todoBoardStore: TodoBoardStore) {
+    _boardViewModel = State(initialValue: BoardViewModel(store: todoBoardStore))
     _calendarViewModel = State(initialValue: TodoCalendarViewModel(container: container))
   }
 

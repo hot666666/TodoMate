@@ -81,7 +81,7 @@ struct TodoMateApp: App {
         .environment(appDIContainer)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
-        .frame(minWidth: 720, minHeight: 540)
+        .frame(minWidth: 1000, minHeight: 625)
         .task {
           #if DEBUG
             MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
