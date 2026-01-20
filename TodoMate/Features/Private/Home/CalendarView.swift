@@ -15,12 +15,9 @@ import TodoMateDomain
 
 struct CalendarView: View {
   @Environment(\.overlayManager) private var overlay
+  @Environment(CoreDIContainer.self) private var coreDI
 
   let viewModel: TodoCalendarViewModel
-
-  @State private var selectedTodoId: String?
-
-  private let calendar = Calendar.current
 
   var body: some View {
     VStack(spacing: 0) {
@@ -34,20 +31,21 @@ struct CalendarView: View {
 
         LazyVGrid(columns: columns, spacing: 0) {
           ForEach(viewModel.days, id: \.self) { date in
-            // Helper to filter todos for this cell
             let cellTodos = viewModel.todos(for: date)
+            let isCurrentMonth = viewModel.isCurrentMonth(date)
+            let isToday = viewModel.isToday(date)
+            let dayString = "\(coreDI.calendar.component(.day, from: date))"
 
             CalendarCell(
               date: date,
-              currentMonth: viewModel.currentDate,
+              dayString: dayString,
+              isCurrentMonth: isCurrentMonth,
+              isToday: isToday,
               todos: cellTodos,
               cellHeight: cellHeight,
-              selectedTodoId: $selectedTodoId,
+              selectedTodoId: viewModel.selectedTodoId,
               onDrop: { todo in
-                var updatedTodo = todo
-                updatedTodo.date = calendar.startOfDay(for: date)
-                updatedTodo.updatedAt = Date()
-                viewModel.update(updatedTodo)
+                viewModel.updateDate(of: todo, to: date)
               },
               onTapTodo: { todo in
                 presentTodoSheet(for: todo)
@@ -80,6 +78,7 @@ struct CalendarView: View {
       HomeToolbarContent()
     }
     .task(id: viewModel.currentDate) {
+      viewModel.selectedTodoId = nil
       await viewModel.startObserving()
     }
   }
@@ -88,28 +87,24 @@ struct CalendarView: View {
 
   private var calendarHeader: some View {
     HStack(alignment: .top) {
-      Text(viewModel.currentDate.formatted(.dateTime.month(.wide).year()))
+      Text(viewModel.headerTitle)
         .font(.title)
 
       Spacer()
 
       HStack(spacing: 8) {
         Button {
-          viewModel.currentDate =
-            calendar.date(byAdding: .month, value: -1, to: viewModel.currentDate)
-              ?? viewModel.currentDate
+          viewModel.previousMonth()
         } label: {
           Image(systemName: "chevron.left")
         }
 
         Button("Today") {
-          viewModel.currentDate = Date()
+          viewModel.goToday()
         }
 
         Button {
-          viewModel.currentDate =
-            calendar.date(byAdding: .month, value: 1, to: viewModel.currentDate)
-              ?? viewModel.currentDate
+          viewModel.nextMonth()
         } label: {
           Image(systemName: "chevron.right")
         }
@@ -120,11 +115,10 @@ struct CalendarView: View {
   }
 
   private var weekdayHeader: some View {
-    let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
     let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
 
     return LazyVGrid(columns: columns, spacing: 0) {
-      ForEach(daysOfWeek, id: \.self) { day in
+      ForEach(viewModel.weekdays, id: \.self) { day in
         Text(day)
           .font(.caption)
           .fontWeight(.semibold)
@@ -168,10 +162,12 @@ struct CalendarView: View {
 
 private struct CalendarCell: View {
   let date: Date
-  let currentMonth: Date
+  let dayString: String
+  let isCurrentMonth: Bool
+  let isToday: Bool
   let todos: [Todo]
   let cellHeight: CGFloat
-  @Binding var selectedTodoId: String?
+  let selectedTodoId: String?
 
   let onDrop: (Todo) -> Void
   let onTapTodo: (Todo) -> Void
@@ -180,16 +176,6 @@ private struct CalendarCell: View {
   let onStatusChange: (Todo) -> Void
   let onDuplicate: (Todo) -> Void
   let onDelete: (Todo) -> Void
-
-  private let calendar = Calendar.current
-
-  private var isCurrentMonth: Bool {
-    calendar.isDate(date, equalTo: currentMonth, toGranularity: .month)
-  }
-
-  private var isToday: Bool {
-    calendar.isDateInToday(date)
-  }
 
   private var maxVisibleItems: Int {
     let availableHeight = cellHeight - DesignSystem.Layout.calendarCellHeaderHeight
@@ -229,7 +215,7 @@ private struct CalendarCell: View {
     Button {
       onTapDate(date)
     } label: {
-      Text("\(calendar.component(.day, from: date))")
+      Text(dayString)
         .font(.system(size: 14, weight: isToday ? .bold : .medium))
         .foregroundStyle(isToday ? .primary : (isCurrentMonth ? .primary : .secondary))
         .opacity(isCurrentMonth ? 1 : 0.4)
@@ -286,6 +272,5 @@ private struct CalendarCell: View {
 
 #Preview {
   CalendarView(viewModel: TodoCalendarViewModel.preview)
-    .environment(NavigationManager.preview)
-    .environment(TodoBoardStore.preview)
+    .environment(CoreDIContainer.preview)
 }

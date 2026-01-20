@@ -168,10 +168,6 @@ struct BoardView: View {
 
       HomeToolbarContent()
     }
-    .task(id: viewModel.dateFilter) {
-      let range = viewModel.dateFilter.dateRange
-      store.updateObservation(range: range)
-    }
   }
 
   // MARK: - Helpers

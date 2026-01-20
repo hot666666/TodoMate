@@ -16,12 +16,12 @@ enum TodoCardStyle {
 struct TodoCard: View {
   @Environment(\.colorScheme) private var colorScheme
 
-  let style: TodoCardStyle = .normal
+  var style: TodoCardStyle = .normal
   let todo: Todo
-  let onStatusClick: (() -> Void)?
-  let onStatusChange: ((TodoStatus) -> Void)?
-  let onDuplicate: (() -> Void)?
-  let onDelete: (() -> Void)?
+  var onStatusClick: (() -> Void)?
+  var onStatusChange: ((TodoStatus) -> Void)?
+  var onDuplicate: (() -> Void)?
+  var onDelete: (() -> Void)?
 
   private var accentColor: Color {
     todo.status.displayColor
