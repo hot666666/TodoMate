@@ -70,10 +70,10 @@ private struct MainContent: View {
         SettingView()
 
       case .todo:
-        HomeView(container: container.core, todoBoardStore: todoBoardStore)
+        HomeView(container: container.core)
 
       case .memo:
-        MemoView(store: memoStore)
+        MemoView()
 
       case .group:
         AuthenticatedView {

@@ -12,12 +12,10 @@ struct HomeView: View {
   @Environment(NavigationManager.self) private var naviManager
   @Environment(\.overlayManager) private var overlay
 
-  @State private var boardViewModel: BoardViewModel
   @State private var calendarViewModel: TodoCalendarViewModel
   @State private var escToken: HotKeyManager.RegistrationToken?
 
-  init(container: CoreDIContainer, todoBoardStore: TodoBoardStore) {
-    _boardViewModel = State(initialValue: BoardViewModel(store: todoBoardStore))
+  init(container: CoreDIContainer) {
     _calendarViewModel = State(initialValue: TodoCalendarViewModel(container: container))
   }
 
@@ -25,7 +23,7 @@ struct HomeView: View {
     Group {
       switch naviManager.viewMode {
       case .board:
-        BoardView(viewModel: boardViewModel)
+        BoardView()
       case .calendar:
         CalendarView(viewModel: calendarViewModel)
       }

@@ -56,8 +56,8 @@ final class TodoBoardStore {
   func startObservation() {
     observationTask?.cancel()
 
-    let startDate = Date().startOfDay
-    let endDate = startDate.addingTimeInterval(86400 * 7)
+    let endDate = Date().startOfDay
+    let startDate = endDate.addingTimeInterval(86400 * -7)
 
     observationTask = Task { [weak self] in
       guard let self else { return }
