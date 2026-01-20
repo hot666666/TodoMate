@@ -13,11 +13,13 @@ import TodoMateDomain
 
 @main
 struct TodoMateApp: App {
+  // MARK: - Dependencies
+
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
   private let appDIContainer: AppDIContainer
   private let overlayViewController: OverlayViewController
 
-  // MARK: - SwiftData(Todo, Memo) Helper
+  // MARK: - State
 
   @State private var todoBoardStore: TodoBoardStore
   @State private var memoStore: MemoStore

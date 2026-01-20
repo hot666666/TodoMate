@@ -14,6 +14,8 @@ enum TodoCardStyle {
 }
 
 struct TodoCard: View {
+  // MARK: - Properties
+
   @Environment(\.colorScheme) private var colorScheme
 
   var style: TodoCardStyle = .normal
@@ -23,6 +25,8 @@ struct TodoCard: View {
   var onDuplicate: (() -> Void)?
   var onDelete: (() -> Void)?
 
+  // MARK: - Computed Properties
+
   private var accentColor: Color {
     todo.status.displayColor
   }
@@ -30,6 +34,8 @@ struct TodoCard: View {
   private var isDone: Bool {
     todo.status == .complete
   }
+
+  // MARK: - Body
 
   var body: some View {
     Group {
@@ -43,7 +49,7 @@ struct TodoCard: View {
     .contextMenu { contextMenuContent }
   }
 
-  // MARK: - Common Components
+  // MARK: - Subviews
 
   private var statusStrip: some View {
     Rectangle()

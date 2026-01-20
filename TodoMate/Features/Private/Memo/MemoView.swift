@@ -13,6 +13,8 @@ import TodoMateDomain
 // MARK: - MemoView (Container)
 
 struct MemoView: View {
+  // MARK: - Properties
+
   @Environment(AppDIContainer.self) private var container
   @State private var viewModel: MemoViewModel
   @Namespace private var heroNamespace
@@ -22,9 +24,13 @@ struct MemoView: View {
   @State private var selectedMemo: Memo?
   @State private var isDetailViewPresented = false
 
+  // MARK: - Init
+
   init(store: MemoStore) {
     _viewModel = State(initialValue: MemoViewModel(store: store))
   }
+
+  // MARK: - Body
 
   var body: some View {
     ZStack {
@@ -138,6 +144,8 @@ struct MemoView: View {
 // MARK: - MemoContent (Pure UI)
 
 private struct MemoContent: View {
+  // MARK: - Properties
+
   let memos: [Memo]
   let heroNamespace: Namespace.ID
   let onTapMemo: (Memo) -> Void
@@ -146,6 +154,8 @@ private struct MemoContent: View {
   private let columns = [
     GridItem(.adaptive(minimum: 180, maximum: 300), spacing: 16),
   ]
+
+  // MARK: - Body
 
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
