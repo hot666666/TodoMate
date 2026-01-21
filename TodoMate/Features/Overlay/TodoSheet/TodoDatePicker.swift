@@ -10,54 +10,62 @@ import TodoMateData
 import TodoMateDomain
 
 struct TodoDatePicker: View {
+  @Environment(CoreDIContainer.self) private var coreDI
+
+  // MARK: - Properties
+
   @Binding var date: Date
-  let calendarDayService: CalendarDayService
+  private let onDismiss: () -> Void
 
-  init(date: Binding<Date>, calendarDayService: CalendarDayService = CalendarDayServiceImpl()) {
-    _date = date
-    self.calendarDayService = calendarDayService
-  }
+  // MARK: - State
 
-  var body: some View {
-    PopoverView(date: $date, calendarDayService: calendarDayService)
-      .padding(DesignSystem.TodoSheet.DatePicker.padding)
-      .frame(
-        width: DesignSystem.TodoSheet.DatePicker.width,
-        height: DesignSystem.TodoSheet.DatePicker.height,
-      )
-      .background(.ultraThinMaterial)
-      .clipShape(RoundedRectangle(cornerRadius: 12))
-  }
-}
-
-// MARK: - PopoverView
-
-private struct PopoverView: View {
-  @Binding var date: Date
   @State private var displayMonth: Date
-  let dateService: CalendarDayService
 
-  init(date: Binding<Date>, calendarDayService: CalendarDayService) {
+  // MARK: - Init
+
+  init(
+    date: Binding<Date>,
+    onDismiss: @escaping () -> Void,
+  ) {
     _date = date
-    dateService = calendarDayService
+    self.onDismiss = onDismiss
+
     // 월의 첫날로 정규화하여 일관된 월 이동 보장
     let calendar = Calendar.current
     let normalizedMonth =
-      calendar.date(from: calendar.dateComponents([.year, .month], from: date.wrappedValue))
-        ?? date.wrappedValue
+      calendar.date(
+        from: calendar.dateComponents([.year, .month], from: date.wrappedValue),
+      ) ?? date.wrappedValue
+
     _displayMonth = State(initialValue: normalizedMonth)
   }
+
+  // MARK: - Body
 
   var body: some View {
     VStack(spacing: 0) {
       header
         .padding(.bottom, DesignSystem.TodoSheet.Spacing.small)
+
       CalendarWeekday()
+
       daysGrid
         .padding(.top, 5)
     }
     .frame(maxHeight: .infinity, alignment: .top)
+    .padding(DesignSystem.TodoSheet.DatePicker.padding)
+    .frame(
+      width: DesignSystem.TodoSheet.DatePicker.width,
+      height: DesignSystem.TodoSheet.DatePicker.height,
+    )
+    .materialCardOverlay()
+    .onKeyPress(.escape) {
+      onDismiss()
+      return .handled
+    }
   }
+
+  // MARK: - Subviews
 
   private var header: some View {
     HStack {
@@ -67,28 +75,25 @@ private struct PopoverView: View {
 
       Spacer()
 
-      Button(action: {
-        displayMonth = dateService.moveMonth(of: displayMonth, by: -1)
-      }) {
-        Image(systemName: "chevron.left")
-          .foregroundColor(.secondary)
-          .contentShape(.rect)
-      }
-      .buttonStyle(.plain)
-
-      Button(action: {
-        displayMonth = dateService.moveMonth(of: displayMonth, by: 1)
-      }) {
-        Image(systemName: "chevron.right")
-          .foregroundColor(.secondary)
-          .contentShape(.rect)
-      }
-      .buttonStyle(.plain)
+      monthNavigationButton(direction: -1, icon: "chevron.left")
+      monthNavigationButton(direction: 1, icon: "chevron.right")
     }
   }
 
+  private func monthNavigationButton(direction: Int, icon: String) -> some View {
+    Button {
+      displayMonth = coreDI.calendarDayService.moveMonth(of: displayMonth, by: direction)
+    } label: {
+      Image(systemName: icon)
+        .foregroundColor(.secondary)
+        .contentShape(.rect)
+    }
+    .buttonStyle(.plain)
+  }
+
   private var daysGrid: some View {
-    let calendarDays = dateService.getCalendarDays(in: displayMonth)
+    let calendarDays = coreDI.calendarDayService.getCalendarDays(in: displayMonth)
+
     return LazyVGrid(
       columns: Array(repeating: GridItem(.flexible()), count: 7),
       spacing: DesignSystem.TodoSheet.Spacing.small,
@@ -99,13 +104,20 @@ private struct PopoverView: View {
           isSelected: calendarDay.date.isSameDay(as: date),
         )
         .onTapGesture {
-          date = calendarDay.date
-          if !calendarDay.date.isSameMonth(as: displayMonth) {
-            displayMonth = calendarDay.date
-          }
+          selectDate(calendarDay.date)
         }
       }
     }
+  }
+
+  // MARK: - Actions
+
+  private func selectDate(_ newDate: Date) {
+    date = newDate
+    if !newDate.isSameMonth(as: displayMonth) {
+      displayMonth = newDate
+    }
+    onDismiss()
   }
 }
 
@@ -156,7 +168,7 @@ private struct DayCell: View {
   @State @Previewable var date = Date()
 
   VStack(spacing: 20) {
-    TodoDatePicker(date: $date)
+    TodoDatePicker(date: $date, onDismiss: {})
       .background(Color(nsColor: .windowBackgroundColor))
       .cornerRadius(12)
       .shadow(radius: 10)

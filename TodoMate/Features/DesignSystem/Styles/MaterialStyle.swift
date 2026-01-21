@@ -132,6 +132,12 @@ extension View {
         shadowY: 0,
       ))
   }
+
+  /// 오버레이용 머티리얼 스타일
+  func materialCardOverlay(cornerRadius: CGFloat = 16) -> some View {
+    background(.ultraThinMaterial)
+      .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+  }
 }
 
 // MARK: - Material Button Style

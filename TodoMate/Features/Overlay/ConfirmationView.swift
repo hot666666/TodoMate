@@ -46,6 +46,7 @@ struct ConfirmationView: View {
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
+        .tint(.red)
 
         Button(action: {
           onDismiss()
