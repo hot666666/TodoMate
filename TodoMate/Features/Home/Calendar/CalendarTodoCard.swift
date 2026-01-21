@@ -18,6 +18,7 @@ struct CalendarTodoCard: View {
   // MARK: - Properties
 
   let todo: Todo
+  var isDone: Bool { todo.status == .complete }
 
   // MARK: - Body
 
@@ -42,7 +43,8 @@ struct CalendarTodoCard: View {
   private var content: some View {
     HStack(spacing: 0) {
       Text(todo.content)
-        .todoTextStyle(isDone: todo.status == .complete)
+        .foregroundStyle(isDone ? .secondary : .primary)
+        .strikethrough(isDone)
         .font(.caption2.weight(.medium))
         .lineLimit(1)
         .padding(.horizontal, 6)

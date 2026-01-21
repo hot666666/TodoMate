@@ -18,6 +18,7 @@ struct BoardTodoCard: View {
   // MARK: - Properties
 
   let todo: Todo
+  var isDone: Bool { todo.status == .complete }
 
   // MARK: - Body
 
@@ -39,7 +40,8 @@ struct BoardTodoCard: View {
   private var content: some View {
     VStack(alignment: .leading, spacing: 8) {
       Text(todo.content)
-        .todoTextStyle(isDone: todo.status == .complete)
+        .foregroundStyle(isDone ? .secondary : .primary)
+        .strikethrough(isDone)
         .font(.subheadline.weight(.semibold))
         .lineLimit(2)
         .fixedSize(horizontal: false, vertical: true)

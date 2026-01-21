@@ -10,6 +10,7 @@ import TodoMateDomain
 
 struct SharedTodoRow: View {
   let todo: Todo
+  var isDone: Bool { todo.status == .complete }
 
   var body: some View {
     HStack(alignment: .center, spacing: 12) {
@@ -18,7 +19,8 @@ struct SharedTodoRow: View {
         .foregroundStyle(todo.status.displayColor)
 
       Text(todo.content)
-        .todoTextStyle(isDone: todo.status == .complete)
+        .foregroundStyle(isDone ? .secondary : .primary)
+        .strikethrough(isDone)
         .lineLimit(1)
     }
     .padding(.horizontal, 16)
