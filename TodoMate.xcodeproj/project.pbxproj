@@ -121,11 +121,6 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		45A242C42F0BCCE8006B9A72 /* Shared */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Shared;
-			sourceTree = "<group>";
-		};
 		45DA69ED2E238B00007183E3 /* TodoMate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TodoMate;
@@ -201,7 +196,6 @@
 				452C64D22E21F56600A68B94 /* .pre-commit-config.yaml */,
 				452C64D32E21F56600A68B94 /* .swiftformat */,
 				452C64D42E21F56600A68B94 /* .swiftlint.yml */,
-				45A242C42F0BCCE8006B9A72 /* Shared */,
 				455B43FD2F17AB2100849861 /* Infra */,
 				45DA69ED2E238B00007183E3 /* TodoMate */,
 				4584495C2F18E88700B05106 /* TodoMateWidget */,
@@ -284,7 +278,6 @@
 			fileSystemSynchronizedGroups = (
 				455B43FD2F17AB2100849861 /* Infra */,
 				45A242BB2F0BCCCF006B9A72 /* Resources */,
-				45A242C42F0BCCE8006B9A72 /* Shared */,
 				45DA69ED2E238B00007183E3 /* TodoMate */,
 			);
 			name = TodoMate;

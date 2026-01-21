@@ -10,7 +10,11 @@ import Foundation
 import TodoMateDomain
 
 struct ReadTodosIntent: AppIntent {
-  static var title: LocalizedStringResource = "Show Todos"
+  #if DEBUG
+    static var title: LocalizedStringResource = "Show Todos DEBUG"
+  #else
+    static var title: LocalizedStringResource = "Show Todos"
+  #endif
   static var description: IntentDescription? = "Shows your local todos."
 
   // 필터링 옵션을 추가할 수 있음 (예: "오늘", "내일", "완료됨" 등)

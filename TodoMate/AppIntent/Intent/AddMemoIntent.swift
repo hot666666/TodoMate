@@ -10,7 +10,11 @@ import Foundation
 import TodoMateDomain
 
 struct AddMemoIntent: AppIntent {
-  static var title: LocalizedStringResource = "Add Memo"
+  #if DEBUG
+    static var title: LocalizedStringResource = "Add Memo DEBUG"
+  #else
+    static var title: LocalizedStringResource = "Add Memo"
+  #endif
   static var description: IntentDescription? = "Creates a new Memo in TodoMate."
 
   @Parameter(title: "Content")
