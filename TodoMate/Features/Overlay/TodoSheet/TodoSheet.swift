@@ -46,8 +46,9 @@ struct TodoSheet: View {
       actionBar
     }
     .onTapBackground { dismissWithConfirmation() }
-    .onGlobalHotKey(.escape) {
-      Task { @MainActor in dismissWithConfirmation() }
+    .onKeyPress(.escape) {
+      dismissWithConfirmation()
+      return .handled
     }
     .onAppear { focusContentIfEmpty() }
     .compositingGroup()
