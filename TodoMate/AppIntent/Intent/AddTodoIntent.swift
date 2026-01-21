@@ -33,12 +33,11 @@ struct AddTodoIntent: AppIntent {
     }
   }
 
+  @Dependency
+  private var container: CoreDIContainer
+
   @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<TodoEntity> {
-    guard let container = CoreDIContainer.shared else {
-      throw AppIntentError.containerNotFound
-    }
-
     // 로컬 Todo는 owner를 ""로 설정 (AppIntent는 Firebase 미사용)
     let sanitizedContent = content.replacingOccurrences(of: "\n", with: " ")
 
