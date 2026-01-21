@@ -39,46 +39,52 @@ private struct MenuBarContent: View {
   let todos: [Todo]
 
   var body: some View {
-    Button("새 할일") {
-      WindowManager.shared.toggleOverlay()
-    }
-    .keyboardShortcut(" ", modifiers: [.command, .shift])
+    Group {
+      Button("새 할일") {
+        WindowManager.shared.toggleOverlay()
+      }
+      .keyboardShortcut(" ", modifiers: [.command, .shift])
 
-    Button("TodoMate 열기") {
-      WindowManager.shared.openMainWindow()
-    }
-    .keyboardShortcut("O", modifiers: [.command])
+      Button("TodoMate 열기") {
+        WindowManager.shared.openMainWindow()
+      }
+      .keyboardShortcut("O", modifiers: [.command])
 
-    Divider()
+      Divider()
 
-    Section {
-      if todos.isEmpty {
-        Text("오늘 할일 없음")
-          .foregroundStyle(.secondary)
-      } else {
-        ForEach(todos) { todo in
-          MenuTodoRow(todo: todo) { todo in
-            switch todo.status {
-            case .todo:
-              todoStore.updateStatus(todo, status: .inProgress)
-            case .inProgress:
-              todoStore.updateStatus(todo, status: .complete)
-            default:
-              break
+      Section {
+        if todos.isEmpty {
+          Text("오늘 할일 없음")
+            .foregroundStyle(.secondary)
+        } else {
+          ForEach(todos) { todo in
+            MenuTodoRow(todo: todo) { todo in
+              switch todo.status {
+              case .todo:
+                todoStore.updateStatus(todo, status: .inProgress)
+              case .inProgress:
+                todoStore.updateStatus(todo, status: .complete)
+              default:
+                break
+              }
             }
           }
         }
+      } header: {
+        Text("오늘의 할일")
       }
-    } header: {
-      Text("오늘의 할일")
-    }
 
-    Divider()
+      Divider()
 
-    Button("종료") {
-      NSApplication.shared.terminate(nil)
+      Button("종료") {
+        NSApplication.shared.terminate(nil)
+      }
+      .keyboardShortcut("Q", modifiers: [.command])
     }
-    .keyboardShortcut("Q", modifiers: [.command])
+    .onAppear {
+      // MenuBarExtra는 앱 시작 시 항상 나타나므로 여기서 주입
+      WindowManager.shared.openWindowAction = openWindow
+    }
   }
 }
 
