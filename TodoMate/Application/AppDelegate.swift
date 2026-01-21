@@ -66,9 +66,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
 
   func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
     if !flag {
-      if let url = mainWindowURL {
-        NSWorkspace.shared.open(url)
-      }
+      WindowManager.shared.openMainWindow()
     }
     return true
   }
