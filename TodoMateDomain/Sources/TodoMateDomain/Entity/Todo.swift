@@ -51,12 +51,15 @@ public struct Todo: Identifiable, Codable, Sendable {
     self.isDeleted = isDeleted
   }
 
-  public init(owner: String, content: String = "", detail: String = "", in date: Date? = nil) {
+  public init(
+    owner: String, content: String = "", status: TodoStatus = .todo, detail: String = "",
+    in date: Date? = nil,
+  ) {
     let now = date ?? Date()
     self.init(
       id: UUID().uuidString,
       content: content,
-      status: .todo,
+      status: status,
       detail: detail,
       date: Calendar.current.startOfDay(for: now),
       createdAt: now,
