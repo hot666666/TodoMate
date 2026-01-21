@@ -7,14 +7,45 @@
 
 import Foundation
 import Observation
+import SimpleOverlaySystem
+import SwiftUI
 import TodoMateDomain
 
 @Observable
 @MainActor
 final class TodoCalendarViewModel {
-  var todos: [Todo] = []
+  static let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
+
+  var todos: [Todo] = [] {
+    didSet {
+      rebuildTodosByDate()
+      updateSelectedDateTodos()
+    }
+  }
+
   var currentDate: Date = .init()
+  var selectedDate: Date? {
+    didSet { updateSelectedDateTodos() }
+  }
+
   var selectedTodoId: String?
+  private(set) var selectedDateTodos: [Todo] = []
+  private(set) var todosByDate: [Date: [Todo]] = [:]
+
+  private func rebuildTodosByDate() {
+    todosByDate = Dictionary(grouping: todos) { calendar.startOfDay(for: $0.date) }
+  }
+
+  private func updateSelectedDateTodos() {
+    guard let date = selectedDate else {
+      selectedDateTodos = []
+      return
+    }
+    selectedDateTodos = todosByDate[calendar.startOfDay(for: date)] ?? []
+  }
+
+  // Weak reference to avoid retain cycles (ViewModel -> OverlayManager -> View -> ViewModel)
+  weak var overlay: OverlayManager?
 
   private let calendar: Calendar
   private let observeTodosUseCase: ObserveTodosUseCase
@@ -67,7 +98,11 @@ final class TodoCalendarViewModel {
   }
 
   func todos(for date: Date) -> [Todo] {
-    todos.filter { calendar.isDate($0.date, inSameDayAs: date) }
+    todosByDate[calendar.startOfDay(for: date)] ?? []
+  }
+
+  func dayString(from date: Date) -> String {
+    "\(calendar.component(.day, from: date))"
   }
 
   func isCurrentMonth(_ date: Date) -> Bool {
@@ -100,10 +135,11 @@ final class TodoCalendarViewModel {
   }
 
   func startObserving() async {
+    selectedTodoId = nil
+
     guard let start = days.first, let end = days.last else { return }
     let range = start ... end
 
-    // Observe changes for the current date range
     for await newTodos in observeTodosUseCase.execute(dateRange: range) {
       todos = newTodos
     }
@@ -140,6 +176,61 @@ final class TodoCalendarViewModel {
         print("Failed to delete todo: \(error)")
       }
     }
+  }
+
+  // MARK: - Overlay Actions
+
+  func presentTodoSheet(for todo: Todo) {
+    overlay?.presentCentered(
+      id: .todoSheet,
+      backdropOpacity: 0,
+      offset: CGPoint(x: 0, y: -120),
+    ) {
+      TodoSheet(editableTodo: EditableTodo(from: todo))
+    }
+  }
+
+  func presentDayTodoList(for date: Date) {
+    selectDate(date)
+    overlay?.presentCentered(backdropOpacity: 0) {
+      DayTodoList(date: date)
+        .environment(self)
+    }
+  }
+
+  // MARK: - View Helpers
+
+  func maxVisibleItems(for height: CGFloat) -> Int {
+    let titleHeight: CGFloat = 20
+    let itemHeight: CGFloat = 24 // Compact card height
+    let availableHeight = height - titleHeight - 4
+    return max(1, Int(availableHeight / itemHeight))
+  }
+
+  func updateStatus(_ todo: Todo, to status: TodoStatus) {
+    var updated = todo
+    updated.status = status
+    update(updated)
+  }
+
+  @discardableResult
+  func handleDrop(todos: [Todo], to date: Date) -> Bool {
+    guard let todo = todos.first else { return false }
+    updateDate(of: todo, to: date)
+    return true
+  }
+
+  @discardableResult
+  func handleStatusDrop(todos items: [Todo], to status: TodoStatus) -> Bool {
+    guard let todo = items.first else { return false }
+    if todo.status != status {
+      updateStatus(todo, to: status)
+    }
+    return true
+  }
+
+  func selectDate(_ date: Date) {
+    selectedDate = date
   }
 }
 
