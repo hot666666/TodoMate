@@ -69,6 +69,11 @@ struct Sidebar: View {
           memoLabel
         }
         .accessibilityIdentifier("sidebar_memo")
+
+        NavigationLink(value: NavigationDestination.deletedItems) {
+          trashLabel
+        }
+        .accessibilityIdentifier("sidebar_trash")
       } header: {
         Text("Private")
       }
@@ -89,13 +94,6 @@ struct Sidebar: View {
           ConnectivityToggle()
             .padding(.trailing, 8)
         }
-      }
-
-      Section {
-        NavigationLink(value: NavigationDestination.deletedItems) {
-          deletedItemsLabel
-        }
-        .accessibilityIdentifier("sidebar_deleted_items")
       }
     }
     .frame(minWidth: 200)
@@ -144,9 +142,9 @@ struct Sidebar: View {
     }
   }
 
-  private var deletedItemsLabel: some View {
+  private var trashLabel: some View {
     Label {
-      Text("휴지통")
+      Text("Trash")
     } icon: {
       Image(systemName: "trash")
         .foregroundStyle(.secondary)

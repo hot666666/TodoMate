@@ -99,11 +99,16 @@ struct DeletedItemsView: View {
   }
 
   private var sortMenu: some View {
-    @Bindable var store = store
-    return Menu {
-      Picker("정렬", selection: $store.sortOrder) {
-        ForEach(DeletedItemsStore.SortOrder.allCases, id: \.self) { order in
-          Text(order.rawValue).tag(order)
+    Menu {
+      ForEach(DeletedItemsStore.SortOrder.allCases, id: \.self) { order in
+        Button {
+          store.sortOrder = order
+        } label: {
+          if store.sortOrder == order {
+            Label(order.rawValue, systemImage: "checkmark")
+          } else {
+            Text(order.rawValue)
+          }
         }
       }
     } label: {

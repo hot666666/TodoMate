@@ -23,6 +23,7 @@ final class MemoStore {
   private let updateUseCase: UpdateLocalMemoUseCase
   private let deleteUseCase: DeleteLocalMemoUseCase
   private let observeMemosUseCase: ObserveMemosUseCase
+  private let permanentlyDeleteUseCase: PermanentlyDeleteItemUseCase
 
   private var observationTask: Task<Void, Never>?
 
@@ -34,12 +35,14 @@ final class MemoStore {
     updateUseCase: UpdateLocalMemoUseCase,
     deleteUseCase: DeleteLocalMemoUseCase,
     observeMemosUseCase: ObserveMemosUseCase,
+    permanentlyDeleteUseCase: PermanentlyDeleteItemUseCase,
   ) {
     self.createUseCase = createUseCase
     self.readUseCase = readUseCase
     self.updateUseCase = updateUseCase
     self.deleteUseCase = deleteUseCase
     self.observeMemosUseCase = observeMemosUseCase
+    self.permanentlyDeleteUseCase = permanentlyDeleteUseCase
 
     updateObservation()
   }
@@ -51,6 +54,7 @@ final class MemoStore {
       updateUseCase: container.updateLocalMemoUseCase,
       deleteUseCase: container.deleteLocalMemoUseCase,
       observeMemosUseCase: container.observeMemosUseCase,
+      permanentlyDeleteUseCase: container.permanentlyDeleteItemUseCase,
     )
   }
 
@@ -101,6 +105,18 @@ final class MemoStore {
 
       } catch {
         Log.error("Failed to delete private memo: \(error)", category: .data)
+      }
+    }
+  }
+
+  /// Permanently delete a memo (used when content is cleared before dismissal)
+  func permanentlyDelete(_ memo: Memo) {
+    Task {
+      do {
+        try await permanentlyDeleteUseCase.run([.memo(memo)])
+
+      } catch {
+        Log.error("Failed to permanently delete memo: \(error)", category: .data)
       }
     }
   }
