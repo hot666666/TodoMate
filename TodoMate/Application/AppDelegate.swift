@@ -14,14 +14,6 @@ import WidgetKit
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
 
-  private var mainWindowURL: URL? {
-    #if DEBUG
-      URL(string: "todomatedebug://main")
-    #else
-      URL(string: "todomate://main")
-    #endif
-  }
-
   func applicationDidFinishLaunching(_: Notification) {
     // Dock 표시 설정 적용 (기본값: true/regular)
     let showInDock = UserDefaults.standard.bool(

@@ -8,10 +8,10 @@
 import Foundation
 
 public enum TodoStatus: String, CaseIterable, Codable, CustomStringConvertible, Sendable {
-  case inComplete = "미완료"
   case todo = "시작 전"
   case inProgress = "진행 중"
   case complete = "완료"
+  case inComplete = "미완료"
 
   public var description: String { rawValue }
 }

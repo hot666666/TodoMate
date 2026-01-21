@@ -49,22 +49,42 @@ struct CalendarView: View {
 
   private var calendarHeader: some View {
     PageHeader(title: viewModel.headerTitle) {
-      HStack(spacing: 8) {
+      HStack(spacing: 6) {
         Button {
           viewModel.previousMonth()
         } label: {
           Image(systemName: "chevron.left")
+            .font(.caption.bold())
+            .frame(width: 28, height: 28)
+            .contentShape(.rect)
         }
-        Button("Today") {
+        .background(.ultraThinMaterial)
+        .clipShape(.circle)
+
+        Button {
           viewModel.goToday()
+        } label: {
+          Text("Today")
+            .padding(.horizontal, 12)
+            .frame(height: 28)
+            .font(.caption.bold())
+            .contentShape(.rect)
         }
+        .background(.ultraThinMaterial)
+        .clipShape(.capsule)
+
         Button {
           viewModel.nextMonth()
         } label: {
           Image(systemName: "chevron.right")
+            .font(.caption.bold())
+            .frame(width: 28, height: 28)
+            .contentShape(.rect)
         }
+        .background(.ultraThinMaterial)
+        .clipShape(.circle)
       }
-      .buttonStyle(.bordered)
+      .buttonStyle(.plain)
     }
   }
 

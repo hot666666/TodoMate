@@ -55,7 +55,7 @@ struct DefaultAvatar: View {
   var size: CGFloat = 64
 
   private var initials: String {
-    displayName.isEmpty ? "?" : String(displayName.prefix(2)).uppercased()
+    displayName.isEmpty ? "?" : String(displayName.prefix(1)).uppercased()
   }
 
   var body: some View {

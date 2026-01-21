@@ -92,6 +92,10 @@ public extension Date {
       return formatted(.dateTime.month().day())
     }
   }
+
+  func addingDays(_ value: Int) -> Date {
+    Calendar.current.date(byAdding: .day, value: value, to: self) ?? self
+  }
 }
 
 private enum CachedFormatters {

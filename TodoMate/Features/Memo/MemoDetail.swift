@@ -69,26 +69,28 @@ struct MemoDetail: View {
     .onAppear {
       editedContent = memo.content
     }
+    .onDisappear {
+      saveOrDelete()
+    }
   }
 
   @ToolbarContentBuilder
   private var toolbarContent: some ToolbarContent {
     ToolbarItem(placement: .primaryAction) {
       Button {
-        saveOrDeleteAndDismiss()
+        onDismiss()
       } label: {
         Image(systemName: "chevron.left")
       }
     }
   }
 
-  private func saveOrDeleteAndDismiss() {
+  private func saveOrDelete() {
     if isEmpty {
       onDelete()
     } else {
       onSave(editedContent)
     }
-    onDismiss()
   }
 }
 
