@@ -57,6 +57,12 @@ final class ScreenshotTests: XCTestCase {
     captureScreen(.memo)
   }
 
+  @MainActor
+  func testCaptureDeletedItems() {
+    launchApp()
+    captureScreen(.deletedItems)
+  }
+
   // MARK: - Settings in 3 States
 
   @MainActor

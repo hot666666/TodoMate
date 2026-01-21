@@ -54,6 +54,7 @@ struct DeletedItemsView: View {
     } message: {
       Text("선택한 \(store.selectedIds.count)개 항목을 영구적으로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")
     }
+    .accessibilityIdentifier("deletedItemsView")
   }
 
   // MARK: - Subviews
