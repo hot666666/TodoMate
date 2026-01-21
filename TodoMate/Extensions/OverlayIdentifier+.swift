@@ -7,6 +7,8 @@
 
 import SimpleOverlaySystem
 
-extension OverlayIdentifier {
-  static var todoSheet: Self { .unique("todoSheet") }
+enum OverlayIDs {
+  static let todoSheet = OverlayIdentifier.unique("todoSheet")
+  static let dayTodoList = OverlayIdentifier.unique("dayTodoList")
+  static let discardConfirmation = OverlayIdentifier.unique("discardConfirmation")
 }

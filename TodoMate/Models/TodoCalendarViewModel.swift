@@ -182,7 +182,7 @@ final class TodoCalendarViewModel {
 
   func presentTodoSheet(for todo: Todo) {
     overlay?.presentCentered(
-      id: .todoSheet,
+      id: OverlayIDs.todoSheet,
       backdropOpacity: 0,
       offset: CGPoint(x: 0, y: -120),
     ) {
@@ -192,7 +192,7 @@ final class TodoCalendarViewModel {
 
   func presentDayTodoList(for date: Date) {
     selectDate(date)
-    overlay?.presentCentered(backdropOpacity: 0) {
+    overlay?.presentCentered(id: OverlayIDs.dayTodoList, backdropOpacity: 0) {
       DayTodoList(date: date)
         .environment(self)
     }
