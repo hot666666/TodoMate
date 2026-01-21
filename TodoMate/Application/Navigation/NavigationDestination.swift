@@ -12,6 +12,7 @@ enum NavigationDestination: Hashable, Identifiable {
   case memo
   case settings
   case group
+  case deletedItems
 
   var id: String {
     switch self {
@@ -19,6 +20,7 @@ enum NavigationDestination: Hashable, Identifiable {
     case .memo: "memo"
     case .settings: "settings"
     case .group: "group"
+    case .deletedItems: "deletedItems"
     }
   }
 
@@ -28,6 +30,7 @@ enum NavigationDestination: Hashable, Identifiable {
     case .memo: "Memo"
     case .settings: "Settings"
     case .group: "Group"
+    case .deletedItems: "Deleted Items"
     }
   }
 }

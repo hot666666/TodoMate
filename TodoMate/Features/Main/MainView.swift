@@ -62,10 +62,22 @@ struct MainView: View {
         AuthenticatedView {
           GroupFeedWrapperView(container: container)
         }
+
+      case .deletedItems:
+        DeletedItemsView()
+          .environment(deletedItemsStore)
       }
     } else {
       unavailableView
     }
+  }
+
+  private var deletedItemsStore: DeletedItemsStore {
+    DeletedItemsStore(
+      fetchDeletedItemsUseCase: container.core.fetchDeletedItemsUseCase,
+      restoreDeletedItemUseCase: container.core.restoreDeletedItemUseCase,
+      permanentlyDeleteItemUseCase: container.core.permanentlyDeleteItemUseCase,
+    )
   }
 
   @ViewBuilder

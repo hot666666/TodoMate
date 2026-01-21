@@ -90,6 +90,13 @@ struct Sidebar: View {
             .padding(.trailing, 8)
         }
       }
+
+      Section {
+        NavigationLink(value: NavigationDestination.deletedItems) {
+          deletedItemsLabel
+        }
+        .accessibilityIdentifier("sidebar_deleted_items")
+      }
     }
     .frame(minWidth: 200)
     .listStyle(.sidebar)
@@ -133,6 +140,15 @@ struct Sidebar: View {
         .foregroundStyle(.secondary)
     } icon: {
       Image(systemName: "person.2.fill")
+        .foregroundStyle(.secondary)
+    }
+  }
+
+  private var deletedItemsLabel: some View {
+    Label {
+      Text("휴지통")
+    } icon: {
+      Image(systemName: "trash")
         .foregroundStyle(.secondary)
     }
   }
