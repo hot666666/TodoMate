@@ -57,10 +57,13 @@ struct TodoSheet: View {
     .coordinateSpace(name: "TodoSheet")
   }
 
+  // MARK: - Subviews
+
   private var actionBar: some View {
     HStack(alignment: .center) {
-      TodoStatusButton(status: Bindable(editableTodo).status)
-      TodoDateButton(date: Bindable(editableTodo).date)
+      WrappedTodoStatusButton(status: $editableTodo.status)
+      WrappedTodoDateButton(date: $editableTodo.date)
+
       Spacer()
 
       TodoSheetActionButton(
@@ -72,18 +75,16 @@ struct TodoSheet: View {
     }
     .padding(.top, DesignSystem.TodoSheet.Padding.medium)
   }
-}
 
-// MARK: - Actions
+  // MARK: - Actions
 
-private extension TodoSheet {
-  func focusContentIfEmpty() {
+  private func focusContentIfEmpty() {
     if editableTodo.content.isEmpty {
       isContentFocused = true
     }
   }
 
-  func submit() {
+  private func submit() {
     if editableTodo.isDirty {
       let todo = Todo.from(editableTodo)
       if editableTodo.isNew {
@@ -95,7 +96,7 @@ private extension TodoSheet {
     overlay?.dismissTop()
   }
 
-  func dismissWithConfirmation() {
+  private func dismissWithConfirmation() {
     if editableTodo.isDirty {
       showDiscardConfirmation()
     } else {
@@ -103,7 +104,7 @@ private extension TodoSheet {
     }
   }
 
-  func showDiscardConfirmation() {
+  private func showDiscardConfirmation() {
     let title = editableTodo.isNew ? "작성 중인 내용을 폐기하시겠습니까?" : "변경사항을 폐기하시겠습니까?"
     let message = editableTodo.isNew ? "작성 중인 내용이 사라집니다." : "저장하지 않은 변경사항이 있습니다."
 
@@ -122,6 +123,65 @@ private extension TodoSheet {
         },
       )
     }
+  }
+}
+
+// MARK: - Subcomponents
+
+private struct WrappedTodoStatusButton: View {
+  @Binding var status: TodoStatus
+  @Environment(\.overlayManager) private var overlay
+
+  var body: some View {
+    AnchoredOverlayButton(
+      placement: .bottom(spacing: 4, alignment: .center),
+      dismissPolicy: .tap,
+      barrier: .blockAll,
+      backdropOpacity: 0,
+    ) {
+      TodoStatusChip(status: status)
+    } content: {
+      TodoStatusPicker(
+        selectedStatus: $status,
+        onDismiss: { overlay?.dismissTop() },
+      )
+    }
+    .buttonStyle(.plain)
+  }
+}
+
+private struct WrappedTodoDateButton: View {
+  @Binding var date: Date
+  @Environment(\.overlayManager) private var overlay
+
+  private var isToday: Bool {
+    date.isToday
+  }
+
+  private var displayText: String {
+    isToday ? "오늘" : date.yearMonthDay
+  }
+
+  var body: some View {
+    AnchoredOverlayButton(
+      placement: .bottom(spacing: 4, alignment: .leading),
+      dismissPolicy: .tap,
+      barrier: .blockAll,
+      backdropOpacity: 0,
+    ) {
+      ChipLabel(
+        icon: isToday ? "calendar" : "calendar.badge.clock",
+        text: displayText,
+        isActive: isToday,
+        color: .green,
+      )
+    } content: {
+      TodoDatePicker(
+        date: $date,
+        onDismiss: { overlay?.dismissTop() },
+      )
+    }
+    .buttonStyle(.plain)
   }
 }
 
