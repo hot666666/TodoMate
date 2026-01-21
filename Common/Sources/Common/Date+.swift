@@ -10,16 +10,12 @@ import Foundation
 public extension Date {
   /// Format: `yyyy/MM/dd`
   var yearMonthDay: String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy/MM/dd"
-    return formatter.string(from: self)
+    CachedFormatters.yearMonthDay.string(from: self)
   }
 
   /// Format: `yyyy M월`
   var yearMonth: String {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy M월"
-    return dateFormatter.string(from: self)
+    CachedFormatters.yearMonth.string(from: self)
   }
 
   func isSameDay(as date: Date) -> Bool {
@@ -71,14 +67,11 @@ public extension Date {
 
   /// 오늘이면 시간(HH:mm:ss), 아니면 날짜(yy/MM/dd)
   var timeOrDateString: String {
-    let calendar = Calendar.current
-    let formatter = DateFormatter()
-    if calendar.isDateInToday(self) {
-      formatter.dateFormat = "HH:mm:ss"
+    if Calendar.current.isDateInToday(self) {
+      CachedFormatters.time.string(from: self)
     } else {
-      formatter.dateFormat = "yy/MM/dd"
+      CachedFormatters.shortDate.string(from: self)
     }
-    return formatter.string(from: self)
   }
 
   /// 날짜를 헤더용 문자열로 변환
@@ -99,4 +92,30 @@ public extension Date {
       return formatted(.dateTime.month().day())
     }
   }
+}
+
+private enum CachedFormatters {
+  static let yearMonthDay: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy/MM/dd"
+    return formatter
+  }()
+
+  static let yearMonth: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy M월"
+    return formatter
+  }()
+
+  static let time: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm:ss"
+    return formatter
+  }()
+
+  static let shortDate: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yy/MM/dd"
+    return formatter
+  }()
 }
