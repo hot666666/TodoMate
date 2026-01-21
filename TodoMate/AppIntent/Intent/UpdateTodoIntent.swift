@@ -22,12 +22,11 @@ struct UpdateTodoIntent: AppIntent {
   @Parameter(title: "New Content")
   var newContent: String?
 
+  @Dependency
+  private var container: CoreDIContainer
+
   @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<TodoEntity> {
-    guard let container = CoreDIContainer.shared else {
-      throw AppIntentError.containerNotFound
-    }
-
     // Domain Todo로 변환하여 업데이트
     // 먼저 최신 상태 조회
     guard let currentTodo = try await container.localTodoRepository.read(id: todo.id) else {

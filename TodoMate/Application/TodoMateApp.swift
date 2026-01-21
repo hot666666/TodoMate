@@ -5,6 +5,7 @@
 //  Created by hs on 6/2/25.
 //
 
+import AppIntents
 import Common
 import SwiftData
 import SwiftUI
@@ -26,43 +27,30 @@ struct TodoMateApp: App {
 
   init() {
     // Firebase 및 GoogleSignIn 설정 후, DI Container 생성
+    let container: AppDIContainer
     #if DEBUG
       DebugConfiguration.configureFirebase()
-      appDIContainer = DebugConfiguration.makeContainer() ?? Self.composeContainer()
+      container = DebugConfiguration.makeContainer() ?? Self.composeContainer()
     #else
       TodoMateDataConfiguration.configure()
-      appDIContainer = Self.composeContainer()
+      container = Self.composeContainer()
     #endif
-
-    // AppIntent에서 사용할 수 있도록 공유 인스턴스 설정
-    CoreDIContainer.shared = appDIContainer.core
+    appDIContainer = container
 
     // 앱 업데이트 체크 및 처리
-    Self.checkAndHandleAppUpdate(container: appDIContainer)
+    Self.checkAndHandleAppUpdate(container: container)
 
-    // Helper 초기화
-    let todoBoardStore = TodoBoardStore(container: appDIContainer.core)
+    // 스토어 초기화
+    let todoBoardStore = TodoBoardStore(container: container.core)
     _todoBoardStore = State(initialValue: todoBoardStore)
-    _memoStore = State(initialValue: MemoStore(container: appDIContainer.core))
+    _memoStore = State(initialValue: MemoStore(container: container.core))
 
-    // OverlayViewController 초기화
-    overlayViewController = OverlayViewController(
-      coreDI: appDIContainer.core,
-      todoBoardStore: todoBoardStore,
-    )
-
-    // WindowManager에 오버레이 컨트롤러 주입
+    // OverlayVC 생성 및 WindowManager 등록
+    overlayViewController = Self.composeVCandRegisterHotKey(container: container, store: todoBoardStore)
     WindowManager.shared.overlayController = overlayViewController
 
-    // 글로벌 단축키 등록 (시스템 레벨 - 다른 앱에서도 작동)
-    // ⇧⌘Space: 오버레이 토글
-    appDIContainer.core.hotKeyManager.register(
-      key: .space,
-      modifiers: [.command, .shift],
-      handler: {
-        WindowManager.shared.toggleOverlay()
-      },
-    )
+    // AppIntent에서 사용할 수 있도록 CoreDIContainer 등록
+    AppDependencyManager.shared.add(dependency: container.core)
   }
 
   var body: some Scene {
@@ -105,7 +93,7 @@ struct TodoMateApp: App {
         .keyboardShortcut("n", modifiers: [.command, .shift])
       }
 
-      // 앱 메뉴: 업데이트 확인
+      // 앱 메뉴: 업데이트 확인 (⌥⌘U)
       CommandGroup(after: .appInfo) {
         Button("업데이트 확인") {
           appDelegate.checkForUpdates()
@@ -120,6 +108,21 @@ struct TodoMateApp: App {
 // MARK: - Container Composition
 
 private extension TodoMateApp {
+  static func composeVCandRegisterHotKey(container: AppDIContainer, store: TodoBoardStore) -> OverlayViewController {
+    let overlayVC = OverlayViewController(coreDI: container.core, todoBoardStore: store)
+
+    // 시스템 레벨 글로벌 단축키: 오버레이 토글 (⇧⌘Space)
+    container.core.hotKeyManager.register(
+      key: .space,
+      modifiers: [.command, .shift],
+      handler: {
+        WindowManager.shared.toggleOverlay()
+      },
+    )
+
+    return overlayVC
+  }
+
   @MainActor
   static func composeContainer() -> AppDIContainer {
     let userDefaults = UserDefaults.standard

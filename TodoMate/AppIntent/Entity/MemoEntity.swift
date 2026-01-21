@@ -37,10 +37,11 @@ struct MemoEntity: AppEntity {
 }
 
 struct MemoEntityQuery: EntityQuery {
+  @Dependency
+  private var container: CoreDIContainer
+
   func entities(for identifiers: [String]) async throws -> [MemoEntity] {
-    guard let container = CoreDIContainer.shared?.modelContainer else {
-      return []
-    }
+    let container = container.modelContainer
 
     let context = ModelContext(container)
     var result: [MemoEntity] = []
@@ -56,9 +57,7 @@ struct MemoEntityQuery: EntityQuery {
   }
 
   func suggestedEntities() async throws -> [MemoEntity] {
-    guard let container = CoreDIContainer.shared?.modelContainer else {
-      return []
-    }
+    let container = container.modelContainer
 
     let context = ModelContext(container)
     var descriptor = FetchDescriptor<SDMemo>(sortBy: [SortDescriptor(\.updatedAt, order: .reverse)])

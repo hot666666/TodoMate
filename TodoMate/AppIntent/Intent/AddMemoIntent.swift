@@ -20,12 +20,11 @@ struct AddMemoIntent: AppIntent {
     Summary("Add Memo \(\.$content)")
   }
 
+  @Dependency
+  private var container: CoreDIContainer
+
   @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<MemoEntity> {
-    guard let container = CoreDIContainer.shared else {
-      throw AppIntentError.containerNotFound
-    }
-
     // 로컬 Memo는 owner를 ""로 설정 (AppIntent는 Firebase 미사용)
     let memo = Memo(
       owner: "",
