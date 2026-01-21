@@ -16,7 +16,7 @@ public enum TodoStatus: String, CaseIterable, Codable, CustomStringConvertible, 
   public var description: String { rawValue }
 }
 
-public struct Todo: Identifiable, Codable, Sendable {
+public struct Todo: Identifiable, Codable, Sendable, Equatable {
   public let id: String
   /// DocumentID
   public var content: String
