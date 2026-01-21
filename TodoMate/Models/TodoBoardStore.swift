@@ -1,5 +1,5 @@
 //
-//  LocalTodoHelper.swift
+//  TodoBoardStore.swift
 //  TodoMate
 //
 //  Created by hs on 07/02/25.
@@ -13,13 +13,17 @@ import TodoMateDomain
 
 @Observable
 @MainActor
-final class LocalTodoHelper {
-  var refreshClock: Int = 0
+final class TodoBoardStore {
+  var todos: [Todo] = []
 
+  // Dependencies
   private let createUseCase: CreateLocalTodoUseCase
   private let readUseCase: ReadLocalTodoUseCase
   private let updateUseCase: UpdateLocalTodoUseCase
   private let deleteUseCase: DeleteLocalTodoUseCase
+  private let observeTodosUseCase: ObserveTodosUseCase
+
+  private var observationTask: Task<Void, Never>?
 
   var error: Error?
 
@@ -28,11 +32,17 @@ final class LocalTodoHelper {
     readUseCase: ReadLocalTodoUseCase,
     updateUseCase: UpdateLocalTodoUseCase,
     deleteUseCase: DeleteLocalTodoUseCase,
+    observeTodosUseCase: ObserveTodosUseCase,
   ) {
     self.createUseCase = createUseCase
     self.readUseCase = readUseCase
     self.updateUseCase = updateUseCase
     self.deleteUseCase = deleteUseCase
+    self.observeTodosUseCase = observeTodosUseCase
+
+    // Start observing default range (e.g., last 7 days + future)
+    // Adjust based on typical usage or user preference
+    updateObservation(range: Date() ... Date().addingTimeInterval(86400 * 7))
   }
 
   convenience init(container: CoreDIContainer) {
@@ -41,7 +51,19 @@ final class LocalTodoHelper {
       readUseCase: container.readLocalTodoUseCase,
       updateUseCase: container.updateLocalTodoUseCase,
       deleteUseCase: container.deleteLocalTodoUseCase,
+      observeTodosUseCase: container.observeTodosUseCase,
     )
+  }
+
+  // MARK: - Observation
+
+  func updateObservation(range: ClosedRange<Date>) {
+    observationTask?.cancel()
+    observationTask = Task {
+      for await newTodos in observeTodosUseCase.execute(dateRange: range) {
+        self.todos = newTodos
+      }
+    }
   }
 
   func getTodo(id: String) async -> Todo? {
@@ -54,7 +76,7 @@ final class LocalTodoHelper {
     Task {
       do {
         try await createUseCase.run(todo)
-        refreshClock = (refreshClock + 1) % 100_000_000
+
       } catch {
         self.error = error
         Log.error("Failed to create local todo: \(error)")
@@ -66,7 +88,7 @@ final class LocalTodoHelper {
     Task {
       do {
         try await updateUseCase.run(todo)
-        refreshClock = (refreshClock + 1) % 100_000_000
+
       } catch {
         self.error = error
         Log.error("Failed to update local todo: \(error)")
@@ -86,7 +108,7 @@ final class LocalTodoHelper {
     Task {
       do {
         try await deleteUseCase.run(todoId)
-        refreshClock = (refreshClock + 1) % 100_000_000
+
       } catch {
         self.error = error
         Log.error("Failed to delete local todo: \(error)")
@@ -99,8 +121,8 @@ final class LocalTodoHelper {
   }
 }
 
-extension LocalTodoHelper {
-  static var preview: LocalTodoHelper {
-    LocalTodoHelper(container: .preview)
+extension TodoBoardStore {
+  static var preview: TodoBoardStore {
+    TodoBoardStore(container: .preview)
   }
 }

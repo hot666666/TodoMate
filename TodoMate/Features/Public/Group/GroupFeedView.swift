@@ -173,7 +173,7 @@ struct GroupFeedView: View {
         ScrollView {
           GroupMemberSection(
             user: member,
-            todos: (todoStore.todos[member.id] ?? []).map { ViewTodo(from: $0) },
+            todos: todoStore.todos[member.id] ?? [],
           )
           .padding(24)
         }
@@ -234,7 +234,7 @@ struct GroupFeedView: View {
 
 private struct GroupMemberSection: View {
   let user: User
-  let todos: [ViewTodo]
+  let todos: [Todo]
 
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {

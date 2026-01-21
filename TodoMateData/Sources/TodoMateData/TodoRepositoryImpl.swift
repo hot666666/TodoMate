@@ -58,6 +58,10 @@ public final class FirestoreTodoRepository: TodoRepository {
     }
   }
 
+  public func observeTodos(query _: TodoQuery) -> AsyncStream<[Todo]> {
+    AsyncStream { $0.finish() }
+  }
+
   public func fetchCount(query: TodoQuery) async throws -> Int {
     let firestoreQuery = buildFirestoreQuery(from: query)
     do {

@@ -287,11 +287,11 @@ import TodoMateDomain
       self.todos = todos
     }
 
-    func create(_ todo: Todo) throws {
+    func create(_ todo: Todo) async throws {
       todos.append(todo)
     }
 
-    func update(_ todo: Todo) throws {
+    func update(_ todo: Todo) async throws {
       if let index = todos.firstIndex(where: { $0.id == todo.id }) {
         todos[index] = todo
       }
@@ -320,6 +320,28 @@ import TodoMateDomain
           }
         }
         return true
+      }
+    }
+
+    func observeTodos(query: TodoQuery) -> AsyncStream<[Todo]> {
+      AsyncStream { continuation in
+        let filteredTodos = todos.filter { todo in
+          for filter in query.filters {
+            switch filter {
+            case let .owner(userId):
+              if todo.owner != userId { return false }
+            case let .owners(userIds):
+              if !userIds.contains(todo.owner) { return false }
+            case let .dateRange(range):
+              if !range.contains(todo.date) { return false }
+            case let .status(status):
+              if todo.status != status { return false }
+            }
+          }
+          return true
+        }
+        continuation.yield(filteredTodos)
+        continuation.finish()
       }
     }
 
@@ -352,8 +374,8 @@ import TodoMateDomain
       self.currentUser = currentUser
     }
 
-    func create(_ memo: Memo) throws { memos.insert(memo, at: 0) }
-    func update(_ memo: Memo) throws {
+    func create(_ memo: Memo) async throws { memos.insert(memo, at: 0) }
+    func update(_ memo: Memo) async throws {
       if let index = memos.firstIndex(where: { $0.id == memo.id }) {
         memos[index] = memo
       }
@@ -371,6 +393,19 @@ import TodoMateDomain
 
     func readAllByUserIds(_ userIds: [String], useCache _: Bool) async throws -> [Memo] {
       memos.filter { userIds.contains($0.owner) }
+    }
+
+    func observeMemos() -> AsyncStream<[Memo]> {
+      AsyncStream { continuation in
+        // Default to observing memos for current user if applicable, or all?
+        // Ideally should match repository behavior.
+        // For mock, returning all memos associated with this store instance seems fine
+        // provided they are filtered by user somewhere else or this mock implies single user.
+        // Given MockMemoRepository is initialized with currentUser, limiting to that user makes sense.
+        let userMemos = memos.filter { $0.owner == currentUser.id }
+        continuation.yield(userMemos)
+        continuation.finish()
+      }
     }
 
     func fetchCount(userId: String) async throws -> Int {

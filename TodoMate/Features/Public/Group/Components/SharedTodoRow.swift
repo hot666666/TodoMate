@@ -7,75 +7,63 @@
 
 import SwiftUI
 
+import TodoMateDomain
+
 struct SharedTodoRow: View {
-  let todo: ViewTodo
+  let todo: Todo
 
   var body: some View {
     HStack(alignment: .top, spacing: 12) {
-      Image(systemName: todo.status.toDomainStatus().iconName)
+      Image(systemName: todo.status.iconName)
         .font(.system(size: 20))
-        .foregroundStyle(todo.status.toDomainStatus().color)
+        .foregroundStyle(todo.status.displayColor)
 
       VStack(alignment: .leading, spacing: 4) {
         Text(todo.content)
-          .foregroundStyle(todo.status == .done ? .secondary : .primary)
-          .strikethrough(todo.status == .done)
+          .foregroundStyle(todo.status == .complete ? .secondary : .primary)
+          .strikethrough(todo.status == .complete)
           .lineLimit(1)
-
-        if !todo.tags.isEmpty {
-          HStack {
-            ForEach(todo.tags, id: \.self) { tag in
-              Text(tag)
-                .font(.caption2)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(tagColor(for: tag).opacity(0.1))
-                .foregroundStyle(tagColor(for: tag))
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-                .overlay(
-                  RoundedRectangle(cornerRadius: 4)
-                    .strokeBorder(tagColor(for: tag).opacity(0.2)),
-                )
-            }
-          }
-        }
       }
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
-  }
-
-  func tagColor(for tag: String) -> Color {
-    switch tag.lowercased() {
-    case "high": .red
-    case "system": .purple
-    default: .blue
-    }
   }
 }
 
 #Preview {
   VStack {
     SharedTodoRow(
-      todo: ViewTodo(
-        owner: "user1",
+      todo: Todo(
         content: "Sample Task",
         status: .todo,
-        tags: ["High"],
+        detail: "",
+        date: .now,
+        createdAt: .now,
+        updatedAt: .now,
+        owner: "user1",
+        isDeleted: false,
       ))
     SharedTodoRow(
-      todo: ViewTodo(
-        owner: "user1",
+      todo: Todo(
         content: "Completed Task",
-        status: .done,
-        tags: ["System"],
+        status: .complete,
+        detail: "",
+        date: .now,
+        createdAt: .now,
+        updatedAt: .now,
+        owner: "user1",
+        isDeleted: false,
       ))
     SharedTodoRow(
-      todo: ViewTodo(
-        owner: "user1",
+      todo: Todo(
         content: "In Progress Task",
         status: .inProgress,
-        tags: [],
+        detail: "",
+        date: .now,
+        createdAt: .now,
+        updatedAt: .now,
+        owner: "user1",
+        isDeleted: false,
       ))
   }
 }

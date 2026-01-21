@@ -92,7 +92,7 @@ struct MemoDetailView: View {
     onSave: { _ in },
     onDelete: {},
   )
-  .environment(LocalMemoHelper(container: .preview))
+  .environment(MemoStore(container: .preview))
   .environment(SessionStore.preview)
   .frame(width: 400, height: 500)
 }

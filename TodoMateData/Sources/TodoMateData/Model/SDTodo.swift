@@ -9,6 +9,7 @@
 
 import Foundation
 import SwiftData
+import TodoMateDomain
 
 @Model
 public final class SDTodo {

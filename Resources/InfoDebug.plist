@@ -45,8 +45,10 @@
 			<array>
 				<string>public.data</string>
 			</array>
+			<key>UTTypeDescription</key>
+			<string>Todo Item</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.hotcs6.TodoMate</string>
+			<string>io.hotcs6.TodoMate.todo</string>
 			<key>UTTypeTagSpecification</key>
 			<dict/>
 		</dict>

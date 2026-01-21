@@ -12,9 +12,8 @@ import SwiftUI
 import TodoMateDomain
 
 struct Sidebar: View {
-  @Environment(AppDIContainer.self) private var diContainer
-  @Environment(LocalTodoHelper.self) private var todoHelper
-  @Environment(LocalMemoHelper.self) private var memoHelper
+  @Environment(TodoBoardStore.self) private var todoStore
+  @Environment(MemoStore.self) private var memoStore
 
   @AppStorage(UserDefaultsKey.cachedProfileName.rawValue)
   private var cachedProfileName: String = ""
@@ -25,8 +24,14 @@ struct Sidebar: View {
 
   @Binding var selection: NavigationDestination?
 
-  @State private var todayTodoCount: Int = 0
-  @State private var memoCount: Int = 0
+  private var todayTodoCount: Int {
+    let calendar = Calendar.current
+    return todoStore.todos.count(where: { calendar.isDateInToday($0.date) })
+  }
+
+  private var memoCount: Int {
+    memoStore.memos.count
+  }
 
   var body: some View {
     List(selection: $selection) {
@@ -100,9 +105,6 @@ struct Sidebar: View {
     }
     .frame(minWidth: 200)
     .listStyle(.sidebar)
-    .task(id: [todoHelper.refreshClock, memoHelper.refreshClock]) {
-      await refreshCounts()
-    }
   }
 
   private var groupLabel: some View {
@@ -132,34 +134,13 @@ struct Sidebar: View {
   private var groupName: String {
     (cachedGroupName.isEmpty ? nil : cachedGroupName) ?? "그룹"
   }
-
-  private func refreshCounts() async {
-    let calendar = Calendar.current
-    let now = Date()
-    let startOfDay = calendar.startOfDay(for: now)
-
-    // TODO: All todos for today
-    if let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)?.addingTimeInterval(
-      -1) {
-      let query = TodoQuery(filters: [.dateRange(startOfDay ... endOfDay)])
-      if let count = try? await diContainer.core.fetchTodoCountUseCase.execute(query: query) {
-        todayTodoCount = count
-      }
-    }
-
-    // Memo: All memos
-    if let count = try? await diContainer.core.fetchMemoCountUseCase.execute(userId: "") {
-      memoCount = count
-    }
-  }
 }
 
 #Preview {
   NavigationSplitView {
     Sidebar(selection: .constant(.todo))
-      .environment(AppDIContainer.preview)
-      .environment(LocalTodoHelper.preview)
-      .environment(LocalMemoHelper.preview)
+      .environment(TodoBoardStore.preview)
+      .environment(MemoStore.preview)
   } detail: {
     Text("Detail")
   }

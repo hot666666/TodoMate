@@ -1,5 +1,5 @@
 //
-//  LocalMemoHelper.swift
+//  MemoStore.swift
 //  TodoMate
 //
 //  Created by agent on 1/11/26.
@@ -13,8 +13,8 @@ import TodoMateDomain
 
 @Observable
 @MainActor
-final class LocalMemoHelper {
-  var refreshClock: Int = 0
+final class MemoStore {
+  var memos: [Memo] = []
 
   // MARK: - Dependencies
 
@@ -22,6 +22,9 @@ final class LocalMemoHelper {
   private let readUseCase: ReadLocalMemoUseCase
   private let updateUseCase: UpdateLocalMemoUseCase
   private let deleteUseCase: DeleteLocalMemoUseCase
+  private let observeMemosUseCase: ObserveMemosUseCase
+
+  private var observationTask: Task<Void, Never>?
 
   // MARK: - Initialization
 
@@ -30,11 +33,15 @@ final class LocalMemoHelper {
     readUseCase: ReadLocalMemoUseCase,
     updateUseCase: UpdateLocalMemoUseCase,
     deleteUseCase: DeleteLocalMemoUseCase,
+    observeMemosUseCase: ObserveMemosUseCase,
   ) {
     self.createUseCase = createUseCase
     self.readUseCase = readUseCase
     self.updateUseCase = updateUseCase
     self.deleteUseCase = deleteUseCase
+    self.observeMemosUseCase = observeMemosUseCase
+
+    updateObservation()
   }
 
   convenience init(container: CoreDIContainer) {
@@ -43,7 +50,19 @@ final class LocalMemoHelper {
       readUseCase: container.readLocalMemoUseCase,
       updateUseCase: container.updateLocalMemoUseCase,
       deleteUseCase: container.deleteLocalMemoUseCase,
+      observeMemosUseCase: container.observeMemosUseCase,
     )
+  }
+
+  // MARK: - Observation
+
+  func updateObservation() {
+    observationTask?.cancel()
+    observationTask = Task {
+      for await newMemos in observeMemosUseCase.execute() {
+        self.memos = newMemos
+      }
+    }
   }
 
   // MARK: - Actions
@@ -55,7 +74,7 @@ final class LocalMemoHelper {
     Task {
       do {
         try await createUseCase.run(memo)
-        refreshClock = (refreshClock + 1) % 100_000_000
+
       } catch {
         Log.error("Failed to create private memo: \(error)", category: .data)
       }
@@ -68,7 +87,7 @@ final class LocalMemoHelper {
     Task {
       do {
         try await updateUseCase.run(updatedMemo)
-        refreshClock = (refreshClock + 1) % 100_000_000
+
       } catch {
         Log.error("Failed to update private memo: \(error)", category: .data)
       }
@@ -79,7 +98,7 @@ final class LocalMemoHelper {
     Task {
       do {
         try await deleteUseCase.run(memo)
-        refreshClock = (refreshClock + 1) % 100_000_000
+
       } catch {
         Log.error("Failed to delete private memo: \(error)", category: .data)
       }
@@ -87,8 +106,8 @@ final class LocalMemoHelper {
   }
 }
 
-extension LocalMemoHelper {
-  static var preview: LocalMemoHelper {
-    LocalMemoHelper(container: .preview)
+extension MemoStore {
+  static var preview: MemoStore {
+    MemoStore(container: .preview)
   }
 }

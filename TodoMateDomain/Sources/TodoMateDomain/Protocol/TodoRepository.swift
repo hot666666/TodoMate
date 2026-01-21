@@ -12,6 +12,7 @@ public protocol TodoRepository: Sendable {
   func read(id: String) async throws -> Todo?
   func readAll(query: TodoQuery, useCache: Bool) async throws -> [Todo]
   func fetchCount(query: TodoQuery) async throws -> Int
+  func observeTodos(query: TodoQuery) -> AsyncStream<[Todo]>
 }
 
 // MARK: - StubTodoRepository
@@ -24,4 +25,7 @@ public final class StubTodoRepository: TodoRepository, Sendable {
   public func read(id _: String) async throws -> Todo? { nil }
   public func readAll(query _: TodoQuery, useCache _: Bool) async throws -> [Todo] { [] }
   public func fetchCount(query _: TodoQuery) async throws -> Int { 0 }
+  public func observeTodos(query _: TodoQuery) -> AsyncStream<[Todo]> {
+    AsyncStream { $0.finish() }
+  }
 }

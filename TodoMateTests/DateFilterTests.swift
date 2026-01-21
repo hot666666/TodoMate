@@ -6,6 +6,7 @@
 //
 //  Created by agent on 1/8/26.
 //
+//
 
 import Foundation
 import Testing
@@ -32,6 +33,29 @@ struct DateFilterTests {
 
     let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
     #expect(!range.contains(yesterday))
+  }
+
+  @Test("Last3Days filter contains past 3 days and today")
+  func last3DaysFilterContainsPast3Days() {
+    // Given
+    let filter = DateFilter.last3Days
+    let calendar = Calendar.current
+    let today = calendar.startOfDay(for: .now)
+
+    // When
+    let range = filter.dateRange
+
+    // Then
+    // Today should be included
+    #expect(range.contains(today))
+
+    // 3 days ago should be included
+    let threeDaysAgo = calendar.date(byAdding: .day, value: -3, to: today)!
+    #expect(range.contains(threeDaysAgo))
+
+    // 4 days ago should NOT be included
+    let fourDaysAgo = calendar.date(byAdding: .day, value: -4, to: today)!
+    #expect(!range.contains(fourDaysAgo))
   }
 
   @Test("LastWeek filter contains past 7 days")
@@ -62,36 +86,13 @@ struct DateFilterTests {
     #expect(!range.contains(eightDaysAgo))
   }
 
-  @Test("LastMonth filter contains past month")
-  func lastMonthFilterContainsPastMonth() {
-    // Given
-    let filter = DateFilter.lastMonth
-    let calendar = Calendar.current
-    let today = calendar.startOfDay(for: .now)
-
-    // When
-    let range = filter.dateRange
-
-    // Then
-    // Today should be included
-    #expect(range.contains(today))
-
-    // 2 weeks ago should be included
-    let twoWeeksAgo = calendar.date(byAdding: .day, value: -14, to: today)!
-    #expect(range.contains(twoWeeksAgo))
-
-    // 25 days ago should be included
-    let twentyFiveDaysAgo = calendar.date(byAdding: .day, value: -25, to: today)!
-    #expect(range.contains(twentyFiveDaysAgo))
-  }
-
   // MARK: - Filter Raw Value Tests
 
   @Test("Filter raw values are Korean")
   func filterRawValuesAreKorean() {
     #expect(DateFilter.today.rawValue == "오늘")
+    #expect(DateFilter.last3Days.rawValue == "최근 3일")
     #expect(DateFilter.lastWeek.rawValue == "최근 1주")
-    #expect(DateFilter.lastMonth.rawValue == "최근 1달")
   }
 
   // MARK: - CaseIterable Tests

@@ -19,8 +19,8 @@ struct TodoMateApp: App {
 
   // MARK: - SwiftData(Todo, Memo) Helper
 
-  @State private var todoHelper: LocalTodoHelper
-  @State private var memoHelper: LocalMemoHelper
+  @State private var todoBoardStore: TodoBoardStore
+  @State private var memoStore: MemoStore
 
   init() {
     // Firebase 및 GoogleSignIn 설정 후, DI Container 생성
@@ -39,14 +39,14 @@ struct TodoMateApp: App {
     Self.checkAndHandleAppUpdate(container: appDIContainer)
 
     // Helper 초기화
-    let todoHelper = LocalTodoHelper(container: appDIContainer.core)
-    _todoHelper = State(initialValue: todoHelper)
-    _memoHelper = State(initialValue: LocalMemoHelper(container: appDIContainer.core))
+    let todoBoardStore = TodoBoardStore(container: appDIContainer.core)
+    _todoBoardStore = State(initialValue: todoBoardStore)
+    _memoStore = State(initialValue: MemoStore(container: appDIContainer.core))
 
     // OverlayViewController 초기화
     overlayViewController = OverlayViewController(
       coreDI: appDIContainer.core,
-      todoHelper: todoHelper,
+      todoBoardStore: todoBoardStore,
     )
 
     // 글로벌 단축키 등록 (⇧⌘Space)
@@ -64,7 +64,7 @@ struct TodoMateApp: App {
 
     MenuBarExtra("TodoMate", systemImage: "checklist") {
       MenuBarView()
-        .environment(todoHelper)
+        .environment(todoBoardStore)
         .modelContainer(appDIContainer.core.modelContainer)
     }
     .menuBarExtraStyle(.menu)
@@ -76,12 +76,12 @@ struct TodoMateApp: App {
         .defaultAppStorage(appDIContainer.core.userDefaults)
         .modelContainer(appDIContainer.core.modelContainer)
         .environment(appDIContainer.core)
-        .environment(todoHelper)
-        .environment(memoHelper)
+        .environment(todoBoardStore)
+        .environment(memoStore)
         .environment(appDIContainer)
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
-        .frame(minWidth: 720, minHeight: 540)
+        .frame(minWidth: 1000, minHeight: 625)
         .task {
           #if DEBUG
             MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)

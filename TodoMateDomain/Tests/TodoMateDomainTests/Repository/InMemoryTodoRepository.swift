@@ -66,4 +66,15 @@ public actor InMemoryTodoRepository: TodoRepository {
     // Reuse readAll logic for simplicity
     try await readAll(query: query, useCache: true).count
   }
+
+  public nonisolated func observeTodos(query: TodoQuery) -> AsyncStream<[Todo]> {
+    AsyncStream { continuation in
+      // Simple one-shot yield for tests
+      Task {
+        let result = try? await self.readAll(query: query, useCache: true)
+        continuation.yield(result ?? [])
+        continuation.finish()
+      }
+    }
+  }
 }

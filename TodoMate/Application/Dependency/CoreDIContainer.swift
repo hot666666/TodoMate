@@ -36,6 +36,9 @@ final class CoreDIContainer {
   @ObservationIgnored let fetchTodoCountUseCase: FetchTodoCountUseCase
   @ObservationIgnored let fetchMemoCountUseCase: FetchMemoCountUseCase
 
+  @ObservationIgnored let observeTodosUseCase: ObserveTodosUseCase
+  @ObservationIgnored let observeMemosUseCase: ObserveMemosUseCase
+
   init(
     modelContainer: ModelContainer,
     userDefaults: UserDefaults = .standard,
@@ -65,6 +68,9 @@ final class CoreDIContainer {
 
     fetchTodoCountUseCase = FetchTodoCountUseCaseImpl(repository: localTodoRepository)
     fetchMemoCountUseCase = FetchMemoCountUseCaseImpl(repository: localMemoRepository)
+
+    observeTodosUseCase = ObserveTodosUseCaseImpl(repository: localTodoRepository)
+    observeMemosUseCase = ObserveMemosUseCaseImpl(repository: localMemoRepository)
 
     sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)

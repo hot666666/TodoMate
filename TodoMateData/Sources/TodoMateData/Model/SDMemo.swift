@@ -9,6 +9,7 @@
 
 import Foundation
 import SwiftData
+import TodoMateDomain
 
 @Model
 public final class SDMemo {
@@ -35,6 +36,18 @@ public final class SDMemo {
     self.isDeleted = isDeleted
   }
 
+  /// Domain Entity -> SwiftData Model
+  convenience init(from memo: Memo) {
+    self.init(
+      id: memo.id,
+      content: memo.content,
+      createdAt: memo.createdAt,
+      updatedAt: memo.updatedAt,
+      ownerId: memo.owner,
+      isDeleted: memo.isDeleted,
+    )
+  }
+
   public func toDomain() -> Memo {
     Memo(
       id: id,
@@ -42,19 +55,6 @@ public final class SDMemo {
       createdAt: createdAt,
       updatedAt: updatedAt,
       owner: ownerId,
-      isDeleted: isDeleted,
-    )
-  }
-}
-
-public extension Memo {
-  func toSDMemo() -> SDMemo {
-    SDMemo(
-      id: id,
-      content: content,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      ownerId: owner,
       isDeleted: isDeleted,
     )
   }

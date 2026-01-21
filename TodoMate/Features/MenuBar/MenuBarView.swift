@@ -13,44 +13,19 @@ import SwiftUI
 import TodoMateDomain
 
 struct MenuBarView: View {
-  var body: some View {
-    MenuBarQueryWrapper()
-  }
-}
+  @Environment(TodoBoardStore.self) private var todoStore
 
-// MARK: - Wrapper
-
-private struct MenuBarQueryWrapper: View {
-  @Query private var sdTodos: [SDTodo]
-
-  init() {
+  private var todayTodos: [Todo] {
     let calendar = Calendar.current
-    let startOfDay = calendar.startOfDay(for: Date())
-    guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
-      let distantFuture = Date.distantFuture
-      let predicate = #Predicate<SDTodo> { $0.date == distantFuture }
-      _sdTodos = Query(filter: predicate)
-      return
+    return todoStore.todos.filter {
+      calendar.isDateInToday($0.date) && !$0.isDeleted
+        && ($0.status == .todo || $0.status == .inProgress)
     }
-
-    // Filter: Date is Today AND Not Deleted AND (Todo OR InProgress)
-    // Note: Using literals/constants for status to avoid Predicate capture issues
-    let splitStatus_todo = TodoStatus.todo.rawValue
-    let splitStatus_inProgress = TodoStatus.inProgress.rawValue
-
-    let predicate = #Predicate<SDTodo> { todo in
-      todo.date >= startOfDay && todo.date < endOfDay && !todo.isDeleted
-        && (todo.statusRawValue == splitStatus_todo
-          || todo.statusRawValue == splitStatus_inProgress)
-    }
-
-    _sdTodos = Query(filter: predicate, sort: \.date)
+    .sorted { $0.date < $1.date }
   }
 
   var body: some View {
-    let todos = sdTodos.map { $0.toDomain() }
-
-    MenuBarContent(todos: todos)
+    MenuBarContent(todos: todayTodos)
   }
 }
 
@@ -58,7 +33,7 @@ private struct MenuBarQueryWrapper: View {
 
 private struct MenuBarContent: View {
   @Environment(\.openWindow) private var openWindow
-  @Environment(LocalTodoHelper.self) private var todoHelper
+  @Environment(TodoBoardStore.self) private var todoStore
   let todos: [Todo]
 
   var body: some View {
@@ -86,9 +61,9 @@ private struct MenuBarContent: View {
           MenuTodoRow(todo: todo) { todo in
             switch todo.status {
             case .todo:
-              todoHelper.updateStatus(todo, status: .inProgress)
+              todoStore.updateStatus(todo, status: .inProgress)
             case .inProgress:
-              todoHelper.updateStatus(todo, status: .complete)
+              todoStore.updateStatus(todo, status: .complete)
             default:
               break
             }

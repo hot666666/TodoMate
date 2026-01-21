@@ -7,7 +7,6 @@
 //
 
 import SimpleOverlaySystem
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 
@@ -15,12 +14,17 @@ import TodoMateDomain
 
 struct MemoView: View {
   @Environment(AppDIContainer.self) private var container
-  @Environment(LocalMemoHelper.self) private var memoStore
-
-  @State private var selectedMemo: Memo?
-  @State private var escToken: HotKeyManager.RegistrationToken?
+  @State private var viewModel: MemoViewModel
   @Namespace private var heroNamespace
+
+  @State private var escToken: HotKeyManager.RegistrationToken?
+  // 애니메이션 중 데이터가 사라지는 것을 방지하기 위해 데이터(selectedMemo)와 표시 여부(isDetailViewPresented)를 분리합니다.
+  @State private var selectedMemo: Memo?
   @State private var isDetailViewPresented = false
+
+  init(store: MemoStore) {
+    _viewModel = State(initialValue: MemoViewModel(store: store))
+  }
 
   var body: some View {
     ZStack {
@@ -44,8 +48,9 @@ struct MemoView: View {
         .transition(.asymmetric(insertion: .identity, removal: .opacity))
         .zIndex(1)
       } else {
-        // Query Wrapper & Content
-        MemoQueryWrapper(
+        // Content
+        MemoContent(
+          memos: viewModel.memos,
           heroNamespace: heroNamespace,
           onTapMemo: { memo in
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
@@ -57,6 +62,7 @@ struct MemoView: View {
         )
       }
     }
+
     .toolbar {
       if !isDetailViewPresented {
         ToolbarItem(placement: .primaryAction) {
@@ -83,27 +89,26 @@ struct MemoView: View {
   // MARK: - Actions
 
   private func addNewMemo() {
-    // Add via store (fire & forget, Query will update UI)
-    memoStore.add(content: "")
+    viewModel.addMemo()
   }
 
   private func saveMemo(_ memo: Memo, with newContent: String) {
     if newContent != memo.content {
       let updatedMemo = memo.withUpdatedContent(newContent)
-      memoStore.update(updatedMemo)
+      viewModel.updateMemo(updatedMemo)
     }
   }
 
   private func deleteMemo(_ memo: Memo) {
     Task {
-      memoStore.delete(memo)
+      viewModel.deleteMemo(memo)
       dismissDetail()
     }
   }
 
   private func dismissDetail() {
     withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-      selectedMemo = nil
+      // selectedMemo = nil // 애니메이션 도중 데이터가 nil이 되면 UI 글리치가 발생할 수 있으므로 유지
       isDetailViewPresented = false
     }
   }
@@ -127,33 +132,6 @@ struct MemoView: View {
       container.core.hotKeyManager.unregister(token)
       escToken = nil
     }
-  }
-}
-
-// MARK: - MemoQueryWrapper (Data Access)
-
-private struct MemoQueryWrapper: View {
-  @Query(
-    filter: #Predicate<SDMemo> { !$0.isDeleted },
-    sort: \SDMemo.createdAt,
-    order: .reverse,
-  )
-  private var sdMemos: [SDMemo]
-
-  let heroNamespace: Namespace.ID
-  let onTapMemo: (Memo) -> Void
-  let onDeleteMemo: (Memo) -> Void
-
-  var body: some View {
-    // Convert SDMemo -> Memo (Domain)
-    let memos = sdMemos.map { $0.toDomain() }
-
-    MemoContent(
-      memos: memos,
-      heroNamespace: heroNamespace,
-      onTapMemo: onTapMemo,
-      onDeleteMemo: onDeleteMemo,
-    )
   }
 }
 
@@ -210,7 +188,7 @@ private struct MemoContent: View {
 }
 
 #Preview {
-  MemoView()
-    .environment(LocalMemoHelper.preview)
+  MemoView(store: .preview)
+    .environment(MemoStore.preview)
     .environment(OverlayManager())
 }

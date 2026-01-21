@@ -41,6 +41,6 @@ struct AuthenticatedView<Content: View>: View {
   .environment(AppDIContainer.preview)
   .environment(SessionStore.preview)
   .environment(TodoStore.preview)
-  .environment(LocalMemoHelper.preview)
+  .environment(MemoStore.preview)
   .environment(MessageStore.preview)
 }

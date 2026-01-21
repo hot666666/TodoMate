@@ -89,3 +89,7 @@ If SwiftData is configured to use CloudKit:
 
 ## Code style
 - Writing code that already follows the rules defined in .swiftformat and swiftlint.yml reduces the amount of work the pre-commit hook needs to do.
+
+## Task and Commit
+- If you have been developing without committing your changes and now need to commit them, never commit everything at once. Group related changes into separate commits and write appropriate commit messages for each one.
+- Never include *.log files in a commit.

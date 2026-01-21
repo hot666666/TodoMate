@@ -38,6 +38,14 @@ struct PrivateTodoStoreTests {
     func run(_ todoId: String) async throws { runHandler?(todoId) }
   }
 
+  final class MockObserveUseCase: ObserveTodosUseCase {
+    func execute(dateRange _: ClosedRange<Date>) -> AsyncStream<[Todo]> {
+      AsyncStream { continuation in
+        continuation.finish()
+      }
+    }
+  }
+
   @Test("Add Todo calls CreateUseCase")
   func addTodo_callsUseCase() async throws {
     // Given
@@ -46,11 +54,14 @@ struct PrivateTodoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = LocalTodoHelper(
+    let observeUC = MockObserveUseCase()
+
+    let store = TodoBoardStore(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
+      observeTodosUseCase: observeUC,
     )
 
     let todo = Todo(owner: "me", content: "New Todo", in: Date())
@@ -73,11 +84,14 @@ struct PrivateTodoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = LocalTodoHelper(
+    let observeUC = MockObserveUseCase()
+
+    let store = TodoBoardStore(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
+      observeTodosUseCase: observeUC,
     )
 
     let todo = Todo(owner: "me", content: "Updated Todo", in: Date())
@@ -101,11 +115,14 @@ struct PrivateTodoStoreTests {
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
 
-    let store = LocalTodoHelper(
+    let observeUC = MockObserveUseCase()
+
+    let store = TodoBoardStore(
       createUseCase: createUC,
       readUseCase: readUC,
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
+      observeTodosUseCase: observeUC,
     )
 
     let todoId = "some-id"
