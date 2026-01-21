@@ -27,7 +27,8 @@ struct MainView: View {
         .environment(sessionStore)
         .environment(naviManager)
     }
-    .onGlobalHotKey(.b, modifiers: [.command]) {
+    // ⌘B: 사이드바 토글
+    .hiddenKeyboardShortcut("b", modifiers: .command) {
       toggleSidebar()
     }
     .task {

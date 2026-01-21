@@ -42,6 +42,12 @@ struct TodoViewModePicker: View {
       .labelsHidden()
       .accessibilityIdentifier("viewModePicker")
     }
+    // ⌘T: 뷰 모드 전환 (Board ↔ Calendar)
+    .hiddenKeyboardShortcut("t", modifiers: .command) {
+      withAnimation {
+        naviManager.viewMode = naviManager.viewMode == .board ? .calendar : .board
+      }
+    }
   }
 }
 
