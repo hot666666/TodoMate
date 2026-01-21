@@ -77,7 +77,7 @@ struct BoardTodoCard: View {
 
   private func presentTodoSheet() {
     overlay?.presentCentered(
-      id: .todoSheet,
+      id: OverlayIDs.todoSheet,
       backdropOpacity: 0,
       offset: CGPoint(x: 0, y: -120),
     ) {

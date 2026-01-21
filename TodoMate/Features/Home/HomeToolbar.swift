@@ -53,7 +53,7 @@ struct AddTodoButton: View {
   private func action() {
     let newTodo = EditableTodo(owner: sessionStore.userId)
     overlay?.presentCentered(
-      id: .todoSheet,
+      id: OverlayIDs.todoSheet,
       backdropOpacity: 0,
       offset: CGPoint(x: 0, y: -120),
     ) {
