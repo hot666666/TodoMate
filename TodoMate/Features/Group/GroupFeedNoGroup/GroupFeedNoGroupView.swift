@@ -87,7 +87,8 @@ private struct JoinGroupCard: View {
                 .foregroundStyle(.blue)
             }
           }
-          .buttonStyle(.material(padding: .init(top: 10, leading: 20, bottom: 10, trailing: 20)))
+          // Use material style for consistency with the design system, replacing the legacy card style.
+          .buttonStyle(.material)
           .disabled(!enabled || groupId.trimmingCharacters(in: .whitespaces).isEmpty || isJoining)
         }
 
@@ -177,7 +178,7 @@ private struct CreateGroupCard: View {
               errorMessage = nil
             }
             .foregroundStyle(.secondary)
-            .buttonStyle(.material(padding: .init(top: 8, leading: 16, bottom: 8, trailing: 16)))
+            .buttonStyle(.material)
 
             Button {
               createGroup()
@@ -191,7 +192,7 @@ private struct CreateGroupCard: View {
                   .foregroundStyle(.green)
               }
             }
-            .buttonStyle(.material(padding: .init(top: 8, leading: 16, bottom: 8, trailing: 16)))
+            .buttonStyle(.material)
             .disabled(groupName.trimmingCharacters(in: .whitespaces).isEmpty || isCreating)
           }
 
@@ -209,7 +210,7 @@ private struct CreateGroupCard: View {
             .fontWeight(.medium)
             .foregroundStyle(enabled ? .green : .secondary)
         }
-        .buttonStyle(.material(padding: .init(top: 8, leading: 16, bottom: 8, trailing: 16)))
+        .buttonStyle(.material)
         .disabled(!enabled)
 
         if !enabled {
