@@ -1,0 +1,107 @@
+//
+//  MemoDetail.swift
+//  TodoMate
+//
+//  Created by agent on 1/8/26.
+//
+
+import AppKit
+import SwiftUI
+import SwiftUIIntrospect
+import TodoMateDomain
+
+struct MemoDetail: View {
+  // MARK: - Properties
+
+  let memo: Memo
+  let namespace: Namespace.ID
+  let onDismiss: () -> Void
+  let onSave: (String) -> Void
+  let onDelete: () -> Void
+
+  // MARK: - State
+
+  @State private var cleared = false
+  @State private var editedContent: String = ""
+  @FocusState private var isEditing: Bool
+
+  private var isEmpty: Bool {
+    editedContent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+  }
+
+  var body: some View {
+    VStack(spacing: 0) {
+      // Content Editor
+      TextEditor(text: $editedContent)
+        .font(.body)
+        .scrollContentBackground(.hidden)
+        .opacity(cleared ? 1 : 0)
+        .focused($isEditing)
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .introspect(.textEditor, on: .macOS(.v26)) { textView in
+          textView.drawsBackground = false
+          if let scrollView = textView.enclosingScrollView {
+            scrollView.drawsBackground = false
+            scrollView.contentView.drawsBackground = false
+            scrollView.scrollerStyle = .overlay
+            scrollView.autohidesScrollers = true
+          }
+          // Reveal after styles applied to avoid first-frame flash
+          DispatchQueue.main.async { cleared = true }
+        }
+
+      // Footer
+      HStack {
+        Text("Updated \(memo.updatedAt.formatted(.relative(presentation: .named)))")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        Spacer()
+      }
+      .padding()
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(.regularMaterial)
+    .matchedGeometryEffect(id: memo.id, in: namespace)
+    .toolbar {
+      toolbarContent
+    }
+    .onAppear {
+      editedContent = memo.content
+    }
+  }
+
+  @ToolbarContentBuilder
+  private var toolbarContent: some ToolbarContent {
+    ToolbarItem(placement: .primaryAction) {
+      Button {
+        saveOrDeleteAndDismiss()
+      } label: {
+        Image(systemName: "chevron.left")
+      }
+    }
+  }
+
+  private func saveOrDeleteAndDismiss() {
+    if isEmpty {
+      onDelete()
+    } else {
+      onSave(editedContent)
+    }
+    onDismiss()
+  }
+}
+
+#Preview {
+  @Previewable @Namespace var namespace
+  MemoDetail(
+    memo: .stub,
+    namespace: namespace,
+    onDismiss: {},
+    onSave: { _ in },
+    onDelete: {},
+  )
+  .environment(MemoStore(container: .preview))
+  .environment(SessionStore.preview)
+  .frame(width: 400, height: 500)
+}
