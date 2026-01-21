@@ -28,11 +28,11 @@ struct ReadTodosIntent: AppIntent {
     ]
   }
 
-  func perform() async throws -> some IntentResult & ReturnsValue<[TodoEntity]> {
-    guard let container = CoreDIContainer.shared else {
-      throw AppIntentError.containerNotFound
-    }
+  @Dependency
+  private var container: CoreDIContainer
 
+  @MainActor
+  func perform() async throws -> some IntentResult & ReturnsValue<[TodoEntity]> {
     // Repository에서 조회
     // Query 구성
     var query = TodoQuery()

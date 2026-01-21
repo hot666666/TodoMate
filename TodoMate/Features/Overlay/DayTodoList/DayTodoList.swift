@@ -42,9 +42,6 @@ struct DayTodoList: View {
       overlay?.dismissTop()
       return .handled
     }
-    .onGlobalHotKey(.escape) {
-      overlay?.dismissTop()
-    }
   }
 
   private var header: some View {

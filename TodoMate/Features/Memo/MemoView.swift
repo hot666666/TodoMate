@@ -53,8 +53,9 @@ struct MemoView: View {
       }
     }
     .accessibilityIdentifier("memoView")
-    .onGlobalHotKey(.escape) {
+    .onKeyPress(.escape) {
       if isDetailViewPresented { dismissDetail() }
+      return .handled
     }
   }
 

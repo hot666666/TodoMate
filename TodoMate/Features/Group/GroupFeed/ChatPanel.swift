@@ -69,7 +69,7 @@ private extension ChatPanel {
   }
 
   func dateHeader(for date: Date) -> some View {
-    Text(DateHeaderFormatter.format(date))
+    Text(date.headerFormatted)
       .font(.caption2)
       .fontWeight(.bold)
       .foregroundStyle(.secondary)

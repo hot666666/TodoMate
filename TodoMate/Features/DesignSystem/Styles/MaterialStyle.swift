@@ -142,14 +142,32 @@ extension View {
 
 // MARK: - Material Button Style
 
+/// 머티리얼 버튼 크기/스타일 옵션
+enum MaterialButtonSize {
+  case standard
+  case large
+  case custom(EdgeInsets)
+
+  var padding: EdgeInsets {
+    switch self {
+    case .standard:
+      EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+    case .large:
+      EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20)
+    case let .custom(insets):
+      insets
+    }
+  }
+}
+
 /// 머티리얼 스타일 버튼
 struct MaterialButtonStyle: ButtonStyle {
-  var padding: EdgeInsets = .init(top: 10, leading: 20, bottom: 10, trailing: 20)
+  var size: MaterialButtonSize = .standard
   var cornerRadius: CGFloat = 8
 
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .padding(padding)
+      .padding(size.padding)
       .modifier(
         MaterialStyleModifier(
           shape: .roundedRect(cornerRadius: cornerRadius),
@@ -166,10 +184,15 @@ struct MaterialButtonStyle: ButtonStyle {
 }
 
 extension ButtonStyle where Self == MaterialButtonStyle {
-  static var material: MaterialButtonStyle { MaterialButtonStyle() }
+  /// 기본 머티리얼 버튼 스타일 (Standard size: 8, 16)
+  static var material: MaterialButtonStyle { MaterialButtonStyle(size: .standard) }
 
-  static func material(padding: EdgeInsets, cornerRadius: CGFloat = 8) -> MaterialButtonStyle {
-    MaterialButtonStyle(padding: padding, cornerRadius: cornerRadius)
+  /// 크기 옵션을 지정할 수 있는 머티리얼 버튼 스타일
+  static func material(
+    _ size: MaterialButtonSize = .standard,
+    cornerRadius: CGFloat = 8,
+  ) -> MaterialButtonStyle {
+    MaterialButtonStyle(size: size, cornerRadius: cornerRadius)
   }
 }
 

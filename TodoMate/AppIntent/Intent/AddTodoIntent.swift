@@ -22,23 +22,29 @@ struct AddTodoIntent: AppIntent {
   @Parameter(title: "Date", default: .now)
   var date: Date
 
+  @Parameter(title: "Status", default: .todo)
+  var status: TodoStatusParam
+
   static var parameterSummary: some ParameterSummary {
     Summary("Add \(\.$content)") {
       \.$date
       \.$detail
+      \.$status
     }
   }
 
-  func perform() async throws -> some IntentResult & ReturnsValue<TodoEntity> {
-    guard let container = CoreDIContainer.shared else {
-      throw AppIntentError.containerNotFound
-    }
+  @Dependency
+  private var container: CoreDIContainer
 
+  @MainActor
+  func perform() async throws -> some IntentResult & ReturnsValue<TodoEntity> {
     // 로컬 Todo는 owner를 ""로 설정 (AppIntent는 Firebase 미사용)
+    let sanitizedContent = content.replacingOccurrences(of: "\n", with: " ")
 
     let todo = Todo(
       owner: "",
-      content: content,
+      content: sanitizedContent,
+      status: status.asDomain,
       detail: detail ?? "",
       in: date,
     )

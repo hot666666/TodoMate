@@ -43,10 +43,11 @@ struct TodoEntity: AppEntity {
 }
 
 struct TodoEntityQuery: EntityQuery {
+  @Dependency
+  private var container: CoreDIContainer
+
   func entities(for identifiers: [String]) async throws -> [TodoEntity] {
-    guard let container = CoreDIContainer.shared?.modelContainer else {
-      return []
-    }
+    let container = container.modelContainer
 
     let context = ModelContext(container)
     var result: [TodoEntity] = []
@@ -64,9 +65,7 @@ struct TodoEntityQuery: EntityQuery {
   }
 
   func suggestedEntities() async throws -> [TodoEntity] {
-    guard let container = CoreDIContainer.shared?.modelContainer else {
-      return []
-    }
+    let container = container.modelContainer
 
     let context = ModelContext(container)
     // 최근 수정된 순서로 20개 조회

@@ -79,7 +79,7 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     // 레이아웃 재귀 경고 방지를 위해 다음 런루프로 윈도우 크기 조정 연기
     DispatchQueue.main.async { [weak self] in
       self?.resizeAndCenterWindow()
-      self?.activateApp()
+      self?.window.makeKeyAndOrderFront(nil)
     }
   }
 
