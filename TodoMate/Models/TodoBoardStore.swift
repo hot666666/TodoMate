@@ -138,6 +138,12 @@ final class TodoBoardStore {
   func deleteTodo(_ todo: Todo) {
     deleteTodo(todo.id)
   }
+
+  func duplicate(_ todo: Todo) {
+    var newTodo = Todo.copy(from: todo)
+    newTodo.detail = ""
+    addTodo(newTodo)
+  }
 }
 
 extension TodoBoardStore {
