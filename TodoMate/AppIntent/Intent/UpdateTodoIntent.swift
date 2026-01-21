@@ -44,6 +44,7 @@ struct UpdateTodoIntent: AppIntent {
     }
   }
 
+  @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<TodoEntity> {
     guard let container = CoreDIContainer.shared else {
       throw AppIntentError.containerNotFound

@@ -20,6 +20,7 @@ struct AddMemoIntent: AppIntent {
     Summary("Add Memo \(\.$content)")
   }
 
+  @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<MemoEntity> {
     guard let container = CoreDIContainer.shared else {
       throw AppIntentError.containerNotFound
