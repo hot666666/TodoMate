@@ -14,9 +14,6 @@ import TodoMateDomain
 @Observable
 @MainActor
 final class TodoBoardStore {
-  var todos: [Todo] = []
-
-  // Dependencies
   private let createUseCase: CreateLocalTodoUseCase
   private let readUseCase: ReadLocalTodoUseCase
   private let updateUseCase: UpdateLocalTodoUseCase
@@ -25,6 +22,7 @@ final class TodoBoardStore {
 
   private var observationTask: Task<Void, Never>?
 
+  var todos: [Todo] = []
   var error: Error?
 
   init(
@@ -40,9 +38,7 @@ final class TodoBoardStore {
     self.deleteUseCase = deleteUseCase
     self.observeTodosUseCase = observeTodosUseCase
 
-    // Start observing default range (e.g., last 7 days + future)
-    // Adjust based on typical usage or user preference
-    updateObservation(range: Date() ... Date().addingTimeInterval(86400 * 7))
+    startObservation()
   }
 
   convenience init(container: CoreDIContainer) {
@@ -57,11 +53,35 @@ final class TodoBoardStore {
 
   // MARK: - Observation
 
-  func updateObservation(range: ClosedRange<Date>) {
+  func startObservation() {
     observationTask?.cancel()
-    observationTask = Task {
-      for await newTodos in observeTodosUseCase.execute(dateRange: range) {
-        self.todos = newTodos
+
+    let endDate = Date().startOfDay
+    let startDate = endDate.addingTimeInterval(86400 * -7)
+
+    observationTask = Task { [weak self] in
+      guard let self else { return }
+
+      let todoStream = observeTodosUseCase.execute(dateRange: startDate ... endDate)
+
+      await withTaskGroup(of: Void.self) { group in
+        group.addTask {
+          for await newTodos in todoStream {
+            await MainActor.run {
+              self.todos = newTodos
+            }
+          }
+        }
+
+        group.addTask {
+          let dayChangeStream = NotificationCenter.default.notifications(named: .NSCalendarDayChanged)
+          for await _ in dayChangeStream {
+            await MainActor.run {
+              self.startObservation()
+            }
+            return
+          }
+        }
       }
     }
   }
@@ -96,7 +116,6 @@ final class TodoBoardStore {
     }
   }
 
-  // Status update helper
   func updateStatus(_ todo: Todo, status: TodoStatus) {
     var updatedTodo = todo
     updatedTodo.status = status
@@ -118,6 +137,12 @@ final class TodoBoardStore {
 
   func deleteTodo(_ todo: Todo) {
     deleteTodo(todo.id)
+  }
+
+  func duplicate(_ todo: Todo) {
+    var newTodo = Todo.copy(from: todo)
+    newTodo.detail = ""
+    addTodo(newTodo)
   }
 }
 

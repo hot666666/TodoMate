@@ -8,82 +8,40 @@
 import SimpleOverlaySystem
 import SwiftUI
 
-// MARK: - MainView
-
 struct MainView: View {
   @Environment(AppDIContainer.self) private var container
-  /// SessionStore 생성
-  @State private var sessionStore: SessionStore
-  /// NavigationManager 생성
+  @Environment(TodoBoardStore.self) private var todoBoardStore
+  @Environment(MemoStore.self) private var memoStore
+
   @State private var naviManager: NavigationManager
+  @State private var sessionStore: SessionStore
 
   init(container: AppDIContainer) {
-    _sessionStore = State(initialValue: SessionStore(container: container))
     _naviManager = State(initialValue: NavigationManager(container: container))
+    _sessionStore = State(initialValue: SessionStore(container: container))
   }
 
   var body: some View {
     OverlayContainer {
-      MainContent(naviManager: naviManager)
+      splitView
         .environment(sessionStore)
         .environment(naviManager)
     }
-    .task {
-      sessionStore.startListeningToAuthChanges()
+    .onGlobalHotKey(.b, modifiers: [.command]) {
+      toggleSidebar()
     }
-    .onDisappear {
-      sessionStore.cleanup()
+    .task {
+      await sessionStore.startListeningToAuthChanges()
     }
   }
-}
 
-// MARK: - MainContent
-
-private struct MainContent: View {
-  @Environment(AppDIContainer.self) private var container
-  @Environment(\.overlayManager) private var overlay
-  @Environment(TodoBoardStore.self) private var todoBoardStore
-  @Environment(MemoStore.self) private var memoStore
-  @State private var sidebarToken: HotKeyManager.RegistrationToken?
-
-  @Bindable var naviManager: NavigationManager
-
-  var body: some View {
+  private var splitView: some View {
     NavigationSplitView(columnVisibility: $naviManager.columnVisibility) {
-      Sidebar(selection: $naviManager.selection)
+      Sidebar()
     } detail: {
       detailView
     }
     .navigationSplitViewStyle(.prominentDetail)
-    .onAppear {
-      registerHotKeys()
-    }
-    .onDisappear {
-      unregisterHotKeys()
-    }
-  }
-
-  // ... (hotkey methods skipped, assumed unchanged)
-
-  private func registerHotKeys() {
-    // Command+B: Toggle Sidebar
-    sidebarToken = container.core.hotKeyManager.register(
-      key: .b, modifiers: [.command],
-    ) { [weak naviManager] in
-      Task { @MainActor in
-        guard let naviManager else { return }
-        withAnimation {
-          naviManager.columnVisibility =
-            naviManager.columnVisibility == .all ? .detailOnly : .all
-        }
-      }
-    }
-  }
-
-  private func unregisterHotKeys() {
-    if let token = sidebarToken {
-      container.core.hotKeyManager.unregister(token)
-    }
   }
 
   @ViewBuilder
@@ -94,10 +52,10 @@ private struct MainContent: View {
         SettingView()
 
       case .todo:
-        HomeView(container: container.core, todoBoardStore: todoBoardStore)
+        homeView
 
       case .memo:
-        MemoView(store: memoStore)
+        MemoView()
 
       case .group:
         AuthenticatedView {
@@ -109,6 +67,16 @@ private struct MainContent: View {
     }
   }
 
+  @ViewBuilder
+  private var homeView: some View {
+    switch naviManager.viewMode {
+    case .board:
+      BoardView()
+    case .calendar:
+      CalendarView(container: container.core)
+    }
+  }
+
   private var unavailableView: some View {
     ContentUnavailableView(
       "Select an Item",
@@ -116,12 +84,19 @@ private struct MainContent: View {
       description: Text("Choose a category from the sidebar"),
     )
   }
+
+  private func toggleSidebar() {
+    withAnimation {
+      naviManager.columnVisibility =
+        naviManager.columnVisibility == .all ? .detailOnly : .all
+    }
+  }
 }
 
 #Preview {
   MainView(container: .preview)
     .frame(width: 800, height: 600)
     .environment(AppDIContainer.preview)
-    .environment(AppDIContainer.preview)
     .environment(TodoStore.preview)
+    .environment(MemoStore.preview)
 }

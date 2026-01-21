@@ -13,16 +13,18 @@ import SwiftUI
 import TodoMateDomain
 
 struct MenuBarView: View {
+  // MARK: - Properties
+
   @Environment(TodoBoardStore.self) private var todoStore
 
   private var todayTodos: [Todo] {
-    let calendar = Calendar.current
-    return todoStore.todos.filter {
-      calendar.isDateInToday($0.date) && !$0.isDeleted
-        && ($0.status == .todo || $0.status == .inProgress)
+    todoStore.todos.filter {
+      $0.date.isToday && !$0.isDeleted && ($0.status == .todo || $0.status == .inProgress)
     }
     .sorted { $0.date < $1.date }
   }
+
+  // MARK: - Body
 
   var body: some View {
     MenuBarContent(todos: todayTodos)
