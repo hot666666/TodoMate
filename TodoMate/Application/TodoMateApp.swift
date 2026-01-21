@@ -51,12 +51,16 @@ struct TodoMateApp: App {
       todoBoardStore: todoBoardStore,
     )
 
-    // 글로벌 단축키 등록 (⇧⌘Space)
+    // WindowManager에 오버레이 컨트롤러 주입
+    WindowManager.shared.overlayController = overlayViewController
+
+    // 글로벌 단축키 등록 (시스템 레벨 - 다른 앱에서도 작동)
+    // ⇧⌘Space: 오버레이 토글
     appDIContainer.core.hotKeyManager.register(
       key: .space,
       modifiers: [.command, .shift],
-      handler: { [weak overlayViewController] in
-        overlayViewController?.show()
+      handler: {
+        WindowManager.shared.toggleOverlay()
       },
     )
   }
@@ -84,6 +88,7 @@ struct TodoMateApp: App {
         .environment(\.colorScheme, .dark)
         .background(.ultraThickMaterial)
         .frame(minWidth: 1000, minHeight: 625)
+        .modifier(WindowManagerInjector())
         .task {
           #if DEBUG
             MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
@@ -92,6 +97,23 @@ struct TodoMateApp: App {
     }
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)
+    .commands {
+      // File 메뉴: 새 윈도우 (⇧⌘N)
+      CommandGroup(replacing: .newItem) {
+        Button("새 윈도우") {
+          WindowManager.shared.openMainWindow()
+        }
+        .keyboardShortcut("n", modifiers: [.command, .shift])
+      }
+
+      // 앱 메뉴: 업데이트 확인
+      CommandGroup(after: .appInfo) {
+        Button("업데이트 확인") {
+          appDelegate.checkForUpdates()
+        }
+        .keyboardShortcut("u", modifiers: [.command, .option])
+      }
+    }
     #endif
   }
 }

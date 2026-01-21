@@ -39,21 +39,18 @@ private struct MenuBarContent: View {
   let todos: [Todo]
 
   var body: some View {
-    // 1. 새 할일 (Opens Main App)
     Button("새 할일") {
-      openWindow(id: AppSceneID.mainApp.rawValue)
+      WindowManager.shared.toggleOverlay()
     }
     .keyboardShortcut(" ", modifiers: [.command, .shift])
 
-    // 2. 앱 열기
     Button("TodoMate 열기") {
-      openWindow(id: AppSceneID.mainApp.rawValue)
+      WindowManager.shared.openMainWindow()
     }
     .keyboardShortcut("O", modifiers: [.command])
 
     Divider()
 
-    // 3. 오늘 할일 목록
     Section {
       if todos.isEmpty {
         Text("오늘 할일 없음")
@@ -78,7 +75,6 @@ private struct MenuBarContent: View {
 
     Divider()
 
-    // 4. 종료
     Button("종료") {
       NSApplication.shared.terminate(nil)
     }
