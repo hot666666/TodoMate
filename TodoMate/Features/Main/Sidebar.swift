@@ -70,7 +70,7 @@ struct Sidebar: View {
         }
         .accessibilityIdentifier("sidebar_memo")
 
-        NavigationLink(value: NavigationDestination.deletedItems) {
+        NavigationLink(value: NavigationDestination.trash) {
           trashLabel
         }
         .accessibilityIdentifier("sidebar_trash")

@@ -1,5 +1,5 @@
 //
-//  DeletedItemsView.swift
+//  TrashView.swift
 //  TodoMate
 //
 //  Created by agent on 1/22/26.
@@ -12,17 +12,17 @@ import TodoMateDomain
 /// Main view for displaying and managing deleted items (trash).
 /// Supports multi-selection, sorting, restoration, and permanent deletion.
 /// Uses ViewModel pattern - viewModel is created when view appears.
-struct DeletedItemsView: View {
+struct TrashView: View {
   // MARK: - Environment
 
   @Environment(\.overlayManager) private var overlay
 
   // MARK: - State
 
-  @State private var viewModel: DeletedItemsViewModel
+  @State private var viewModel: TrashViewModel
 
   init(container: CoreDIContainer) {
-    _viewModel = State(initialValue: DeletedItemsViewModel(container: container))
+    _viewModel = State(initialValue: TrashViewModel(container: container))
   }
 
   // MARK: - Body
@@ -35,8 +35,8 @@ struct DeletedItemsView: View {
       .task {
         await viewModel.fetch()
       }
-      .navigationTitle("삭제된 항목")
-      .accessibilityIdentifier("deletedItemsView")
+      .navigationTitle("휴지통")
+      .accessibilityIdentifier("trashView")
   }
 
   private var emptyView: some View {
@@ -65,7 +65,7 @@ struct DeletedItemsView: View {
 
   private var listView: some View {
     List(viewModel.sortedItems, selection: Bindable(viewModel).selectedIds) { item in
-      DeletedItemRow(item: item, isSelected: viewModel.selectedIds.contains(item.id))
+      TrashItemRow(item: item, isSelected: viewModel.selectedIds.contains(item.id))
         .tag(item.id)
         .contentShape(.rect)
         .onTapGesture {
@@ -98,7 +98,7 @@ struct DeletedItemsView: View {
 
   private var sortMenu: some View {
     Menu {
-      ForEach(DeletedItemsViewModel.SortOrder.allCases, id: \.self) { order in
+      ForEach(TrashViewModel.SortOrder.allCases, id: \.self) { order in
         Button {
           viewModel.sortOrder = order
         } label: {
@@ -206,6 +206,6 @@ struct DeletedItemsView: View {
 
 #Preview {
   NavigationStack {
-    DeletedItemsView(container: .preview)
+    TrashView(container: .preview)
   }
 }

@@ -63,8 +63,8 @@ struct MainView: View {
           GroupFeedWrapperView(container: container)
         }
 
-      case .deletedItems:
-        DeletedItemsView(container: container.core)
+      case .trash:
+        TrashView(container: container.core)
       }
     } else {
       unavailableView

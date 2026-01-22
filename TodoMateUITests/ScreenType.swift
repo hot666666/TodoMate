@@ -16,7 +16,7 @@ enum ScreenType: String, CaseIterable {
   case noGroups = "no_groups"
   case login
   case settings
-  case deletedItems
+  case trash
 
   /// 해당 화면의 메인 뷰 accessibility identifier
   var accessibilityIdentifier: String {
@@ -28,7 +28,7 @@ enum ScreenType: String, CaseIterable {
     case .noGroups: "GroupFeedNoGroupView"
     case .login: "loginView"
     case .settings: "settingView"
-    case .deletedItems: "deletedItemsView"
+    case .trash: "trashView"
     }
   }
 
@@ -40,7 +40,7 @@ enum ScreenType: String, CaseIterable {
     case .groupFeed, .noGroups: "sidebar_group"
     case .settings: "sidebar_profile"
     case .login: "sidebar_group"
-    case .deletedItems: "sidebar_trash"
+    case .trash: "sidebar_trash"
     }
   }
 
