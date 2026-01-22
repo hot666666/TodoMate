@@ -109,7 +109,7 @@ struct TodoSheet: View {
     let title = editableTodo.isNew ? "작성 중인 내용을 폐기하시겠습니까?" : "변경사항을 폐기하시겠습니까?"
     let message = editableTodo.isNew ? "작성 중인 내용이 사라집니다." : "저장하지 않은 변경사항이 있습니다."
 
-    overlay?.presentCentered(id: OverlayIDs.discardConfirmation, backdropOpacity: 0) {
+    overlay?.presentCentered(id: OverlayIDs.confirmation, backdropOpacity: 0) {
       ConfirmationView(
         title: title,
         message: message,
