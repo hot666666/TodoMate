@@ -23,15 +23,20 @@ graph TD
     subgraph SidebarNav[Sidebar Navigation]
         Sidebar[Sidebar]:::view
         DestSettings["Settings (SettingView)"]:::view
-        DestTodo["Todo (Board/Calendar)"]:::view
+        DestHome["Home (HomeView)"]:::view
         DestMemo["Memo (MemoView)"]:::view
         DestGroup["Group (GroupFeedWrapperView)"]:::view
+        DestTrash["Trash (DeletedItemsView)"]:::view
     end
 
     subgraph FeatureHome["Home(Todo) Views"]
         BoardView[BoardView]:::view
         CalendarView[CalendarView]:::view
         CalVM[TodoCalendarViewModel]:::vm
+    end
+
+    subgraph FeatureTrash["Trash Feature"]
+        DeletedVM[DeletedItemsViewModel]:::vm
     end
 
     subgraph FeatureMemo[Memo Feature]
@@ -58,9 +63,10 @@ graph TD
     Sidebar -- selection --> NavMgr
 
     MainView -- "switch navMgr.selection" --> DestSettings
-    MainView -- "switch navMgr.selection" --> DestTodo
+    MainView -- "switch navMgr.selection" --> DestHome
     MainView -- "switch navMgr.selection" --> DestMemo
     MainView -- "switch navMgr.selection" --> DestGroup
+    MainView -- "switch navMgr.selection" --> DestTrash
 
     DestGroup --> GroupWrapper
     GroupWrapper -- "@State init" --> GroupTodoStore
@@ -68,8 +74,9 @@ graph TD
     GroupWrapper --> GroupFeed
     GroupWrapper --> GroupFeedNoGroup
 
-    DestTodo -- "switch navMgr.viewMode" --> BoardView
-    DestTodo -- "switch navMgr.viewMode" --> CalendarView
+    DestHome -- "switch navMgr.viewMode" --> BoardView
+    DestHome -- "switch navMgr.viewMode" --> CalendarView
+    DestTrash -- "@State init" --> DeletedVM
 
     CalendarView -- "@State init" --> CalVM
 

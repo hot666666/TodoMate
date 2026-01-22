@@ -87,3 +87,32 @@ private var toolbarContent: some ToolbarContent {
 1. **`ToolbarSpacer(.flexible)`**을 사용하여 정렬과 배치를 제어한다.
 2. `ToolbarItemGroup` 보다는 개별 **`ToolbarItem`**을 나열하여 순서를 명확히 제어한다.
 3. `Divider()`는 macOS Toolbar에서 시각적 분리 역할을 제대로 수행하지 못하므로, 간격이 필요하면 `ToolbarSpacer`를 사용한다.
+
+## 5. Toolbar Item Placement 가이드
+
+`ToolbarItem(placement: ...)`을 사용하여 아이템의 의미론적 위치를 지정할 수 있습니다. macOS에서는 이 placement가 시각적 위치를 결정하는 데 중요한 역할을 합니다.
+
+### 5.1 주요 Placement 옵션
+
+| Placement | 설명 | macOS 위치 |
+| :--- | :--- | :--- |
+| **`.navigation`** | 네비게이션 관련 동작 (뒤로가기, 사이드바 토글 등) | **왼쪽 (Leading)**. 타이틀 영역보다 왼쪽에 배치됩니다. |
+| **`.primaryAction`** | 뷰의 주요 동작 (추가, 편집, 저장 등) | **오른쪽 (Trailing)**. 주로 서치바 옆이나 윈도우 우측 상단에 배치됩니다. |
+| **`.principal`** | 현재 컨텍스트의 핵심 정보 또는 컨트롤 | **중앙 (Center)**. 윈도우 타이틀 영역의 중앙에 위치합니다. |
+| **`.automatic`** | 시스템이 문맥에 따라 자동으로 결정 | 위치가 유동적일 수 있으므로 명시적 배치를 권장합니다. |
+| **`.status`** | 상태 정보 표시 | UI 일관성을 위해 신중히 사용해야 합니다. |
+
+### 5.2 Modal/Sheet 전용 Placement
+
+| Placement | 설명 | macOS 위치 |
+| :--- | :--- | :--- |
+| **`.cancellationAction`** | 작업 취소 (Cancel, 닫기) | **왼쪽 (Leading)** |
+| **`.confirmationAction`** | 작업 완료/확인 (Done, Save, Add) | **오른쪽 (Trailing)**. 강조된 스타일(Accent Color)이 적용될 수 있습니다. |
+
+### 5.3 💡 Tip: `.navigation` vs `.primaryAction`
+
+사용자가 언급한 것처럼 `.navigation`을 사용하면 **확실하게 왼쪽 영역**을 선점할 수 있습니다.
+- **왼쪽 배치**: `ToolbarItem(placement: .navigation)`
+- **오른쪽 배치**: `ToolbarItem(placement: .primaryAction)`
+
+중간에 `ToolbarSpacer()`를 사용하는 전략과 함께, `placement`를 명시적으로 지정하면 더욱 견고한 레이아웃을 만들 수 있습니다.
