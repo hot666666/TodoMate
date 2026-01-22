@@ -12,6 +12,8 @@ import TodoMateDomain
 struct SettingView: View {
   @Environment(AppDIContainer.self) private var appDI
   @Environment(SessionStore.self) private var sessionStore
+  @State private var viewModel: SettingsViewModel?
+
   @AppStorage(UserDefaultsKey.isPublicModeEnabled.rawValue)
   private var isPublicModeEnabled: Bool = false
   @AppStorage(UserDefaultsKey.showInDock.rawValue)
@@ -37,6 +39,7 @@ struct SettingView: View {
         profileSection
         if sessionStore.user != nil {
           groupSection
+          legacyImportSection
         }
         dockSection
       }
@@ -48,6 +51,9 @@ struct SettingView: View {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor))
     .onAppear {
+      if viewModel == nil {
+        viewModel = SettingsViewModel(importLegacyDataUseCase: appDI.importLegacyDataUseCase)
+      }
       if let displayName = sessionStore.user?.displayName {
         appDI.core.sidebarCacheUseCase.saveProfileName(displayName)
       }
@@ -232,6 +238,76 @@ struct SettingView: View {
           }
           .padding(16)
         }
+      }
+    }
+  }
+
+  // MARK: - Legacy Import Section
+
+  @ViewBuilder
+  private var legacyImportSection: some View {
+    if let user = sessionStore.user,
+       let viewModel,
+       viewModel.isValidTargetForImport(user: user) {
+      VStack(alignment: .leading, spacing: 16) {
+        Text("기존 데이터 불러오기")
+          .font(.headline)
+          .foregroundStyle(.secondary)
+
+        VStack(alignment: .leading, spacing: 12) {
+          Text("4.0.0 이전 버전의 데이터를 기기로 가져옵니다.")
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+
+          switch viewModel.importState {
+          case .idle, .failed:
+            Button {
+              viewModel.showImportConfirmation = true
+            } label: {
+              Text("불러오기")
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+
+            if case let .failed(error) = viewModel.importState {
+              Text("실패: \(error.localizedDescription)")
+                .font(.caption)
+                .foregroundStyle(.red)
+            }
+
+          case let .importing(progress):
+            VStack(spacing: 8) {
+              ProgressView(value: progress)
+              Text("\(Int(progress * 100))%")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+          case .completed:
+            HStack {
+              Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+              Text("완료되었습니다")
+            }
+          }
+        }
+        .padding(16)
+        .background(Color(nsColor: .controlBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+      }
+      .confirmationDialog(
+        "데이터 가져오기",
+        isPresented: Bindable(viewModel).showImportConfirmation,
+        titleVisibility: .visible,
+      ) {
+        Button("가져오기") {
+          Task {
+            await viewModel.importLegacyData(userId: user.id)
+          }
+        }
+        Button("취소", role: .cancel) {}
+      } message: {
+        Text("기존 데이터(Todo, Memo)를 현재 기기로 가져옵니다.\n이미 존재하는 데이터는 건너뜁니다.")
       }
     }
   }
