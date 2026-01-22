@@ -27,16 +27,20 @@ final class SettingsViewModel {
     self.importLegacyDataUseCase = importLegacyDataUseCase
   }
 
+  // Target Date: 2025-08-24 00:00:00 UTC
+  // Users created before this date are eligible for legacy import.
+  private let legacyImportCutoffDate: Date? = {
+    var components = DateComponents()
+    components.year = 2025
+    components.month = 8
+    components.day = 24
+    components.timeZone = TimeZone(identifier: "UTC")
+    return Calendar(identifier: .gregorian).date(from: components)
+  }()
+
   func isValidTargetForImport(user: User?) -> Bool {
-    guard let user else { return false }
-
-    // Check createdAt < 2025-08-24
-    // 2025-08-24 00:00:00 UTC
-    let calendar = Calendar(identifier: .gregorian)
-    let components = DateComponents(year: 2025, month: 8, day: 24)
-    guard let targetDate = calendar.date(from: components) else { return false }
-
-    return user.createdAt < targetDate
+    guard let user, let cutoffDate = legacyImportCutoffDate else { return false }
+    return user.createdAt < cutoffDate
   }
 
   func importLegacyData(userId: String) async {
