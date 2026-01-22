@@ -170,7 +170,11 @@ private extension TodoMateApp {
 
   static func createSwiftDataModelContainer() -> ModelContainer {
     let schema = Schema([SDTodo.self, SDMemo.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: false)
+    let config = ModelConfiguration(
+      AppEnvironment.Container.name,
+      schema: schema,
+      isStoredInMemoryOnly: false,
+    )
 
     do {
       let container = try ModelContainer(for: schema, configurations: [config])

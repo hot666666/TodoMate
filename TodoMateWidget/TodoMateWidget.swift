@@ -8,6 +8,7 @@
 //
 
 import AppIntents
+import Common
 import SwiftData
 import SwiftUI
 import TodoMateData
@@ -37,7 +38,11 @@ struct WidgetTodo: Identifiable {
 enum WidgetDataContainer {
   static let shared: ModelContainer = {
     let schema = Schema([SDTodo.self, SDMemo.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: false)
+    let config = ModelConfiguration(
+      AppEnvironment.Container.name,
+      schema: schema,
+      isStoredInMemoryOnly: false,
+    )
 
     do {
       return try ModelContainer(for: schema, configurations: [config])
@@ -149,6 +154,15 @@ struct TodoMateWidgetEntryView: View {
   var entry: TodoWidgetEntry
   @Environment(\.widgetFamily) var family
 
+  private var maxTodoCount: Int {
+    switch family {
+    case .systemSmall: 3
+    case .systemMedium: 4
+    case .systemLarge: 8
+    default: 4
+    }
+  }
+
   var body: some View {
     Group {
       if entry.isAllCompleted {
@@ -159,16 +173,18 @@ struct TodoMateWidgetEntryView: View {
         todoListView
       }
     }
+    .overlay(alignment: .topTrailing) {
+      refreshButton
+    }
     .containerBackground(.fill.tertiary, for: .widget)
   }
 
-  private var maxTodoCount: Int {
-    switch family {
-    case .systemSmall: 3
-    case .systemMedium: 4
-    case .systemLarge: 8
-    default: 4
+  private var refreshButton: some View {
+    Button(intent: RefreshWidgetIntent()) {
+      Image(systemName: "arrow.clockwise")
+        .font(.caption)
     }
+    .buttonStyle(.plain)
   }
 
   // MARK: - Todo List View
@@ -201,15 +217,14 @@ struct TodoMateWidgetEntryView: View {
       Text("진행 중")
         .font(.headline)
 
-      Spacer()
-
       Text("\(entry.todos.count)")
         .font(.caption)
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
         .background(.secondary.opacity(0.2))
         .clipShape(.capsule)
-        .offset(y: -2)
+
+      Spacer()
     }
   }
 
@@ -270,7 +285,7 @@ private struct TodoRowView: View {
   var body: some View {
     HStack(spacing: 8) {
       Button(intent: ToggleTodoStatusIntent(todoId: todo.id)) {
-        Image(systemName: "circle")
+        Image(systemName: "arrow.right.circle.fill")
           .font(.system(size: 16))
           .foregroundStyle(.blue)
       }
@@ -297,7 +312,11 @@ private struct TodoRowView: View {
 // MARK: - Widget Configuration
 
 struct TodoMateWidget: Widget {
-  let kind = "TodoMateWidget"
+  #if DEBUG
+    let kind = "TodoMateWidgetDev"
+  #else
+    let kind = "TodoMateWidget"
+  #endif
 
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: TodoMateTimelineProvider()) { entry in
