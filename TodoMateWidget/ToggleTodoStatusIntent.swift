@@ -8,6 +8,7 @@
 //
 
 import AppIntents
+import Common
 import SwiftData
 import TodoMateData
 import TodoMateDomain
@@ -27,6 +28,7 @@ struct ToggleTodoStatusIntent: AppIntent {
     self.todoId = todoId
   }
 
+  @MainActor
   func perform() async throws -> some IntentResult {
     // Intent는 MainActor가 아니므로 Task로 감싸거나, 독립적으로 생성해야 함.
     // 하지만 WidgetDataContainer는 @MainActor이므로 여기서는 독립 생성하되,
@@ -35,7 +37,11 @@ struct ToggleTodoStatusIntent: AppIntent {
     // 여기서는 안전하게 독립 생성하되 스키마만 일치시킴.
 
     let schema = Schema([SDTodo.self, SDMemo.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: false)
+    let config = ModelConfiguration(
+      AppEnvironment.Container.name,
+      schema: schema,
+      isStoredInMemoryOnly: false,
+    )
 
     do {
       let container = try ModelContainer(for: schema, configurations: [config])
