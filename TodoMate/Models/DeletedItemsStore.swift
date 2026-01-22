@@ -77,7 +77,7 @@ final class DeletedItemsStore {
     do {
       items = try await fetchDeletedItemsUseCase.run()
       // Remove selected IDs that no longer exist
-      selectedIds = selectedIds.filter { id in items.contains { $0.id == id } }
+      selectedIds.formIntersection(items.map(\.id))
     } catch {
       self.error = error
     }
