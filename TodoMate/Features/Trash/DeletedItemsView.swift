@@ -49,22 +49,25 @@ struct DeletedItemsView: View {
 
   @ViewBuilder
   private var contentView: some View {
-    if viewModel.items.isEmpty {
+    if viewModel.isLoading {
+      ProgressView()
+    } else if viewModel.items.isEmpty {
       emptyView
     } else {
-      List(
-        viewModel.sortedItems,
-        selection: Bindable(viewModel).selectedIds,
-      ) { item in
-        DeletedItemRow(item: item, isSelected: viewModel.selectedIds.contains(item.id))
-          .tag(item.id)
-          .contentShape(.rect)
-          .onTapGesture {
-            viewModel.toggleSelection(for: item)
-          }
-      }
-      .listStyle(.inset)
+      listView
     }
+  }
+
+  private var listView: some View {
+    List(viewModel.sortedItems, selection: Bindable(viewModel).selectedIds) { item in
+      DeletedItemRow(item: item, isSelected: viewModel.selectedIds.contains(item.id))
+        .tag(item.id)
+        .contentShape(.rect)
+        .onTapGesture {
+          viewModel.toggleSelection(for: item)
+        }
+    }
+    .listStyle(.inset)
   }
 
   @ToolbarContentBuilder
