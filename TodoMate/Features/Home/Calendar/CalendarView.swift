@@ -38,7 +38,6 @@ struct CalendarView: View {
     .background(Color(nsColor: .windowBackgroundColor))
     .accessibilityIdentifier("personalCalendarView")
     .environment(viewModel)
-    .toolbar { HomeToolbarContent() }
     .onAppear {
       viewModel.overlay = overlay
     }

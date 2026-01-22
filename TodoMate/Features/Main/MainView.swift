@@ -53,7 +53,7 @@ struct MainView: View {
         SettingView()
 
       case .todo:
-        homeView
+        HomeView()
 
       case .memo:
         MemoView()
@@ -68,16 +68,6 @@ struct MainView: View {
       }
     } else {
       unavailableView
-    }
-  }
-
-  @ViewBuilder
-  private var homeView: some View {
-    switch naviManager.viewMode {
-    case .board:
-      BoardView()
-    case .calendar:
-      CalendarView(container: container.core)
     }
   }
 
