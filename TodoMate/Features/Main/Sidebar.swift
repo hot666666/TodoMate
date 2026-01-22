@@ -69,6 +69,11 @@ struct Sidebar: View {
           memoLabel
         }
         .accessibilityIdentifier("sidebar_memo")
+
+        NavigationLink(value: NavigationDestination.deletedItems) {
+          trashLabel
+        }
+        .accessibilityIdentifier("sidebar_trash")
       } header: {
         Text("Private")
       }
@@ -133,6 +138,15 @@ struct Sidebar: View {
         .foregroundStyle(.secondary)
     } icon: {
       Image(systemName: "person.2.fill")
+        .foregroundStyle(.secondary)
+    }
+  }
+
+  private var trashLabel: some View {
+    Label {
+      Text("Trash")
+    } icon: {
+      Image(systemName: "trash")
         .foregroundStyle(.secondary)
     }
   }

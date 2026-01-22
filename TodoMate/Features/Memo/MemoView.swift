@@ -105,6 +105,7 @@ struct MemoView: View {
       onDismiss: dismissDetail,
       onSave: { updatedContent in saveMemo(memo, with: updatedContent) },
       onDelete: { deleteMemo(memo) },
+      onPermanentlyDelete: { permanentlyDeleteMemo(memo) },
     )
   }
 }
@@ -130,8 +131,15 @@ private extension MemoView {
     }
   }
 
+  /// Soft delete - puts memo in trash (used by context menu)
   func deleteMemo(_ memo: Memo) {
     store.delete(memo)
+    dismissDetail()
+  }
+
+  /// Hard delete - removes memo permanently (used when content is cleared)
+  func permanentlyDeleteMemo(_ memo: Memo) {
+    store.permanentlyDelete(memo)
     dismissDetail()
   }
 

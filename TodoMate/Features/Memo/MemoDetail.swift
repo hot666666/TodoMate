@@ -18,6 +18,7 @@ struct MemoDetail: View {
   let onDismiss: () -> Void
   let onSave: (String) -> Void
   let onDelete: () -> Void
+  let onPermanentlyDelete: () -> Void
 
   // MARK: - State
 
@@ -87,7 +88,7 @@ struct MemoDetail: View {
 
   private func saveOrDelete() {
     if isEmpty {
-      onDelete()
+      onPermanentlyDelete()
     } else {
       onSave(editedContent)
     }
@@ -102,6 +103,7 @@ struct MemoDetail: View {
     onDismiss: {},
     onSave: { _ in },
     onDelete: {},
+    onPermanentlyDelete: {},
   )
   .environment(MemoStore(container: .preview))
   .environment(SessionStore.preview)

@@ -39,6 +39,13 @@ final class CoreDIContainer {
   @ObservationIgnored let observeTodosUseCase: ObserveTodosUseCase
   @ObservationIgnored let observeMemosUseCase: ObserveMemosUseCase
 
+  // MARK: - Deleted Items
+
+  @ObservationIgnored let deletedItemsRepository: DeletedItemsRepository
+  @ObservationIgnored let fetchDeletedItemsUseCase: FetchDeletedItemsUseCase
+  @ObservationIgnored let restoreDeletedItemUseCase: RestoreDeletedItemUseCase
+  @ObservationIgnored let permanentlyDeleteItemUseCase: PermanentlyDeleteItemUseCase
+
   init(
     modelContainer: ModelContainer,
     userDefaults: UserDefaults = .standard,
@@ -74,6 +81,14 @@ final class CoreDIContainer {
 
     sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)
+
+    // Deleted Items
+    deletedItemsRepository = DeletedItemsRepositoryImpl(modelContainer: modelContainer)
+    fetchDeletedItemsUseCase = FetchDeletedItemsUseCaseImpl(repository: deletedItemsRepository)
+    restoreDeletedItemUseCase = RestoreDeletedItemUseCaseImpl(repository: deletedItemsRepository)
+    permanentlyDeleteItemUseCase = PermanentlyDeleteItemUseCaseImpl(
+      repository: deletedItemsRepository,
+    )
   }
 }
 

@@ -62,6 +62,9 @@ struct MainView: View {
         AuthenticatedView {
           GroupFeedWrapperView(container: container)
         }
+
+      case .deletedItems:
+        DeletedItemsView(container: container.core)
       }
     } else {
       unavailableView
