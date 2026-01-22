@@ -158,7 +158,6 @@ struct TrashView: View {
     ) {
       Task {
         await viewModel.restoreSelected()
-        overlay?.dismissTop()
       }
     }
   }
@@ -173,7 +172,6 @@ struct TrashView: View {
     ) {
       Task {
         await viewModel.permanentlyDeleteSelected()
-        overlay?.dismissTop()
       }
     }
   }
