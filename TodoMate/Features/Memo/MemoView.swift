@@ -42,7 +42,7 @@ struct MemoView: View {
     }
     .toolbar {
       if !isDetailViewPresented {
-        ToolbarItem(placement: .primaryAction) {
+        ToolbarItem(placement: .navigation) {
           Button {
             addNewMemo()
           } label: {

@@ -15,6 +15,7 @@ struct ConfirmationView: View {
   let message: String?
   let destructiveActionTitle: String
   let cancelTitle: String
+  var isDestructive: Bool = true
   let destructiveAction: () -> Void
   let onDismiss: () -> Void
 
@@ -35,7 +36,7 @@ struct ConfirmationView: View {
 
       VStack(spacing: DesignSystem.Confirmation.buttonSpacing) {
         Button(
-          role: .destructive,
+          role: isDestructive ? .destructive : nil,
           action: {
             destructiveAction()
             onDismiss()
@@ -46,7 +47,7 @@ struct ConfirmationView: View {
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
-        .tint(.red)
+        .tint(isDestructive ? .red : .accentColor)
 
         Button(action: {
           onDismiss()

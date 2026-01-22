@@ -1,5 +1,5 @@
 //
-//  DeletedItemRow.swift
+//  TrashItemRow.swift
 //  TodoMate
 //
 //  Created by agent on 1/22/26.
@@ -9,7 +9,7 @@ import SwiftUI
 import TodoMateDomain
 
 /// A single row representing a deleted item (Todo or Memo) in the trash list.
-struct DeletedItemRow: View {
+struct TrashItemRow: View {
   let item: DeletedItem
   let isSelected: Bool
 
@@ -77,11 +77,11 @@ struct DeletedItemRow: View {
 
 #Preview {
   List {
-    DeletedItemRow(
+    TrashItemRow(
       item: .todo(Todo(owner: "user1", content: "Sample Todo", in: Date())),
       isSelected: false,
     )
-    DeletedItemRow(
+    TrashItemRow(
       item: .memo(Memo(owner: "user1", content: "Sample Memo", date: Date())),
       isSelected: true,
     )

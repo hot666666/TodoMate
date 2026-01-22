@@ -47,7 +47,6 @@ struct BoardView: View {
     .accessibilityIdentifier("privateBoardView")
     .toolbar {
       dateFilterMenu
-      HomeToolbarContent()
     }
   }
 
@@ -110,7 +109,7 @@ struct BoardView: View {
 
   @ToolbarContentBuilder
   private var dateFilterMenu: some ToolbarContent {
-    ToolbarItem(placement: .primaryAction) {
+    ToolbarItem(placement: .navigation) {
       Menu {
         Picker("Date Filter", selection: $dateFilter) {
           ForEach(DateFilter.allCases, id: \.self) { filter in

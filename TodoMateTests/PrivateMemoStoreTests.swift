@@ -44,6 +44,13 @@ struct PrivateMemoStoreTests {
     }
   }
 
+  final class MockPermanentlyDeleteUseCase: PermanentlyDeleteItemUseCase, @unchecked Sendable {
+    var runHandler: (([DeletedItem]) -> Void)?
+    func run(_: DeletedItem) async throws {}
+    func run(_ items: [DeletedItem]) async throws { runHandler?(items) }
+    func runAll() async throws {}
+  }
+
   @Test("Add Memo calls CreateUseCase")
   func add_callsUseCase() async throws {
     // Given
@@ -51,8 +58,8 @@ struct PrivateMemoStoreTests {
     let readUC = MockReadUseCase()
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
-
     let observeUC = MockObserveUseCase()
+    let permanentlyDeleteUC = MockPermanentlyDeleteUseCase()
 
     let store = MemoStore(
       createUseCase: createUC,
@@ -60,6 +67,7 @@ struct PrivateMemoStoreTests {
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
       observeMemosUseCase: observeUC,
+      permanentlyDeleteUseCase: permanentlyDeleteUC,
     )
 
     var capturedMemo: Memo?
@@ -80,8 +88,8 @@ struct PrivateMemoStoreTests {
     let readUC = MockReadUseCase()
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
-
     let observeUC = MockObserveUseCase()
+    let permanentlyDeleteUC = MockPermanentlyDeleteUseCase()
 
     let store = MemoStore(
       createUseCase: createUC,
@@ -89,6 +97,7 @@ struct PrivateMemoStoreTests {
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
       observeMemosUseCase: observeUC,
+      permanentlyDeleteUseCase: permanentlyDeleteUC,
     )
 
     let memo = Memo(owner: "me", content: "Updated")
@@ -110,8 +119,8 @@ struct PrivateMemoStoreTests {
     let readUC = MockReadUseCase()
     let updateUC = MockUpdateUseCase()
     let deleteUC = MockDeleteUseCase()
-
     let observeUC = MockObserveUseCase()
+    let permanentlyDeleteUC = MockPermanentlyDeleteUseCase()
 
     let store = MemoStore(
       createUseCase: createUC,
@@ -119,6 +128,7 @@ struct PrivateMemoStoreTests {
       updateUseCase: updateUC,
       deleteUseCase: deleteUC,
       observeMemosUseCase: observeUC,
+      permanentlyDeleteUseCase: permanentlyDeleteUC,
     )
 
     let memo = Memo(owner: "me", content: "Delete me")

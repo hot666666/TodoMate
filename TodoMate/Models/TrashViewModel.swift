@@ -1,5 +1,5 @@
 //
-//  DeletedItemsViewModel.swift
+//  TrashViewModel.swift
 //  TodoMate
 //
 //  Created by agent on 1/22/26.
@@ -8,12 +8,12 @@
 import Foundation
 import TodoMateDomain
 
-/// ViewModel for the Deleted Items view.
+/// ViewModel for the Trash View (formerly DeletedItemsView).
 /// Manages fetching, sorting, selection, restoration, and permanent deletion.
-/// Lifecycle is tied to the DeletedItemsView - created when view appears.
+/// Lifecycle is tied to the TrashView - created when view appears.
 @Observable
 @MainActor
-final class DeletedItemsViewModel {
+final class TrashViewModel {
   // MARK: - Dependencies
 
   private let fetchUseCase: FetchDeletedItemsUseCase
@@ -148,9 +148,9 @@ final class DeletedItemsViewModel {
 
 // MARK: - Preview Support
 
-extension DeletedItemsViewModel {
-  static var preview: DeletedItemsViewModel {
-    DeletedItemsViewModel(
+extension TrashViewModel {
+  static var preview: TrashViewModel {
+    TrashViewModel(
       fetchUseCase: StubFetchDeletedItemsUseCase(),
       restoreUseCase: StubRestoreDeletedItemUseCase(),
       deleteUseCase: StubPermanentlyDeleteItemUseCase(),

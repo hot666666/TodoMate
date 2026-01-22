@@ -1,5 +1,5 @@
 //
-//  DeletedItemsView.swift
+//  TrashView.swift
 //  TodoMate
 //
 //  Created by agent on 1/22/26.
@@ -12,17 +12,17 @@ import TodoMateDomain
 /// Main view for displaying and managing deleted items (trash).
 /// Supports multi-selection, sorting, restoration, and permanent deletion.
 /// Uses ViewModel pattern - viewModel is created when view appears.
-struct DeletedItemsView: View {
+struct TrashView: View {
   // MARK: - Environment
 
   @Environment(\.overlayManager) private var overlay
 
   // MARK: - State
 
-  @State private var viewModel: DeletedItemsViewModel
+  @State private var viewModel: TrashViewModel
 
   init(container: CoreDIContainer) {
-    _viewModel = State(initialValue: DeletedItemsViewModel(container: container))
+    _viewModel = State(initialValue: TrashViewModel(container: container))
   }
 
   // MARK: - Body
@@ -35,8 +35,8 @@ struct DeletedItemsView: View {
       .task {
         await viewModel.fetch()
       }
-      .navigationTitle("삭제된 항목")
-      .accessibilityIdentifier("deletedItemsView")
+      .navigationTitle("휴지통")
+      .accessibilityIdentifier("trashView")
   }
 
   private var emptyView: some View {
@@ -45,26 +45,35 @@ struct DeletedItemsView: View {
       systemImage: "trash",
       description: Text("삭제된 Todo와 Memo가 여기에 표시됩니다."),
     )
+    .opacity(0.6)
   }
 
   @ViewBuilder
   private var contentView: some View {
-    if viewModel.items.isEmpty {
-      emptyView
-    } else {
-      List(
-        viewModel.sortedItems,
-        selection: Bindable(viewModel).selectedIds,
-      ) { item in
-        DeletedItemRow(item: item, isSelected: viewModel.selectedIds.contains(item.id))
-          .tag(item.id)
-          .contentShape(.rect)
-          .onTapGesture {
-            viewModel.toggleSelection(for: item)
-          }
+    Group {
+      if viewModel.isLoading {
+        ProgressView()
+      } else if viewModel.items.isEmpty {
+        emptyView
+      } else {
+        listView
       }
-      .listStyle(.inset)
     }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(Color(nsColor: .windowBackgroundColor))
+  }
+
+  private var listView: some View {
+    List(viewModel.sortedItems, selection: Bindable(viewModel).selectedIds) { item in
+      TrashItemRow(item: item, isSelected: viewModel.selectedIds.contains(item.id))
+        .tag(item.id)
+        .contentShape(.rect)
+        .onTapGesture {
+          viewModel.toggleSelection(for: item)
+        }
+    }
+    .listStyle(.inset)
+    .scrollContentBackground(.hidden)
   }
 
   @ToolbarContentBuilder
@@ -89,7 +98,7 @@ struct DeletedItemsView: View {
 
   private var sortMenu: some View {
     Menu {
-      ForEach(DeletedItemsViewModel.SortOrder.allCases, id: \.self) { order in
+      ForEach(TrashViewModel.SortOrder.allCases, id: \.self) { order in
         Button {
           viewModel.sortOrder = order
         } label: {
@@ -123,9 +132,7 @@ struct DeletedItemsView: View {
 
   private var restoreButton: some View {
     Button {
-      Task {
-        await viewModel.restoreSelected()
-      }
+      showRestoreConfirmation()
     } label: {
       Label("복구", systemImage: "arrow.uturn.backward")
     }
@@ -141,21 +148,50 @@ struct DeletedItemsView: View {
     .help("선택한 항목 영구 삭제")
   }
 
-  // MARK: - Actions
+  /// Shows a confirmation overlay for restore action
+  private func showRestoreConfirmation() {
+    showConfirmation(
+      title: "복구",
+      message: "선택한 \(viewModel.selectedIds.count)개 항목을 복구하시겠습니까?",
+      actionTitle: "복구",
+      isDestructive: false,
+    ) {
+      Task {
+        await viewModel.restoreSelected()
+      }
+    }
+  }
 
+  /// Shows a confirmation overlay for permanent delete action
   private func showDeleteConfirmation() {
-    overlay?.presentCentered(id: OverlayIDs.deleteConfirmation, backdropOpacity: 0) {
+    showConfirmation(
+      title: "영구 삭제",
+      message: "선택한 \(viewModel.selectedIds.count)개 항목을 영구적으로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
+      actionTitle: "삭제",
+      isDestructive: true,
+    ) {
+      Task {
+        await viewModel.permanentlyDeleteSelected()
+      }
+    }
+  }
+
+  /// Generic confirmation overlay presenter
+  private func showConfirmation(
+    title: String,
+    message: String,
+    actionTitle: String,
+    isDestructive: Bool,
+    action: @escaping () -> Void,
+  ) {
+    overlay?.presentCentered(id: OverlayIDs.confirmation, backdropOpacity: 0) {
       ConfirmationView(
-        title: "영구 삭제",
-        message: "선택한 \(viewModel.selectedIds.count)개 항목을 영구적으로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
-        destructiveActionTitle: "삭제",
+        title: title,
+        message: message,
+        destructiveActionTitle: actionTitle,
         cancelTitle: "취소",
-        destructiveAction: {
-          Task {
-            await viewModel.permanentlyDeleteSelected()
-            overlay?.dismissTop()
-          }
-        },
+        isDestructive: isDestructive,
+        destructiveAction: action,
         onDismiss: {
           overlay?.dismissTop()
         },
@@ -168,6 +204,6 @@ struct DeletedItemsView: View {
 
 #Preview {
   NavigationStack {
-    DeletedItemsView(container: .preview)
+    TrashView(container: .preview)
   }
 }
