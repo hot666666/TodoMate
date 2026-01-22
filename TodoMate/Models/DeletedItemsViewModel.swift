@@ -1,5 +1,5 @@
 //
-//  DeletedItemsStore.swift
+//  DeletedItemsViewModel.swift
 //  TodoMate
 //
 //  Created by agent on 1/22/26.
@@ -8,16 +8,17 @@
 import Foundation
 import TodoMateDomain
 
-/// Manages state for the Deleted Items sidebar view.
-/// Handles fetching, sorting, selection, restoration, and permanent deletion of deleted items.
+/// ViewModel for the Deleted Items view.
+/// Manages fetching, sorting, selection, restoration, and permanent deletion.
+/// Lifecycle is tied to the DeletedItemsView - created when view appears.
 @Observable
 @MainActor
-final class DeletedItemsStore {
+final class DeletedItemsViewModel {
   // MARK: - Dependencies
 
-  private let fetchDeletedItemsUseCase: FetchDeletedItemsUseCase
-  private let restoreDeletedItemUseCase: RestoreDeletedItemUseCase
-  private let permanentlyDeleteItemUseCase: PermanentlyDeleteItemUseCase
+  private let fetchUseCase: FetchDeletedItemsUseCase
+  private let restoreUseCase: RestoreDeletedItemUseCase
+  private let deleteUseCase: PermanentlyDeleteItemUseCase
 
   // MARK: - State
 
@@ -59,13 +60,21 @@ final class DeletedItemsStore {
   // MARK: - Init
 
   init(
-    fetchDeletedItemsUseCase: FetchDeletedItemsUseCase,
-    restoreDeletedItemUseCase: RestoreDeletedItemUseCase,
-    permanentlyDeleteItemUseCase: PermanentlyDeleteItemUseCase,
+    fetchUseCase: FetchDeletedItemsUseCase,
+    restoreUseCase: RestoreDeletedItemUseCase,
+    deleteUseCase: PermanentlyDeleteItemUseCase,
   ) {
-    self.fetchDeletedItemsUseCase = fetchDeletedItemsUseCase
-    self.restoreDeletedItemUseCase = restoreDeletedItemUseCase
-    self.permanentlyDeleteItemUseCase = permanentlyDeleteItemUseCase
+    self.fetchUseCase = fetchUseCase
+    self.restoreUseCase = restoreUseCase
+    self.deleteUseCase = deleteUseCase
+  }
+
+  convenience init(container: CoreDIContainer) {
+    self.init(
+      fetchUseCase: container.fetchDeletedItemsUseCase,
+      restoreUseCase: container.restoreDeletedItemUseCase,
+      deleteUseCase: container.permanentlyDeleteItemUseCase,
+    )
   }
 
   // MARK: - Actions
@@ -75,8 +84,7 @@ final class DeletedItemsStore {
     error = nil
 
     do {
-      items = try await fetchDeletedItemsUseCase.run()
-      // Remove selected IDs that no longer exist
+      items = try await fetchUseCase.run()
       selectedIds.formIntersection(items.map(\.id))
     } catch {
       self.error = error
@@ -106,7 +114,7 @@ final class DeletedItemsStore {
     guard !itemsToRestore.isEmpty else { return }
 
     do {
-      try await restoreDeletedItemUseCase.run(itemsToRestore)
+      try await restoreUseCase.run(itemsToRestore)
       selectedIds.removeAll()
       await fetch()
     } catch {
@@ -119,7 +127,7 @@ final class DeletedItemsStore {
     guard !itemsToDelete.isEmpty else { return }
 
     do {
-      try await permanentlyDeleteItemUseCase.run(itemsToDelete)
+      try await deleteUseCase.run(itemsToDelete)
       selectedIds.removeAll()
       await fetch()
     } catch {
@@ -129,7 +137,7 @@ final class DeletedItemsStore {
 
   func emptyTrash() async {
     do {
-      try await permanentlyDeleteItemUseCase.runAll()
+      try await deleteUseCase.runAll()
       selectedIds.removeAll()
       items.removeAll()
     } catch {
@@ -140,12 +148,12 @@ final class DeletedItemsStore {
 
 // MARK: - Preview Support
 
-extension DeletedItemsStore {
-  static var preview: DeletedItemsStore {
-    DeletedItemsStore(
-      fetchDeletedItemsUseCase: StubFetchDeletedItemsUseCase(),
-      restoreDeletedItemUseCase: StubRestoreDeletedItemUseCase(),
-      permanentlyDeleteItemUseCase: StubPermanentlyDeleteItemUseCase(),
+extension DeletedItemsViewModel {
+  static var preview: DeletedItemsViewModel {
+    DeletedItemsViewModel(
+      fetchUseCase: StubFetchDeletedItemsUseCase(),
+      restoreUseCase: StubRestoreDeletedItemUseCase(),
+      deleteUseCase: StubPermanentlyDeleteItemUseCase(),
     )
   }
 }

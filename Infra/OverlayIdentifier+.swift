@@ -11,4 +11,5 @@ enum OverlayIDs {
   static let todoSheet = OverlayIdentifier.unique("todoSheet")
   static let dayTodoList = OverlayIdentifier.unique("dayTodoList")
   static let discardConfirmation = OverlayIdentifier.unique("discardConfirmation")
+  static let deleteConfirmation = OverlayIdentifier.unique("deleteConfirmation")
 }

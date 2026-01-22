@@ -15,17 +15,10 @@ struct MainView: View {
 
   @State private var naviManager: NavigationManager
   @State private var sessionStore: SessionStore
-  @State private var deletedItemsStore: DeletedItemsStore
 
   init(container: AppDIContainer) {
     _naviManager = State(initialValue: NavigationManager(container: container))
     _sessionStore = State(initialValue: SessionStore(container: container))
-    _deletedItemsStore = State(
-      initialValue: DeletedItemsStore(
-        fetchDeletedItemsUseCase: container.core.fetchDeletedItemsUseCase,
-        restoreDeletedItemUseCase: container.core.restoreDeletedItemUseCase,
-        permanentlyDeleteItemUseCase: container.core.permanentlyDeleteItemUseCase,
-      ))
   }
 
   var body: some View {
@@ -71,8 +64,7 @@ struct MainView: View {
         }
 
       case .deletedItems:
-        DeletedItemsView()
-          .environment(deletedItemsStore)
+        DeletedItemsView(container: container.core)
       }
     } else {
       unavailableView
