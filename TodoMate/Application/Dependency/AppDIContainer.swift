@@ -17,6 +17,7 @@ final class AppDIContainer {
   @ObservationIgnored let pub: PublicDIContainer
 
   @ObservationIgnored let syncTodayTodosUseCase: SyncTodayTodosUseCase
+  @ObservationIgnored let importLegacyDataUseCase: ImportLegacyDataUseCase
 
   init(coreContainer: CoreDIContainer, publicContainer: PublicDIContainer) {
     core = coreContainer
@@ -25,6 +26,12 @@ final class AppDIContainer {
     syncTodayTodosUseCase = SyncTodayTodosUseCaseImpl(
       localRepository: core.localTodoRepository,
       remoteRepository: pub.todoRepository,
+    )
+
+    importLegacyDataUseCase = ImportLegacyDataUseCaseImpl(
+      legacyRepository: pub.legacyImportRepository,
+      todoRepository: core.localTodoRepository,
+      memoRepository: core.localMemoRepository,
     )
   }
 }

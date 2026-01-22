@@ -155,6 +155,7 @@ private extension TodoMateApp {
     let groupRepo = FirestoreGroupRepository(reference: firestoreReference)
 
     let connectivityRepo = FirestoreConnectivityRepository(reference: firestoreReference)
+    let legacyImportRepo = LegacyImportRepositoryImpl(reference: firestoreReference)
     let messageReadTracker = MessageReadTrackerImpl(userDefaults: userDefaults)
 
     return PublicDIContainer(
@@ -163,6 +164,7 @@ private extension TodoMateApp {
       messageRepository: messageRepo,
       groupRepository: groupRepo,
       connectivityRepository: connectivityRepo,
+      legacyImportRepository: legacyImportRepo,
       authService: authService,
       messageReadTracker: messageReadTracker,
     )

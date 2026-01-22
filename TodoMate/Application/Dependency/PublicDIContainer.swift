@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TodoMateData
 import TodoMateDomain
 
 final class PublicDIContainer {
@@ -17,6 +18,7 @@ final class PublicDIContainer {
 
   let groupRepository: GroupRepository
   let connectivityRepository: ConnectivityRepository
+  let legacyImportRepository: LegacyImportRepository
   let authService: AuthService
   let messageReadTracker: MessageReadTracker
 
@@ -62,6 +64,7 @@ final class PublicDIContainer {
     messageRepository: MessageRepository,
     groupRepository: GroupRepository,
     connectivityRepository: ConnectivityRepository,
+    legacyImportRepository: LegacyImportRepository,
     authService: AuthService,
     messageReadTracker: MessageReadTracker,
   ) {
@@ -71,6 +74,7 @@ final class PublicDIContainer {
     self.messageRepository = messageRepository
     self.groupRepository = groupRepository
     self.connectivityRepository = connectivityRepository
+    self.legacyImportRepository = legacyImportRepository
     self.authService = authService
     self.messageReadTracker = messageReadTracker
 
@@ -130,6 +134,7 @@ extension PublicDIContainer {
     messageRepository: StubMessageRepository(),
     groupRepository: StubGroupRepository(),
     connectivityRepository: StubConnectivityRepository(),
+    legacyImportRepository: StubLegacyImportRepository(),
     authService: StubAuthService(),
     messageReadTracker: StubMessageReadTracker(),
   )
@@ -146,6 +151,7 @@ extension PublicDIContainer {
       messageRepository: StubMessageRepository(messagesToReturn: messages),
       groupRepository: StubGroupRepository(groupToReturn: groupState),
       connectivityRepository: StubConnectivityRepository(),
+      legacyImportRepository: StubLegacyImportRepository(),
       authService: StubAuthService(signedInUserId: authState),
       messageReadTracker: StubMessageReadTracker(),
     )
