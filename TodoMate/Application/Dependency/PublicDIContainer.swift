@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import TodoMateData
 import TodoMateDomain
 
 final class PublicDIContainer {
