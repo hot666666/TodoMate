@@ -20,21 +20,30 @@ public final class ImportLegacyDataUseCaseImpl: ImportLegacyDataUseCase {
   private static let batchLimit = 100
 
   private let legacyRepository: LegacyImportRepository
+  private let stateRepository: LegacyImportStateRepository
   private let todoRepository: TodoRepository
   private let memoRepository: MemoRepository
 
   public init(
     legacyRepository: LegacyImportRepository,
+    stateRepository: LegacyImportStateRepository,
     todoRepository: TodoRepository,
     memoRepository: MemoRepository,
   ) {
     self.legacyRepository = legacyRepository
+    self.stateRepository = stateRepository
     self.todoRepository = todoRepository
     self.memoRepository = memoRepository
   }
 
   public func execute(userId: String) -> AsyncThrowingStream<Double, Error> {
     AsyncThrowingStream { continuation in
+      // Guard Clause: Check if already imported to prevent duplicate execution
+      if stateRepository.isImported() {
+        continuation.finish()
+        return
+      }
+
       Task {
         do {
           // 1. Import Memo
@@ -44,6 +53,7 @@ public final class ImportLegacyDataUseCaseImpl: ImportLegacyDataUseCase {
           let totalCount = try await legacyRepository.fetchLegacyTodoCount(userId: userId)
 
           if totalCount == 0 {
+            stateRepository.setImported(true)
             continuation.yield(1.0)
             continuation.finish()
             return
@@ -80,6 +90,7 @@ public final class ImportLegacyDataUseCaseImpl: ImportLegacyDataUseCase {
           }
 
           continuation.finish()
+          stateRepository.setImported(true)
 
         } catch {
           continuation.finish(throwing: error)

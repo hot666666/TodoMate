@@ -30,6 +30,7 @@ final class AppDIContainer {
 
     importLegacyDataUseCase = ImportLegacyDataUseCaseImpl(
       legacyRepository: pub.legacyImportRepository,
+      stateRepository: core.legacyImportStateRepository,
       todoRepository: core.localTodoRepository,
       memoRepository: core.localMemoRepository,
     )

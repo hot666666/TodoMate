@@ -5,11 +5,12 @@
 //  Created by hs on 2025-01-23.
 //
 
+import Common
 import FirebaseFirestore
 import Foundation
 import TodoMateDomain
 
-public final class LegacyImportRepositoryImpl: LegacyImportRepository {
+public final class LegacyImportRepositoryImpl: LegacyImportRepository, @unchecked Sendable {
   private let reference: FirestoreReference
 
   public init(reference: FirestoreReference) {

@@ -13,15 +13,18 @@ import Testing
 struct ImportLegacyDataUseCaseTests {
   var useCase: ImportLegacyDataUseCaseImpl!
   var legacyRepo: MockLegacyImportRepository!
+  var stateRepo: MockLegacyImportStateRepository!
   var todoRepo: LocalInMemoryTodoRepository!
   var memoRepo: LocalInMemoryMemoRepository!
 
   init() {
     legacyRepo = MockLegacyImportRepository()
+    stateRepo = MockLegacyImportStateRepository()
     todoRepo = LocalInMemoryTodoRepository()
     memoRepo = LocalInMemoryMemoRepository()
     useCase = ImportLegacyDataUseCaseImpl(
       legacyRepository: legacyRepo,
+      stateRepository: stateRepo,
       todoRepository: todoRepo,
       memoRepository: memoRepo,
     )
@@ -41,6 +44,22 @@ struct ImportLegacyDataUseCaseTests {
     let createdMemos = try await memoRepo.readAllByUserId(userId, useCache: true)
     #expect(createdMemos.count == 1)
     #expect(createdMemos.first?.content == "Legacy Memo")
+  }
+
+  @Test("Guard Clause: Returns immediately if already imported")
+  func executeReturnsImmediatelyIfImported() async throws {
+    // Given
+    stateRepo.isImportedValue = true
+    let userId = "user1"
+
+    // When
+    var didYield = false
+    for try await _ in useCase.execute(userId: userId) {
+      didYield = true
+    }
+
+    // Then
+    #expect(didYield == false)
   }
 
   @Test("Todo Import: Imports all items across pages")
@@ -76,6 +95,9 @@ struct ImportLegacyDataUseCaseTests {
     // Batch 2 (1 item) -> 3/3 = 1.0
     #expect(progressValues.contains(shouldMatch: 0.66))
     #expect(progressValues.last == 1.0)
+
+    // 3. Check State Updated
+    #expect(stateRepo.isImportedValue == true)
   }
 
   @Test("Todo Import: Skips duplicates")
@@ -183,6 +205,12 @@ final class MockLegacyImportRepository: LegacyImportRepository, @unchecked Senda
   func fetchLegacyTodoCount(userId _: String) async throws -> Int {
     totalCount
   }
+}
+
+final class MockLegacyImportStateRepository: LegacyImportStateRepository, @unchecked Sendable {
+  var isImportedValue = false
+  func isImported() -> Bool { isImportedValue }
+  func setImported(_ imported: Bool) { isImportedValue = imported }
 }
 
 extension [Double] {

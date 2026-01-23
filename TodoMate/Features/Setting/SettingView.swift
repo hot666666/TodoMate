@@ -23,6 +23,8 @@ struct SettingView: View {
   private var showInDock: Bool = true
   @AppStorage(UserDefaultsKey.quitOnWindowClose.rawValue)
   private var quitOnWindowClose: Bool = true
+  @AppStorage(UserDefaultsKey.hasImportedLegacyData.rawValue)
+  private var hasImportedLegacyData: Bool = false
 
   // MARK: - State
 
@@ -39,10 +41,12 @@ struct SettingView: View {
         profileSection
         if let user = sessionStore.user {
           groupSection
-          LegacyImportSection(
-            user: user,
-            importLegacyDataUseCase: appDI.importLegacyDataUseCase,
-          )
+          if !hasImportedLegacyData {
+            LegacyImportSection(
+              user: user,
+              importLegacyDataUseCase: appDI.importLegacyDataUseCase,
+            )
+          }
         }
         dockSection
       }

@@ -88,4 +88,9 @@ public enum UserDefaultsKey: String {
 
   /// 마지막 읽은 메시지 타임스탬프
   case lastMessageReadTimestamp = "last_message_read_timestamp"
+
+  // MARK: - Legacy Import
+
+  /// Legacy Data Import 완료 여부
+  case hasImportedLegacyData = "has_imported_legacy_data"
 }
