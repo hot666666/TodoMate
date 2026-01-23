@@ -217,6 +217,7 @@ import TodoMateDomain
         messageRepository: messageRepo,
         groupRepository: StubGroupRepository(),
         connectivityRepository: StubConnectivityRepository(),
+        legacyImportRepository: StubLegacyImportRepository(),
         authService: authService,
         messageReadTracker: StubMessageReadTracker(),
       )

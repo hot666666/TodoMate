@@ -10,33 +10,43 @@ import SwiftUI
 import TodoMateDomain
 
 struct SettingView: View {
+  // MARK: - Environment
+
   @Environment(AppDIContainer.self) private var appDI
   @Environment(SessionStore.self) private var sessionStore
+
+  // MARK: - AppStorage
+
   @AppStorage(UserDefaultsKey.isPublicModeEnabled.rawValue)
   private var isPublicModeEnabled: Bool = false
   @AppStorage(UserDefaultsKey.showInDock.rawValue)
   private var showInDock: Bool = true
   @AppStorage(UserDefaultsKey.quitOnWindowClose.rawValue)
   private var quitOnWindowClose: Bool = true
+  @AppStorage(UserDefaultsKey.hasImportedLegacyData.rawValue)
+  private var hasImportedLegacyData: Bool = false
+
+  // MARK: - State
+
   @State private var showLogoutConfirmation = false
   @State private var showLeaveGroupConfirmation = false
   @State private var showEditNameSheet = false
   @State private var editingName = ""
 
-  private var hasGroup: Bool {
-    !sessionStore.userGroupId.isEmpty
-  }
-
-  private var memberCount: Int {
-    sessionStore.groupMembers.count
-  }
+  // MARK: - Body
 
   var body: some View {
     ScrollView {
       VStack(spacing: 30) {
         profileSection
-        if sessionStore.user != nil {
+        if let user = sessionStore.user {
           groupSection
+          if !hasImportedLegacyData {
+            LegacyImportSection(
+              user: user,
+              importLegacyDataUseCase: appDI.importLegacyDataUseCase,
+            )
+          }
         }
         dockSection
       }
@@ -47,72 +57,42 @@ struct SettingView: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color(nsColor: .windowBackgroundColor))
-    .onAppear {
-      if let displayName = sessionStore.user?.displayName {
-        appDI.core.sidebarCacheUseCase.saveProfileName(displayName)
-      }
-    }
+    .onAppear(perform: onAppear)
     .confirmationDialog(
-      "Leave Group",
+      "그룹 나가기",
       isPresented: $showLeaveGroupConfirmation,
       titleVisibility: .visible,
     ) {
-      Button("Leave", role: .destructive) {
-        Task {
-          await sessionStore.leaveGroup()
-        }
+      Button("나가기", role: .destructive) {
+        Task { await sessionStore.leaveGroup() }
       }
-      Button("Cancel", role: .cancel) {}
+      Button("취소", role: .cancel) {}
     } message: {
-      Text("Are you sure you want to leave this group? You'll need an invitation to rejoin.")
+      Text("그룹을 나가시겠습니까?")
     }
     .confirmationDialog(
-      "Sign Out",
+      "로그아웃",
       isPresented: $showLogoutConfirmation,
       titleVisibility: .visible,
     ) {
-      Button("Sign Out", role: .destructive) {
+      Button("로그아웃", role: .destructive) {
         sessionStore.signOut()
       }
-      Button("Cancel", role: .cancel) {}
+      Button("취소", role: .cancel) {}
     } message: {
-      Text("Are you sure you want to sign out of your account?")
+      Text("로그아웃 하시겠습니까?")
     }
     .sheet(isPresented: $showEditNameSheet) {
       EditDisplayNameSheet(
         currentName: sessionStore.user?.displayName ?? "",
         onSave: { newName in
-          Task {
-            await updateDisplayName(newName)
-          }
+          Task { await updateDisplayName(newName) }
         },
       )
     }
   }
 
-  // MARK: - Dock Section
-
-  private var dockSection: some View {
-    VStack(alignment: .leading, spacing: 16) {
-      Text("General")
-        .font(.headline)
-        .foregroundStyle(.secondary)
-
-      VStack(alignment: .leading, spacing: 12) {
-        Toggle("Dock에 앱 표시", isOn: $showInDock)
-          .toggleStyle(.checkbox)
-
-        Toggle("창을 닫으면 앱 종료", isOn: $quitOnWindowClose)
-          .toggleStyle(.checkbox)
-      }
-      .frame(maxWidth: .infinity, alignment: .leading)
-    }
-    .onChange(of: showInDock) { _, newValue in
-      NSApp.updateActivationPolicy(showInDock: newValue, activate: true)
-    }
-  }
-
-  // MARK: - Profile Section
+  // MARK: - Components
 
   private var profileSection: some View {
     VStack(alignment: .leading, spacing: 16) {
@@ -170,8 +150,6 @@ struct SettingView: View {
     }
   }
 
-  // MARK: - Group Section
-
   private var groupSection: some View {
     VStack(alignment: .leading, spacing: 16) {
       Text("Group")
@@ -179,64 +157,96 @@ struct SettingView: View {
         .foregroundStyle(.secondary)
 
       VStack(spacing: 0) {
-        if hasGroup {
-          // Current Group
-          HStack(spacing: 12) {
-            Image(systemName: "person.2.fill")
-              .font(.system(size: 24))
-              .foregroundStyle(DesignSystem.Colors.accentIndigo)
-              .frame(width: 40)
-
-            VStack(alignment: .leading, spacing: 2) {
-              Text(sessionStore.currentGroup?.name ?? "My Group")
-                .font(.subheadline)
-                .fontWeight(.medium)
-              Text("\(memberCount) member\(memberCount == 1 ? "" : "s")")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            // Leave Group (Moved from below)
-            Button {
-              showLeaveGroupConfirmation = true
-            } label: {
-              HStack(spacing: 4) {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                Text("Leave")
-              }
-              .foregroundStyle(.red)
-              .padding(.horizontal, 12)
-              .padding(.vertical, 6)
-              .background(Color.red.opacity(isPublicModeEnabled ? 0.1 : 0.05))
-              .clipShape(Capsule())
-            }
-            .buttonStyle(.plain)
-            .disabled(!isPublicModeEnabled)
-          }
-          .padding(16)
+        if !sessionStore.userGroupId.isEmpty {
+          currentGroupView
         } else {
-          // No group
-          HStack(spacing: 12) {
-            Image(systemName: "person.2.slash")
-              .font(.system(size: 24))
-              .foregroundStyle(.secondary)
-              .frame(width: 40)
-
-            Text("그룹 없음")
-              .font(.subheadline)
-              .foregroundStyle(.secondary)
-
-            Spacer()
-          }
-          .padding(16)
+          noGroupView
         }
       }
     }
   }
 
+  private var currentGroupView: some View {
+    HStack(spacing: 12) {
+      Image(systemName: "person.2.fill")
+        .font(.system(size: 24))
+        .foregroundStyle(DesignSystem.Colors.accentIndigo)
+        .frame(width: 40)
+
+      VStack(alignment: .leading, spacing: 2) {
+        Text(sessionStore.currentGroup?.name ?? "My Group")
+          .font(.subheadline)
+          .fontWeight(.medium)
+        let count = sessionStore.groupMembers.count
+        Text("\(count) member\(count == 1 ? "" : "s")")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+      }
+
+      Spacer()
+
+      Button {
+        showLeaveGroupConfirmation = true
+      } label: {
+        HStack(spacing: 4) {
+          Image(systemName: "rectangle.portrait.and.arrow.right")
+          Text("Leave")
+        }
+        .foregroundStyle(.red)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.red.opacity(isPublicModeEnabled ? 0.1 : 0.05))
+        .clipShape(Capsule())
+      }
+      .buttonStyle(.plain)
+      .disabled(!isPublicModeEnabled)
+    }
+    .padding(16)
+  }
+
+  private var noGroupView: some View {
+    HStack(spacing: 12) {
+      Image(systemName: "person.2.slash")
+        .font(.system(size: 24))
+        .foregroundStyle(.secondary)
+        .frame(width: 40)
+
+      Text("그룹 없음")
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+
+      Spacer()
+    }
+    .padding(16)
+  }
+
+  private var dockSection: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      Text("General")
+        .font(.headline)
+        .foregroundStyle(.secondary)
+
+      VStack(alignment: .leading, spacing: 12) {
+        Toggle("Dock에 앱 표시", isOn: $showInDock)
+          .toggleStyle(.checkbox)
+
+        Toggle("창을 닫으면 앱 종료", isOn: $quitOnWindowClose)
+          .toggleStyle(.checkbox)
+      }
+      .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    .onChange(of: showInDock) { _, newValue in
+      NSApp.updateActivationPolicy(showInDock: newValue, activate: true)
+    }
+  }
+
   // MARK: - Actions
+
+  private func onAppear() {
+    if let displayName = sessionStore.user?.displayName {
+      appDI.core.sidebarCacheUseCase.saveProfileName(displayName)
+    }
+  }
 
   private func updateDisplayName(_ newName: String) async {
     guard var user = sessionStore.user else { return }
@@ -252,60 +262,9 @@ struct SettingView: View {
   }
 }
 
-// MARK: - Edit Display Name Sheet
-
-private struct EditDisplayNameSheet: View {
-  @Environment(\.dismiss) private var dismiss
-  let currentName: String
-  let onSave: (String) -> Void
-
-  @State private var name: String = ""
-  @FocusState private var isFocused: Bool
-
-  private var isValid: Bool {
-    let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-    return !trimmed.isEmpty && name.count <= UpdateUserUseCaseImpl.maxDisplayNameLength
-  }
-
-  var body: some View {
-    VStack(spacing: 20) {
-      Text("이름 변경")
-        .font(.headline)
-
-      TextField("이름", text: $name)
-        .textFieldStyle(.roundedBorder)
-        .focused($isFocused)
-
-      Text("\(name.count)/\(UpdateUserUseCaseImpl.maxDisplayNameLength)")
-        .font(.caption)
-        .foregroundStyle(
-          name.count > UpdateUserUseCaseImpl.maxDisplayNameLength ? .red : .secondary)
-
-      HStack(spacing: 12) {
-        Button("취소") {
-          dismiss()
-        }
-        .buttonStyle(.bordered)
-
-        Button("저장") {
-          onSave(name.trimmingCharacters(in: .whitespacesAndNewlines))
-          dismiss()
-        }
-        .buttonStyle(.borderedProminent)
-        .disabled(!isValid)
-      }
-    }
-    .padding(24)
-    .frame(width: 300)
-    .onAppear {
-      name = currentName
-      isFocused = true
-    }
-  }
-}
-
 #Preview {
   SettingView()
     .environment(SessionStore.preview)
+    .environment(AppDIContainer.preview)
     .frame(width: 600, height: 700)
 }

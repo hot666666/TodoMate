@@ -46,6 +46,8 @@ final class CoreDIContainer {
   @ObservationIgnored let restoreDeletedItemUseCase: RestoreDeletedItemUseCase
   @ObservationIgnored let permanentlyDeleteItemUseCase: PermanentlyDeleteItemUseCase
 
+  @ObservationIgnored let legacyImportStateRepository: LegacyImportStateRepository
+
   init(
     modelContainer: ModelContainer,
     userDefaults: UserDefaults = .standard,
@@ -89,6 +91,9 @@ final class CoreDIContainer {
     permanentlyDeleteItemUseCase = PermanentlyDeleteItemUseCaseImpl(
       repository: deletedItemsRepository,
     )
+
+    // Legacy Import
+    legacyImportStateRepository = LegacyImportStateRepositoryImpl(userDefaults: userDefaults)
   }
 }
 
