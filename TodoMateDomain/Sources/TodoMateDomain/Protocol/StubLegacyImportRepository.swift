@@ -21,10 +21,4 @@ public final class StubLegacyImportRepository: LegacyImportRepository, Sendable 
   public func fetchLegacyTodoCount(userId _: String) async throws -> Int {
     0
   }
-
-  public func isAlreadyImported() -> Bool {
-    false
-  }
-
-  public func updateImportStatus(_: Bool) {}
 }

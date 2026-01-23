@@ -89,8 +89,8 @@ public final class ImportLegacyDataUseCaseImpl: ImportLegacyDataUseCase {
             if snapshot == nil { break }
           }
 
-          continuation.finish()
           stateRepository.setImported(true)
+          continuation.finish()
 
         } catch {
           continuation.finish(throwing: error)
