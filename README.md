@@ -5,7 +5,7 @@
 
 **TodoMate**는 개인의 할 일과 메모를 체계적으로 관리할 수 있는 올인원 플래너입니다.
 
-<img src="images/application.png" width="250" alt="App">
+![App](images/application.png)
 
 *현재 다음과 같이 최소한의 기능들로 구현되어있으며, 향후 지속적인 고도화 및 기능 업데이트가 진행될 예정입니다.*
 
