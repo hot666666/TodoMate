@@ -1,50 +1,57 @@
-## AppFlow
+## Presentation Layer
 
 ```mermaid
+---
+config:
+  layout: elk
+---
 graph TD
-    classDef app fill:#f9f9f9,stroke:#333,stroke-width:2px;
-    classDef store fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
-    classDef vm fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
-    classDef view fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    subgraph UserFlow[Application Entry]
+    subgraph UserFlow[Application]
         App[TodoMateApp]:::app
         DI[AppDIContainer]:::app
         PersonalTodoStore[TodoBoardStore]:::store
         PersonalMemoStore[MemoStore]:::store
+        WinMgr[WindowManager]:::app
     end
 
-    subgraph StateManagement[Main & Navigation State]
+    subgraph MenuBarNav[MenuBar]
+        MenuBar[MenuBarView]:::view
+    end
+
+    subgraph StateManagement[Main]
         MainView[MainView]:::view
-        NavMgr[NavigationManager]:::vm
+        NaviManager[NavigationManager]:::vm
         Session[SessionStore]:::store
+
+        DestSettings["Setting"]:::view
+        DestHome["Home"]:::view
+        DestMemo["Memo"]:::view
+        DestGroup["Group"]:::view
+        DestTrash["Trash"]:::view
     end
 
-    subgraph SidebarNav[Sidebar Navigation]
-        Sidebar[Sidebar]:::view
-        DestSettings["Settings (SettingView)"]:::view
-        DestHome["Home (HomeView)"]:::view
-        DestMemo["Memo (MemoView)"]:::view
-        DestGroup["Group (GroupFeedWrapperView)"]:::view
-        DestTrash["Trash (DeletedItemsView)"]:::view
-    end
-
-    subgraph FeatureHome["Home(Todo) Views"]
+    subgraph FeatureHome["Home"]
+        HomeView[HomeView]:::view
         BoardView[BoardView]:::view
         CalendarView[CalendarView]:::view
         CalVM[TodoCalendarViewModel]:::vm
     end
 
-    subgraph FeatureTrash["Trash Feature"]
-        DeletedVM[DeletedItemsViewModel]:::vm
+    subgraph FeatureTrash["Trash"]
+        TrashView[TrashView]:::view
+        TrashVM[TrashViewModel]:::vm
     end
 
-    subgraph FeatureMemo[Memo Feature]
+    subgraph FeatureMemo[Memo]
         MemoView[MemoView]:::view
         MemoDetail[MemoDetailView]:::view
     end
 
-    subgraph FeatureGroup[Group Feature]
+    subgraph FeatureSetting[Setting]
+        SettingView[SettingView]:::view
+    end
+
+    subgraph FeatureGroup[Group]
         GroupWrapper[GroupFeedWrapperView]:::view
         GroupTodoStore[TodoStore]:::store
         MessageStore[MessageStore]:::store
@@ -52,21 +59,17 @@ graph TD
         GroupFeedNoGroup[GroupFeedNoGroupView]:::view
     end
 
+    App -- "@State init" --> DI
+    App --> MainView
+    App --> MenuBar
     App -- "@State init" --> PersonalTodoStore
     App -- "@State init" --> PersonalMemoStore
-    App -- environment --> MainView
+    App -- "setup" --> WinMgr
 
-    MainView -- "@State init" --> NavMgr
+
     MainView -- "@State init" --> Session
-    MainView --> Sidebar
+    MainView -- "@State init" --> NaviManager
 
-    Sidebar -- selection --> NavMgr
-
-    MainView -- "switch navMgr.selection" --> DestSettings
-    MainView -- "switch navMgr.selection" --> DestHome
-    MainView -- "switch navMgr.selection" --> DestMemo
-    MainView -- "switch navMgr.selection" --> DestGroup
-    MainView -- "switch navMgr.selection" --> DestTrash
 
     DestGroup --> GroupWrapper
     GroupWrapper -- "@State init" --> GroupTodoStore
@@ -74,17 +77,17 @@ graph TD
     GroupWrapper --> GroupFeed
     GroupWrapper --> GroupFeedNoGroup
 
-    DestHome -- "switch navMgr.viewMode" --> BoardView
-    DestHome -- "switch navMgr.viewMode" --> CalendarView
-    DestTrash -- "@State init" --> DeletedVM
+    DestHome --> HomeView
+    DestMemo --> MemoView
+    DestSettings --> SettingView
+    DestTrash --> TrashView
+    TrashView -- "@State init" --> TrashVM
 
+    HomeView --> BoardView
+    HomeView --> CalendarView
     CalendarView -- "@State init" --> CalVM
 
-    PersonalTodoStore -. "@Environment" .-> BoardView
-    PersonalTodoStore -. "@Environment" .-> CalendarView
-    PersonalMemoStore -. "@Environment" .-> MemoView
-
-    MemoView -- "@State" --> MemoDetail
+    MemoView  --> MemoDetail
 ```
 
 ## WindowManager
