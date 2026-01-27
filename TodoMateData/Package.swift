@@ -16,6 +16,7 @@ let package = Package(
     .package(path: "../Common"),
     .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "12.7.0"),
     .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "9.0.0"),
+    .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.0.0"),
   ],
   targets: [
     .target(
@@ -27,6 +28,7 @@ let package = Package(
         .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
         .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
         .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
+        .product(name: "GRDB", package: "GRDB.swift"),
       ],
     ),
     // SwiftData 등 Firebase 외 Data 레이어 테스트

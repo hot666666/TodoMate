@@ -6,14 +6,13 @@
 //
 
 import Foundation
-import SwiftData
 import TodoMateData
 import TodoMateDomain
 
 @Observable
 @MainActor
 final class CoreDIContainer {
-  @ObservationIgnored let modelContainer: ModelContainer
+  @ObservationIgnored let database: GRDBDatabase
   @ObservationIgnored let userDefaults: UserDefaults
   @ObservationIgnored let calendar: Calendar
   @ObservationIgnored let hotKeyManager: HotKeyManager
@@ -49,19 +48,19 @@ final class CoreDIContainer {
   @ObservationIgnored let legacyImportStateRepository: LegacyImportStateRepository
 
   init(
-    modelContainer: ModelContainer,
+    database: GRDBDatabase,
     userDefaults: UserDefaults = .standard,
     calendar: Calendar = .current,
     hotKeyManager: HotKeyManager,
   ) {
-    self.modelContainer = modelContainer
+    self.database = database
     self.userDefaults = userDefaults
     self.calendar = calendar
     self.hotKeyManager = hotKeyManager
     calendarDayService = CalendarDayServiceImpl(calendar: calendar)
 
-    localTodoRepository = SwiftDataTodoRepositoryImpl(modelContainer: modelContainer)
-    localMemoRepository = SwiftDataMemoRepositoryImpl(modelContainer: modelContainer)
+    localTodoRepository = GRDBTodoRepositoryImpl(dbWriter: database.dbWriter)
+    localMemoRepository = GRDBMemoRepositoryImpl(dbWriter: database.dbWriter)
 
     createLocalTodoUseCase = CreateLocalTodoUseCaseImpl(repository: localTodoRepository)
     readLocalTodoUseCase = ReadLocalTodoUseCaseImpl(
@@ -85,7 +84,7 @@ final class CoreDIContainer {
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)
 
     // Deleted Items
-    deletedItemsRepository = DeletedItemsRepositoryImpl(modelContainer: modelContainer)
+    deletedItemsRepository = GRDBDeletedItemsRepositoryImpl(dbWriter: database.dbWriter)
     fetchDeletedItemsUseCase = FetchDeletedItemsUseCaseImpl(repository: deletedItemsRepository)
     restoreDeletedItemUseCase = RestoreDeletedItemUseCaseImpl(repository: deletedItemsRepository)
     permanentlyDeleteItemUseCase = PermanentlyDeleteItemUseCaseImpl(
@@ -100,12 +99,10 @@ final class CoreDIContainer {
 extension CoreDIContainer {
   @MainActor
   static var preview: CoreDIContainer = {
-    let schema = Schema([SDTodo.self, SDMemo.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
     // swiftlint:disable:next force_try
-    let container = try! ModelContainer(for: schema, configurations: [config])
+    let database = try! GRDBDatabase(inMemory: true)
     return CoreDIContainer(
-      modelContainer: container,
+      database: database,
       userDefaults: .preview,
       hotKeyManager: HotKeyManager(),
     )

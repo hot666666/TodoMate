@@ -8,7 +8,6 @@
 
 import AppKit
 import Common
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 

@@ -7,7 +7,7 @@
 
 #if DEBUG
   import Common
-  import SwiftData
+  import GRDB
   import SwiftUI
   import TodoMateData
   import TodoMateDomain
@@ -63,74 +63,83 @@
 
   enum MockDataSeeder {
     @MainActor
-    static func seedIfNeeded(container: ModelContainer) {
+    static func seedIfNeeded(database: GRDBDatabase) {
       guard DebugConfiguration.isUsingMock else { return }
 
-      let context = container.mainContext
-      let todoDescriptor = FetchDescriptor<SDTodo>()
+      Task {
+        do {
+          try await database.dbWriter.write { db in
+            if try GRDBTodo.fetchCount(db) > 0 { return }
 
-      do {
-        if try context.fetchCount(todoDescriptor) > 0 { return }
+            let today = Date()
+            let calendar = Calendar.current
 
-        let today = Date()
-        let calendar = Calendar.current
+            let todo1 = GRDBTodo(
+              id: UUID().uuidString,
+              content: "Buy Groceries",
+              statusRawValue: "todo",
+              detail: "",
+              date: today,
+              createdAt: today,
+              updatedAt: today,
+              owner: "user_1",
+              isDeleted: false
+            )
 
-        let todo1 = SDTodo(
-          content: "Buy Groceries",
-          status: "todo",
-          detail: "",
-          date: today,
-          createdAt: today,
-          updatedAt: today,
-          owner: "user_1",
-        )
+            let todo2 = GRDBTodo(
+              id: UUID().uuidString,
+              content: "Team Meeting",
+              statusRawValue: "done",
+              detail: "Prepare quarterly report",
+              date: today,
+              createdAt: today,
+              updatedAt: today,
+              owner: "user_1",
+              isDeleted: false
+            )
 
-        let todo2 = SDTodo(
-          content: "Team Meeting",
-          status: "done",
-          detail: "Prepare quarterly report",
-          date: today,
-          createdAt: today,
-          updatedAt: today,
-          owner: "user_1",
-        )
+            let todo3 = GRDBTodo(
+              id: UUID().uuidString,
+              content: "Walk the dog",
+              statusRawValue: "todo",
+              detail: "",
+              date: calendar.date(byAdding: .day, value: 1, to: today) ?? today,
+              createdAt: today,
+              updatedAt: today,
+              owner: "user_1",
+              isDeleted: false
+            )
 
-        let todo3 = SDTodo(
-          content: "Walk the dog",
-          status: "todo",
-          detail: "",
-          date: calendar.date(byAdding: .day, value: 1, to: today) ?? today,
-          createdAt: today,
-          updatedAt: today,
-          owner: "user_1",
-        )
+            try todo1.insert(db)
+            try todo2.insert(db)
+            try todo3.insert(db)
 
-        context.insert(todo1)
-        context.insert(todo2)
-        context.insert(todo3)
+            let memo1 = GRDBMemo(
+              id: UUID().uuidString,
+              content: "Project Ideas\n\n1. AI Assistant\n2. Smart Home",
+              createdAt: today,
+              updatedAt: today,
+              ownerId: "user_1",
+              isDeleted: false
+            )
 
-        let memo1 = SDMemo(
-          content: "Project Ideas\n\n1. AI Assistant\n2. Smart Home",
-          createdAt: today,
-          updatedAt: today,
-          ownerId: "user_1",
-        )
+            let memo2 = GRDBMemo(
+              id: UUID().uuidString,
+              content: "Shopping List\n- Milk\n- Eggs\n- Bread",
+              createdAt: calendar.date(byAdding: .day, value: -1, to: today) ?? today,
+              updatedAt: today,
+              ownerId: "user_1",
+              isDeleted: false
+            )
 
-        let memo2 = SDMemo(
-          content: "Shopping List\n- Milk\n- Eggs\n- Bread",
-          createdAt: calendar.date(byAdding: .day, value: -1, to: today) ?? today,
-          updatedAt: today,
-          ownerId: "user_1",
-        )
+            try memo1.insert(db)
+            try memo2.insert(db)
+          }
+          print("✅ Mock data seeded successfully")
 
-        context.insert(memo1)
-        context.insert(memo2)
-
-        try context.save()
-        print("✅ Mock data seeded successfully")
-
-      } catch {
-        print("❌ Failed to seed mock data: \(error)")
+        } catch {
+          print("❌ Failed to seed mock data: \(error)")
+        }
       }
     }
   }
