@@ -9,10 +9,38 @@ struct LegacySwiftDataImporterTests {
   func importsLegacyRecordsOnce() async throws {
     let legacyURL = FileManager.default.temporaryDirectory
       .appendingPathComponent("legacy-\(UUID().uuidString).store")
-    let legacyDatabase = try DatabaseQueue(path: legacyURL.path)
     let now = Date()
 
-    try await legacyDatabase.write { databaseConnection in
+    try await Self.createLegacyStore(at: legacyURL, timestamp: now)
+
+    let database = try GRDBDatabase(storage: .inMemory)
+    try await withThrowingTaskGroup(of: Void.self) { group in
+      for _ in 0 ..< 2 {
+        group.addTask {
+          try LegacySwiftDataImporter.importIfNeeded(from: [legacyURL], into: database.writer)
+        }
+      }
+      try await group.waitForAll()
+    }
+    try LegacySwiftDataImporter.importIfNeeded(from: [legacyURL], into: database.writer)
+
+    let todos = try await GRDBTodoRepository(database: database).readAll(
+      query: .init(),
+      useCache: false,
+    )
+    let memos = try await GRDBMemoRepository(database: database).readAllByUserId(
+      "owner",
+      useCache: false,
+    )
+    #expect(todos.map(\.content) == ["Legacy Todo"])
+    #expect(memos.map(\.content) == ["Legacy Memo"])
+
+    Self.removeDatabaseFiles(at: legacyURL)
+  }
+
+  private static func createLegacyStore(at url: URL, timestamp: Date) async throws {
+    let database = try DatabaseQueue(path: url.path)
+    try await database.write { databaseConnection in
       try databaseConnection.execute(sql: """
       CREATE TABLE ZSDTODO (
         ZID TEXT, ZCONTENT TEXT, ZSTATUSRAWVALUE TEXT, ZDETAIL TEXT,
@@ -28,9 +56,9 @@ struct LegacySwiftDataImporterTests {
         sql: "INSERT INTO ZSDTODO VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         arguments: [
           "todo-id", "Legacy Todo", "시작 전", "detail",
-          now.timeIntervalSinceReferenceDate,
-          now.timeIntervalSinceReferenceDate,
-          now.timeIntervalSinceReferenceDate,
+          timestamp.timeIntervalSinceReferenceDate,
+          timestamp.timeIntervalSinceReferenceDate,
+          timestamp.timeIntervalSinceReferenceDate,
           "owner", 0,
         ],
       )
@@ -38,26 +66,17 @@ struct LegacySwiftDataImporterTests {
         sql: "INSERT INTO ZSDMEMO VALUES (?, ?, ?, ?, ?, ?)",
         arguments: [
           "memo-id", "Legacy Memo",
-          now.timeIntervalSinceReferenceDate,
-          now.timeIntervalSinceReferenceDate,
+          timestamp.timeIntervalSinceReferenceDate,
+          timestamp.timeIntervalSinceReferenceDate,
           "owner", 0,
         ],
       )
     }
+  }
 
-    let database = try GRDBDatabase(storage: .inMemory)
-    try LegacySwiftDataImporter.importIfNeeded(from: [legacyURL], into: database.writer)
-    try LegacySwiftDataImporter.importIfNeeded(from: [legacyURL], into: database.writer)
-
-    let todos = try await GRDBTodoRepository(database: database).readAll(
-      query: .init(),
-      useCache: false,
-    )
-    let memos = try await GRDBMemoRepository(database: database).readAllByUserId(
-      "owner",
-      useCache: false,
-    )
-    #expect(todos.map(\.content) == ["Legacy Todo"])
-    #expect(memos.map(\.content) == ["Legacy Memo"])
+  private static func removeDatabaseFiles(at url: URL) {
+    try? FileManager.default.removeItem(at: url)
+    try? FileManager.default.removeItem(at: URL(fileURLWithPath: url.path + "-wal"))
+    try? FileManager.default.removeItem(at: URL(fileURLWithPath: url.path + "-shm"))
   }
 }

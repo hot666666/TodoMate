@@ -12,11 +12,11 @@ public final class GRDBDeletedItemsRepository: DeletedItemsRepository, Sendable 
   public func fetchAll() async throws -> [DeletedItem] {
     try await writer.read { databaseConnection in
       let todos = try TodoRecord
-        .filter(Column("isDeleted"))
+        .filter(TodoRecord.Columns.deletedAt != nil)
         .fetchAll(databaseConnection)
-        .map { try DeletedItem.todo($0.domainValue()) }
+        .map { DeletedItem.todo($0.domainValue()) }
       let memos = try MemoRecord
-        .filter(Column("isDeleted"))
+        .filter(MemoRecord.Columns.deletedAt != nil)
         .fetchAll(databaseConnection)
         .map { DeletedItem.memo($0.domainValue()) }
       return (todos + memos).sorted { $0.deletedAt > $1.deletedAt }
@@ -28,13 +28,11 @@ public final class GRDBDeletedItemsRepository: DeletedItemsRepository, Sendable 
       switch item {
       case let .todo(todo):
         guard var record = try TodoRecord.fetchOne(databaseConnection, key: todo.id) else { return }
-        record.isDeleted = false
-        record.updatedAt = .now
+        guard try record.restore(at: databaseConnection.transactionDate) else { return }
         try record.update(databaseConnection)
       case let .memo(memo):
         guard var record = try MemoRecord.fetchOne(databaseConnection, key: memo.id) else { return }
-        record.isDeleted = false
-        record.updatedAt = .now
+        guard try record.restore(at: databaseConnection.transactionDate) else { return }
         try record.update(databaseConnection)
       }
     }
@@ -53,8 +51,8 @@ public final class GRDBDeletedItemsRepository: DeletedItemsRepository, Sendable 
 
   public func permanentlyDeleteAll() async throws {
     try await writer.write { databaseConnection in
-      _ = try TodoRecord.filter(Column("isDeleted")).deleteAll(databaseConnection)
-      _ = try MemoRecord.filter(Column("isDeleted")).deleteAll(databaseConnection)
+      _ = try TodoRecord.filter(TodoRecord.Columns.deletedAt != nil).deleteAll(databaseConnection)
+      _ = try MemoRecord.filter(MemoRecord.Columns.deletedAt != nil).deleteAll(databaseConnection)
     }
   }
 }

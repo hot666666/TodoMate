@@ -39,7 +39,13 @@ struct LocalMemoRepositoryTests {
 
   @Test("Updates existing memo locally")
   func updateMemo() async throws {
-    var memo = Memo(owner: testUserId, content: "Original")
+    let originalDate = Date(timeIntervalSince1970: 1)
+    var memo = Memo(
+      content: "Original",
+      createdAt: originalDate,
+      updatedAt: originalDate,
+      owner: testUserId,
+    )
     try await repository.create(memo)
 
     memo = memo.withUpdatedContent("Updated")
@@ -49,6 +55,14 @@ struct LocalMemoRepositoryTests {
     let updated = results.first { $0.id == memo.id }
 
     #expect(updated?.content == "Updated")
+    #expect(updated?.updatedAt ?? originalDate > originalDate)
+
+    let memoID = memo.id
+    let record = try await database.writer.read { databaseConnection in
+      try MemoRecord.fetchOne(databaseConnection, key: memoID)
+    }
+    #expect(record?.createdAt == originalDate)
+    #expect(record?.localRevision == 2)
   }
 
   @Test("Updating a missing memo fails")

@@ -41,7 +41,13 @@ struct LocalTodoRepositoryTests {
 
   @Test("Updates existing todo locally")
   func updateTodo() async throws {
-    var todo = Todo(owner: testUserId, content: "Original")
+    let originalDate = Date(timeIntervalSince1970: 1)
+    var todo = Todo(
+      content: "Original",
+      createdAt: originalDate,
+      updatedAt: originalDate,
+      owner: testUserId,
+    )
     try await repository.create(todo)
 
     todo.content = "Updated"
@@ -54,6 +60,14 @@ struct LocalTodoRepositoryTests {
 
     #expect(updated?.content == "Updated")
     #expect(updated?.status == .complete)
+    #expect(updated?.updatedAt ?? originalDate > originalDate)
+
+    let todoID = todo.id
+    let record = try await database.writer.read { databaseConnection in
+      try TodoRecord.fetchOne(databaseConnection, key: todoID)
+    }
+    #expect(record?.createdAt == originalDate)
+    #expect(record?.localRevision == 2)
   }
 
   @Test("Updating a missing todo fails")
@@ -158,5 +172,30 @@ struct LocalTodoRepositoryTests {
 
     let updated = await iterator.next()
     #expect(updated?.map(\.content) == ["Observed"])
+  }
+
+  @Test("Observation emits changes written through another database pool")
+  func observationEmitsCrossPoolChanges() async throws {
+    let databaseURL = FileManager.default.temporaryDirectory
+      .appendingPathComponent("cross-pool-\(UUID().uuidString).sqlite")
+
+    do {
+      let observingDatabase = try GRDBDatabase(storage: .file(databaseURL))
+      let writingDatabase = try GRDBDatabase(storage: .file(databaseURL))
+      let observingRepository = GRDBTodoRepository(database: observingDatabase)
+      let writingRepository = GRDBTodoRepository(database: writingDatabase)
+      let stream = observingRepository.observeTodos(query: TodoQuery().owner(userId: testUserId))
+      var iterator = stream.makeAsyncIterator()
+
+      #expect(await iterator.next()?.isEmpty == true)
+      try await writingRepository.create(Todo(owner: testUserId, content: "External"))
+
+      let updated = await iterator.next()
+      #expect(updated?.map(\.content) == ["External"])
+    }
+
+    try? FileManager.default.removeItem(at: databaseURL)
+    try? FileManager.default.removeItem(at: URL(fileURLWithPath: databaseURL.path + "-wal"))
+    try? FileManager.default.removeItem(at: URL(fileURLWithPath: databaseURL.path + "-shm"))
   }
 }

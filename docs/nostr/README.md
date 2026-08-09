@@ -2,7 +2,12 @@
 
 TodoMate의 **그룹 및 데이터 공유 기능**을 Firebase(Auth + Firestore)에서 **Nostr**로 옮기기 위한 조사·설계·계획 문서 모음입니다.
 
-개인 데이터(SwiftData)는 **그대로 로컬에 유지**하고, 그룹 관련 통신만 Nostr로 대체하는 것이 전제입니다.
+개인 데이터(GRDB)는 **로컬 진실의 원천으로 유지**하고, 그룹 관련 통신만 Nostr로 대체하는 것이 전제입니다.
+
+> 현재 persistence 기준(2026-08-10): 개인 Todo·Memo·휴지통은 App Group의 GRDB에
+> 저장한다. `localRevision`과 `deletedAt`은 로컬 변경·삭제 메타데이터이며, DB 변경
+> notification은 화면 갱신용이다. 향후 Nostr 동기화는 notification을 큐처럼 사용하지
+> 않고 로컬 write와 같은 transaction에 durable outbox를 기록해야 한다.
 
 ## 문서 구성
 
@@ -30,7 +35,7 @@ TodoMate의 **그룹 및 데이터 공유 기능**을 Firebase(Auth + Firestore)
 **핵심 결론 5가지**
 
 1. **Nostr는 Firestore의 대체재가 아니다.** 릴레이는 보존을 보장하지 않고, 트랜잭션·집계·서버 규칙이 없다.
-   → SwiftData를 진실의 원천(source of truth)으로 두고, **Nostr는 전송/동기화 계층**으로만 쓴다. (지금 방향과 일치)
+   → GRDB를 진실의 원천(source of truth)으로 두고, **Nostr는 전송/동기화 계층**으로만 쓴다. (지금 방향과 일치)
 2. **로그인 방식이 근본적으로 바뀐다.** Google 로그인 → 개인키(nsec) 생성/보관. 계정 복구가 불가능하므로 키 백업 UX가 이 프로젝트에서 가장 위험한 부분이다.
 3. **릴레이 DB가 곧 그룹이다.** NIP-29를 택했으므로 그룹 멤버십이 릴레이에만 존재한다. **릴레이 백업이 Phase 3 이전의 필수 작업**이다.
 4. **얻는 것**: 실시간 구독이 프로토콜 기본이라 지금 미구현 상태인 `observeTodos`(그룹 피드 실시간 갱신)를 공짜로 얻는다. E2EE도 가능해진다. Firebase 무료 티어 한계에서 벗어난다.
@@ -42,7 +47,7 @@ TodoMate의 **그룹 및 데이터 공유 기능**을 Firebase(Auth + Firestore)
 ```mermaid
 graph LR
     subgraph 유지["변경 없음"]
-        Local["SwiftData 개인 데이터<br/>Todo/Memo/Trash"]
+        Local["GRDB 개인 데이터<br/>Todo/Memo/Trash"]
         Domain["Domain 프로토콜<br/>대부분 시그니처 유지"]
         View["SwiftUI View<br/>거의 그대로"]
     end

@@ -18,7 +18,7 @@
 
 **D3 보충 — 직접 구현 범위**: `swift-secp256k1`(Schnorr 서명/ECDH)만 SPM 의존성으로 추가하고, 이벤트 직렬화·bech32·WebSocket 릴레이 풀은 직접 작성한다. WebSocket은 `URLSessionWebSocketTask`(네이티브)를 쓰므로 추가 의존성이 없다. NIP-44(ChaCha20이 CryptoKit에 없음)는 Phase 6로 미뤄, Phase 1~5는 암호화 구현 없이 진행한다.
 
-**D4 보충**: 개인 Todo/Memo는 이미 SwiftData에 있어 이관 대상이 아니다. 실제로 포기하는 것은 **기존 그룹 채팅 이력**뿐이다. 전환 시 사용자에게 안내 UI가 필요하다.
+**D4 보충**: 개인 Todo/Memo는 이미 GRDB에 있어 추가 이관 대상이 아니다. 실제로 포기하는 것은 **기존 그룹 채팅 이력**뿐이다. 전환 시 사용자에게 안내 UI가 필요하다.
 
 ---
 

@@ -6,11 +6,23 @@
 
 ## 1. 설계 원칙
 
-1. **로컬 우선(Local-first).** SwiftData가 진실의 원천이다. Nostr는 전송·동기화 계층일 뿐이며, 릴레이가 전부 죽어도 개인 기능은 100% 동작해야 한다. (현재의 온/오프라인 모드 분리 철학과 동일)
+1. **로컬 우선(Local-first).** GRDB가 진실의 원천이다. Nostr는 전송·동기화 계층일 뿐이며, 릴레이가 전부 죽어도 개인 기능은 100% 동작해야 한다. (현재의 온/오프라인 모드 분리 철학과 동일)
 2. **Domain 레이어는 최대한 건드리지 않는다.** 교체 대상은 `TodoMateData`의 구현체다. UseCase 시그니처가 바뀌면 View까지 파급되므로, 프로토콜 변경은 불가피한 것만 (§8의 미스매치 목록).
 3. **암호화는 나중에 켤 수 있게 설계한다.** 쿼리에 필요한 값은 태그(평문), 내용은 `content`. 그러면 Phase 6에서 `content`만 NIP-44로 감싸면 된다.
 4. **NIP-29 호환 가능한 형태로 이벤트를 만든다.** 모든 그룹 이벤트에 `h` 태그를 붙여두면, 나중에 릴레이 정책을 NIP-29로 바꿔도 이벤트 스키마를 다시 짜지 않아도 된다.
-5. **되돌릴 수 있게 간다.** Firebase 코드는 마지막 Phase까지 삭제하지 않는다.
+5. **교체 가능한 경계를 유지한다.** Nostr 구현은 Domain capability port 뒤에 두고, 릴레이 장애나 구현 교체가 개인 GRDB 기능에 영향을 주지 않게 한다.
+
+### 1.1 현재 로컬 변경 계약
+
+- 개인 Todo·Memo는 `createdAt`, `updatedAt`, nullable `deletedAt`, 단조 증가하는
+  `localRevision`을 가진 GRDB record로 저장한다.
+- `localRevision`은 한 기기 DB 안의 행 버전이다. Nostr `created_at`, 이벤트 `id`,
+  addressable event의 교체 순서와 동일시하지 않는다.
+- GRDB observation과 Darwin notification은 앱이나 활성 extension이 DB를 다시 읽게 만드는
+  비내구성 신호다. WidgetKit timeline 갱신은 별도 `WidgetCenter` 요청으로 처리한다. 어느
+  쪽도 재시작, 오프라인, 릴레이 ACK 재시도를 보장하지 않으므로 Nostr 발행 큐로 사용하지 않는다.
+- 향후 outbox는 로컬 mutation과 같은 GRDB transaction에 기록하고 `origin`을 구분한다.
+  로컬 origin만 발행하며, 원격 이벤트를 materialized cache에 적용한 변경은 재발행하지 않는다.
 
 ---
 
@@ -318,7 +330,7 @@ graph TD
         NGroup[Nip29GroupRepository<br/>9007/9021/39002]
         NTodo[NostrTodoSnapshotRepository<br/>kind 31700]
         NChat[NostrChatRepository<br/>kind 9]
-        SD[(SwiftData<br/>진실의 원천)]
+        SD[(GRDB<br/>진실의 원천)]
     end
     subgraph Nostr["TodoMateNostr"]
         Pool[RelayPool]
@@ -347,7 +359,7 @@ Firestore → Nostr 전환에서 **그냥은 안 되는 것들**과 대응책. �
 |---|---|---|---|
 | 1 | **삭제가 없다** | `TodoRepository.delete`, `MessageRepository.delete` | Todo: 하루 묶음에서 빼고 재발행(§5.3). 채팅: kind 5 삭제 요청(best-effort) + 로컬 숨김 |
 | 2 | **수정이 없다** | `MessageRepository.update` | 채팅 수정 기능 폐기 (현재 UI 미사용) |
-| 3 | **집계 쿼리가 없다** | `fetchCount(query:)` (`.count.getAggregation`) | 로컬 SwiftData에서 계산. 원격 카운트는 포기 |
+| 3 | **집계 쿼리가 없다** | `fetchCount(query:)` (`.count.getAggregation`) | 로컬 GRDB에서 계산. 원격 카운트는 포기 |
 | 4 | **트랜잭션이 없다** | `joinGroup`/`leaveGroup`의 Firestore 트랜잭션 | A안: 릴레이가 원자성 보장. B안: 낙관적 갱신 + 재조회 |
 | 5 | **전체 컬렉션 조회가 없다** | `UserRepository.readAll(useCache:)` | 프로토콜에서 제거. 멤버 pubkey 목록으로만 조회 |
 | 6 | **캐시 소스 구분이 없다** | `useCache: Bool` 파라미터 도처 | 로컬 이벤트 캐시를 직접 만들고 `useCache`를 그 위에 매핑 (프로토콜 유지 가능) |
@@ -355,7 +367,7 @@ Firestore → Nostr 전환에서 **그냥은 안 되는 것들**과 대응책. �
 | 8 | **정렬이 없다** | `.order(by: "createdAt")` | 클라이언트 정렬(이미 `MessageStore`에서 하고 있음) |
 | 9 | **발행 실패가 부분적이다** | Firestore는 성공/실패 이분법 | `OK` 응답을 릴레이별로 추적. 아웃박스 큐 + 재시도 |
 | 10 | **중복 수신** | 없음 | 이벤트 `id` 기준 dedup (`Set<String>` LRU) |
-| 11 | **오프라인 지속성** | Firestore가 자동 제공 | 아웃박스 큐(SwiftData) 직접 구현 |
+| 11 | **오프라인 지속성** | Firestore가 자동 제공 | 아웃박스 큐(GRDB) 직접 구현 |
 | 12 | **계정 복구** | Google이 해줌 | **불가.** 온보딩 백업 강제 + 경고 UI |
 
 ---
@@ -365,7 +377,7 @@ Firestore → Nostr 전환에서 **그냥은 안 되는 것들**과 대응책. �
 ```mermaid
 sequenceDiagram
     participant UI as SwiftUI
-    participant SD as SwiftData (원천)
+    participant SD as GRDB (원천)
     participant Q as 아웃박스 큐
     participant P as RelayPool
     participant R as 릴레이
@@ -384,7 +396,7 @@ sequenceDiagram
 **규칙**
 
 - **발행은 debounce**한다. Todo를 5개 고치면 스냅샷 1개만 나가야 한다. (현재 `SyncTodayTodosUseCase`가 하던 일을 대체)
-- **내 개인 데이터와 남의 그룹 데이터는 저장소를 분리한다.** 남의 스냅샷은 캐시일 뿐이므로 `SDTodo`에 섞지 않는다. (별도 `SDGroupSnapshot` 모델)
+- **내 개인 데이터와 남의 그룹 데이터는 저장소를 분리한다.** 남의 스냅샷은 캐시일 뿐이므로 개인 `TodoRecord`에 섞지 않는다. (별도 `GroupSnapshotRecord`)
 - **재구독 커서**: 마지막으로 본 이벤트의 `created_at`을 저장해두고 `since`로 재구독 → 매번 전체를 다시 받지 않는다.
 - **충돌 해결**: `content.updatedAt` 기준 last-write-wins (현재 정책 유지). 발행 시 `created_at = updatedAt`으로 맞춰 릴레이의 대체 판정과 일치시킨다.
 
