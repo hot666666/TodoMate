@@ -1,0 +1,64 @@
+name: 개발 작업
+description: 유지보수, 리팩터링, 문서화 또는 테스트 작업을 명확한 범위로 관리합니다.
+title: "[작업]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        사용자 버그 제보나 기능 제안이 아닌 실행 가능한 프로젝트 작업에 사용합니다.
+        결과에 집중하고 검토 가능한 크기로 이슈를 작성해 주세요.
+  - type: textarea
+    id: context
+    attributes:
+      label: 배경
+      description: 이 작업이 필요한 이유를 적고, 관련 이슈·PR·문서·장애를 연결해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: 목표
+      description: 이 이슈가 달성해야 하는 관찰 가능한 결과를 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 범위
+      description: 포함할 항목과 중요한 제외 항목을 명확히 적어 주세요.
+      placeholder: |
+        포함:
+        - …
+
+        제외:
+        - …
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: 완료 기준
+      description: 구체적이고 검증 가능한 완료 조건을 나열해 주세요.
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: true
+  - type: textarea
+    id: implementation-notes
+    attributes:
+      label: 구현 메모
+      description: 선택 사항입니다. 제약, 영향 받는 모듈, 마이그레이션 메모 또는 기술적 접근을 기록해 주세요.
+    validations:
+      required: false
+  - type: textarea
+    id: validation-plan
+    attributes:
+      label: 검증 계획
+      description: 변경을 검증하기 위해 필요한 빌드, 자동화 테스트 또는 수동 확인을 적어 주세요.
+      placeholder: |
+        - 빌드:
+        - 자동화 테스트:
+        - 수동 확인:
+    validations:
+      required: true

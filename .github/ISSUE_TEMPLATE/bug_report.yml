@@ -1,0 +1,71 @@
+name: 버그 제보
+description: TodoMate에서 재현 가능한 문제를 제보합니다.
+title: "[버그]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        TodoMate 개선에 도움 주셔서 감사합니다. 개인 정보, Firebase 자격 증명,
+        액세스 토큰 등 민감한 정보는 포함하지 마세요.
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: 기존 이슈 확인
+      description: 새 이슈를 등록하기 전에 열려 있거나 닫힌 이슈를 검색해 주세요.
+      options:
+        - label: 기존 이슈를 검색했고 중복 이슈를 찾지 못했습니다.
+          required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: 어떤 문제가 발생했나요?
+      description: 관찰한 동작과 사용자에게 미치는 영향을 설명해 주세요.
+      placeholder: 발생한 문제를 간결하게 설명해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 재현 절차
+      description: 문제를 안정적으로 재현할 수 있는 최소 절차를 적어 주세요.
+      placeholder: |
+        1. …을 엽니다.
+        2. …을 선택합니다.
+        3. …을 확인합니다.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 기대한 동작
+      description: 실제 결과 대신 어떤 동작을 기대했는지 설명해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 환경 정보
+      description: 앱 버전 또는 커밋, macOS 버전, 필요하다면 Mac 모델을 적어 주세요.
+      value: |
+        - TodoMate 버전 또는 커밋:
+        - macOS 버전:
+        - Mac 모델:
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 스크린샷, 화면 녹화 또는 로그
+      description: 가능하면 민감한 정보를 가린 스크린샷, 화면 녹화, 크래시 리포트 또는 관련 로그를 첨부해 주세요.
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 추가 정보
+      description: 임시 해결 방법, 발생 빈도, 관련 이슈 등 조사에 도움이 될 정보를 적어 주세요.
+    validations:
+      required: false

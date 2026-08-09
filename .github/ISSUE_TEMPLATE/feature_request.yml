@@ -1,0 +1,54 @@
+name: 기능 제안
+description: 해결하려는 사용자 문제와 원하는 결과가 명확한 개선안을 제안합니다.
+title: "[기능]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        좋은 제안 감사합니다. 사용자 문제와 원하는 결과에 집중해 주세요.
+        구현 방식 제안은 환영하지만 필수는 아닙니다.
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: 기존 이슈 확인
+      description: 새 제안을 등록하기 전에 열려 있거나 닫힌 이슈를 검색해 주세요.
+      options:
+        - label: 기존 이슈를 검색했고 중복 이슈를 찾지 못했습니다.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 해결하려는 문제 또는 사용 사례
+      description: 누가 어떤 상황에서 무엇을 하기 어려운지 설명해 주세요.
+      placeholder: …할 때 …해야 하지만, 현재는 …이 어렵습니다.
+    validations:
+      required: true
+  - type: textarea
+    id: desired-outcome
+    attributes:
+      label: 원하는 결과
+      description: 이 변경으로 제공되어야 하는 관찰 가능한 동작 또는 가치를 설명해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: 제안하는 해결 방법
+      description: 선택 사항입니다. 접근 방식, 스케치 또는 다른 제품의 사례를 공유해 주세요.
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 대안 또는 임시 해결 방법
+      description: 검토한 다른 접근 방식이나 현재의 임시 해결 방법이 있나요?
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 추가 정보
+      description: 목업, 스크린샷, 관련 이슈 등 뒷받침할 정보를 첨부해 주세요.
+    validations:
+      required: false
