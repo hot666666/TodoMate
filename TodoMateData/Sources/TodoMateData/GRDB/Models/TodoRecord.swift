@@ -4,7 +4,7 @@ import TodoMateDomain
 
 extension TodoStatus: @retroactive DatabaseValueConvertible {}
 
-struct TodoRecord: Codable, FetchableRecord, PersistableRecord, Identifiable, Sendable {
+struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Identifiable, Sendable {
   static let databaseTableName = "todo"
 
   enum CodingKeys: String, CodingKey {

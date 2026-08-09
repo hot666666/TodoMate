@@ -82,6 +82,30 @@ struct LocalTodoRepositoryTests {
     #expect(didThrow)
   }
 
+  @Test("Rejects an update after the todo was deleted")
+  func updateDeletedTodoFails() async throws {
+    var todo = Todo(owner: testUserId, content: "Original")
+    try await repository.create(todo)
+    try await repository.delete(todo.id)
+
+    todo.content = "Stale update"
+    var didThrow = false
+    do {
+      try await repository.update(todo)
+    } catch {
+      didThrow = true
+    }
+
+    #expect(didThrow)
+    let todoID = todo.id
+    let record = try await database.writer.read { databaseConnection in
+      try TodoRecord.fetchOne(databaseConnection, key: todoID)
+    }
+    #expect(record?.content == "Original")
+    #expect(record?.deletedAt != nil)
+    #expect(record?.localRevision == 2)
+  }
+
   // MARK: - Delete
 
   @Test("Deletes todo locally")
@@ -172,6 +196,34 @@ struct LocalTodoRepositoryTests {
 
     let updated = await iterator.next()
     #expect(updated?.map(\.content) == ["Observed"])
+  }
+
+  @Test("Observation emits metadata-only revisions")
+  func observationEmitsMetadataOnlyRevision() async throws {
+    let stream = repository.observeTodos(query: TodoQuery().owner(userId: testUserId))
+    var iterator = stream.makeAsyncIterator()
+    #expect(await iterator.next()?.isEmpty == true)
+
+    let todo = Todo(
+      content: "Unchanged",
+      date: .now,
+      createdAt: .distantPast,
+      updatedAt: .distantPast,
+      owner: testUserId,
+    )
+    try await repository.create(todo)
+    let inserted = try #require(await iterator.next()?.first)
+
+    try await repository.update(inserted)
+    let revised = try #require(await iterator.next()?.first)
+
+    #expect(revised.content == inserted.content)
+    #expect(revised.updatedAt != inserted.updatedAt)
+    let todoID = revised.id
+    let localRevision = try await database.writer.read { databaseConnection in
+      try TodoRecord.fetchOne(databaseConnection, key: todoID)?.localRevision
+    }
+    #expect(localRevision == 2)
   }
 
   @Test("Observation emits changes written through another database pool")

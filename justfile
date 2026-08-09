@@ -1,11 +1,17 @@
 # 테스트 로그 디렉토리
 LOG_DIR := ".test-logs"
+DERIVED_DATA_DIR := ".build/DerivedData"
 
 build:
     @mkdir -p {{LOG_DIR}}
     set -o pipefail && xcodebuild \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
-        -destination 'platform=macOS' \
+        -configuration Debug \
+        -destination 'generic/platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/build-unsigned \
+        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGNING_REQUIRED=NO \
         -quiet 2>&1 \
         | tee {{LOG_DIR}}/build.log \
         | xcbeautify --quieter \
@@ -46,8 +52,11 @@ test-app:
     @mkdir -p {{LOG_DIR}}
     @echo "🧪 Running TodoMate app unit tests..."
     set -o pipefail && xcodebuild test \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
+        -configuration Debug \
         -destination 'platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/app-tests \
         -only-testing:TodoMateTests \
         2>&1 \
         | tee {{LOG_DIR}}/app.log \
@@ -59,8 +68,11 @@ test-app-runtime:
     @mkdir -p {{LOG_DIR}}
     @echo "🧪 Running TodoMate runtime tests..."
     set -o pipefail && xcodebuild test \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
+        -configuration Debug \
         -destination 'platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/ui-runtime-signed \
         -only-testing:TodoMateUITests \
         -skip-testing:TodoMateUITests/ScreenshotTests \
         2>&1 \
@@ -88,8 +100,11 @@ ui-screenshots SCREENS="":
     @rm -rf screenshots.xcresult
     @echo "Testing screens: {{ if SCREENS == "" { "ALL" } else { SCREENS } }}"
     set -o pipefail && xcodebuild test \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
+        -configuration Debug \
         -destination 'platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/ui-screenshots-signed \
         $(python3 script/generate_screenshot_test_args.py "{{SCREENS}}") \
         -resultBundlePath ./screenshots.xcresult \
         2>&1 | xcbeautify

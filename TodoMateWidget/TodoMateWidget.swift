@@ -76,7 +76,7 @@ struct TodoMateTimelineProvider: TimelineProvider {
         .map { WidgetTodo(id: $0.id, content: $0.content, detail: $0.detail) }
 
       let isEmpty = todos.isEmpty
-      let isAllCompleted = isEmpty && !todayTodos.isEmpty
+      let isAllCompleted = !todayTodos.isEmpty && todayTodos.allSatisfy { $0.status == .complete }
 
       let entry = TodoWidgetEntry(
         date: .now,
@@ -275,14 +275,8 @@ private struct TodoRowView: View {
 // MARK: - Widget Configuration
 
 struct TodoMateWidget: Widget {
-  #if DEBUG
-    let kind = "TodoMateWidgetDev"
-  #else
-    let kind = "TodoMateWidget"
-  #endif
-
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: kind, provider: TodoMateTimelineProvider()) { entry in
+    StaticConfiguration(kind: AppEnvironment.Widget.kind, provider: TodoMateTimelineProvider()) { entry in
       TodoMateWidgetEntryView(entry: entry)
     }
     .configurationDisplayName("진행 중인 할 일")

@@ -77,6 +77,30 @@ struct LocalMemoRepositoryTests {
     #expect(didThrow)
   }
 
+  @Test("Rejects an update after the memo was deleted")
+  func updateDeletedMemoFails() async throws {
+    var memo = Memo(owner: testUserId, content: "Original")
+    try await repository.create(memo)
+    try await repository.delete(memo)
+
+    memo = memo.withUpdatedContent("Stale update")
+    var didThrow = false
+    do {
+      try await repository.update(memo)
+    } catch {
+      didThrow = true
+    }
+
+    #expect(didThrow)
+    let memoID = memo.id
+    let record = try await database.writer.read { databaseConnection in
+      try MemoRecord.fetchOne(databaseConnection, key: memoID)
+    }
+    #expect(record?.content == "Original")
+    #expect(record?.deletedAt != nil)
+    #expect(record?.localRevision == 2)
+  }
+
   // MARK: - Delete
 
   @Test("Deletes memo locally")

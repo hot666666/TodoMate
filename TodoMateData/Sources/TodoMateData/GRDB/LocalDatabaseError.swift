@@ -5,4 +5,5 @@ public enum LocalDatabaseError: Error, Equatable {
   case databaseCoordinationFailed(URL)
   case invalidTodoStatus(String)
   case malformedLegacyRecord(String)
+  case legacyImportGenerationExhausted
 }

@@ -32,7 +32,7 @@ struct OverlayWindowRootView: View {
       _localTodo = State(initialValue: EditableTodo(from: todo))
     } else {
       _localTodo = State(
-        initialValue: EditableTodo(owner: ""),
+        initialValue: EditableTodo(owner: User.local.id),
       )
     }
   }

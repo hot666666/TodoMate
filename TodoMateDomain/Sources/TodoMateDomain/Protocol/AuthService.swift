@@ -17,11 +17,14 @@ public protocol AuthService {
 public final class StubAuthService: AuthService, Sendable {
   private let userId: String?
 
-  public init(signedInUserId: String? = User.stub.id) {
+  public init(signedInUserId: String? = User.local.id) {
     userId = signedInUserId
   }
 
-  public var signedInUserId: String? { userId }
+  public var signedInUserId: String? {
+    userId
+  }
+
   public func signIn() async throws {}
   public func signOut() throws {}
   public func listenToAuthStateChanges() -> AsyncStream<String?> {

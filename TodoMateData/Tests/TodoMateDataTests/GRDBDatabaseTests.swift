@@ -6,6 +6,17 @@ import TodoMateDomain
 
 @Suite("GRDB Database Tests", .serialized)
 struct GRDBDatabaseTests {
+  @Test("Canonicalizes only reserved local owner aliases")
+  func canonicalizesOnlyReservedLocalOwnerAliases() {
+    #expect(LocalAuthorID.canonicalizing("") == User.local.id)
+    #expect(LocalAuthorID.canonicalizing(EntityConstant.User.stubId) == User.local.id)
+    #expect(LocalAuthorID.canonicalizing(User.local.id) == User.local.id)
+    #expect(LocalAuthorID.canonicalizing("firebase-user") == "firebase-user")
+    #expect(LocalAuthorID.canonicalizing("stubUser") == "stubUser")
+    #expect(LocalAuthorID.canonicalizing("TESTUSER") == "TESTUSER")
+    #expect(LocalAuthorID.canonicalizing(" testUser ") == " testUser ")
+  }
+
   @Test("Uses canonical metadata column names")
   func canonicalMetadataColumns() async throws {
     let database = try GRDBDatabase(storage: .inMemory)
@@ -39,12 +50,20 @@ struct GRDBDatabaseTests {
 
     do {
       let database = try GRDBDatabase(storage: .file(databaseURL))
-      let record = try await database.writer.read { databaseConnection in
-        try TodoRecord.fetchOne(databaseConnection, key: "todo-id")
+      let records = try await database.writer.read { databaseConnection in
+        try (
+          originalTodo: TodoRecord.fetchOne(databaseConnection, key: "todo-id"),
+          stubTodo: TodoRecord.fetchOne(databaseConnection, key: "stub-todo-id"),
+          emptyOwnerMemo: MemoRecord.fetchOne(databaseConnection, key: "empty-memo-id"),
+          remoteOwnerMemo: MemoRecord.fetchOne(databaseConnection, key: "remote-memo-id"),
+        )
       }
-      #expect(record?.ownerID == "owner-id")
-      #expect(record?.deletedAt == timestamp)
-      #expect(record?.localRevision == 1)
+      #expect(records.originalTodo?.ownerID == "owner-id")
+      #expect(records.originalTodo?.deletedAt == timestamp)
+      #expect(records.originalTodo?.localRevision == 1)
+      #expect(records.stubTodo?.ownerID == User.local.id)
+      #expect(records.emptyOwnerMemo?.ownerID == User.local.id)
+      #expect(records.remoteOwnerMemo?.ownerID == "firebase-user")
     }
 
     Self.removeDatabaseFiles(at: databaseURL)
@@ -105,6 +124,27 @@ struct GRDBDatabaseTests {
         """,
         arguments: [
           "todo-id", "Legacy", "시작 전", "", timestamp, timestamp, timestamp, "owner-id", true,
+        ],
+      )
+      try databaseConnection.execute(
+        sql: """
+        INSERT INTO todo
+          (id, content, status, detail, date, createdAt, updatedAt, owner, isDeleted)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        arguments: [
+          "stub-todo-id", "Stub", "시작 전", "", timestamp, timestamp, timestamp,
+          EntityConstant.User.stubId, false,
+        ],
+      )
+      try databaseConnection.execute(
+        sql: """
+        INSERT INTO memo (id, content, createdAt, updatedAt, owner, isDeleted)
+        VALUES (?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?)
+        """,
+        arguments: [
+          "empty-memo-id", "Empty owner", timestamp, timestamp, "", false,
+          "remote-memo-id", "Remote owner", timestamp, timestamp, "firebase-user", false,
         ],
       )
     }

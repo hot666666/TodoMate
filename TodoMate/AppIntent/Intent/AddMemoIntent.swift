@@ -29,9 +29,8 @@ struct AddMemoIntent: AppIntent {
 
   @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<MemoEntity> {
-    // 로컬 Memo는 owner를 ""로 설정
     let memo = Memo(
-      owner: "",
+      owner: User.local.id,
       content: content,
     )
 

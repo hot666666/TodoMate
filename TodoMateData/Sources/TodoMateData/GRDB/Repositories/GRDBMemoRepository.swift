@@ -19,7 +19,10 @@ public final class GRDBMemoRepository: MemoRepository, Sendable {
 
   public func update(_ memo: Memo) async throws {
     try await database.writer.write { databaseConnection in
-      guard var record = try MemoRecord.fetchOne(databaseConnection, key: memo.id) else {
+      guard var record = try MemoRecord
+        .filter(MemoRecord.Columns.id == memo.id && MemoRecord.Columns.deletedAt == nil)
+        .fetchOne(databaseConnection)
+      else {
         throw MemoRecord.recordNotFound(databaseConnection, key: memo.id)
       }
       try record.apply(memo, at: databaseConnection.transactionDate)
@@ -78,8 +81,9 @@ public final class GRDBMemoRepository: MemoRepository, Sendable {
     database.observe(
       region: .memo,
       fetch: { databaseConnection in
-        try Self.activeMemos.fetchAll(databaseConnection).map { $0.domainValue() }
+        try Self.activeMemos.fetchAll(databaseConnection)
       },
+      transform: { records in records.map { $0.domainValue() } },
       onError: { error in
         Log.error("Memo database observation failed: \(error)", category: .data)
       },

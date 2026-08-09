@@ -1,43 +1,121 @@
+import Common
 import Foundation
 import GRDB
 import TodoMateDomain
 
 enum LegacySwiftDataImporter {
   private static let completionKey = "legacySwiftDataImportCompleted"
+  private static let generationKey = "legacySwiftDataImportGeneration"
+
+  struct LegacyRecords {
+    let todos: [TodoRecord]
+    let memos: [MemoRecord]
+    let rejectedRecordCount: Int
+  }
+
+  struct ImportPreparation {
+    var todosByID: [String: TodoRecord] = [:]
+    var memosByID: [String: MemoRecord] = [:]
+    var rejectedRecordCount = 0
+    var sourceReadFailed = false
+
+    var canMarkComplete: Bool {
+      !sourceReadFailed && rejectedRecordCount == 0
+    }
+
+    mutating func merge(_ records: LegacyRecords) {
+      rejectedRecordCount += records.rejectedRecordCount
+      for todo in records.todos
+        where todo.updatedAt > (todosByID[todo.id]?.updatedAt ?? .distantPast) {
+        todosByID[todo.id] = todo
+      }
+      for memo in records.memos
+        where memo.updatedAt > (memosByID[memo.id]?.updatedAt ?? .distantPast) {
+        memosByID[memo.id] = memo
+      }
+    }
+  }
 
   static func importIfNeeded(
     from storeURLs: [URL],
     into writer: any DatabaseWriter,
   ) throws {
     guard !storeURLs.isEmpty else { return }
-    let isComplete = try writer.read { databaseConnection in
-      try Self.isComplete(in: databaseConnection)
-    }
-    guard !isComplete else { return }
+    guard let generation = try reserveImportGeneration(in: writer) else { return }
 
-    var todosByID: [String: TodoRecord] = [:]
-    var memosByID: [String: MemoRecord] = [:]
+    let preparation = prepareImport(from: storeURLs)
+    logDeferredImportReasons(in: preparation)
+    try persist(preparation, generation: generation, into: writer)
+  }
 
-    for url in storeURLs where FileManager.default.fileExists(atPath: url.path) {
-      let records = try readLegacyStore(at: url)
-      for todo in records.todos where todo.updatedAt > (todosByID[todo.id]?.updatedAt ?? .distantPast) {
-        todosByID[todo.id] = todo
-      }
-      for memo in records.memos where memo.updatedAt > (memosByID[memo.id]?.updatedAt ?? .distantPast) {
-        memosByID[memo.id] = memo
-      }
-    }
-
+  static func reserveImportGeneration(in writer: any DatabaseWriter) throws -> Int64? {
     try writer.write { databaseConnection in
-      // Another process may have completed the import while legacy stores were read.
-      guard try !Self.isComplete(in: databaseConnection) else { return }
+      guard try !isComplete(in: databaseConnection) else { return nil }
+      let currentGeneration = try importGeneration(in: databaseConnection)
+      guard currentGeneration < Int64.max else {
+        throw LocalDatabaseError.legacyImportGenerationExhausted
+      }
+      let generation = currentGeneration + 1
+      try databaseConnection.execute(
+        sql: """
+        INSERT INTO localMetadata (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        """,
+        arguments: [generationKey, String(generation)],
+      )
+      return generation
+    }
+  }
 
-      for todo in todosByID.values {
-        try todo.insert(databaseConnection, onConflict: .replace)
+  static func prepareImport(from storeURLs: [URL]) -> ImportPreparation {
+    var preparation = ImportPreparation()
+    for url in storeURLs where FileManager.default.fileExists(atPath: url.path) {
+      do {
+        try preparation.merge(readLegacyStore(at: url))
+      } catch {
+        preparation.sourceReadFailed = true
       }
-      for memo in memosByID.values {
-        try memo.insert(databaseConnection, onConflict: .replace)
+    }
+    return preparation
+  }
+
+  private static func logDeferredImportReasons(in preparation: ImportPreparation) {
+    if preparation.sourceReadFailed {
+      Log.warning(
+        "Legacy SwiftData import was deferred because a source store could not be read",
+        category: .data,
+      )
+    }
+    if preparation.rejectedRecordCount > 0 {
+      Log.warning(
+        "Legacy SwiftData import skipped \(preparation.rejectedRecordCount) malformed record(s); retry remains enabled",
+        category: .data,
+      )
+    }
+  }
+
+  static func persist(
+    _ preparation: ImportPreparation,
+    generation: Int64,
+    into writer: any DatabaseWriter,
+  ) throws {
+    try writer.write { databaseConnection in
+      // Reconcile every snapshot that began before completion. A newer prepared snapshot must
+      // not be discarded just because an older importer committed the marker first.
+      for todo in preparation.todosByID.values {
+        try LegacyImportReconciler.persist(todo, in: databaseConnection)
       }
+      for memo in preparation.memosByID.values {
+        try LegacyImportReconciler.persist(memo, in: databaseConnection)
+      }
+      guard preparation.canMarkComplete else {
+        try databaseConnection.execute(
+          sql: "DELETE FROM localMetadata WHERE key = ?",
+          arguments: [completionKey],
+        )
+        return
+      }
+      guard try generation == importGeneration(in: databaseConnection) else { return }
       try databaseConnection.execute(
         sql: """
         INSERT INTO localMetadata (key, value) VALUES (?, ?)
@@ -56,21 +134,37 @@ enum LegacySwiftDataImporter {
     ) != nil
   }
 
-  private static func readLegacyStore(at url: URL) throws -> (todos: [TodoRecord], memos: [MemoRecord]) {
+  private static func importGeneration(in databaseConnection: Database) throws -> Int64 {
+    let storedValue = try String.fetchOne(
+      databaseConnection,
+      sql: "SELECT value FROM localMetadata WHERE key = ?",
+      arguments: [generationKey],
+    )
+    return storedValue.flatMap(Int64.init) ?? 0
+  }
+
+  private static func readLegacyStore(at url: URL) throws -> LegacyRecords {
     var configuration = Configuration()
     configuration.readonly = true
     let database = try DatabaseQueue(path: url.path, configuration: configuration)
 
     return try database.read { databaseConnection in
-      let todos = try databaseConnection.tableExists("ZSDTODO")
-        ? readTodos(from: databaseConnection) : []
-      let memos = try databaseConnection.tableExists("ZSDMEMO")
-        ? readMemos(from: databaseConnection) : []
-      return (todos, memos)
+      let todoResult = try databaseConnection.tableExists("ZSDTODO")
+        ? readTodos(from: databaseConnection) : (records: [], rejectedRecordCount: 0)
+      let memoResult = try databaseConnection.tableExists("ZSDMEMO")
+        ? readMemos(from: databaseConnection) : (records: [], rejectedRecordCount: 0)
+      return LegacyRecords(
+        todos: todoResult.records,
+        memos: memoResult.records,
+        rejectedRecordCount: todoResult.rejectedRecordCount + memoResult.rejectedRecordCount,
+      )
     }
   }
 
-  private static func readTodos(from databaseConnection: Database) throws -> [TodoRecord] {
+  private static func readTodos(from databaseConnection: Database) throws -> (
+    records: [TodoRecord],
+    rejectedRecordCount: Int,
+  ) {
     let rows = try Row.fetchAll(
       databaseConnection,
       sql: """
@@ -79,7 +173,10 @@ enum LegacySwiftDataImporter {
       FROM ZSDTODO
       """,
     )
-    return try rows.map { row in
+    var records: [TodoRecord] = []
+    var rejectedRecordCount = 0
+
+    for row in rows {
       guard let id: String = row["ZID"],
             let content: String = row["ZCONTENT"],
             let statusValue: String = row["ZSTATUSRAWVALUE"],
@@ -87,17 +184,20 @@ enum LegacySwiftDataImporter {
             let date: Double = row["ZDATE"],
             let createdAt: Double = row["ZCREATEDAT"],
             let updatedAt: Double = row["ZUPDATEDAT"],
-            let owner: String = row["ZOWNER"]
+            let owner: String = row["ZOWNER"],
+            date.isFinite,
+            createdAt.isFinite,
+            updatedAt.isFinite
       else {
-        throw LocalDatabaseError.malformedLegacyRecord("ZSDTODO")
+        rejectedRecordCount += 1
+        continue
       }
-      guard let status = TodoStatus(rawValue: statusValue) else {
-        throw LocalDatabaseError.invalidTodoStatus(statusValue)
-      }
+      // Match the legacy SwiftData decoder: unknown historical values remain usable as `.todo`.
+      let status = TodoStatus(rawValue: statusValue) ?? .todo
 
       let modificationDate = Date(timeIntervalSinceReferenceDate: updatedAt)
 
-      return TodoRecord(
+      records.append(TodoRecord(
         id: id,
         content: content,
         status: status,
@@ -105,13 +205,18 @@ enum LegacySwiftDataImporter {
         date: Date(timeIntervalSinceReferenceDate: date),
         createdAt: Date(timeIntervalSinceReferenceDate: createdAt),
         updatedAt: modificationDate,
-        ownerID: owner,
+        ownerID: LocalAuthorID.canonicalizing(owner),
         deletedAt: (row["ZISDELETED"] as Int64? ?? 0) != 0 ? modificationDate : nil,
-      )
+      ))
     }
+
+    return (records, rejectedRecordCount)
   }
 
-  private static func readMemos(from databaseConnection: Database) throws -> [MemoRecord] {
+  private static func readMemos(from databaseConnection: Database) throws -> (
+    records: [MemoRecord],
+    rejectedRecordCount: Int,
+  ) {
     let rows = try Row.fetchAll(
       databaseConnection,
       sql: """
@@ -119,26 +224,158 @@ enum LegacySwiftDataImporter {
       FROM ZSDMEMO
       """,
     )
-    return try rows.map { row in
+    var records: [MemoRecord] = []
+    var rejectedRecordCount = 0
+
+    for row in rows {
       guard let id: String = row["ZID"],
             let content: String = row["ZCONTENT"],
             let createdAt: Double = row["ZCREATEDAT"],
             let updatedAt: Double = row["ZUPDATEDAT"],
-            let owner: String = row["ZOWNERID"]
+            let owner: String = row["ZOWNERID"],
+            createdAt.isFinite,
+            updatedAt.isFinite
       else {
-        throw LocalDatabaseError.malformedLegacyRecord("ZSDMEMO")
+        rejectedRecordCount += 1
+        continue
       }
 
       let modificationDate = Date(timeIntervalSinceReferenceDate: updatedAt)
 
-      return MemoRecord(
+      records.append(MemoRecord(
         id: id,
         content: content,
         createdAt: Date(timeIntervalSinceReferenceDate: createdAt),
         updatedAt: modificationDate,
-        ownerID: owner,
+        ownerID: LocalAuthorID.canonicalizing(owner),
         deletedAt: (row["ZISDELETED"] as Int64? ?? 0) != 0 ? modificationDate : nil,
-      )
+      ))
     }
+
+    return (records, rejectedRecordCount)
+  }
+}
+
+private enum LegacyImportReconciler {
+  private enum EntityKind: String {
+    case todo
+    case memo
+  }
+
+  private struct Provenance: Codable {
+    let sourceUpdatedAt: Double
+    let appliedLocalRevision: Int64
+  }
+
+  private static let provenanceKeyPrefix = "legacySwiftDataImport.provenance.v1"
+
+  static func persist(_ incoming: TodoRecord, in databaseConnection: Database) throws {
+    let key = provenanceKey(for: .todo, id: incoming.id)
+    let storedProvenance = try String.fetchOne(
+      databaseConnection,
+      sql: "SELECT value FROM localMetadata WHERE key = ?",
+      arguments: [key],
+    )
+
+    guard let current = try TodoRecord.fetchOne(databaseConnection, key: incoming.id) else {
+      guard storedProvenance == nil else { return }
+      try incoming.insert(databaseConnection)
+      try saveProvenance(for: incoming, key: key, in: databaseConnection)
+      return
+    }
+
+    guard let provenance = decode(storedProvenance),
+          current.localRevision == provenance.appliedLocalRevision,
+          current.updatedAt.timeIntervalSinceReferenceDate == provenance.sourceUpdatedAt,
+          incoming.updatedAt.timeIntervalSinceReferenceDate > provenance.sourceUpdatedAt,
+          current.localRevision < Int64.max
+    else { return }
+
+    var replacement = incoming
+    replacement.localRevision = current.localRevision + 1
+    try replacement.update(databaseConnection)
+    try saveProvenance(for: replacement, key: key, in: databaseConnection)
+  }
+
+  static func persist(_ incoming: MemoRecord, in databaseConnection: Database) throws {
+    let key = provenanceKey(for: .memo, id: incoming.id)
+    let storedProvenance = try String.fetchOne(
+      databaseConnection,
+      sql: "SELECT value FROM localMetadata WHERE key = ?",
+      arguments: [key],
+    )
+
+    guard let current = try MemoRecord.fetchOne(databaseConnection, key: incoming.id) else {
+      guard storedProvenance == nil else { return }
+      try incoming.insert(databaseConnection)
+      try saveProvenance(for: incoming, key: key, in: databaseConnection)
+      return
+    }
+
+    guard let provenance = decode(storedProvenance),
+          current.localRevision == provenance.appliedLocalRevision,
+          current.updatedAt.timeIntervalSinceReferenceDate == provenance.sourceUpdatedAt,
+          incoming.updatedAt.timeIntervalSinceReferenceDate > provenance.sourceUpdatedAt,
+          current.localRevision < Int64.max
+    else { return }
+
+    var replacement = incoming
+    replacement.localRevision = current.localRevision + 1
+    try replacement.update(databaseConnection)
+    try saveProvenance(for: replacement, key: key, in: databaseConnection)
+  }
+
+  private static func provenanceKey(for kind: EntityKind, id: String) -> String {
+    "\(provenanceKeyPrefix).\(kind.rawValue).\(id)"
+  }
+
+  private static func decode(_ storedValue: String?) -> Provenance? {
+    guard let storedValue, let data = Data(base64Encoded: storedValue) else { return nil }
+    return try? JSONDecoder().decode(Provenance.self, from: data)
+  }
+
+  private static func saveProvenance(
+    for record: TodoRecord,
+    key: String,
+    in databaseConnection: Database,
+  ) throws {
+    try saveProvenance(
+      Provenance(
+        sourceUpdatedAt: record.updatedAt.timeIntervalSinceReferenceDate,
+        appliedLocalRevision: record.localRevision,
+      ),
+      key: key,
+      in: databaseConnection,
+    )
+  }
+
+  private static func saveProvenance(
+    for record: MemoRecord,
+    key: String,
+    in databaseConnection: Database,
+  ) throws {
+    try saveProvenance(
+      Provenance(
+        sourceUpdatedAt: record.updatedAt.timeIntervalSinceReferenceDate,
+        appliedLocalRevision: record.localRevision,
+      ),
+      key: key,
+      in: databaseConnection,
+    )
+  }
+
+  private static func saveProvenance(
+    _ provenance: Provenance,
+    key: String,
+    in databaseConnection: Database,
+  ) throws {
+    let data = try JSONEncoder().encode(provenance)
+    try databaseConnection.execute(
+      sql: """
+      INSERT INTO localMetadata (key, value) VALUES (?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+      """,
+      arguments: [key, data.base64EncodedString()],
+    )
   }
 }

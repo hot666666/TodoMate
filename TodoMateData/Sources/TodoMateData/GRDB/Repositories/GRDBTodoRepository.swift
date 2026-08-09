@@ -19,7 +19,10 @@ public final class GRDBTodoRepository: TodoRepository, Sendable {
 
   public func update(_ todo: Todo) async throws {
     try await database.writer.write { databaseConnection in
-      guard var record = try TodoRecord.fetchOne(databaseConnection, key: todo.id) else {
+      guard var record = try TodoRecord
+        .filter(TodoRecord.Columns.id == todo.id && TodoRecord.Columns.deletedAt == nil)
+        .fetchOne(databaseConnection)
+      else {
         throw TodoRecord.recordNotFound(databaseConnection, key: todo.id)
       }
       try record.apply(todo, at: databaseConnection.transactionDate)
@@ -64,8 +67,8 @@ public final class GRDBTodoRepository: TodoRepository, Sendable {
       fetch: { databaseConnection in
         try TodoRecord.activeRequest(for: query)
           .fetchAll(databaseConnection)
-          .map { $0.domainValue() }
       },
+      transform: { records in records.map { $0.domainValue() } },
       onError: { error in
         Log.error("Todo database observation failed: \(error)", category: .data)
       },

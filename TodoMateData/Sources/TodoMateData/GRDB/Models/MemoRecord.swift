@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 import TodoMateDomain
 
-struct MemoRecord: Codable, FetchableRecord, PersistableRecord, Identifiable, Sendable {
+struct MemoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Identifiable, Sendable {
   static let databaseTableName = "memo"
 
   enum CodingKeys: String, CodingKey {

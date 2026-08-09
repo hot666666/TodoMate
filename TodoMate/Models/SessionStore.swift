@@ -50,15 +50,24 @@ final class SessionStore {
   // MARK: - Session State
 
   private(set) var user: User?
-  var userId: String { user?.id ?? "" }
-  var userGroupId: String { user?.groupId ?? "" }
-  var hasGroup: Bool { user?.groupId.isEmpty == false }
+  var userId: String {
+    user?.id ?? ""
+  }
+
+  var userGroupId: String {
+    user?.groupId ?? ""
+  }
+
+  var hasGroup: Bool {
+    user?.groupId.isEmpty == false
+  }
 
   private(set) var groupMembers: [User] = [] {
     didSet {
       groupMemberIds = groupMembers.map(\.id)
       groupMemberDisplayNames = Dictionary(
-        uniqueKeysWithValues: groupMembers.map { ($0.id, $0.displayName) })
+        uniqueKeysWithValues: groupMembers.map { ($0.id, $0.displayName) },
+      )
     }
   }
 
@@ -115,14 +124,16 @@ final class SessionStore {
       groupMembers = session.groupMembers
       groupMemberIds = session.groupMembers.map(\.id)
       groupMemberDisplayNames = Dictionary(
-        uniqueKeysWithValues: session.groupMembers.map { ($0.id, $0.displayName) })
+        uniqueKeysWithValues: session.groupMembers.map { ($0.id, $0.displayName) },
+      )
 
       authState = .authenticated
       emit(
         .loggedIn(
           userId: session.currentUser.id, groupId: session.currentUser.groupId,
           memberIds: groupMemberIds,
-        ))
+        ),
+      )
       Log.info("Authenticated: \(session.currentUser.displayName)", category: .auth)
 
       // Update with latest data from server
@@ -158,7 +169,8 @@ final class SessionStore {
         continuation.yield(
           .loggedIn(
             userId: currentUser.id, groupId: currentUser.groupId, memberIds: self.groupMemberIds,
-          ))
+          ),
+        )
       } else if case .unauthenticated = self.authState {
         continuation.yield(.loggedOut)
       }
@@ -282,9 +294,7 @@ extension SessionStore {
 
   static let local: SessionStore = {
     let store = SessionStore(container: .preview) // Use preview container as dummy
-    store.user = User(
-      id: "local-user", displayName: "Me", groupId: "",
-    )
+    store.user = .local
     store.authState = .authenticated
     return store
   }()

@@ -35,10 +35,6 @@ jobs:
           # 경로 설정 (프로젝트 구조에 따라 수정)
           echo "RESOURCES_DIR=Resources" >> $GITHUB_ENV
 
-      - name: Decode GoogleService-Info.plist
-        run: |
-          echo ${{ secrets.GOOGLE_SERVICE_INFO }} | base64 --decode > GoogleService-Info.plist
-
       - name: Install Apple certificate and provisioning profile
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
