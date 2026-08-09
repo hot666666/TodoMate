@@ -8,15 +8,15 @@
 import Foundation
 
 public protocol LegacyImportRepository: Sendable {
-  /// Fetch stored Todos from legacy (Firestore) database with pagination
+  /// Fetch stored Todos from a legacy data source with pagination
   /// - Parameters:
   ///   - userId: Target User ID
-  ///   - lastSnapshot: The last document snapshot from the previous fetch (for pagination)
+  ///   - lastSnapshot: The pagination cursor from the previous fetch
   ///   - limit: Number of documents to fetch per batch
   /// - Returns: A tuple containing the fetched Todos and the last snapshot for the next fetch
   func fetchLegacyTodos(userId: String, lastSnapshot: Any?, limit: Int) async throws -> (todos: [Todo], lastSnapshot: Any?)
 
-  /// Fetch stored Memo from legacy (Firestore) database
+  /// Fetch stored Memo from a legacy data source
   /// - Parameter userId: Target User ID
   /// - Returns: The user's memo if exists, otherwise nil
   func fetchLegacyMemo(userId: String) async throws -> Memo?

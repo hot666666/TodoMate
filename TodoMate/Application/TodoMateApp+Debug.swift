@@ -20,21 +20,6 @@
       ProcessInfo.processInfo.arguments.contains("-use-mock-container")
     }
 
-    /// 에뮬레이터 사용 여부 (런타임 테스트용)
-    static var isUsingEmulator: Bool {
-      ProcessInfo.processInfo.arguments.contains("-use-emulator")
-    }
-
-    /// Firebase 설정 (에뮬레이터 또는 프로덕션)
-    @MainActor
-    static func configureFirebase() {
-      if isUsingEmulator {
-        TodoMateDataConfiguration.configure(mode: .emulator)
-      } else {
-        TodoMateDataConfiguration.configure()
-      }
-    }
-
     /// DI Container 생성 (Mock 또는 실제)
     @MainActor
     static func makeContainer() -> AppDIContainer? {

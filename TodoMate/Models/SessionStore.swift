@@ -86,7 +86,7 @@ final class SessionStore {
 
   // MARK: - Auth Listening
 
-  /// Firebase Auth 상태 변화를 감지하고 자동으로 이벤트 방출
+  /// 인증 상태 변화를 감지하고 자동으로 이벤트 방출
   func startListeningToAuthChanges() async {
     for await storedUid in listenAuthStateUseCase.run() {
       if let uid = storedUid {

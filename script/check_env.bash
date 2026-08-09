@@ -14,7 +14,6 @@ swiftformat --version
 swiftlint version
 
 echo -e "\n--- Backend & Script ---"
-firebase --version
 node -v
 java -version
 python3 --version

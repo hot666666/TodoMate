@@ -92,14 +92,13 @@ class MyTests: XCTestCase {
 Swift Testing의 `@Suite`는 **`init() async throws`를 지원**합니다.
 
 ```swift
-@Suite("Firebase Tests")
-struct FirebaseTests {
-    let repository: TodoRepository
+@Suite("Repository Tests")
+struct RepositoryTests {
+    let repository: StubTodoRepository
 
     // ✅ async throws init 지원
     init() async throws {
-        try await FirestoreReference.shared.resetAllCollections()
-        repository = FirestoreTodoRepository()
+        repository = StubTodoRepository()
     }
 
     @Test func createTodo() async throws {
@@ -260,7 +259,7 @@ xcodebuild test \
 
 ```bash
 # ❌ 잘못된 사용 (폴더 이름)
--skip-testing:TodoMateTests/Firebase
+-skip-testing:TodoMateTests/Repository
 
 # ✅ 올바른 사용 (테스트 struct 이름)
 -skip-testing:TodoMateTests/TodoRepositoryTests
@@ -268,7 +267,7 @@ xcodebuild test \
 ```
 
 > [!IMPORTANT]
-> 테스트 파일이 `Firebase/TodoRepositoryTests.swift`에 있더라도, 필터링은 `struct TodoRepositoryTests` 이름으로 해야 합니다.
+> 테스트 파일이 `Repository/TodoRepositoryTests.swift`에 있더라도, 필터링은 `struct TodoRepositoryTests` 이름으로 해야 합니다.
 
 ---
 
@@ -288,7 +287,7 @@ extension Tag {
 }
 
 // 적용
-@Suite("Firebase Tests", .tags(.integration))
+@Suite("Repository Tests", .tags(.integration))
 struct TodoRepositoryTests { }
 ```
 
@@ -298,7 +297,7 @@ struct TodoRepositoryTests { }
 |------|------|
 | **Test Plan** | Xcode에서 Test Plan을 생성하고 Tag로 필터링 설정 후 `-testPlan` 옵션 사용 |
 | **명시적 지정** | `-only-testing`, `-skip-testing`으로 테스트 클래스명 직접 지정 |
-| **Test Target 분리** | Firebase 테스트를 별도 Target으로 분리 |
+| **Test Target 분리** | 통합 테스트를 별도 Target으로 분리 |
 
 > [!CAUTION]
 > `-test-tag`, `-skip-test-tag` 옵션은 **xcodebuild에 존재하지 않습니다.**
@@ -306,17 +305,17 @@ struct TodoRepositoryTests { }
 ### 현실적인 접근: 명시적 테스트 클래스 지정
 
 ```just
-# Firebase 테스트 제외
+# 앱 단위 테스트만 실행
 test-unit:
     xcodebuild test \
         -scheme TodoMate \
         -destination 'platform=macOS' \
         -only-testing:TodoMateTests
 
-# Firebase 테스트만 실행 (별도 타겟)
+# 통합 테스트만 실행 (별도 타겟이 있는 경우)
 test-integration:
     xcodebuild test \
         -scheme TodoMate \
         -destination 'platform=macOS' \
-        -only-testing:TodoMateFirebaseTests
+        -only-testing:TodoMateIntegrationTests
 ```
