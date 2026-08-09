@@ -6,25 +6,19 @@
 //
 
 import Foundation
-import SwiftData
 import Testing
+@testable import TodoMateData
 import TodoMateDomain
 
-@testable import TodoMateData
-
 @Suite("Local Memo Repository Tests", .serialized)
-@MainActor
 struct LocalMemoRepositoryTests {
-  let repository: SwiftDataMemoRepositoryImpl
-  let container: ModelContainer
+  let database: GRDBDatabase
+  let repository: GRDBMemoRepository
   let testUserId = "local-user"
 
   init() async throws {
-    // Setup in-memory SwiftData container
-    let schema = Schema([SDMemo.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    container = try ModelContainer(for: schema, configurations: [config])
-    repository = SwiftDataMemoRepositoryImpl(modelContainer: container)
+    database = try GRDBDatabase(storage: .inMemory)
+    repository = GRDBMemoRepository(database: database)
   }
 
   // MARK: - Create & Read
@@ -55,6 +49,18 @@ struct LocalMemoRepositoryTests {
     let updated = results.first { $0.id == memo.id }
 
     #expect(updated?.content == "Updated")
+  }
+
+  @Test("Updating a missing memo fails")
+  func updateMissingMemoFails() async throws {
+    let memo = Memo(owner: testUserId, content: "Missing")
+    var didThrow = false
+    do {
+      try await repository.update(memo)
+    } catch {
+      didThrow = true
+    }
+    #expect(didThrow)
   }
 
   // MARK: - Delete
@@ -102,5 +108,29 @@ struct LocalMemoRepositoryTests {
     let count = try await repository.fetchCount(userId: testUserId)
 
     #expect(count == 1)
+  }
+
+  @Test("Reads memos for the requested owners")
+  func readsMemosForRequestedOwners() async throws {
+    try await repository.create(Memo(owner: testUserId, content: "Mine"))
+    try await repository.create(Memo(owner: "other", content: "Other"))
+
+    let oneOwner = try await repository.readAllByUserId(testUserId, useCache: false)
+    let multipleOwners = try await repository.readAllByUserIds(["other"], useCache: false)
+
+    #expect(oneOwner.map(\.content) == ["Mine"])
+    #expect(multipleOwners.map(\.content) == ["Other"])
+  }
+
+  @Test("Observation emits database changes")
+  func observationEmitsChanges() async throws {
+    let stream = repository.observeMemos()
+    var iterator = stream.makeAsyncIterator()
+    #expect(await iterator.next()?.isEmpty == true)
+
+    try await repository.create(Memo(owner: testUserId, content: "Observed"))
+
+    let updated = await iterator.next()
+    #expect(updated?.map(\.content) == ["Observed"])
   }
 }

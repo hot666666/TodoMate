@@ -6,25 +6,19 @@
 //
 
 import Foundation
-import SwiftData
 import Testing
+@testable import TodoMateData
 import TodoMateDomain
 
-@testable import TodoMateData
-
 @Suite("Local Todo Repository Tests", .serialized)
-@MainActor
 struct LocalTodoRepositoryTests {
-  let repository: SwiftDataTodoRepositoryImpl
-  let container: ModelContainer
+  let database: GRDBDatabase
+  let repository: GRDBTodoRepository
   let testUserId = "local-user"
 
   init() async throws {
-    // Setup in-memory SwiftData container
-    let schema = Schema([SDTodo.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    container = try ModelContainer(for: schema, configurations: [config])
-    repository = SwiftDataTodoRepositoryImpl(modelContainer: container)
+    database = try GRDBDatabase(storage: .inMemory)
+    repository = GRDBTodoRepository(database: database)
   }
 
   // MARK: - Create & Read
@@ -62,6 +56,18 @@ struct LocalTodoRepositoryTests {
     #expect(updated?.status == .complete)
   }
 
+  @Test("Updating a missing todo fails")
+  func updateMissingTodoFails() async throws {
+    let todo = Todo(owner: testUserId, content: "Missing")
+    var didThrow = false
+    do {
+      try await repository.update(todo)
+    } catch {
+      didThrow = true
+    }
+    #expect(didThrow)
+  }
+
   // MARK: - Delete
 
   @Test("Deletes todo locally")
@@ -83,7 +89,7 @@ struct LocalTodoRepositoryTests {
     let today = Date()
     let calendar = Calendar.current
     let startOfDay = calendar.startOfDay(for: today)
-    let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!.addingTimeInterval(-1)
+    let endOfDay = try #require(calendar.date(byAdding: .day, value: 1, to: startOfDay)?.addingTimeInterval(-1))
 
     // 1. One active today
     let todo1 = Todo(
@@ -108,7 +114,7 @@ struct LocalTodoRepositoryTests {
     )
 
     // 3. One active tomorrow (out of range)
-    let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+    let tomorrow = try #require(calendar.date(byAdding: .day, value: 1, to: today))
     let todo3 = Todo(
       id: UUID().uuidString,
       content: "Active Tomorrow",
@@ -127,5 +133,30 @@ struct LocalTodoRepositoryTests {
     let count = try await repository.fetchCount(query: query)
 
     #expect(count == 1)
+  }
+
+  @Test("Applies owner and status filters")
+  func appliesAllFilters() async throws {
+    try await repository.create(Todo(owner: testUserId, content: "Mine", status: .inProgress))
+    try await repository.create(Todo(owner: "other", content: "Other", status: .inProgress))
+    try await repository.create(Todo(owner: testUserId, content: "Done", status: .complete))
+
+    let results = try await repository.readAll(
+      query: TodoQuery().owner(userId: testUserId).status(.inProgress),
+      useCache: false,
+    )
+    #expect(results.map(\.content) == ["Mine"])
+  }
+
+  @Test("Observation emits database changes")
+  func observationEmitsChanges() async throws {
+    let stream = repository.observeTodos(query: TodoQuery().owner(userId: testUserId))
+    var iterator = stream.makeAsyncIterator()
+    #expect(await iterator.next()?.isEmpty == true)
+
+    try await repository.create(Todo(owner: testUserId, content: "Observed"))
+
+    let updated = await iterator.next()
+    #expect(updated?.map(\.content) == ["Observed"])
   }
 }

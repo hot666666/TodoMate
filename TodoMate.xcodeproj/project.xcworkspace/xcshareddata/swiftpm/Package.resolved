@@ -2,6 +2,15 @@
   "originHash" : "f0ccc6264ff39514c0d7c80f1460eb34b4d914765d33403a1485658b1c3f6755",
   "pins" : [
     {
+      "identity" : "grdb.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/groue/GRDB.swift.git",
+      "state" : {
+        "revision" : "b83108d10f42680d78f23fe4d4d80fc88dab3212",
+        "version" : "7.11.1"
+      }
+    },
+    {
       "identity" : "simpleoverlaysystem",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hot666666/SimpleOverlaySystem",
