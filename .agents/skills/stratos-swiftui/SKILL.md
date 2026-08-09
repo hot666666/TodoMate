@@ -102,7 +102,7 @@ class UserViewModel {
     var name: String = ""
     var email: String = ""
     var isLoading: Bool = false
-    
+
     func updateProfile() {
         // Update properties - views observing this will update automatically
         isLoading = true
@@ -114,7 +114,7 @@ class UserViewModel {
 // VIEW:
 struct ProfileView: View {
     @State private var viewModel = UserViewModel()
-    
+
     var body: some View {
         VStack(spacing: 16) {
             TextField("Name", text: $viewModel.name)
@@ -217,8 +217,8 @@ struct MyCustomButtonStyle: ButtonStyle {
         configuration.label
             .padding()
             .background(
-                configuration.isPressed 
-                    ? Color.gray.opacity(0.8) 
+                configuration.isPressed
+                    ? Color.gray.opacity(0.8)
                     : Color.blue
             )
             .foregroundStyle(.white)

@@ -81,10 +81,10 @@ actor UserRepository {
         if let cached = cache[id] {
             return cached
         }
-        
+
         // Then perform async work
         let user = try await api.fetch(id: id)
-        
+
         // Store result after async work completes
         cache[id] = user
         return user
@@ -109,18 +109,18 @@ actor ImageCache {
         if let cached = cache[url] {
             return cached
         }
-        
+
         // Check if already downloading
         if let task = inFlight[url] {
             return try await task.value
         }
-        
+
         // Start download task
         let task = Task {
             try await downloadImage(url)
         }
         inFlight[url] = task
-        
+
         do {
             let image = try await task.value
             cache[url] = image
@@ -160,17 +160,17 @@ struct Point: Sendable {
 final class ThreadSafeCounter {
     private var value = 0
     private let lock = NSLock()
-    
-    func increment() { 
-        lock.lock(); 
-        value += 1; 
-        lock.unlock() 
+
+    func increment() {
+        lock.lock();
+        value += 1;
+        lock.unlock()
     }
-    
-    func getValue() -> Int { 
-        lock.lock(); 
-        defer { lock.unlock() }; 
-        return value 
+
+    func getValue() -> Int {
+        lock.lock();
+        defer { lock.unlock() }
+        return value
     }
 }
 ```
@@ -184,10 +184,10 @@ final class ThreadSafeCounter {
 ```swift
 // INSTEAD OF: Unstructured tasks in a loop
 // for url in urls {
-//     Task { 
-//         do { 
-//             let data = try await fetch(url) 
-//             results.append(data) 
+//     Task {
+//         do {
+//             let data = try await fetch(url)
+//             results.append(data)
 //         } catch {
 //             // Handle error
 //         }
@@ -198,11 +198,11 @@ final class ThreadSafeCounter {
 func fetchAll(_ urls: [URL]) async throws -> [Data] {
     try await withThrowingTaskGroup(of: Data.self) { group in
         for url in urls {
-            group.addTask { 
-                try await fetch(url) 
+            group.addTask {
+                try await fetch(url)
             }
         }
-        
+
         var results: [Data] = []
         for try await data in group {
             results.append(data)
@@ -353,7 +353,7 @@ public extension Array where Element: Sortable {
 
 Follow the core rejection criteria from stratos-core:
 - **Stringly-Typed APIs**: Use enums instead of strings
-- **Boolean Traps**: Use semantic enums instead of booleans  
+- **Boolean Traps**: Use semantic enums instead of booleans
 - **Implicit Any**: Use concrete types
 
 Additional rejections for Swift libraries:
