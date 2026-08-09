@@ -8,7 +8,6 @@
 import Common
 import Sparkle
 import SwiftUI
-import TodoMateData
 import WidgetKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
@@ -37,19 +36,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
 
   func applicationDidResignActive(_: Notification) {
     WidgetCenter.shared.reloadAllTimelines()
-  }
-
-  func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-    // Firestore gRPC 연결 종료 후 앱 종료
-    Task { @MainActor in
-      do {
-        try await FirestoreReference.shared.terminate()
-      } catch {
-        // 종료 실패해도 앱은 종료되어야 함
-      }
-      sender.reply(toApplicationShouldTerminate: true)
-    }
-    return .terminateLater
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {

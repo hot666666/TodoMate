@@ -26,13 +26,10 @@ struct TodoMateApp: App {
   @State private var memoStore: MemoStore
 
   init() {
-    // Firebase 및 GoogleSignIn 설정 후, DI Container 생성
     let container: AppDIContainer
     #if DEBUG
-      DebugConfiguration.configureFirebase()
       container = DebugConfiguration.makeContainer() ?? Self.composeContainer()
     #else
-      TodoMateDataConfiguration.configure()
       container = Self.composeContainer()
     #endif
     appDIContainer = container
@@ -147,25 +144,16 @@ private extension TodoMateApp {
   }
 
   static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
-    let firestoreReference = FirestoreReference.shared
-    let authService = FirebaseAuthService()
-    let userRepo = FirestoreUserRepository(reference: firestoreReference)
-    let todoRepo = FirestoreTodoRepository(reference: firestoreReference)
-    let messageRepo = FirestoreMessageRepository(reference: firestoreReference)
-    let groupRepo = FirestoreGroupRepository(reference: firestoreReference)
-
-    let connectivityRepo = FirestoreConnectivityRepository(reference: firestoreReference)
-    let legacyImportRepo = LegacyImportRepositoryImpl(reference: firestoreReference)
     let messageReadTracker = MessageReadTrackerImpl(userDefaults: userDefaults)
 
     return PublicDIContainer(
-      userRepository: userRepo,
-      todoRepository: todoRepo,
-      messageRepository: messageRepo,
-      groupRepository: groupRepo,
-      connectivityRepository: connectivityRepo,
-      legacyImportRepository: legacyImportRepo,
-      authService: authService,
+      userRepository: StubUserRepository(),
+      todoRepository: StubTodoRepository(),
+      messageRepository: StubMessageRepository(),
+      groupRepository: StubGroupRepository(),
+      connectivityRepository: StubConnectivityRepository(),
+      legacyImportRepository: StubLegacyImportRepository(),
+      authService: StubAuthService(),
       messageReadTracker: messageReadTracker,
     )
   }

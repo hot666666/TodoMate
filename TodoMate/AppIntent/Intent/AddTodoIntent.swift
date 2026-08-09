@@ -42,7 +42,7 @@ struct AddTodoIntent: AppIntent {
 
   @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<TodoEntity> {
-    // 로컬 Todo는 owner를 ""로 설정 (AppIntent는 Firebase 미사용)
+    // 로컬 Todo는 owner를 ""로 설정
     let sanitizedContent = content.replacingOccurrences(of: "\n", with: " ")
 
     let todo = Todo(

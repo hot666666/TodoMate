@@ -26,7 +26,6 @@ final class TodoMateUITests: XCTestCase {
     // UI tests must launch the application that they test.
     let app = XCUIApplication()
     if ProcessInfo.processInfo.environment["USE_EMULATOR"] != nil {
-      app.launchArguments.append("-use-emulator")
     }
     app.launch()
 

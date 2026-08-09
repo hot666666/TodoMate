@@ -29,7 +29,7 @@ struct AddMemoIntent: AppIntent {
 
   @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<MemoEntity> {
-    // 로컬 Memo는 owner를 ""로 설정 (AppIntent는 Firebase 미사용)
+    // 로컬 Memo는 owner를 ""로 설정
     let memo = Memo(
       owner: "",
       content: content,

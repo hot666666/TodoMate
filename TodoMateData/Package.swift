@@ -14,8 +14,6 @@ let package = Package(
   dependencies: [
     .package(path: "../TodoMateDomain"),
     .package(path: "../Common"),
-    .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "12.7.0"),
-    .package(url: "https://github.com/google/GoogleSignIn-iOS.git", from: "9.0.0"),
   ],
   targets: [
     .target(
@@ -23,20 +21,10 @@ let package = Package(
       dependencies: [
         "TodoMateDomain",
         "Common",
-        .product(name: "FirebaseCore", package: "firebase-ios-sdk"),
-        .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
-        .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
-        .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
       ],
     ),
-    // SwiftData 등 Firebase 외 Data 레이어 테스트
     .testTarget(
       name: "TodoMateDataTests",
-      dependencies: ["TodoMateData"],
-    ),
-    // Firebase 에뮬레이터를 사용하는 통합 테스트
-    .testTarget(
-      name: "TodoMateDataFirebaseTests",
       dependencies: ["TodoMateData"],
     ),
   ],
