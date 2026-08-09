@@ -3,7 +3,7 @@
 ## 프로젝트 개요
 
 TodoMate는 SwiftUI와 Clean Architecture로 만든 macOS 할 일 앱입니다. 개인 할 일은
-SwiftData에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재 mock 구현을 사용합니다.
+GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재 mock 구현을 사용합니다.
 
 - 지원 플랫폼: macOS 26 이상
 - 언어·동시성: Swift 6.2 이상, strict concurrency
@@ -23,7 +23,7 @@ SwiftData에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 �
 | ----------------- | --------------------------------------------------------- |
 | `TodoMate/`       | 앱 진입점, DI, SwiftUI 화면, Store                        |
 | `TodoMateDomain/` | 순수 Swift 도메인 모델과 유스케이스. 프레임워크 의존 금지 |
-| `TodoMateData/`   | SwiftData 저장소 구현과 외부 연동                         |
+| `TodoMateData/`   | GRDB 저장소 구현과 외부 연동                              |
 | `Common/`         | 여러 모듈에서 공유하는 유틸리티                           |
 
 새 기능은 다음 경로를 기본으로 따릅니다.
@@ -36,7 +36,7 @@ SwiftData에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 �
 6. 화면·Store: `TodoMate/Features/`, `TodoMate/Models/`
 
 뷰에서는 `@Environment(DIContainer.self)`로 등록된 의존성을 사용합니다. Domain의
-타입이나 Repository 프로토콜에 SwiftData·SwiftUI 의존성을 추가하지 않습니다.
+타입이나 Repository 프로토콜에 GRDB·SwiftUI 의존성을 추가하지 않습니다.
 
 ## 명령어와 검증
 

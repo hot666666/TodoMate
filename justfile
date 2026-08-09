@@ -29,7 +29,7 @@ test-domain:
 # =============================================================================
 # Data Tests (SPM)
 # =============================================================================
-# Data unit tests (SwiftData 등)
+# Data unit tests (GRDB 등)
 test-data:
     @mkdir -p {{LOG_DIR}}
     @echo "🧪 Running TodoMateData unit tests..."

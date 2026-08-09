@@ -44,7 +44,7 @@ flowchart LR
 | `MemoGridItem` | `pasteboard.setString(memo.content)` — 클립보드 복사 | ✅ 붙여넣으면 정상 텍스트 | ❌ JSON 덩어리 |
 | `MemoEntity` (App Intents) | Spotlight/단축어에 노출 | ✅ | ❌ |
 | `TodoMateWidget` | 위젯 본문 표시 | ✅ | ❌ |
-| `SDMemo` (SwiftData) | 로컬 영속화 | ✅ | ✅ |
+| `MemoRecord` (GRDB) | 로컬 영속화 | ✅ | ✅ |
 | `MemoRepositoryImpl` (Firebase) | 원격 동기화 | ✅ | ✅ |
 | `Memo.wordCount` / `isEmpty` | 단어 수, 빈 메모 판정 | ✅ 대체로 맞음 | ❌ 항상 non-empty |
 
@@ -106,7 +106,7 @@ Slopad의 ROADMAP도 같은 편이다:
 | `Memo.content` 타입 | `String` 유지 | `String` (JSON 인코딩) 또는 신규 필드 |
 | 위 6개 소비자 | **전부 무변경** | 6개 중 5개 수정 |
 | 기존 메모 마이그레이션 | 불필요 | 필요 |
-| Domain/Data/Widget 변경 | **없음** | 엔티티·SwiftData 모델·Firebase 스키마·위젯 |
+| Domain/Data/Widget 변경 | **없음** | 엔티티·GRDB 모델·원격 스키마·위젯 |
 | 왕복 무손실 | ⚠️ 부분적 (§4) | ✅ 완전 |
 | 사람이 읽을 수 있음 | ✅ | ❌ |
 | 다른 앱과 호환 | ✅ 복붙·내보내기 자연스러움 | ❌ |
@@ -208,7 +208,7 @@ revision의 그 테스트를 확인하고, 앱 저장 호환성에 해당하는 
 | 8개 `BlockKind` 전수 | 각각 인코딩/디코딩 |
 | 4개 인라인 마크 + 조합 | 중첩, 인접, 경계 |
 | 중첩 리스트 | 3단계까지 |
-| **기존 메모 회귀** | 현재 SwiftData에 있는 실제 메모들을 `decode` → `encode` → 원문과 비교. **차이가 나는 것들을 눈으로 확인** |
+| **기존 메모 회귀** | 현재 GRDB에 있는 실제 메모들을 `decode` → `encode` → 원문과 비교. **차이가 나는 것들을 눈으로 확인** |
 | 미지원 구문 | 진단과 함께 fail-closed하고 기존 `Memo.content`가 보존되는지 |
 | 빈 문자열 / 공백만 | `isEmpty` 판정이 기존과 일치 (영구 삭제 경로에 영향) |
 
