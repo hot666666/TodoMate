@@ -1,0 +1,4 @@
+interface:
+  display_name: "Swift Secure Logging"
+  short_description: "Build privacy-aware Swift logging systems"
+  default_prompt: "Use $swift-secure-logging to design and implement a privacy-aware Swift logging system."
