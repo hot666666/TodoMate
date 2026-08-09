@@ -1,8 +1,0 @@
-# Agent가 읽지 않을 파일/폴더
-
-# 비공개 폴더
-private/
-
-# Firebase 설정 파일
-FirebaseConfig/
-GoogleService-Info.plist

@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "skills": {
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/grill-me/SKILL.md",
+      "computedHash": "f361db4e15e6bfd562a9282b1dccda513910a50061f9e838ce017be9c69dde3f"
+    },
+    "grill-with-docs": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/grill-with-docs/SKILL.md",
+      "computedHash": "9c460cbd94fd3c63cdef967dbdb6e66ca687103cdc380cd37834e4d10b738f78"
+    },
+    "grilling": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/grilling/SKILL.md",
+      "computedHash": "4ebdd12fe61ff3abf20cff6683740e2b9b3739454be0a3f4a928a1c4d07d6b34"
+    },
+    "handoff": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/handoff/SKILL.md",
+      "computedHash": "ad03e8d4ea3cbbff66420eb7ba3cc375b5cbe1821a2449b53e863256cf5b5cde"
+    },
+    "stratos-core": {
+      "source": "peterfriese/Stratos",
+      "sourceType": "github",
+      "skillPath": "stratos-core/SKILL.md",
+      "computedHash": "057ceac70be86d7a35df7fcd7b0e9330f8ab80308bf1b008c46122707c20bb1d"
+    },
+    "stratos-swift": {
+      "source": "peterfriese/Stratos",
+      "sourceType": "github",
+      "skillPath": "stratos-swift/SKILL.md",
+      "computedHash": "4e4ded05fc765213497d02a4be39ce589b46b7bd07b197ef5bdf6b69788ae065"
+    },
+    "stratos-swiftui": {
+      "source": "peterfriese/Stratos",
+      "sourceType": "github",
+      "skillPath": "stratos-swiftui/SKILL.md",
+      "computedHash": "8b12661fc43dfc46a2bb125003786154ec662563f7deadc0fdd8519b94adafca"
+    },
+    "swift-secure-logging": {
+      "source": "hot666666/skills",
+      "sourceType": "github",
+      "skillPath": "skills/swift-secure-logging/SKILL.md",
+      "computedHash": "54e1c11edd0d9151eddb3c34f74477dbedd1ff54197b51d0aa571ad4aff67fb0"
+    },
+    "swiftui-liquid-glass": {
+      "source": "Dimillian/Skills",
+      "sourceType": "github",
+      "skillPath": "swiftui-liquid-glass/SKILL.md",
+      "computedHash": "e4d3634171bc6caa7cc8d15f58cd2fb848dab4744493edc56ec14f4b2c8521a0"
+    },
+    "swiftui-ui-patterns": {
+      "source": "Dimillian/Skills",
+      "sourceType": "github",
+      "skillPath": "swiftui-ui-patterns/SKILL.md",
+      "computedHash": "f58d51fe4569f9eff10c45a4ed6859c9f5e3eefca7827e819de840141da67995"
+    },
+    "swiftui-view-refactor": {
+      "source": "Dimillian/Skills",
+      "sourceType": "github",
+      "skillPath": "swiftui-view-refactor/SKILL.md",
+      "computedHash": "eefd3e1e72a17ca627f8e50fce173efafaa23eb66515f562f4b5fca88325cb33"
+    },
+    "to-spec": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/to-spec/SKILL.md",
+      "computedHash": "7e07d4cfabd1a4f61627ebe2705601784fae7b9aca7e13af3e201ace75738200"
+    },
+    "uikit-coding-style": {
+      "source": "hot666666/skills",
+      "sourceType": "github",
+      "skillPath": "skills/uikit-coding-style/SKILL.md",
+      "computedHash": "0d1a2d52c95f3ffd12f6938236aecc5fa190df4029a46823189a5471fb3d365a"
+    },
+    "xcuitest-page-object-patterns": {
+      "source": "hot666666/skills",
+      "sourceType": "github",
+      "skillPath": "skills/xcuitest-page-object-patterns/SKILL.md",
+      "computedHash": "722667645dd346572e5fabc7cefa54f590a0cd1ed8d7f9e98ffe93ace5351a65"
+    }
+  }
+}

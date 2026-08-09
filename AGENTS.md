@@ -1,145 +1,103 @@
-# Agent Guide for TodoMate
+# TodoMate 에이전트 가이드
 
-This file provides guidance to the agent when working with code in this repository.
+## 프로젝트 개요
 
-## Project Overview
+TodoMate는 SwiftUI와 Clean Architecture로 만든 macOS 할 일 앱입니다. 개인 할 일은
+SwiftData에 저장하고, 그룹 피드·채팅 등 협업 기능은 Firebase와 동기화합니다.
 
-TodoMate is a native macOS todo application built entirely in SwiftUI following Clean Architecture principles.
-It supports personal todos with SwiftData, group collaboration features including shared feeds and chat, and syncs data through Firebase.
+- 지원 플랫폼: macOS 26 이상
+- 언어·동시성: Swift 6.2 이상, strict concurrency
+- 상태 관리: `@Observable` 기반 Store
 
-**Target Platform**: macOS 26+
+## 작업 전 확인
 
-## Build Commands
+1. `git status --short`로 기존 변경을 확인합니다.
+2. 요청과 관련된 코드·테스트·문서를 먼저 탐색합니다.
+3. 사용자가 만든 무관한 변경은 수정·스테이징·삭제하지 않습니다.
+4. 새 의존성, 외부 서비스 변경, 데이터 마이그레이션은 필요한 경우 먼저 범위와
+   검증 방법을 명확히 합니다.
 
-All commands use `just` (command runner). Logs are saved to `.test-logs/`.
+## 모듈 경계
 
-```bash
-# Build
-just build
+| 모듈              | 책임                                                      |
+| ----------------- | --------------------------------------------------------- |
+| `TodoMate/`       | 앱 진입점, DI, SwiftUI 화면, Store                        |
+| `TodoMateDomain/` | 순수 Swift 도메인 모델과 유스케이스. 프레임워크 의존 금지 |
+| `TodoMateData/`   | SwiftData·Firebase 등 저장소 구현과 외부 연동             |
+| `Common/`         | 여러 모듈에서 공유하는 유틸리티                           |
 
-# Tests (by layer)
-just test-domain          # Domain layer unit tests (swift test)
-just test-data            # Data layer unit tests (swift test)
-just test-data-integration # Data layer Firebase tests (requires emulator)
-just test-app             # App unit tests (xcodebuild)
-just test-app-runtime     # App runtime/UI tests (requires emulator)
-just test-all             # Run all tests in order
+새 기능은 다음 경로를 기본으로 따릅니다.
 
-# Screenshots
-just ui-screenshots       # Capture all screens
-SCREENS=personal_board,memo just ui-screenshots  # Specific screens
+1. 도메인 모델: `TodoMateDomain/Sources/TodoMateDomain/Entity/`
+2. Repository 프로토콜: `TodoMateDomain/Sources/TodoMateDomain/Protocol/`
+3. 유스케이스: `TodoMateDomain/Sources/TodoMateDomain/UseCase/`
+4. 구현체: `TodoMateData/Sources/TodoMateData/`
+5. 의존성 등록: `TodoMate/Application/Dependency/`
+6. 화면·Store: `TodoMate/Features/`, `TodoMate/Models/`
 
-# Utilities
-just clean-logs           # Clear test logs
-just start-emulator       # Start Firebase emulator
-just stop-emulator        # Stop Firebase emulator
-```
+뷰에서는 `@Environment(DIContainer.self)`로 등록된 의존성을 사용합니다. Domain의
+타입이나 Repository 프로토콜에 Firebase·SwiftData·SwiftUI 의존성을 추가하지 않습니다.
 
-## Architecture
+## 명령어와 검증
 
-### Modular Package Structure
+모든 표준 검증은 `justfile`의 명령을 우선 사용합니다. 로그는 `.test-logs/`에
+생성되며 커밋하지 않습니다.
 
-```
-TodoMate/                    # Xcode project (Presentation layer)
-├── Application/             # App entry, DI, Navigation
-├── Features/                # SwiftUI Views per feature
-└── Models/                  # @Observable stores
+| 변경 범위                               | 실행할 검증                                                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| Swift 소스, Xcode 프로젝트, 패키지 설정 | `just build`                                                                 |
+| Domain 로직                             | `just test-domain`                                                           |
+| Data 로직                               | `just test-data`                                                             |
+| Firebase 연동                           | `just test-data-integration` (에뮬레이터 필요)                               |
+| 앱 Store·서비스                         | `just test-app`                                                              |
+| 런타임/UI 동작                          | `just test-app-runtime` (에뮬레이터 필요)                                    |
+| 포맷·린트                               | `just pre-commit`                                                            |
+| 스크린샷                                | `just ui-screenshots` 또는 `SCREENS=personal_board,memo just ui-screenshots` |
 
-TodoMateDomain/              # SPM package (Domain layer)
-├── Entity/                  # Business models (User, Todo, Memo, etc.)
-└── UseCase/                 # Business logic protocols & implementations
+`just pre-commit`은 포맷과 린트를 자동 수정할 수 있습니다. 실행 뒤에는 수정된 파일을
+검토하고 필요한 파일만 명시적으로 스테이징합니다. 문서 또는 GitHub 템플릿만 바꿨다면
+해당 파일의 문법 검사와 `git diff --check`로 충분하며 앱 빌드는 요구하지 않습니다.
 
-TodoMateData/                # SPM package (Data layer)
-├── *Impl.swift              # Firebase/SwiftData implementations
-├── Configuration/           # Firebase/emulator setup
-└── Errors/                  # Domain-specific error types
+## 구현 규칙
 
-Common/                      # SPM package (Shared utilities)
-└── Logger, Extensions, etc.
-```
-
-### Key Architectural Patterns
-
-- **Clean Architecture**: Domain layer is pure Swift with no framework dependencies
-- **Protocol-based DI**: All dependencies managed through `DIContainer`
-- **@Observable Stores**: App-wide state via `Store`
-- **Swift Concurrency**: `async/await` throughout, strict concurrency compliance
-
-### Dependency Injection
-
-`DIContainer` (in `Application/Dependency/`) wires up all dependencies:
-
-```swift
-// Access in views/stores
-@Environment(DIContainer.self) private var container
-```
-
-### Adding New Features
-
-1. **Entity** → Define in `TodoMateDomain/Sources/Entity/`
-2. **Repository Protocol** → Define in `TodoMateDomain/Sources/UseCase/Protocols/`
-3. **UseCase** → Protocol + implementation in `TodoMateDomain/Sources/UseCase/`
-4. **RepositoryImpl** → Implement in `TodoMateData/Sources/`
-5. **DIContainer** → Register the dependency
-6. **Store/View** → Use via `DIContainer`
-
-### Build Verification
-
-Always verify builds after code changes:
-
-```bash
-just build
-```
+- `@Observable` 클래스는 `@MainActor`로 격리합니다.
+- 비동기 작업은 `async`/`await`와 구조적 동시성을 사용하며 GCD를 새로 도입하지 않습니다.
+- 화면은 상태 표현에 집중하고, 비즈니스 로직은 Store·유스케이스·서비스에 둡니다.
+- UIKit은 별도 요청이 없으면 사용하지 않습니다.
+- 새 핵심 로직에는 단위 테스트를 추가합니다. UI 테스트는 단위 테스트로 검증할 수 없는
+  사용자 흐름에 한정합니다.
+- 민감한 키·토큰·개인 정보와 테스트 로그를 저장소에 추가하지 않습니다.
 
 ## Skills
 
-Specialized agent skills are available in `.agent/skills/`:
+이 저장소는 다음 범주의 작업 Skill을 제공합니다.
 
-| Skill                       | Purpose                                  |
-| --------------------------- | ---------------------------------------- |
-| `swift-concurrency-expert`  | Review/fix Swift 6.2+ concurrency issues |
-| `swiftui-liquid-glass`      | Implement iOS 26+ Liquid Glass UI        |
-| `swiftui-performance-audit` | Diagnose SwiftUI performance issues      |
-| `swiftui-ui-patterns`       | Best practices for SwiftUI components    |
-| `swiftui-view-refactor`     | Refactor views for consistency           |
-| `gh-issue-fix-flow`         | End-to-end GitHub issue fix workflow     |
-| `app-store-changelog`       | Generate release notes from git history  |
-| `pre-commit-hooks`          | Run pre-commit hooks                     |
+- Swift·공개 API·동시성 설계
+- SwiftUI 화면, 재사용 컴포넌트, Liquid Glass, 뷰 리팩터링
+- Swift를 이용한 로깅과 POM 기반 XCUITest
+- 요구사항 명세화, 설계 검증, 작업 인계
 
-Read skill instructions with `view_file` on `SKILL.md` before use.
+작업과 직접 일치하는 Skill이 있으면 적용합니다. Skill은 이 문서의 모듈 경계·검증·변경
+범위 규칙을 보완하며 대체하지 않습니다.
 
-## Workflows
+## 참고 문서
 
-Agent workflows are in `.agent/workflows/`:
+| 주제                       | 위치                               |
+| -------------------------- | ---------------------------------- |
+| 앱 구조                    | `docs/app-architecture.md`         |
+| Swift Testing              | `docs/swift-testing-guide.md`      |
+| XCTest(UI)                 | `docs/xctest-ui-test.md`           |
+| SwiftUI Toolbar API(macOS) | `docs/macos-26-toolbar-guide.md`   |
+| 키보드 단축키              | `docs/macos-keyboard-shortcuts.md` |
+| Nostr 마이그레이션 계획    | `docs/nostr/README.md`             |
+| Slopad 에디터 계획         | `docs/slopad-editor/README.md`     |
+| 반복 실패 런북             | `docs/agent-known-failures.md`     |
 
-- `/development-workflow` - TDD-based development process
-- `/commit` - Commit with proper conventional messages
-- `/gh-create-pr` - Create GitHub PR
+## 반복 실패 기록
 
-## Documentation
+같은 원인으로 두 번 이상 재발했거나, 환경·도구·검증 절차를 모르면 재현에 시간이 많이
+드는 실패는 `docs/agent-known-failures.md`에 추가합니다. 일회성 구현 버그, 개인 환경
+문제, 원시 테스트 로그는 기록하지 않습니다.
 
-Reference docs in `docs/`:
-
-- [Liquid Glass Guide](docs/liquid-glass-guide.md) - iOS 26+ design system
-- [Swift Concurrency](docs/mediator-with-swift-concurreny.md) - Modern async patterns
-- [Swift Testing](docs/swift-testing-guide.md) - Testing framework guide
-- [XCTest UI Testing](docs/xctest-ui-test.md) - UI testing patterns
-
-Additional rules in `.agent/rules/`:
-
-- `project-rules.md` - Swift/SwiftUI coding standards
-- `git-conventions.md` - Commit message and merge guidelines
-- `DDD.md` - Domain-driven development guide
-
-## UI Screens
-
-Available for screenshot testing:
-
-| Screen            | File                    |
-| ----------------- | ----------------------- |
-| Personal Board    | `personal_board.png`    |
-| Personal Calendar | `personal_calendar.png` |
-| Memo              | `memo.png`              |
-| Group Feed        | `group_feed.png`        |
-| No Groups         | `no_groups.png`         |
-| Settings          | `settings.png`          |
+기록에는 증상, 재현 조건, 확인된 원인, 해결 또는 우회 방법, 검증 명령, 관련 이슈·PR,
+그리고 더 이상 유효하지 않을 때 제거할 조건을 포함합니다.
