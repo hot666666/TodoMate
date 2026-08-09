@@ -14,6 +14,7 @@ let package = Package(
   dependencies: [
     .package(path: "../TodoMateDomain"),
     .package(path: "../Common"),
+    .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.11.1"),
   ],
   targets: [
     .target(
@@ -21,11 +22,15 @@ let package = Package(
       dependencies: [
         "TodoMateDomain",
         "Common",
+        .product(name: "GRDB", package: "GRDB.swift"),
       ],
     ),
     .testTarget(
       name: "TodoMateDataTests",
-      dependencies: ["TodoMateData"],
+      dependencies: [
+        "TodoMateData",
+        .product(name: "GRDB", package: "GRDB.swift"),
+      ],
     ),
   ],
 )
