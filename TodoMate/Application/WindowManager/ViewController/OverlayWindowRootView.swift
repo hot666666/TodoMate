@@ -6,7 +6,6 @@
 //
 
 import SimpleOverlaySystem
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 
@@ -17,7 +16,7 @@ struct OverlayWindowRootView: View {
   let onClose: () -> Void
   let todoBoardStore: TodoBoardStore
 
-  // 임시 상태 관라 (실제 구현 시 Store 등 사용 고려)
+  /// 임시 상태 관라 (실제 구현 시 Store 등 사용 고려)
   @State private var localTodo: EditableTodo
 
   init(
@@ -33,7 +32,8 @@ struct OverlayWindowRootView: View {
       _localTodo = State(initialValue: EditableTodo(from: todo))
     } else {
       _localTodo = State(
-        initialValue: EditableTodo(owner: ""))
+        initialValue: EditableTodo(owner: ""),
+      )
     }
   }
 

@@ -7,8 +7,6 @@
 
 import AppIntents
 import Foundation
-import SwiftData
-import TodoMateData
 import TodoMateDomain
 
 struct TodoEntity: AppEntity {
@@ -47,38 +45,23 @@ struct TodoEntityQuery: EntityQuery {
   private var container: CoreDIContainer
 
   func entities(for identifiers: [String]) async throws -> [TodoEntity] {
-    let container = container.modelContainer
-
-    let context = ModelContext(container)
     var result: [TodoEntity] = []
-
-    // ID 리스트가 많지 않으므로 반복 조회 허용.
-    // 성능 최적화가 필요하면 FetchDescriptor(predicate: id in ids)를 쓸 수 있으나 SwiftData Predicate 복잡성 회피.
     for id in identifiers {
-      let descriptor = FetchDescriptor<SDTodo>(predicate: #Predicate { $0.id == id })
-      if let sdTodo = try? context.fetch(descriptor).first {
-        result.append(TodoEntity(from: sdTodo.toDomain()))
+      if let todo = try await container.localTodoRepository.read(id: id) {
+        result.append(TodoEntity(from: todo))
       }
     }
-
     return result
   }
 
   func suggestedEntities() async throws -> [TodoEntity] {
-    let container = container.modelContainer
-
-    let context = ModelContext(container)
-    // 최근 수정된 순서로 20개 조회
-    var descriptor = FetchDescriptor<SDTodo>(sortBy: [
-      SortDescriptor(\.updatedAt, order: .reverse),
-    ])
-    descriptor.fetchLimit = 20
-
-    do {
-      let sdTodos = try context.fetch(descriptor)
-      return sdTodos.map { TodoEntity(from: $0.toDomain()) }
-    } catch {
-      return []
-    }
+    let todos = try await container.localTodoRepository.readAll(
+      query: TodoQuery(),
+      useCache: false,
+    )
+    return todos
+      .sorted { $0.updatedAt > $1.updatedAt }
+      .prefix(20)
+      .map(TodoEntity.init(from:))
   }
 }

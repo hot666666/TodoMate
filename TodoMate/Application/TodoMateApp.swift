@@ -7,7 +7,6 @@
 
 import AppIntents
 import Common
-import SwiftData
 import SwiftUI
 import TodoMateData
 import TodoMateDomain
@@ -56,7 +55,6 @@ struct TodoMateApp: App {
     MenuBarExtra("TodoMate", systemImage: "checklist") {
       MenuBarView()
         .environment(todoBoardStore)
-        .modelContainer(appDIContainer.core.modelContainer)
     }
     .menuBarExtraStyle(.menu)
 
@@ -65,7 +63,6 @@ struct TodoMateApp: App {
     Window("TodoMate", id: AppSceneID.mainApp.rawValue) {
       MainView(container: appDIContainer)
         .defaultAppStorage(appDIContainer.core.userDefaults)
-        .modelContainer(appDIContainer.core.modelContainer)
         .environment(appDIContainer.core)
         .environment(todoBoardStore)
         .environment(memoStore)
@@ -75,7 +72,7 @@ struct TodoMateApp: App {
         .frame(minWidth: 1000, minHeight: 625)
         .task {
           #if DEBUG
-            MockDataSeeder.seedIfNeeded(container: appDIContainer.core.modelContainer)
+            await MockDataSeeder.seedIfNeeded(container: appDIContainer.core)
           #endif
         }
     }
@@ -134,10 +131,16 @@ private extension TodoMateApp {
     userDefaults: UserDefaults,
     hotKeyManager: HotKeyManager,
   ) -> CoreDIContainer {
-    let container = Self.createSwiftDataModelContainer()
+    let database: GRDBDatabase
+    do {
+      database = try GRDBDatabase()
+    } catch {
+      Log.error("Failed to create GRDB database: \(error)")
+      fatalError("Failed to create GRDB database: \(error)")
+    }
 
     return CoreDIContainer(
-      modelContainer: container,
+      database: database,
       userDefaults: userDefaults,
       hotKeyManager: hotKeyManager,
     )
@@ -156,24 +159,6 @@ private extension TodoMateApp {
       authService: StubAuthService(),
       messageReadTracker: messageReadTracker,
     )
-  }
-
-  static func createSwiftDataModelContainer() -> ModelContainer {
-    let schema = Schema([SDTodo.self, SDMemo.self])
-    let config = ModelConfiguration(
-      AppEnvironment.Container.name,
-      schema: schema,
-      isStoredInMemoryOnly: false,
-    )
-
-    do {
-      let container = try ModelContainer(for: schema, configurations: [config])
-      Log.info("SwiftData ModelContainer created successfully.")
-      return container
-    } catch {
-      Log.error("Failed to create SwiftData ModelContainer: \(error)")
-      fatalError("Failed to create ModelContainer: \(error)")
-    }
   }
 }
 

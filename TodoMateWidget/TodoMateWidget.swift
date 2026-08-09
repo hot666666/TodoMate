@@ -9,7 +9,6 @@
 
 import AppIntents
 import Common
-import SwiftData
 import SwiftUI
 import TodoMateData
 import TodoMateDomain
@@ -32,24 +31,18 @@ struct WidgetTodo: Identifiable {
   let detail: String
 }
 
-// MARK: - Shared Model Container
+// MARK: - Shared Database
 
-@MainActor
 enum WidgetDataContainer {
-  static let shared: ModelContainer = {
-    let schema = Schema([SDTodo.self, SDMemo.self])
-    let config = ModelConfiguration(
-      AppEnvironment.Container.name,
-      schema: schema,
-      isStoredInMemoryOnly: false,
-    )
-
+  static let database: GRDBDatabase = {
     do {
-      return try ModelContainer(for: schema, configurations: [config])
+      return try GRDBDatabase()
     } catch {
-      fatalError("Failed to create widget model container: \(error)")
+      fatalError("Failed to create widget database: \(error)")
     }
   }()
+
+  static let todoRepository = GRDBTodoRepository(database: database)
 }
 
 // MARK: - Timeline Provider
@@ -73,9 +66,9 @@ struct TodoMateTimelineProvider: TimelineProvider {
   }
 
   func getTimeline(in _: Context, completion: @escaping (Timeline<TodoWidgetEntry>) -> Void) {
-    Task { @MainActor in
-      let todos = fetchInProgressTodos()
-      let hasTodosToday = hasAnyTodosToday()
+    Task {
+      let todos = await fetchInProgressTodos()
+      let hasTodosToday = await hasAnyTodosToday()
 
       let isEmpty = todos.isEmpty
       let isAllCompleted = isEmpty && hasTodosToday
@@ -100,49 +93,30 @@ struct TodoMateTimelineProvider: TimelineProvider {
     }
   }
 
-  @MainActor
-  private func fetchInProgressTodos() -> [WidgetTodo] {
+  private func fetchInProgressTodos() async -> [WidgetTodo] {
     do {
-      let container = WidgetDataContainer.shared
-      let context = ModelContext(container)
-
       let today = Calendar.current.startOfDay(for: .now)
-      let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
-      let inProgressStatus = "진행 중"
-
-      let predicate = #Predicate<SDTodo> { todo in
-        todo.date >= today && todo.date < tomorrow && todo.statusRawValue == inProgressStatus
-          && todo.isDeleted == false
-      }
-
-      var descriptor = FetchDescriptor(predicate: predicate)
-      descriptor.sortBy = [SortDescriptor(\SDTodo.createdAt, order: .forward)]
-
-      let sdTodos = try context.fetch(descriptor)
-      return sdTodos.map { WidgetTodo(id: $0.id, content: $0.content, detail: $0.detail) }
+      let end = Calendar.current.date(byAdding: .day, value: 1, to: today)!.addingTimeInterval(-1)
+      let todos = try await WidgetDataContainer.todoRepository.readAll(
+        query: TodoQuery().dateRange(today ... end).status(.inProgress),
+        useCache: false,
+      )
+      return todos.map { WidgetTodo(id: $0.id, content: $0.content, detail: $0.detail) }
     } catch {
+      Log.error("Widget todo fetch failed: \(error)", category: .data)
       return []
     }
   }
 
-  @MainActor
-  private func hasAnyTodosToday() -> Bool {
+  private func hasAnyTodosToday() async -> Bool {
     do {
-      let container = WidgetDataContainer.shared
-      let context = ModelContext(container)
-
       let today = Calendar.current.startOfDay(for: .now)
-      let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
-
-      let predicate = #Predicate<SDTodo> { todo in
-        todo.date >= today && todo.date < tomorrow && todo.isDeleted == false
-      }
-
-      var descriptor = FetchDescriptor(predicate: predicate)
-      descriptor.fetchLimit = 1
-
-      return try context.fetchCount(descriptor) > 0
+      let end = Calendar.current.date(byAdding: .day, value: 1, to: today)!.addingTimeInterval(-1)
+      return try await WidgetDataContainer.todoRepository.fetchCount(
+        query: TodoQuery().dateRange(today ... end),
+      ) > 0
     } catch {
+      Log.error("Widget todo count failed: \(error)", category: .data)
       return false
     }
   }
