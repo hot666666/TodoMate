@@ -190,7 +190,7 @@ Linear 이슈의 `검증 명령`에는 위 명령 중 해당 범위를 정확히
 | XCTest(UI)                 | `docs/xctest-ui-test.md`           |
 | SwiftUI Toolbar API(macOS) | `docs/macos-26-toolbar-guide.md`   |
 | 키보드 단축키              | `docs/macos-keyboard-shortcuts.md` |
-| Nostr 마이그레이션 계획    | `docs/nostr/README.md`             |
+| Deferred RelayLive 연구    | `docs/nostr/README.md`             |
 | Slopad 에디터 계획         | `docs/slopad-editor/README.md`     |
 | 반복 실패 런북             | `docs/agent-known-failures.md`     |
 

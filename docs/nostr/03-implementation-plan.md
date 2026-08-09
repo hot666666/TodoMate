@@ -1,5 +1,9 @@
 # 03. 구현 계획
 
+> [!WARNING]
+> 폐기된 phase plan이다. 현재 MVP에서 이 Live Relay-first 순서를 실행하지 않고
+> [`README.md`](README.md)가 연결한 dependency frontier와 Full Mock evidence policy를 따른다.
+
 > **확정 전제 ([04-open-questions.md](04-open-questions.md) D1~D4)**
 > - **D1** 그룹 = NIP-29 릴레이 관리형
 > - **D2** 릴레이 = 자체 운영(GCP e2-micro) + 공개 릴레이 병행 → [05-relay-operations.md](05-relay-operations.md)
@@ -325,4 +329,3 @@ test-nostr-integration: start-relay
 ## 다음
 
 → [04-open-questions.md](04-open-questions.md): 착수 전에 결정해야 할 것들
-</content>
