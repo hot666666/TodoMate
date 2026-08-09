@@ -11,6 +11,10 @@ build:
         | xcbeautify --quieter \
         || { echo "❌ Build failed. See {{LOG_DIR}}/build.log"; exit 1; }
 
+# 커밋 전 품질 검사 전체 실행 (자동 수정이 포함될 수 있음)
+pre-commit:
+    pre-commit run --all-files --show-diff-on-failure
+
 # =============================================================================
 # Domain Tests (SPM)
 # =============================================================================
