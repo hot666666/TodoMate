@@ -7,8 +7,6 @@
 
 import AppIntents
 import Foundation
-import SwiftData
-import TodoMateData
 import TodoMateDomain
 
 struct MemoEntity: AppEntity {
@@ -41,33 +39,17 @@ struct MemoEntityQuery: EntityQuery {
   private var container: CoreDIContainer
 
   func entities(for identifiers: [String]) async throws -> [MemoEntity] {
-    let container = container.modelContainer
-
-    let context = ModelContext(container)
     var result: [MemoEntity] = []
-
     for id in identifiers {
-      let descriptor = FetchDescriptor<SDMemo>(predicate: #Predicate { $0.id == id })
-      if let sdMemo = try? context.fetch(descriptor).first {
-        result.append(MemoEntity(from: sdMemo.toDomain()))
+      if let memo = try await container.localMemoRepository.read(id: id) {
+        result.append(MemoEntity(from: memo))
       }
     }
-
     return result
   }
 
   func suggestedEntities() async throws -> [MemoEntity] {
-    let container = container.modelContainer
-
-    let context = ModelContext(container)
-    var descriptor = FetchDescriptor<SDMemo>(sortBy: [SortDescriptor(\.updatedAt, order: .reverse)])
-    descriptor.fetchLimit = 20
-
-    do {
-      let sdMemos = try context.fetch(descriptor)
-      return sdMemos.map { MemoEntity(from: $0.toDomain()) }
-    } catch {
-      return []
-    }
+    let memos = try await container.localMemoRepository.readAllByUserId("", useCache: false)
+    return memos.prefix(20).map(MemoEntity.init(from:))
   }
 }

@@ -7,7 +7,6 @@
 
 import AppKit
 import SimpleOverlaySystem
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 import WidgetKit
@@ -38,19 +37,19 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
       backing: .buffered,
       defer: false,
     )
-    /// 윈도우 자체 투명화 설정
+    // 윈도우 자체 투명화 설정
     window.isOpaque = false
     window.backgroundColor = .clear
-    /// 레벨 및 동작 설정
+    // 레벨 및 동작 설정
     window.level = .floating
     window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-    /// 내용물 연결 (이때 contentView가 교체됨)
+    // 내용물 연결 (이때 contentView가 교체됨)
     window.contentViewController = hostingController
-    /// 기타 설정
+    // 기타 설정
     window.isReleasedWhenClosed = false
-    /// 창이 혹시라도 닫히고 이후 접근 시, 메모리 크래시 방지
+    // 창이 혹시라도 닫히고 이후 접근 시, 메모리 크래시 방지
     window.hasShadow = false
-    /// UI 버그 처리
+    // UI 버그 처리
     window.delegate = self
     return window
   }()
@@ -61,18 +60,18 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     super.init()
   }
 
-  // 오버레이가 현재 보이는지 여부
+  /// 오버레이가 현재 보이는지 여부
   var isVisible: Bool {
     window.isVisible
   }
 
-  // 오버레이 닫기
+  /// 오버레이 닫기
   func close() {
     window.orderOut(nil)
     WidgetCenter.shared.reloadAllTimelines()
   }
 
-  // 오버레이 열기
+  /// 오버레이 열기
   func show(with todo: Todo? = nil) {
     guard !isVisible else { return }
 
@@ -85,7 +84,7 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
     }
   }
 
-  // SwiftUI Root View를 업데이트하고 HostingController에 주입
+  /// SwiftUI Root View를 업데이트하고 HostingController에 주입
   private func updateRootView(with todo: Todo?) {
     let rootView = OverlayContainer {
       OverlayWindowRootView(
@@ -95,21 +94,20 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
         },
         todoBoardStore: self.todoBoardStore,
       )
-      .id(UUID()) /// 새로 생성 시, onAppear 재수행
+      .id(UUID()) // 새로 생성 시, onAppear 재수행
     }
     .environment(todoBoardStore)
     .environment(coreDI)
-    .modelContainer(coreDI.modelContainer)
 
     hostingController.rootView = AnyView(rootView)
   }
 
-  // 뷰의 크기를 계산하고 윈도우를 화면 정중앙에 배치
+  /// 뷰의 크기를 계산하고 윈도우를 화면 정중앙에 배치
   private func resizeAndCenterWindow() {
-    /// fittingSize 접근 시 레이아웃 계산이 트리거될 수 있음 (Async로 호출되어야 안전)
+    // fittingSize 접근 시 레이아웃 계산이 트리거될 수 있음 (Async로 호출되어야 안전)
     let fittingSize = hostingController.view.fittingSize
 
-    /// 최소 크기 보장 (TodoSheet size aligned)
+    // 최소 크기 보장 (TodoSheet size aligned)
     let minSize = CGSize(width: 500, height: 800)
 
     let targetSize = CGSize(
@@ -117,20 +115,20 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
       height: max(fittingSize.height, minSize.height),
     )
 
-    /// 화면 중앙 좌표 계산
+    // 화면 중앙 좌표 계산
     guard let screen = NSScreen.main else { return }
     let frame = calculateCenteredFrame(size: targetSize, in: screen)
 
     window.setFrame(frame, display: true)
   }
 
-  // 윈도우를 표시하고 앱을 활성화
+  /// 윈도우를 표시하고 앱을 활성화
   private func activateApp() {
     window.makeKeyAndOrderFront(nil)
     NSApp.activate(ignoringOtherApps: true)
   }
 
-  // 화면 상단 쪽에 프레임을 배치 (캘린더 팝업 공간 확보)
+  /// 화면 상단 쪽에 프레임을 배치 (캘린더 팝업 공간 확보)
   private func calculateCenteredFrame(size: CGSize, in screen: NSScreen) -> NSRect {
     let x = screen.visibleFrame.midX - size.width / 2
     let y = screen.visibleFrame.minY + screen.visibleFrame.height * 0.75 - size.height / 2
