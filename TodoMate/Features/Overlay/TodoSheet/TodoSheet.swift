@@ -45,7 +45,11 @@ struct TodoSheet: View {
       )
       actionBar
     }
-    .onTapBackground { dismissWithConfirmation() }
+    .onTapBackground {
+      Task { @MainActor in
+        dismissWithConfirmation()
+      }
+    }
     .onKeyPress(.escape) {
       dismissWithConfirmation()
       return .handled

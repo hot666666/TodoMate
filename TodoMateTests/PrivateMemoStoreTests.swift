@@ -18,18 +18,39 @@ struct PrivateMemoStoreTests {
   // MARK: - Mock UseCases
 
   final class MockCreateUseCase: CreateLocalMemoUseCase {
-    var runHandler: ((Memo) -> Void)?
-    func run(_ memo: Memo) async throws { runHandler?(memo) }
+    private let invocation = AwaitableInvocation<Memo>()
+
+    func nextInvocation() async throws -> Memo {
+      try await invocation.next()
+    }
+
+    func run(_ memo: Memo) async throws {
+      invocation.record(memo)
+    }
   }
 
   final class MockUpdateUseCase: UpdateLocalMemoUseCase {
-    var runHandler: ((Memo) -> Void)?
-    func run(_ memo: Memo) async throws { runHandler?(memo) }
+    private let invocation = AwaitableInvocation<Memo>()
+
+    func nextInvocation() async throws -> Memo {
+      try await invocation.next()
+    }
+
+    func run(_ memo: Memo) async throws {
+      invocation.record(memo)
+    }
   }
 
   final class MockDeleteUseCase: DeleteLocalMemoUseCase {
-    var runHandler: ((Memo) -> Void)?
-    func run(_ memo: Memo) async throws { runHandler?(memo) }
+    private let invocation = AwaitableInvocation<Memo>()
+
+    func nextInvocation() async throws -> Memo {
+      try await invocation.next()
+    }
+
+    func run(_ memo: Memo) async throws {
+      invocation.record(memo)
+    }
   }
 
   final class MockReadUseCase: ReadLocalMemoUseCase {
@@ -44,10 +65,9 @@ struct PrivateMemoStoreTests {
     }
   }
 
-  final class MockPermanentlyDeleteUseCase: PermanentlyDeleteItemUseCase, @unchecked Sendable {
-    var runHandler: (([DeletedItem]) -> Void)?
+  final class MockPermanentlyDeleteUseCase: PermanentlyDeleteItemUseCase {
     func run(_: DeletedItem) async throws {}
-    func run(_ items: [DeletedItem]) async throws { runHandler?(items) }
+    func run(_: [DeletedItem]) async throws {}
     func runAll() async throws {}
   }
 
@@ -70,15 +90,12 @@ struct PrivateMemoStoreTests {
       permanentlyDeleteUseCase: permanentlyDeleteUC,
     )
 
-    var capturedMemo: Memo?
-    createUC.runHandler = { capturedMemo = $0 }
-
     // When
     store.add(content: "New Memo")
-    try await Task.sleep(for: .milliseconds(50))
+    let receivedMemo = try await createUC.nextInvocation()
 
     // Then
-    #expect(capturedMemo?.content == "New Memo")
+    #expect(receivedMemo.content == "New Memo")
   }
 
   @Test("Update Memo calls UpdateUseCase")
@@ -101,15 +118,12 @@ struct PrivateMemoStoreTests {
     )
 
     let memo = Memo(owner: "me", content: "Updated")
-    var capturedMemo: Memo?
-    updateUC.runHandler = { capturedMemo = $0 }
-
     // When
     store.update(memo)
-    try await Task.sleep(for: .milliseconds(50))
+    let receivedMemo = try await updateUC.nextInvocation()
 
     // Then
-    #expect(capturedMemo?.id == memo.id)
+    #expect(receivedMemo.id == memo.id)
   }
 
   @Test("Delete Memo calls DeleteUseCase")
@@ -132,14 +146,11 @@ struct PrivateMemoStoreTests {
     )
 
     let memo = Memo(owner: "me", content: "Delete me")
-    var capturedMemo: Memo?
-    deleteUC.runHandler = { capturedMemo = $0 }
-
     // When
     store.delete(memo)
-    try await Task.sleep(for: .milliseconds(50))
+    let receivedMemo = try await deleteUC.nextInvocation()
 
     // Then
-    #expect(capturedMemo?.id == memo.id)
+    #expect(receivedMemo.id == memo.id)
   }
 }

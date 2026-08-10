@@ -24,6 +24,7 @@ final class ScreenshotTests: XCTestCase {
     navigator = nil
   }
 
+  @MainActor
   private func launchApp(args: [String] = []) {
     app = XCUIApplication()
     app.launchArguments = ["--ui-testing", "-use-mock-container"] + args
@@ -108,6 +109,7 @@ final class ScreenshotTests: XCTestCase {
 
   // MARK: - Private Helpers
 
+  @MainActor
   private func captureScreen(_ screen: ScreenType, suffix: String? = nil) {
     print("\n🎯 Capturing: \(screen.rawValue)\(suffix ?? "")")
 

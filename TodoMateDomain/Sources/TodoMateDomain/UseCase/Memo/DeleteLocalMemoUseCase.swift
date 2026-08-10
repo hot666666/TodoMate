@@ -5,7 +5,7 @@
 //  Created by hs on 07/02/25.
 //
 
-public protocol DeleteLocalMemoUseCase {
+public protocol DeleteLocalMemoUseCase: Sendable {
   func run(_ memo: Memo) async throws
 }
 

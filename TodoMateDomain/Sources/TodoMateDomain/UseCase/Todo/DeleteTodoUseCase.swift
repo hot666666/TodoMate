@@ -5,7 +5,7 @@
 //  Created by hs on 6/30/25.
 //
 
-public protocol DeleteTodoUseCase {
+public protocol DeleteTodoUseCase: Sendable {
   func run(for userId: String, _ todo: Todo) async throws
 }
 

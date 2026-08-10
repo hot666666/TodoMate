@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum RepositoryEvent<T> {
+public enum RepositoryEvent<T: Sendable>: Sendable {
   case added(T)
   case modified(T)
   case removed(T)

@@ -9,7 +9,8 @@ import SwiftUI
 import TodoMateDomain
 
 @Observable
-class EditableTodo: Identifiable {
+@MainActor
+class EditableTodo: @MainActor Identifiable {
   // 원본 Todo 기록
   var originalTodo: Todo?
   // 새 Todo인지 여부
@@ -60,6 +61,7 @@ extension EditableTodo {
 }
 
 extension Todo {
+  @MainActor
   static func from(_ editable: EditableTodo) -> Todo {
     Todo(
       id: editable.id,

@@ -10,8 +10,8 @@ import Foundation
 import TodoMateDomain
 
 struct TodoEntity: AppEntity {
-  static var defaultQuery = TodoEntityQuery()
-  static var typeDisplayRepresentation: TypeDisplayRepresentation = "Todo"
+  static let defaultQuery = TodoEntityQuery()
+  static let typeDisplayRepresentation: TypeDisplayRepresentation = "Todo"
 
   var id: String
   var content: String

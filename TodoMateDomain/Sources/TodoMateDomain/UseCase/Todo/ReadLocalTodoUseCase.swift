@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol ReadLocalTodoUseCase {
+public protocol ReadLocalTodoUseCase: Sendable {
   func run(date: Date) async throws -> [Todo]
   func run(in range: ClosedRange<Date>) async throws -> [Todo]
   func run(id: String) async throws -> Todo?

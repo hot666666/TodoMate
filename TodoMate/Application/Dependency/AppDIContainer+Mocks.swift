@@ -8,6 +8,7 @@
 import Common
 import Foundation
 import SwiftUI
+import Synchronization
 import TodoMateData
 import TodoMateDomain
 
@@ -282,32 +283,50 @@ import TodoMateDomain
     }
   }
 
-  final class MockTodoRepository: TodoRepository, @unchecked Sendable {
-    var todos: [Todo]
+  final class MockTodoRepository: TodoRepository, Sendable {
+    private let todos: Mutex<[Todo]>
 
     init(todos: [Todo]) {
-      self.todos = todos
+      self.todos = Mutex(todos)
     }
 
     func create(_ todo: Todo) async throws {
-      todos.append(todo)
+      todos.withLock { $0.append(todo) }
     }
 
     func update(_ todo: Todo) async throws {
-      if let index = todos.firstIndex(where: { $0.id == todo.id }) {
-        todos[index] = todo
+      todos.withLock { todos in
+        if let index = todos.firstIndex(where: { $0.id == todo.id }) {
+          todos[index] = todo
+        }
       }
     }
 
     func delete(_ todoId: String) async throws {
-      todos.removeAll { $0.id == todoId }
+      todos.withLock { $0.removeAll { $0.id == todoId } }
     }
 
     func read(id: String) async throws -> Todo? {
-      todos.first { $0.id == id }
+      todos.withLock { $0.first { $0.id == id } }
     }
 
     func readAll(query: TodoQuery, useCache _: Bool) async throws -> [Todo] {
+      todos.withLock { Self.filter($0, query: query) }
+    }
+
+    func observeTodos(query: TodoQuery) -> AsyncStream<[Todo]> {
+      let filteredTodos = todos.withLock { Self.filter($0, query: query) }
+      return AsyncStream { continuation in
+        continuation.yield(filteredTodos)
+        continuation.finish()
+      }
+    }
+
+    func fetchCount(query: TodoQuery) async throws -> Int {
+      todos.withLock { Self.filter($0, query: query).count }
+    }
+
+    private static func filter(_ todos: [Todo], query: TodoQuery) -> [Todo] {
       todos.filter { todo in
         for filter in query.filters {
           switch filter {
@@ -324,125 +343,82 @@ import TodoMateDomain
         return true
       }
     }
-
-    func observeTodos(query: TodoQuery) -> AsyncStream<[Todo]> {
-      AsyncStream { continuation in
-        let filteredTodos = todos.filter { todo in
-          for filter in query.filters {
-            switch filter {
-            case let .owner(userId):
-              if todo.owner != userId { return false }
-            case let .owners(userIds):
-              if !userIds.contains(todo.owner) { return false }
-            case let .dateRange(range):
-              if !range.contains(todo.date) { return false }
-            case let .status(status):
-              if todo.status != status { return false }
-            }
-          }
-          return true
-        }
-        continuation.yield(filteredTodos)
-        continuation.finish()
-      }
-    }
-
-    func fetchCount(query: TodoQuery) async throws -> Int {
-      let filtered = todos.filter { todo in
-        for filter in query.filters {
-          switch filter {
-          case let .owner(userId):
-            if todo.owner != userId { return false }
-          case let .owners(userIds):
-            if !userIds.contains(todo.owner) { return false }
-          case let .dateRange(range):
-            if !range.contains(todo.date) { return false }
-          case let .status(status):
-            if todo.status != status { return false }
-          }
-        }
-        return true
-      }
-      return filtered.count
-    }
   }
 
-  final class MockMemoRepository: MemoRepository, @unchecked Sendable {
-    var memos: [Memo]
+  final class MockMemoRepository: MemoRepository, Sendable {
+    private let memos: Mutex<[Memo]>
     let currentUser: User
 
     init(memo: Memo?, currentUser: User) {
-      memos = memo.map { [$0] } ?? []
+      memos = Mutex(memo.map { [$0] } ?? [])
       self.currentUser = currentUser
     }
 
     func create(_ memo: Memo) async throws {
-      memos.insert(memo, at: 0)
+      memos.withLock { $0.insert(memo, at: 0) }
     }
 
     func update(_ memo: Memo) async throws {
-      if let index = memos.firstIndex(where: { $0.id == memo.id }) {
-        memos[index] = memo
+      memos.withLock { memos in
+        if let index = memos.firstIndex(where: { $0.id == memo.id }) {
+          memos[index] = memo
+        }
       }
     }
 
     func delete(_ memo: Memo) async throws {
-      memos.removeAll { $0.id == memo.id }
+      memos.withLock { $0.removeAll { $0.id == memo.id } }
     }
 
     func read(id: String) async throws -> Memo? {
-      memos.first { $0.id == id }
+      memos.withLock { $0.first { $0.id == id } }
     }
 
     func readAllByUserId(_ userId: String, useCache _: Bool) async throws -> [Memo] {
-      memos.filter { $0.owner == userId }
+      memos.withLock { $0.filter { $0.owner == userId } }
     }
 
     func readAllByUserIds(_ userIds: [String], useCache _: Bool) async throws -> [Memo] {
-      memos.filter { userIds.contains($0.owner) }
+      memos.withLock { $0.filter { userIds.contains($0.owner) } }
     }
 
     func observeMemos() -> AsyncStream<[Memo]> {
-      AsyncStream { continuation in
-        // Default to observing memos for current user if applicable, or all?
-        // Ideally should match repository behavior.
-        // For mock, returning all memos associated with this store instance seems fine
-        // provided they are filtered by user somewhere else or this mock implies single user.
-        // Given MockMemoRepository is initialized with currentUser, limiting to that user makes sense.
-        let userMemos = memos.filter { $0.owner == currentUser.id }
+      // Given MockMemoRepository is initialized with currentUser, limit the snapshot to that user.
+      let userMemos = memos.withLock { $0.filter { $0.owner == currentUser.id } }
+      return AsyncStream { continuation in
         continuation.yield(userMemos)
         continuation.finish()
       }
     }
 
     func fetchCount(userId: String) async throws -> Int {
-      memos.count(where: { $0.owner == userId && !$0.isDeleted })
+      memos.withLock { $0.count(where: { $0.owner == userId && !$0.isDeleted }) }
     }
   }
 
-  final class MockMessageRepository: MessageRepository {
-    var messages: [GroupMessage]
+  final class MockMessageRepository: MessageRepository, Sendable {
+    private let messages: Mutex<[GroupMessage]>
 
     init(messages: [GroupMessage]) {
-      self.messages = messages
+      self.messages = Mutex(messages)
     }
 
     func create(_ message: GroupMessage) throws {
-      messages.append(message)
+      messages.withLock { $0.append(message) }
     }
 
     func update(_: GroupMessage) throws { /* no-op */ }
     func delete(_ messageId: String) async throws {
-      messages.removeAll { $0.id == messageId }
+      messages.withLock { $0.removeAll { $0.id == messageId } }
     }
 
     func readAll(groupId: String, useCache _: Bool) async throws -> [GroupMessage] {
-      messages.filter { $0.groupId == groupId }
+      messages.withLock { $0.filter { $0.groupId == groupId } }
     }
 
     func observeAll(groupId: String) -> AsyncStream<RepositoryEvent<GroupMessage>> {
-      AsyncStream { continuation in
-        let matches = messages.filter { $0.groupId == groupId }
+      let matches = messages.withLock { $0.filter { $0.groupId == groupId } }
+      return AsyncStream<RepositoryEvent<GroupMessage>> { continuation in
         for msg in matches {
           continuation.yield(.added(msg))
         }

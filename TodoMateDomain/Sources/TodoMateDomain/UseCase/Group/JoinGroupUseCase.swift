@@ -5,7 +5,7 @@
 //  Created by agent on 1/9/26.
 //
 
-public protocol JoinGroupUseCase {
+public protocol JoinGroupUseCase: Sendable {
   func execute(groupId: String, userId: String) async throws
 }
 

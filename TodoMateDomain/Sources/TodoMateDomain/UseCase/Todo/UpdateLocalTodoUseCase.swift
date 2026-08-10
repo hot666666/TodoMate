@@ -5,7 +5,7 @@
 //  Created by hs on 07/02/25.
 //
 
-public protocol UpdateLocalTodoUseCase {
+public protocol UpdateLocalTodoUseCase: Sendable {
   func run(_ todo: Todo) async throws
 }
 

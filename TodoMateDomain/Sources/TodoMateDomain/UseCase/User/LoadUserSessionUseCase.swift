@@ -5,12 +5,12 @@
 //  Created by hs on 6/30/25.
 //
 
-public enum LoadUserSessionPhase {
+public enum LoadUserSessionPhase: Sendable {
   case initial // 최초 진입/가입/캐시 우선
   case refresh // 로그인 후/항상 최신 fetch
 }
 
-public protocol LoadUserSessionUseCase {
+public protocol LoadUserSessionUseCase: Sendable {
   func run(for userId: String, phase: LoadUserSessionPhase) async throws -> UserSession
 }
 

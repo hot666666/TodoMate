@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol ReadGroupTodoUseCase {
+public protocol ReadGroupTodoUseCase: Sendable {
   func run(for userIds: [String], in range: ClosedRange<Date>, useCache: Bool) async throws
     -> [String: [Todo]]
 }

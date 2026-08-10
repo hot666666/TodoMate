@@ -14,6 +14,7 @@ import WidgetKit
 // MARK: - OverlayViewController
 
 /// NSWindow(contentViewController) -> NSHostingController(rootView) -> SwiftUI View
+@MainActor
 final class OverlayViewController: NSObject, NSWindowDelegate {
   // MARK: - Dependency
 

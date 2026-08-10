@@ -8,6 +8,7 @@
 import SwiftUI
 import TodoMateDomain
 
+@MainActor
 final class PublicDIContainer {
   // MARK: - Data Layer
 

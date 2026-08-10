@@ -11,11 +11,11 @@ import TodoMateDomain
 
 struct ReadTodosIntent: AppIntent {
   #if DEBUG
-    static var title: LocalizedStringResource = "Show Todos DEBUG"
+    static let title: LocalizedStringResource = "Show Todos DEBUG"
   #else
-    static var title: LocalizedStringResource = "Show Todos"
+    static let title: LocalizedStringResource = "Show Todos"
   #endif
-  static var description: IntentDescription? = "Shows your local todos."
+  static let description: IntentDescription? = "Shows your local todos."
 
   // 필터링 옵션을 추가할 수 있음 (예: "오늘", "내일", "완료됨" 등)
   @Parameter(title: "Date Filter", default: .today)
@@ -25,8 +25,8 @@ struct ReadTodosIntent: AppIntent {
     case today
     case all
 
-    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Date Filter"
-    static var caseDisplayRepresentations: [DateFilterParam: DisplayRepresentation] = [
+    static let typeDisplayRepresentation: TypeDisplayRepresentation = "Date Filter"
+    static let caseDisplayRepresentations: [DateFilterParam: DisplayRepresentation] = [
       .today: "Today",
       .all: "All",
     ]

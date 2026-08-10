@@ -5,7 +5,7 @@
 //  Created by hs on 6/30/25.
 //
 
-public protocol SignInUseCase {
+public protocol SignInUseCase: Sendable {
   func run() async throws
 }
 

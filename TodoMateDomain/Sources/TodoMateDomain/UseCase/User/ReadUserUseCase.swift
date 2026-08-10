@@ -5,7 +5,7 @@
 //  Created by hs on 6/30/25.
 //
 
-public protocol ReadUserUseCase {
+public protocol ReadUserUseCase: Sendable {
   func run(for userId: String, useCache: Bool) async throws -> User?
 }
 

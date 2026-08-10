@@ -5,7 +5,7 @@
 //  Created by hs on 07/02/25.
 //
 
-public protocol UpdateLocalMemoUseCase {
+public protocol UpdateLocalMemoUseCase: Sendable {
   func run(_ memo: Memo) async throws
 }
 

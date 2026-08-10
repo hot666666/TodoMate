@@ -8,7 +8,7 @@
 import Common
 import Foundation
 
-public protocol SyncTodayTodosUseCase {
+public protocol SyncTodayTodosUseCase: Sendable {
   func run(for userId: String, in date: Date) async throws
 }
 
