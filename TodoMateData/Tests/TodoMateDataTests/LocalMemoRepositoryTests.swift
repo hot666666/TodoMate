@@ -6,25 +6,19 @@
 //
 
 import Foundation
-import SwiftData
 import Testing
+@testable import TodoMateData
 import TodoMateDomain
 
-@testable import TodoMateData
-
 @Suite("Local Memo Repository Tests", .serialized)
-@MainActor
 struct LocalMemoRepositoryTests {
-  let repository: SwiftDataMemoRepositoryImpl
-  let container: ModelContainer
+  let database: GRDBDatabase
+  let repository: GRDBMemoRepository
   let testUserId = "local-user"
 
   init() async throws {
-    // Setup in-memory SwiftData container
-    let schema = Schema([SDMemo.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    container = try ModelContainer(for: schema, configurations: [config])
-    repository = SwiftDataMemoRepositoryImpl(modelContainer: container)
+    database = try GRDBDatabase(storage: .inMemory)
+    repository = GRDBMemoRepository(database: database)
   }
 
   // MARK: - Create & Read
@@ -45,7 +39,13 @@ struct LocalMemoRepositoryTests {
 
   @Test("Updates existing memo locally")
   func updateMemo() async throws {
-    var memo = Memo(owner: testUserId, content: "Original")
+    let originalDate = Date(timeIntervalSince1970: 1)
+    var memo = Memo(
+      content: "Original",
+      createdAt: originalDate,
+      updatedAt: originalDate,
+      owner: testUserId,
+    )
     try await repository.create(memo)
 
     memo = memo.withUpdatedContent("Updated")
@@ -55,6 +55,50 @@ struct LocalMemoRepositoryTests {
     let updated = results.first { $0.id == memo.id }
 
     #expect(updated?.content == "Updated")
+    #expect(updated?.updatedAt ?? originalDate > originalDate)
+
+    let memoID = memo.id
+    let record = try await database.writer.read { databaseConnection in
+      try MemoRecord.fetchOne(databaseConnection, key: memoID)
+    }
+    #expect(record?.createdAt == originalDate)
+    #expect(record?.localRevision == 2)
+  }
+
+  @Test("Updating a missing memo fails")
+  func updateMissingMemoFails() async throws {
+    let memo = Memo(owner: testUserId, content: "Missing")
+    var didThrow = false
+    do {
+      try await repository.update(memo)
+    } catch {
+      didThrow = true
+    }
+    #expect(didThrow)
+  }
+
+  @Test("Rejects an update after the memo was deleted")
+  func updateDeletedMemoFails() async throws {
+    var memo = Memo(owner: testUserId, content: "Original")
+    try await repository.create(memo)
+    try await repository.delete(memo)
+
+    memo = memo.withUpdatedContent("Stale update")
+    var didThrow = false
+    do {
+      try await repository.update(memo)
+    } catch {
+      didThrow = true
+    }
+
+    #expect(didThrow)
+    let memoID = memo.id
+    let record = try await database.writer.read { databaseConnection in
+      try MemoRecord.fetchOne(databaseConnection, key: memoID)
+    }
+    #expect(record?.content == "Original")
+    #expect(record?.deletedAt != nil)
+    #expect(record?.localRevision == 2)
   }
 
   // MARK: - Delete
@@ -102,5 +146,29 @@ struct LocalMemoRepositoryTests {
     let count = try await repository.fetchCount(userId: testUserId)
 
     #expect(count == 1)
+  }
+
+  @Test("Reads memos for the requested owners")
+  func readsMemosForRequestedOwners() async throws {
+    try await repository.create(Memo(owner: testUserId, content: "Mine"))
+    try await repository.create(Memo(owner: "other", content: "Other"))
+
+    let oneOwner = try await repository.readAllByUserId(testUserId, useCache: false)
+    let multipleOwners = try await repository.readAllByUserIds(["other"], useCache: false)
+
+    #expect(oneOwner.map(\.content) == ["Mine"])
+    #expect(multipleOwners.map(\.content) == ["Other"])
+  }
+
+  @Test("Observation emits database changes")
+  func observationEmitsChanges() async throws {
+    let stream = repository.observeMemos()
+    var iterator = stream.makeAsyncIterator()
+    #expect(await iterator.next()?.isEmpty == true)
+
+    try await repository.create(Memo(owner: testUserId, content: "Observed"))
+
+    let updated = await iterator.next()
+    #expect(updated?.map(\.content) == ["Observed"])
   }
 }

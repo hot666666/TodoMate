@@ -49,6 +49,12 @@ public struct User: Identifiable, Codable, Equatable, Hashable, Sendable {
 public extension User {
   static let dummy = User(id: "", groupId: "")
 
+  static let local = User(
+    id: "local-user",
+    displayName: "Me",
+    groupId: "",
+  )
+
   static let stub = User(
     id: EntityConstant.User.stubId,
     displayName: EntityConstant.User.stubDisplayName,

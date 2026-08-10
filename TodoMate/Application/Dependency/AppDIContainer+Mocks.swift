@@ -7,7 +7,6 @@
 
 import Common
 import Foundation
-import SwiftData
 import SwiftUI
 import TodoMateData
 import TodoMateDomain
@@ -113,13 +112,11 @@ import TodoMateDomain
 
     @MainActor
     static var mockCore: CoreDIContainer {
-      let schema = Schema([SDTodo.self, SDMemo.self])
-      let config = ModelConfiguration(isStoredInMemoryOnly: true)
       // swiftlint:disable:next force_try
-      let container = try! ModelContainer(for: schema, configurations: [config])
+      let database = try! GRDBDatabase(storage: .inMemory)
       // Use in-memory UserDefaults for test isolation
       return CoreDIContainer(
-        modelContainer: container,
+        database: database,
         userDefaults: .preview,
         hotKeyManager: HotKeyManager(),
       )
@@ -151,7 +148,8 @@ import TodoMateDomain
           detail: "Implement mock data", in: .now,
         ),
         Todo(owner: mainUser.id, content: "Code Review", in: .now).withUpdatedStatus(
-          .inProgress),
+          .inProgress,
+        ),
       ]
 
       let memo = Memo.stub
@@ -182,7 +180,8 @@ import TodoMateDomain
       let todos = [
         Todo(owner: mainUser.id, content: "Personal Task 1", in: .now),
         Todo(owner: mainUser.id, content: "Personal Task 2", in: .now).withUpdatedStatus(
-          .complete),
+          .complete,
+        ),
       ]
 
       let publicContainer = createMockPublicContainer(
@@ -196,7 +195,7 @@ import TodoMateDomain
       return AppDIContainer(coreContainer: mockCore, publicContainer: publicContainer)
     }
 
-    // Helper to create PublicDIContainer with optional user
+    /// Helper to create PublicDIContainer with optional user
     private static func createMockPublicContainer(
       user: User?,
       groupMembers: [User],
@@ -230,7 +229,9 @@ import TodoMateDomain
   final class MockAuthService: AuthService {
     private let userId: String?
 
-    var signedInUserId: String? { userId }
+    var signedInUserId: String? {
+      userId
+    }
 
     init(userId: String?) {
       self.userId = userId
@@ -375,14 +376,19 @@ import TodoMateDomain
       self.currentUser = currentUser
     }
 
-    func create(_ memo: Memo) async throws { memos.insert(memo, at: 0) }
+    func create(_ memo: Memo) async throws {
+      memos.insert(memo, at: 0)
+    }
+
     func update(_ memo: Memo) async throws {
       if let index = memos.firstIndex(where: { $0.id == memo.id }) {
         memos[index] = memo
       }
     }
 
-    func delete(_ memo: Memo) async throws { memos.removeAll { $0.id == memo.id } }
+    func delete(_ memo: Memo) async throws {
+      memos.removeAll { $0.id == memo.id }
+    }
 
     func read(id: String) async throws -> Memo? {
       memos.first { $0.id == id }
@@ -421,9 +427,14 @@ import TodoMateDomain
       self.messages = messages
     }
 
-    func create(_ message: GroupMessage) throws { messages.append(message) }
+    func create(_ message: GroupMessage) throws {
+      messages.append(message)
+    }
+
     func update(_: GroupMessage) throws { /* no-op */ }
-    func delete(_ messageId: String) async throws { messages.removeAll { $0.id == messageId } }
+    func delete(_ messageId: String) async throws {
+      messages.removeAll { $0.id == messageId }
+    }
 
     func readAll(groupId: String, useCache _: Bool) async throws -> [GroupMessage] {
       messages.filter { $0.groupId == groupId }

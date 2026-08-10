@@ -7,7 +7,6 @@
 
 #if DEBUG
   import Common
-  import SwiftData
   import SwiftUI
   import TodoMateData
   import TodoMateDomain
@@ -18,21 +17,6 @@
     /// Mock 컨테이너 사용 여부 (스크린샷 테스트용)
     static var isUsingMock: Bool {
       ProcessInfo.processInfo.arguments.contains("-use-mock-container")
-    }
-
-    /// 에뮬레이터 사용 여부 (런타임 테스트용)
-    static var isUsingEmulator: Bool {
-      ProcessInfo.processInfo.arguments.contains("-use-emulator")
-    }
-
-    /// Firebase 설정 (에뮬레이터 또는 프로덕션)
-    @MainActor
-    static func configureFirebase() {
-      if isUsingEmulator {
-        TodoMateDataConfiguration.configure(mode: .emulator)
-      } else {
-        TodoMateDataConfiguration.configure()
-      }
     }
 
     /// DI Container 생성 (Mock 또는 실제)
@@ -63,75 +47,56 @@
 
   enum MockDataSeeder {
     @MainActor
-    static func seedIfNeeded(container: ModelContainer) {
+    static func seedIfNeeded(container: CoreDIContainer) async {
       guard DebugConfiguration.isUsingMock else { return }
 
-      let context = container.mainContext
-      let todoDescriptor = FetchDescriptor<SDTodo>()
-
       do {
-        if try context.fetchCount(todoDescriptor) > 0 { return }
+        let existingCount = try await container.localTodoRepository.fetchCount(query: TodoQuery())
+        if existingCount > 0 { return }
 
         let today = Date()
-        let calendar = Calendar.current
-
-        let todo1 = SDTodo(
-          content: "Buy Groceries",
-          status: "todo",
-          detail: "",
-          date: today,
-          createdAt: today,
-          updatedAt: today,
-          owner: "user_1",
-        )
-
-        let todo2 = SDTodo(
-          content: "Team Meeting",
-          status: "done",
-          detail: "Prepare quarterly report",
-          date: today,
-          createdAt: today,
-          updatedAt: today,
-          owner: "user_1",
-        )
-
-        let todo3 = SDTodo(
-          content: "Walk the dog",
-          status: "todo",
-          detail: "",
-          date: calendar.date(byAdding: .day, value: 1, to: today) ?? today,
-          createdAt: today,
-          updatedAt: today,
-          owner: "user_1",
-        )
-
-        context.insert(todo1)
-        context.insert(todo2)
-        context.insert(todo3)
-
-        let memo1 = SDMemo(
-          content: "Project Ideas\n\n1. AI Assistant\n2. Smart Home",
-          createdAt: today,
-          updatedAt: today,
-          ownerId: "user_1",
-        )
-
-        let memo2 = SDMemo(
-          content: "Shopping List\n- Milk\n- Eggs\n- Bread",
-          createdAt: calendar.date(byAdding: .day, value: -1, to: today) ?? today,
-          updatedAt: today,
-          ownerId: "user_1",
-        )
-
-        context.insert(memo1)
-        context.insert(memo2)
-
-        try context.save()
-        print("✅ Mock data seeded successfully")
-
+        for todo in todos(for: today) {
+          try await container.localTodoRepository.create(todo)
+        }
+        for memo in memos(for: today) {
+          try await container.localMemoRepository.create(memo)
+        }
+        Log.info("Mock data seeded successfully", category: .data)
       } catch {
-        print("❌ Failed to seed mock data: \(error)")
+        Log.error("Failed to seed mock data: \(error)", category: .data)
       }
+    }
+
+    private static func todos(for today: Date) -> [Todo] {
+      let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today) ?? today
+      return [
+        Todo(
+          content: "Buy Groceries", date: today, createdAt: today, updatedAt: today,
+          owner: "user_1",
+        ),
+        Todo(
+          content: "Team Meeting", status: .complete, detail: "Prepare quarterly report",
+          date: today, createdAt: today, updatedAt: today, owner: "user_1",
+        ),
+        Todo(
+          content: "Walk the dog", date: tomorrow, createdAt: today, updatedAt: today,
+          owner: "user_1",
+        ),
+      ]
+    }
+
+    private static func memos(for today: Date) -> [Memo] {
+      let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today) ?? today
+      return [
+        Memo(
+          content: "Project Ideas\n\n1. AI Assistant\n2. Smart Home",
+          createdAt: today, updatedAt: today, owner: "user_1",
+        ),
+        Memo(
+          content: "Shopping List\n- Milk\n- Eggs\n- Bread",
+          createdAt: yesterday, updatedAt: today, owner: "user_1",
+        ),
+      ]
     }
   }
 

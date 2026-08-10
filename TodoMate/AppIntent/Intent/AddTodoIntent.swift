@@ -6,8 +6,10 @@
 //
 
 import AppIntents
+import Common
 import Foundation
 import TodoMateDomain
+import WidgetKit
 
 struct AddTodoIntent: AppIntent {
   #if DEBUG
@@ -42,11 +44,10 @@ struct AddTodoIntent: AppIntent {
 
   @MainActor
   func perform() async throws -> some IntentResult & ReturnsValue<TodoEntity> {
-    // 로컬 Todo는 owner를 ""로 설정 (AppIntent는 Firebase 미사용)
     let sanitizedContent = content.replacingOccurrences(of: "\n", with: " ")
 
     let todo = Todo(
-      owner: "",
+      owner: User.local.id,
       content: sanitizedContent,
       status: status.asDomain,
       detail: detail ?? "",
@@ -54,6 +55,7 @@ struct AddTodoIntent: AppIntent {
     )
 
     try await container.createLocalTodoUseCase.run(todo)
+    WidgetCenter.shared.reloadTimelines(ofKind: AppEnvironment.Widget.kind)
 
     let entity = TodoEntity(from: todo)
     return .result(value: entity)

@@ -72,8 +72,7 @@ final class MemoStore {
   // MARK: - Actions
 
   func add(content: String) {
-    let localUserId = SessionStore.local.user?.id ?? "local-user"
-    let memo = Memo(owner: localUserId, content: content)
+    let memo = Memo(owner: User.local.id, content: content)
 
     Task {
       do {

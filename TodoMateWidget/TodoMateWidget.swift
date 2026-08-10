@@ -2,14 +2,13 @@
 //  TodoMateWidget.swift
 //  TodoMateWidget
 //
-//  Modern widget displaying in-progress todos with completion buttons.
+//  Read-only widget displaying in-progress todos.
 //
 //  Created by hs on 1/15/26.
 //
 
 import AppIntents
 import Common
-import SwiftData
 import SwiftUI
 import TodoMateData
 import TodoMateDomain
@@ -17,7 +16,7 @@ import WidgetKit
 
 // MARK: - Timeline Entry
 
-struct TodoWidgetEntry: TimelineEntry {
+struct TodoWidgetEntry: TimelineEntry, Sendable {
   let date: Date
   let todos: [WidgetTodo]
   let isEmpty: Bool
@@ -26,30 +25,27 @@ struct TodoWidgetEntry: TimelineEntry {
 
 // MARK: - Widget Todo Model
 
-struct WidgetTodo: Identifiable {
+struct WidgetTodo: Identifiable, Sendable {
   let id: String
   let content: String
   let detail: String
 }
 
-// MARK: - Shared Model Container
+// MARK: - Read-Only Shared Database
 
-@MainActor
 enum WidgetDataContainer {
-  static let shared: ModelContainer = {
-    let schema = Schema([SDTodo.self, SDMemo.self])
-    let config = ModelConfiguration(
-      AppEnvironment.Container.name,
-      schema: schema,
-      isStoredInMemoryOnly: false,
-    )
-
+  static func makeTodoReader() -> GRDBTodoReader? {
     do {
-      return try ModelContainer(for: schema, configurations: [config])
+      guard let database = try GRDBReadOnlyDatabase() else {
+        Log.warning("Widget database is unavailable or requires migration", category: .data)
+        return nil
+      }
+      return GRDBTodoReader(database: database)
     } catch {
-      fatalError("Failed to create widget model container: \(error)")
+      Log.error("Failed to open read-only widget database: \(error)", category: .data)
+      return nil
     }
-  }()
+  }
 }
 
 // MARK: - Timeline Provider
@@ -73,12 +69,14 @@ struct TodoMateTimelineProvider: TimelineProvider {
   }
 
   func getTimeline(in _: Context, completion: @escaping (Timeline<TodoWidgetEntry>) -> Void) {
-    Task { @MainActor in
-      let todos = fetchInProgressTodos()
-      let hasTodosToday = hasAnyTodosToday()
+    Task {
+      let todayTodos = await fetchTodayTodos()
+      let todos = todayTodos
+        .filter { $0.status == .inProgress }
+        .map { WidgetTodo(id: $0.id, content: $0.content, detail: $0.detail) }
 
       let isEmpty = todos.isEmpty
-      let isAllCompleted = isEmpty && hasTodosToday
+      let isAllCompleted = !todayTodos.isEmpty && todayTodos.allSatisfy { $0.status == .complete }
 
       let entry = TodoWidgetEntry(
         date: .now,
@@ -100,50 +98,18 @@ struct TodoMateTimelineProvider: TimelineProvider {
     }
   }
 
-  @MainActor
-  private func fetchInProgressTodos() -> [WidgetTodo] {
+  private func fetchTodayTodos() async -> [Todo] {
     do {
-      let container = WidgetDataContainer.shared
-      let context = ModelContext(container)
-
-      let today = Calendar.current.startOfDay(for: .now)
-      let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
-      let inProgressStatus = "진행 중"
-
-      let predicate = #Predicate<SDTodo> { todo in
-        todo.date >= today && todo.date < tomorrow && todo.statusRawValue == inProgressStatus
-          && todo.isDeleted == false
-      }
-
-      var descriptor = FetchDescriptor(predicate: predicate)
-      descriptor.sortBy = [SortDescriptor(\SDTodo.createdAt, order: .forward)]
-
-      let sdTodos = try context.fetch(descriptor)
-      return sdTodos.map { WidgetTodo(id: $0.id, content: $0.content, detail: $0.detail) }
+      guard let todoReader = WidgetDataContainer.makeTodoReader() else { return [] }
+      let calendar = Calendar.current
+      let startOfDay = calendar.startOfDay(for: .now)
+      guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: startOfDay) else { return [] }
+      return try await todoReader.fetch(
+        query: TodoQuery().dateRange(startOfDay ... tomorrow.addingTimeInterval(-1)),
+      )
     } catch {
+      Log.error("Widget todo fetch failed: \(error)", category: .data)
       return []
-    }
-  }
-
-  @MainActor
-  private func hasAnyTodosToday() -> Bool {
-    do {
-      let container = WidgetDataContainer.shared
-      let context = ModelContext(container)
-
-      let today = Calendar.current.startOfDay(for: .now)
-      let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
-
-      let predicate = #Predicate<SDTodo> { todo in
-        todo.date >= today && todo.date < tomorrow && todo.isDeleted == false
-      }
-
-      var descriptor = FetchDescriptor(predicate: predicate)
-      descriptor.fetchLimit = 1
-
-      return try context.fetchCount(descriptor) > 0
-    } catch {
-      return false
     }
   }
 }
@@ -284,12 +250,9 @@ private struct TodoRowView: View {
 
   var body: some View {
     HStack(spacing: 8) {
-      Button(intent: ToggleTodoStatusIntent(todoId: todo.id)) {
-        Image(systemName: "arrow.right.circle.fill")
-          .font(.system(size: 16))
-          .foregroundStyle(.blue)
-      }
-      .buttonStyle(.plain)
+      Image(systemName: "arrow.right.circle.fill")
+        .font(.system(size: 16))
+        .foregroundStyle(.blue)
 
       VStack(alignment: .leading, spacing: 2) {
         Text(todo.content.isEmpty ? "이름없음" : todo.content)
@@ -312,18 +275,12 @@ private struct TodoRowView: View {
 // MARK: - Widget Configuration
 
 struct TodoMateWidget: Widget {
-  #if DEBUG
-    let kind = "TodoMateWidgetDev"
-  #else
-    let kind = "TodoMateWidget"
-  #endif
-
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: kind, provider: TodoMateTimelineProvider()) { entry in
+    StaticConfiguration(kind: AppEnvironment.Widget.kind, provider: TodoMateTimelineProvider()) { entry in
       TodoMateWidgetEntryView(entry: entry)
     }
     .configurationDisplayName("진행 중인 할 일")
-    .description("오늘의 진행 중인 할 일을 확인하고 완료 처리하세요.")
+    .description("오늘의 진행 중인 할 일을 확인하세요.")
     .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
   }
 }

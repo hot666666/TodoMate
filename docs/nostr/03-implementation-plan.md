@@ -187,12 +187,12 @@ public enum SubscriptionEvent: Sendable {
 **목적**: `SyncTodayTodosUseCase`(Firestore 양방향 동기화)를 **"내 스냅샷 발행 + 남의 스냅샷 구독"** 단방향 모델로 교체.
 
 **작업**
-- `SDGroupSnapshot` — 남의 스냅샷 캐시용 SwiftData 모델 (개인 `SDTodo`와 분리)
+- `GroupSnapshotRecord` — 남의 스냅샷을 저장하는 GRDB materialized cache (개인 `TodoRecord`와 분리)
 - `NostrTodoSnapshotRepository`
   - 발행: 로컬 오늘 Todo → kind **31700** (`d`=날짜, `h`=그룹), **debounce 2초**
   - 구독: `{kinds:[31700], authors:[멤버], "#d":[날짜들]}`
 - `PublishDailySnapshotUseCase` 신설, `SyncTodayTodosUseCase` 대체
-- 아웃박스 큐 (SwiftData) + 지수 백오프 재시도
+- 아웃박스 큐 (로컬 mutation과 같은 GRDB transaction에 기록) + 지수 백오프 재시도
 - `TodoStore`를 구독 기반으로 전환 → **`observeTodos`가 실제로 동작** (현재는 빈 스트림)
 - `fetchCount` 계열을 로컬 계산으로 이전
 
@@ -255,7 +255,7 @@ public enum SubscriptionEvent: Sendable {
 **작업**
 1. **전환 안내 UI**: "그룹을 새로 만들어야 하고, 기존 그룹 채팅 이력은 이전되지 않는다"를 릴리스 노트와 앱 내에서 명시
 2. **그룹 재생성**: 관리자가 Nostr 그룹을 만들고 초대 코드를 배포. 자동 이주는 하지 않음
-3. **데이터**: 개인 Todo/Memo는 이미 SwiftData에 있으므로 **이관 작업 없음**. 실제로 포기하는 것은 기존 그룹 채팅 이력뿐
+3. **데이터**: 개인 Todo/Memo는 이미 GRDB에 있으므로 **추가 이관 작업 없음**. 실제로 포기하는 것은 기존 그룹 채팅 이력뿐
 4. **제거**: Firebase Auth / Firestore SDK, GoogleSignIn, `GoogleService-Info.plist`, `FirebaseConfig/`, `FirebaseEmulator/`, `Firestore*RepositoryImpl`, `NetworkController`의 Firestore 구현
 5. **`LegacyImportRepository`는 남긴다** (구 사용자 데이터 이전 기능). Firebase 의존이 이것 하나 때문에 남는다면, 임포트 기능을 JSON 파일 기반으로 바꿔 Firebase를 완전히 걷어낼지 별도 판단
 6. 문서 갱신: `README.md`, `GEMINI.md`, `docs/app-information.md`, `justfile`(에뮬레이터 타깃 제거)

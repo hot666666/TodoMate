@@ -7,7 +7,6 @@
 //
 
 import Common
-import SwiftData
 import SwiftUI
 import TodoMateDomain
 

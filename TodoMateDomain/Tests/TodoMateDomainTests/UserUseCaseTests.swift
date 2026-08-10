@@ -7,8 +7,21 @@
 
 import Foundation
 import Testing
-
 @testable import TodoMateDomain
+
+@Suite("Stub User Repository Tests")
+struct StubUserRepositoryTests {
+  @Test("Default local principal is used consistently for reads and group membership")
+  func defaultLocalPrincipal() async throws {
+    let repository = StubUserRepository()
+
+    #expect(try await repository.read(userId: User.local.id, useCache: false) == .local)
+    #expect(try await repository.read(userId: "firebase-user", useCache: false) == nil)
+    #expect(try await repository.readAll(useCache: false) == [.local])
+    #expect(try await repository.readAll(groupId: User.local.groupId, useCache: false) == [.local])
+    #expect(try await repository.readAll(groupId: "other", useCache: false).isEmpty)
+  }
+}
 
 // MARK: - UpdateUserUseCase Tests
 

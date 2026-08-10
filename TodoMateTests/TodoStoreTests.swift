@@ -7,9 +7,8 @@
 
 import Foundation
 import Testing
-import TodoMateDomain
-
 @testable import TodoMate
+import TodoMateDomain
 
 @MainActor
 struct TodoStoreTests {
@@ -17,7 +16,7 @@ struct TodoStoreTests {
   func loadWideRange() async throws {
     // Given
     let today = Date()
-    let lastWeek = Calendar.current.date(byAdding: .day, value: -7, to: today)!
+    let lastWeek = try #require(Calendar.current.date(byAdding: .day, value: -7, to: today))
     let userId = "user1"
 
     let todoToday = Todo(owner: userId, content: "Today", in: today)
@@ -41,7 +40,7 @@ struct TodoStoreTests {
   func loadNarrowRangeMerges() async throws {
     // Given
     let today = Date()
-    let lastWeek = Calendar.current.date(byAdding: .day, value: -7, to: today)!
+    let lastWeek = try #require(Calendar.current.date(byAdding: .day, value: -7, to: today))
     let userId = "user1"
 
     let todoToday = Todo(owner: userId, content: "Today Original", in: today)
@@ -84,6 +83,7 @@ struct TodoStoreTests {
       messageRepository: MockMessageRepository(messages: []),
       groupRepository: StubGroupRepository(),
       connectivityRepository: StubConnectivityRepository(),
+      legacyImportRepository: StubLegacyImportRepository(),
       authService: MockAuthService(userId: userId),
       messageReadTracker: StubMessageReadTracker(),
     )

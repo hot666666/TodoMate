@@ -36,17 +36,6 @@
                ReferencedContainer = "container:TodoMate.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "45B526AF2F0F8A450095C87F"
-               BuildableName = "TodoMateFirebaseTests.xctest"
-               BlueprintName = "TodoMateFirebaseTests"
-               ReferencedContainer = "container:TodoMate.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

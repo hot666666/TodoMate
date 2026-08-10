@@ -6,8 +6,10 @@
 //
 
 import AppIntents
+import Common
 import Foundation
 import TodoMateDomain
+import WidgetKit
 
 struct UpdateTodoIntent: AppIntent {
   #if DEBUG
@@ -48,6 +50,7 @@ struct UpdateTodoIntent: AppIntent {
     }
 
     try await container.localTodoRepository.update(updatedTodo)
+    WidgetCenter.shared.reloadTimelines(ofKind: AppEnvironment.Widget.kind)
 
     return .result(value: TodoEntity(from: updatedTodo))
   }

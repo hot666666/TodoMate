@@ -2,15 +2,12 @@
 //  NetworkController.swift
 //  TodoMate
 //
-//  Protocol for controlling Firestore network state.
-//  Allows dependency injection for testing and previews.
+//  Protocol for controlling remote network state.
 //
 //  Created by hs on 1/6/26.
 //
 
 import Foundation
-import TodoMateData
-
 // MARK: - Protocol
 
 protocol NetworkController {
@@ -18,25 +15,7 @@ protocol NetworkController {
   func disableNetwork() async throws
 }
 
-// MARK: - Firestore Implementation
-
-final class FirestoreNetworkController: NetworkController {
-  private let reference: FirestoreReference
-
-  init(reference: FirestoreReference) {
-    self.reference = reference
-  }
-
-  func enableNetwork() async throws {
-    try await reference.db.enableNetwork()
-  }
-
-  func disableNetwork() async throws {
-    try await reference.db.disableNetwork()
-  }
-}
-
-// MARK: - Stub for Previews/Tests
+// MARK: - Mock Implementation
 
 final class StubNetworkController: NetworkController {
   func enableNetwork() async throws { /* no-op */ }

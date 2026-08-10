@@ -1,11 +1,17 @@
 # 테스트 로그 디렉토리
 LOG_DIR := ".test-logs"
+DERIVED_DATA_DIR := ".build/DerivedData"
 
 build:
     @mkdir -p {{LOG_DIR}}
     set -o pipefail && xcodebuild \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
-        -destination 'platform=macOS' \
+        -configuration Debug \
+        -destination 'generic/platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/build-unsigned \
+        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGNING_REQUIRED=NO \
         -quiet 2>&1 \
         | tee {{LOG_DIR}}/build.log \
         | xcbeautify --quieter \
@@ -29,7 +35,7 @@ test-domain:
 # =============================================================================
 # Data Tests (SPM)
 # =============================================================================
-# Data unit tests (SwiftData 등)
+# Data unit tests (GRDB 등)
 test-data:
     @mkdir -p {{LOG_DIR}}
     @echo "🧪 Running TodoMateData unit tests..."
@@ -37,16 +43,6 @@ test-data:
         | tee ../{{LOG_DIR}}/data.log \
         | xcbeautify \
         || { echo "❌ Test failed. See {{LOG_DIR}}/data.log"; exit 1; }
-
-# Data integration tests (Firebase 에뮬레이터 필요)
-test-data-integration: start-emulator
-    @mkdir -p {{LOG_DIR}}
-    @echo "🧪 Running TodoMateData integration tests..."
-    set -o pipefail && cd TodoMateData && swift test --filter TodoMateDataFirebaseTests 2>&1 \
-        | tee ../{{LOG_DIR}}/data-integration.log \
-        | xcbeautify \
-        || { echo "❌ Test failed. See {{LOG_DIR}}/data-integration.log"; just stop-emulator; exit 1; }
-    just stop-emulator
 
 # =============================================================================
 # App Tests (xcodebuild)
@@ -56,8 +52,11 @@ test-app:
     @mkdir -p {{LOG_DIR}}
     @echo "🧪 Running TodoMate app unit tests..."
     set -o pipefail && xcodebuild test \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
+        -configuration Debug \
         -destination 'platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/app-tests \
         -only-testing:TodoMateTests \
         2>&1 \
         | tee {{LOG_DIR}}/app.log \
@@ -65,25 +64,27 @@ test-app:
         || { echo "❌ Test failed. See {{LOG_DIR}}/app.log"; exit 1; }
 
 # App runtime tests (빌드 후 런타임 문제 검증, 스크린샷 제외)
-test-app-runtime: start-emulator
+test-app-runtime:
     @mkdir -p {{LOG_DIR}}
     @echo "🧪 Running TodoMate runtime tests..."
-    set -o pipefail && TEST_RUNNER_USE_EMULATOR=YES xcodebuild test \
+    set -o pipefail && xcodebuild test \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
+        -configuration Debug \
         -destination 'platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/ui-runtime-signed \
         -only-testing:TodoMateUITests \
         -skip-testing:TodoMateUITests/ScreenshotTests \
         2>&1 \
         | tee {{LOG_DIR}}/app-runtime.log \
         | xcbeautify \
-        || { echo "❌ Test failed. See {{LOG_DIR}}/app-runtime.log"; just stop-emulator; exit 1; }
-    just stop-emulator
+        || { echo "❌ Test failed. See {{LOG_DIR}}/app-runtime.log"; exit 1; }
 
 # =============================================================================
 # Combined Tests
 # =============================================================================
 # 전체 테스트 (Domain → Data → App 순서)
-test-all: test-domain test-data test-data-integration test-app test-app-runtime
+test-all: test-domain test-data test-app test-app-runtime
 
 # 로그 정리
 clean-logs:
@@ -99,8 +100,11 @@ ui-screenshots SCREENS="":
     @rm -rf screenshots.xcresult
     @echo "Testing screens: {{ if SCREENS == "" { "ALL" } else { SCREENS } }}"
     set -o pipefail && xcodebuild test \
+        -project TodoMate.xcodeproj \
         -scheme TodoMate \
+        -configuration Debug \
         -destination 'platform=macOS' \
+        -derivedDataPath {{DERIVED_DATA_DIR}}/ui-screenshots-signed \
         $(python3 script/generate_screenshot_test_args.py "{{SCREENS}}") \
         -resultBundlePath ./screenshots.xcresult \
         2>&1 | xcbeautify
@@ -110,21 +114,3 @@ ui-screenshots SCREENS="":
         --output-path ./screenshots/
     @python3 script/rename_screenshots.py ./screenshots
     @echo "📸 Screenshots saved to ./screenshots/"
-
-# =============================================================================
-# Emulator
-# =============================================================================
-start-emulator:
-    @-lsof -ti:8080 | xargs kill -9 2>/dev/null || true
-    @-lsof -ti:4000 | xargs kill -9 2>/dev/null || true
-    @echo "🔥 Starting Firebase emulator..."
-    @cd FirebaseEmulator && firebase emulators:start --only firestore &
-    @sleep 5
-    @nc -z localhost 8080 && echo "✅ Emulator ready on port 8080"
-    @echo ""
-
-stop-emulator:
-    @echo ""
-    @-lsof -ti:8080 | xargs kill -9 2>/dev/null || true
-    @-lsof -ti:4000 | xargs kill -9 2>/dev/null || true
-    @echo "🕯️ Emulator stopped"
