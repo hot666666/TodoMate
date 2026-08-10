@@ -34,6 +34,24 @@ legacy Home/Memo/Group 분리는 migration input이며 목표 제품 모델이 �
 목표 package 생성, schema migration과 TCA 화면 구현은 각각의 Linear 구현 이슈가 소유한다.
 제품 계약 문서는 그 파일을 조용히 이동하거나 구현·검증 완료를 주장하지 않는다.
 
+각 target의 call site, import 방향, 현재 producer/consumer owner map과 이슈별 이동 순서는
+[SPM 경계와 점진적 migration 계획](spm-migration-plan.md)을 따른다. 이 계획은 목표 구조의
+상세 handoff이며 package가 이미 생성되었다는 의미가 아니다.
+
+## Clean Architecture와 의존성 주입
+
+의존성은 Presentation → Application → Domain/SyncContracts 방향으로 안쪽을 향한다.
+GRDB, SyncEngine, E2EE와 Apple KeyStore는 안쪽 계층의 port를 구현하는 concrete adapter이며,
+서로 직접 결합하지 않고 `TodoMate.app` composition root에서 조립한다.
+
+앱 root는 CartLog식 immutable `AppDependencies` value를 만들 수 있지만 이를 전역 service
+locator나 `@Observable` 상태 저장소로 사용하지 않는다. AppFeature는 root dependency를
+feature별 typed Application client로 나누어 TCA에 주입하고, render-only View는 value,
+binding과 callback만 받는다. Preview/TestStore/UI scenario별 mock 조립, Release linkage 금지와
+legacy `CoreDIContainer`/`PublicDIContainer`/`AppDIContainer` 제거 순서는
+[SPM 계획의 Clean Architecture와 dependency composition](spm-migration-plan.md#clean-architecture와-dependency-composition)을
+따른다.
+
 ## 목표 runtime과 ownership
 
 ```mermaid
