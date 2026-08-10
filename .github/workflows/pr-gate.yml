@@ -26,7 +26,6 @@ jobs:
       CI: 'true'
       DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
       PRE_COMMIT_BASE: ${{ github.event.pull_request.base.sha }}
-      TODOMATE_DERIVED_DATA_DIR: ${{ runner.temp }}/TodoMateDerivedData
 
     steps:
       - name: Checkout exact pull request head
@@ -114,6 +113,8 @@ jobs:
 
       - name: Run canonical certificate-free gate
         id: gate
+        env:
+          TODOMATE_DERIVED_DATA_DIR: ${{ runner.temp }}/TodoMateDerivedData
         run: |
           set -euo pipefail
           just test-pr 2>&1 | tee "${RUNNER_TEMP}/test-pr.log"
