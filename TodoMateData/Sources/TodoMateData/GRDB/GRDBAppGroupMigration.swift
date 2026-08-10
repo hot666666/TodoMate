@@ -65,7 +65,7 @@ enum GRDBAppGroupStorage {
     containerResolution(
       primaryAppGroupIdentifier: AppEnvironment.Container.storageAppGroupIdentifier,
       migrationSourceAppGroupIdentifier:
-        AppEnvironment.Container.migrationSourceAppGroupIdentifier,
+      AppEnvironment.Container.migrationSourceAppGroupIdentifier,
       resolve: resolve,
     )
   }
@@ -100,7 +100,7 @@ enum GRDBAppGroupStorage {
     resolution: GRDBAppGroupContainerResolution,
   ) -> GRDBSharedDatabaseLocations? {
     guard let groupURL = resolution.groupURL,
-      let legacyGroupURL = resolution.legacyGroupURL
+          let legacyGroupURL = resolution.legacyGroupURL
     else { return nil }
     return locations(groupURL: groupURL, legacyGroupURL: legacyGroupURL)
   }
@@ -113,7 +113,7 @@ enum GRDBAppGroupStorage {
       groupURL.standardizedFileURL == legacyGroupURL.standardizedFileURL
     let storeURLs =
       legacyStoreURLs(in: groupURL)
-      + (usesCanonicalGroupOnly ? [] : legacyStoreURLs(in: legacyGroupURL))
+        + (usesCanonicalGroupOnly ? [] : legacyStoreURLs(in: legacyGroupURL))
     return GRDBSharedDatabaseLocations(
       databaseURL: databaseURL(in: groupURL),
       legacyDatabaseURL: databaseURL(in: legacyGroupURL),
@@ -175,8 +175,7 @@ enum GRDBAppGroupMigration {
         try removeOrphanedStagingFiles(in: directoryURL, fileManager: fileManager)
         guard fileManager.fileExists(atPath: legacyDatabaseURL.path) else {
           if fileManager.fileExists(atPath: databaseURL.path),
-            validMigrationMarker(at: databaseURL) != nil
-          {
+             validMigrationMarker(at: databaseURL) != nil {
             throw GRDBAppGroupMigrationError.legacySourceChangedAfterMigration(
               legacyDatabaseURL,
             )
@@ -216,9 +215,9 @@ enum GRDBAppGroupMigration {
             throw GRDBAppGroupMigrationError.projectionMismatch
           }
 
-          let marker = MigrationMarker(
+          let marker = try MigrationMarker(
             version: markerVersion,
-            sourceProjection: try migratedSnapshot.signature(),
+            sourceProjection: migratedSnapshot.signature(),
           )
           try write(marker: marker, to: staging)
           guard try readMarker(from: staging) == marker else {
@@ -250,10 +249,10 @@ enum GRDBAppGroupMigration {
     let legacyExists = fileManager.fileExists(atPath: legacyDatabaseURL.path)
     if let marker = validMigrationMarker(at: databaseURL) {
       guard legacyExists,
-        legacySourceMatches(
-          marker: marker,
-          legacyDatabaseURL: legacyDatabaseURL,
-        )
+            legacySourceMatches(
+              marker: marker,
+              legacyDatabaseURL: legacyDatabaseURL,
+            )
       else { return nil }
 
       if databaseIsReady(at: databaseURL, fileManager: fileManager) {
@@ -276,8 +275,8 @@ enum GRDBAppGroupMigration {
     do {
       let reader = try makeReadOnlyPool(at: databaseURL)
       guard try databaseQuickCheckPasses(in: reader),
-        let marker = try readMarker(from: reader),
-        marker.version == markerVersion
+            let marker = try readMarker(from: reader),
+            marker.version == markerVersion
       else { return nil }
       return marker
     } catch {
@@ -365,18 +364,18 @@ enum GRDBAppGroupMigration {
         databaseConnection.columns(in: MemoRecord.databaseTableName).map(\.name),
       )
       guard todoColumns.contains("id"),
-        todoColumns.contains("content"),
-        todoColumns.contains("status"),
-        todoColumns.contains("detail"),
-        todoColumns.contains("date"),
-        todoColumns.contains("createdAt"),
-        todoColumns.contains("updatedAt"),
-        todoColumns.contains("ownerId") || todoColumns.contains("owner"),
-        memoColumns.contains("id"),
-        memoColumns.contains("content"),
-        memoColumns.contains("createdAt"),
-        memoColumns.contains("updatedAt"),
-        memoColumns.contains("ownerId") || memoColumns.contains("owner")
+            todoColumns.contains("content"),
+            todoColumns.contains("status"),
+            todoColumns.contains("detail"),
+            todoColumns.contains("date"),
+            todoColumns.contains("createdAt"),
+            todoColumns.contains("updatedAt"),
+            todoColumns.contains("ownerId") || todoColumns.contains("owner"),
+            memoColumns.contains("id"),
+            memoColumns.contains("content"),
+            memoColumns.contains("createdAt"),
+            memoColumns.contains("updatedAt"),
+            memoColumns.contains("ownerId") || memoColumns.contains("owner")
       else {
         throw GRDBAppGroupMigrationError.projectionMismatch
       }
@@ -384,43 +383,43 @@ enum GRDBAppGroupMigration {
       let todoOwnerColumn = todoColumns.contains("ownerId") ? "ownerId" : "owner"
       let todoDeletedExpression =
         todoColumns.contains("deletedAt")
-        ? "deletedAt"
-        : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
+          ? "deletedAt"
+          : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
       let todoRevisionExpression =
         todoColumns.contains("localRevision")
-        ? "localRevision"
-        : "1"
+          ? "localRevision"
+          : "1"
       let memoOwnerColumn = memoColumns.contains("ownerId") ? "ownerId" : "owner"
       let memoDeletedExpression =
         memoColumns.contains("deletedAt")
-        ? "deletedAt"
-        : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
+          ? "deletedAt"
+          : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
       let memoRevisionExpression =
         memoColumns.contains("localRevision")
-        ? "localRevision"
-        : "1"
+          ? "localRevision"
+          : "1"
 
       let todoRows = try Row.fetchAll(
         databaseConnection,
         sql: """
-          SELECT id, content, status, detail, date, createdAt, updatedAt,
-                 \(todoOwnerColumn) AS ownerId,
-                 \(todoDeletedExpression) AS deletedAt,
-                 \(todoRevisionExpression) AS localRevision
-          FROM todo
-          ORDER BY id
-          """,
+        SELECT id, content, status, detail, date, createdAt, updatedAt,
+               \(todoOwnerColumn) AS ownerId,
+               \(todoDeletedExpression) AS deletedAt,
+               \(todoRevisionExpression) AS localRevision
+        FROM todo
+        ORDER BY id
+        """,
       )
       let memoRows = try Row.fetchAll(
         databaseConnection,
         sql: """
-          SELECT id, content, createdAt, updatedAt,
-                 \(memoOwnerColumn) AS ownerId,
-                 \(memoDeletedExpression) AS deletedAt,
-                 \(memoRevisionExpression) AS localRevision
-          FROM memo
-          ORDER BY id
-          """,
+        SELECT id, content, createdAt, updatedAt,
+               \(memoOwnerColumn) AS ownerId,
+               \(memoDeletedExpression) AS deletedAt,
+               \(memoRevisionExpression) AS localRevision
+        FROM memo
+        ORDER BY id
+        """,
       )
 
       return ProjectionSnapshot(
@@ -433,13 +432,13 @@ enum GRDBAppGroupMigration {
   private static func write(marker: MigrationMarker, to writer: any DatabaseWriter) throws {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
-    let value = String(decoding: try encoder.encode(marker), as: UTF8.self)
+    let value = try String(decoding: encoder.encode(marker), as: UTF8.self)
     try writer.write { databaseConnection in
       try databaseConnection.execute(
         sql: """
-          INSERT INTO localMetadata (key, value) VALUES (?, ?)
-          ON CONFLICT(key) DO UPDATE SET value = excluded.value
-          """,
+        INSERT INTO localMetadata (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        """,
         arguments: [markerKey, value],
       )
     }
@@ -461,12 +460,12 @@ enum GRDBAppGroupMigration {
   private static func readMarker(from reader: any DatabaseReader) throws -> MigrationMarker? {
     try reader.read { databaseConnection in
       guard try databaseConnection.tableExists("localMetadata"),
-        let value = try String.fetchOne(
-          databaseConnection,
-          sql: "SELECT value FROM localMetadata WHERE key = ?",
-          arguments: [markerKey],
-        ),
-        let data = value.data(using: .utf8)
+            let value = try String.fetchOne(
+              databaseConnection,
+              sql: "SELECT value FROM localMetadata WHERE key = ?",
+              arguments: [markerKey],
+            ),
+            let data = value.data(using: .utf8)
       else {
         return nil
       }
@@ -538,7 +537,7 @@ enum GRDBAppGroupMigration {
     let uuidStart = fileName.index(fileName.startIndex, offsetBy: stagingNamePrefix.count)
     let uuidEnd = fileName.index(fileName.endIndex, offsetBy: -suffix.count)
     guard uuidStart < uuidEnd else { return false }
-    return UUID(uuidString: String(fileName[uuidStart..<uuidEnd])) != nil
+    return UUID(uuidString: String(fileName[uuidStart ..< uuidEnd])) != nil
   }
 
   private static func removeSealedWALSidecars(
@@ -565,7 +564,7 @@ enum GRDBAppGroupMigration {
       databaseURL.path, databaseURL.path + "-wal", databaseURL.path + "-shm",
       databaseURL.path + "-journal",
     ]
-    where fileManager.fileExists(atPath: path) {
+      where fileManager.fileExists(atPath: path) {
       try? fileManager.removeItem(atPath: path)
     }
   }

@@ -9,17 +9,17 @@ import TodoMateDomain
 @Suite("AppFeature")
 struct AppFeatureTests {
   @Test("Launch restores selected Project and opens Todo section")
-  func launchRestoration() async {
-    let project = Project(
+  func launchRestoration() async throws {
+    let project = try Project(
       id: .init(rawValue: "project-1"),
-      name: try! ProjectName("Daily"),
+      name: ProjectName("Daily"),
       lifecycle: .local,
       createdAt: Date(timeIntervalSince1970: 1),
-      updatedAt: Date(timeIntervalSince1970: 1)
+      updatedAt: Date(timeIntervalSince1970: 1),
     )
     let snapshot = ProjectWorkspaceSnapshot(
       projects: [project],
-      selectedProjectID: project.id
+      selectedProjectID: project.id,
     )
     let store = TestStore(initialState: AppFeature.State()) {
       AppFeature()
@@ -30,7 +30,7 @@ struct AppFeatureTests {
           continuation.finish()
         } },
         createLocal: { _ in project.id },
-        select: { _ in }
+        select: { _ in },
       )
     }
 
@@ -55,7 +55,7 @@ struct AppFeatureTests {
 
     await store.send(.internal(.snapshotUpdated(.init(
       projects: [first, second],
-      selectedProjectID: second.id
+      selectedProjectID: second.id,
     )))) {
       $0.sidebar.selectedProjectID = second.id
       $0.workspace = .init(project: second, selectedSection: .todo)
@@ -68,7 +68,7 @@ struct AppFeatureTests {
       name: try! ProjectName(name),
       lifecycle: .local,
       createdAt: Date(timeIntervalSince1970: 1),
-      updatedAt: Date(timeIntervalSince1970: 1)
+      updatedAt: Date(timeIntervalSince1970: 1),
     )
   }
 }

@@ -10,13 +10,13 @@ extension XCUIElement {
   func assertExists(
     timeout: TimeInterval = UITestWait.normal,
     file: StaticString = #filePath,
-    line: UInt = #line
+    line: UInt = #line,
   ) -> Self {
     XCTAssertTrue(
       waitForExistence(timeout: timeout),
       "Expected element to exist: \(self)",
       file: file,
-      line: line
+      line: line,
     )
     return self
   }
@@ -25,12 +25,12 @@ extension XCUIElement {
   func waitAndClick(
     timeout: TimeInterval = UITestWait.normal,
     file: StaticString = #filePath,
-    line: UInt = #line
+    line: UInt = #line,
   ) {
     assertExists(timeout: timeout, file: file, line: line)
     let expectation = XCTNSPredicateExpectation(
       predicate: NSPredicate(format: "hittable == true"),
-      object: self
+      object: self,
     )
     let result = XCTWaiter.wait(for: [expectation], timeout: timeout)
     XCTAssertEqual(result, .completed, "Expected element to become hittable", file: file, line: line)

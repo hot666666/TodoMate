@@ -33,7 +33,7 @@ public struct ProjectClient: Sendable {
   public init(
     snapshots: @escaping @Sendable () -> AsyncStream<ProjectWorkspaceSnapshot>,
     createLocal: @escaping @Sendable (CreateLocalProjectCommand) async throws -> ProjectID,
-    select: @escaping @Sendable (ProjectID) async throws -> Void
+    select: @escaping @Sendable (ProjectID) async throws -> Void,
   ) {
     self.snapshots = snapshots
     self.createLocal = createLocal
@@ -49,32 +49,32 @@ public extension ProjectClient {
       MembershipID(rawValue: UUID().uuidString)
     },
     currentAuthorID: ContentAuthorID = ContentAuthorID(rawValue: User.local.id),
-    now: @escaping @Sendable () -> Date = Date.init
+    now: @escaping @Sendable () -> Date = Date.init,
   ) -> Self {
     Self(
       snapshots: { persistence.snapshots() },
       createLocal: { command in
         let instant = now()
-        let project = Project(
+        let project = try Project(
           id: generateID(),
-          name: try ProjectName(command.name),
+          name: ProjectName(command.name),
           lifecycle: .local,
           createdAt: instant,
-          updatedAt: instant
+          updatedAt: instant,
         )
         let ownerMembership = Membership(
           id: generateMembershipID(),
           projectID: project.id,
           authorID: currentAuthorID,
           role: .owner,
-          createdAt: instant
+          createdAt: instant,
         )
         try await persistence.create(project, ownerMembership: ownerMembership, selecting: true)
         return project.id
       },
       select: { projectID in
         try await persistence.select(projectID)
-      }
+      },
     )
   }
 }

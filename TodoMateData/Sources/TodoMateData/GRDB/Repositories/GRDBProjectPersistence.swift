@@ -23,14 +23,14 @@ public final class GRDBProjectPersistence: ProjectPersistence, Sendable {
       transform: { $0 },
       onError: { error in
         Log.error("Project workspace observation failed: \(error)", category: .data)
-      }
+      },
     )
   }
 
   public func create(
     _ project: Project,
     ownerMembership: Membership,
-    selecting: Bool
+    selecting: Bool,
   ) async throws {
     try await database.writer.write { databaseConnection in
       try ProjectRecord(project).insert(databaseConnection)
@@ -38,7 +38,7 @@ public final class GRDBProjectPersistence: ProjectPersistence, Sendable {
       if selecting {
         try ProjectSelectionRecord(
           key: ProjectSelectionRecord.currentKey,
-          projectId: project.id.rawValue
+          projectId: project.id.rawValue,
         ).save(databaseConnection)
       }
     }
@@ -51,13 +51,13 @@ public final class GRDBProjectPersistence: ProjectPersistence, Sendable {
       }
       try ProjectSelectionRecord(
         key: ProjectSelectionRecord.currentKey,
-        projectId: projectID.rawValue
+        projectId: projectID.rawValue,
       ).save(databaseConnection)
     }
   }
 
   private static func fetchSnapshot(
-    _ databaseConnection: Database
+    _ databaseConnection: Database,
   ) throws -> ProjectWorkspaceSnapshot {
     let projects = try ProjectRecord
       .order(ProjectRecord.Columns.createdAt, ProjectRecord.Columns.id)
@@ -65,7 +65,7 @@ public final class GRDBProjectPersistence: ProjectPersistence, Sendable {
       .map { try $0.domainValue() }
     let storedSelection = try ProjectSelectionRecord.fetchOne(
       databaseConnection,
-      key: ProjectSelectionRecord.currentKey
+      key: ProjectSelectionRecord.currentKey,
     )
     let selectedProjectID = storedSelection
       .map { ProjectID(rawValue: $0.projectId) }
@@ -73,7 +73,7 @@ public final class GRDBProjectPersistence: ProjectPersistence, Sendable {
 
     return ProjectWorkspaceSnapshot(
       projects: projects,
-      selectedProjectID: selectedProjectID
+      selectedProjectID: selectedProjectID,
     )
   }
 }
@@ -86,14 +86,14 @@ public extension ProjectClient {
       MembershipID(rawValue: UUID().uuidString)
     },
     currentAuthorID: ContentAuthorID = ContentAuthorID(rawValue: User.local.id),
-    now: @escaping @Sendable () -> Date = Date.init
+    now: @escaping @Sendable () -> Date = Date.init,
   ) -> Self {
     .live(
       persistence: GRDBProjectPersistence(database: database),
       generateID: generateID,
       generateMembershipID: generateMembershipID,
       currentAuthorID: currentAuthorID,
-      now: now
+      now: now,
     )
   }
 }

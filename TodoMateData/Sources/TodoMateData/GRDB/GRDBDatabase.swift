@@ -24,7 +24,7 @@ public final class GRDBDatabase: Sendable {
       try Self.migrator.migrate(queue)
       openedWriter = queue
       notificationBaseName = nil
-    case .file(let url):
+    case let .file(url):
       openedWriter = try Self.openCoordinatedDatabase(at: url, legacyStoreURLs: [])
       notificationBaseName = Self.changeNotificationBaseName(for: url)
     case .shared:

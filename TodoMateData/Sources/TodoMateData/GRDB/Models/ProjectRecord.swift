@@ -33,7 +33,7 @@ struct ProjectRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Se
       name: ProjectName(name),
       lifecycle: lifecycle,
       createdAt: createdAt,
-      updatedAt: updatedAt
+      updatedAt: updatedAt,
     )
   }
 }

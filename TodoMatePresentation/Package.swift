@@ -13,7 +13,7 @@ let package = Package(
     .package(path: "../TodoMateDomain"),
     .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture",
-      exact: "1.26.1"
+      exact: "1.26.1",
     ),
   ],
   targets: [
@@ -25,14 +25,14 @@ let package = Package(
         .product(name: "TodoMateDomain", package: "TodoMateDomain"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         "TodoMateUITestContracts",
-      ]
+      ],
     ),
     .testTarget(
       name: "TodoMatePresentationTests",
       dependencies: [
         "TodoMatePresentation",
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-      ]
+      ],
     ),
-  ]
+  ],
 )

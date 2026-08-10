@@ -1,8 +1,8 @@
 import Foundation
 import Testing
 import TodoMateApplication
-import TodoMateDomain
 @testable import TodoMateData
+import TodoMateDomain
 
 @Suite("GRDB Project persistence")
 struct GRDBProjectPersistenceTests {
@@ -20,7 +20,7 @@ struct GRDBProjectPersistenceTests {
         database: database,
         generateID: { id },
         generateMembershipID: { MembershipID(rawValue: "membership-1") },
-        now: { instant }
+        now: { instant },
       )
       _ = try await client.createLocal(.init(name: "Daily"))
       let membership = try await database.writer.read { connection in

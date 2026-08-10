@@ -5,7 +5,7 @@ private enum ProjectClientKey: DependencyKey {
   static let liveValue = ProjectClient(
     snapshots: { AsyncStream { $0.finish() } },
     createLocal: { _ in throw MissingProjectClient() },
-    select: { _ in throw MissingProjectClient() }
+    select: { _ in throw MissingProjectClient() },
   )
   static let testValue = liveValue
 }

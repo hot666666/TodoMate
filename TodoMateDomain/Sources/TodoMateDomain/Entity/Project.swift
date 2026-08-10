@@ -7,7 +7,9 @@ public struct ProjectID: Hashable, Codable, Sendable, RawRepresentable, CustomSt
     self.rawValue = rawValue
   }
 
-  public var description: String { rawValue }
+  public var description: String {
+    rawValue
+  }
 }
 
 public struct ProjectName: Hashable, Codable, Sendable {
@@ -45,7 +47,7 @@ public struct Project: Equatable, Codable, Identifiable, Sendable {
     name: ProjectName,
     lifecycle: Lifecycle,
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
   ) {
     self.id = id
     self.name = name

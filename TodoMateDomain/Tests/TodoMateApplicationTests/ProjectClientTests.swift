@@ -1,7 +1,7 @@
 import Foundation
 import Testing
-import TodoMateDomain
 @testable import TodoMateApplication
+import TodoMateDomain
 
 @Suite("ProjectClient")
 struct ProjectClientTests {
@@ -15,7 +15,7 @@ struct ProjectClientTests {
       persistence: persistence,
       generateID: { expectedID },
       generateMembershipID: { expectedMembershipID },
-      now: { expectedDate }
+      now: { expectedDate },
     )
 
     let createdID = try await client.createLocal(.init(name: "  Daily  "))
@@ -23,13 +23,13 @@ struct ProjectClientTests {
 
     #expect(createdID == expectedID)
     #expect(snapshot.selectedProjectID == expectedID)
-    #expect(snapshot.projects == [
+    #expect(try snapshot.projects == [
       Project(
         id: expectedID,
-        name: try ProjectName("Daily"),
+        name: ProjectName("Daily"),
         lifecycle: .local,
         createdAt: expectedDate,
-        updatedAt: expectedDate
+        updatedAt: expectedDate,
       ),
     ])
     #expect(await persistence.memberships() == [
@@ -38,7 +38,7 @@ struct ProjectClientTests {
         projectID: expectedID,
         authorID: ContentAuthorID(rawValue: User.local.id),
         role: .owner,
-        createdAt: expectedDate
+        createdAt: expectedDate,
       ),
     ])
   }
@@ -51,7 +51,7 @@ private actor InMemoryProjectPersistence: ProjectPersistence {
   nonisolated func snapshots() -> AsyncStream<ProjectWorkspaceSnapshot> {
     AsyncStream { continuation in
       Task {
-        continuation.yield(await snapshot())
+        await continuation.yield(snapshot())
         continuation.finish()
       }
     }
@@ -70,8 +70,13 @@ private actor InMemoryProjectPersistence: ProjectPersistence {
     current.selectedProjectID = projectID
   }
 
-  func snapshot() -> ProjectWorkspaceSnapshot { current }
-  func memberships() -> [Membership] { storedMemberships }
+  func snapshot() -> ProjectWorkspaceSnapshot {
+    current
+  }
+
+  func memberships() -> [Membership] {
+    storedMemberships
+  }
 
   enum PersistenceError: Error {
     case missingProject

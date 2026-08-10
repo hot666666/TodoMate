@@ -33,7 +33,7 @@ public struct Membership: Equatable, Codable, Identifiable, Sendable {
     projectID: ProjectID,
     authorID: ContentAuthorID,
     role: Role,
-    createdAt: Date
+    createdAt: Date,
   ) {
     self.id = id
     self.projectID = projectID

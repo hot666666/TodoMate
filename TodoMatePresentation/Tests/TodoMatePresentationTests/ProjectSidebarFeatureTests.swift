@@ -19,7 +19,7 @@ struct ProjectSidebarFeatureTests {
           #expect(command.name == "Daily")
           return expectedID
         },
-        select: { _ in }
+        select: { _ in },
       )
     }
 
