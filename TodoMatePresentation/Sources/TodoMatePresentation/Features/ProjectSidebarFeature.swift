@@ -11,13 +11,25 @@ public struct ProjectSidebarFeature: Sendable {
     public var isCreatePresented = false
     public var newProjectName = ""
     public var operation: Operation = .idle
+    public var failureMessage: String?
+
+    public var canConfirmCreate: Bool {
+      operation == .idle && (try? ProjectName(newProjectName)) != nil
+    }
+
+    public var createValidationMessage: String? {
+      let normalizedName = newProjectName.trimmingCharacters(in: .whitespacesAndNewlines)
+      guard !normalizedName.isEmpty, normalizedName.count > ProjectName.maximumLength else {
+        return nil
+      }
+      return "프로젝트 이름은 \(ProjectName.maximumLength)자 이하로 입력해 주세요."
+    }
 
     // swiftlint:disable:next nesting
     public enum Operation: Equatable, Sendable {
       case idle
       case creating
       case selecting(ProjectID)
-      case failed
     }
 
     public init(projects: [Project] = [], selectedProjectID: ProjectID? = nil) {
@@ -60,25 +72,35 @@ public struct ProjectSidebarFeature: Sendable {
     Reduce { state, action in
       switch action {
       case .view(.createButtonTapped):
+        guard state.operation == .idle else { return .none }
         state.newProjectName = ""
         state.isCreatePresented = true
-        state.operation = .idle
+        state.failureMessage = nil
         return .none
 
       case let .view(.createNameChanged(name)):
         state.newProjectName = name
+        state.failureMessage = nil
         return .none
 
       case .view(.createCancelled):
+        guard state.operation != .creating else { return .none }
         state.isCreatePresented = false
         state.newProjectName = ""
         state.operation = .idle
+        state.failureMessage = nil
         return .none
 
       case .view(.createConfirmed):
-        guard state.operation != .creating else { return .none }
+        guard state.canConfirmCreate else {
+          if state.createValidationMessage != nil {
+            state.failureMessage = state.createValidationMessage
+          }
+          return .none
+        }
         let name = state.newProjectName
         state.operation = .creating
+        state.failureMessage = nil
         return .run { send in
           do {
             let projectID = try await projectClient.createLocal(.init(name: name))
@@ -89,8 +111,9 @@ public struct ProjectSidebarFeature: Sendable {
         }
 
       case let .view(.projectSelected(projectID)):
-        guard state.operation != .selecting(projectID) else { return .none }
+        guard state.operation == .idle else { return .none }
         state.operation = .selecting(projectID)
+        state.failureMessage = nil
         return .run { send in
           do {
             try await projectClient.select(projectID)
@@ -104,19 +127,23 @@ public struct ProjectSidebarFeature: Sendable {
         state.isCreatePresented = false
         state.newProjectName = ""
         state.operation = .idle
+        state.failureMessage = nil
         return .none
 
       case .internal(.createFinished(nil)):
-        state.operation = .failed
+        state.operation = .idle
+        state.failureMessage = "프로젝트를 만들지 못했습니다. 다시 시도해 주세요."
         return .none
 
       case let .internal(.selectionFinished(projectID, .success)):
         state.selectedProjectID = projectID
         state.operation = .idle
+        state.failureMessage = nil
         return .none
 
       case .internal(.selectionFinished(_, .failure)):
-        state.operation = .failed
+        state.operation = .idle
+        state.failureMessage = "프로젝트를 선택하지 못했습니다. 다시 시도해 주세요."
         return .none
       }
     }

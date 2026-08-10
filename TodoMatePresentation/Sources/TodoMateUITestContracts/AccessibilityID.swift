@@ -8,6 +8,7 @@ public enum AccessibilityID {
     public static let createButton = "project.sidebar.create"
     public static let createNameField = "project.create.name"
     public static let createConfirmButton = "project.create.confirm"
+    public static let createError = "project.create.error"
 
     public static func row(_ projectID: String) -> String {
       "project.sidebar.row.\(projectID)"

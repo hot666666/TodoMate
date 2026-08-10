@@ -10,6 +10,8 @@ struct ProjectSidebarScreen: View {
     ProjectSidebarView(
       projects: store.projects,
       selectedProjectID: store.selectedProjectID,
+      failureMessage: store.failureMessage,
+      isBusy: store.operation != .idle,
       onCreate: { store.send(.view(.createButtonTapped)) },
       onSelect: { store.send(.view(.projectSelected($0))) },
     )
@@ -27,9 +29,12 @@ struct ProjectSidebarScreen: View {
           set: { store.send(.view(.createNameChanged($0))) },
         ),
         isCreating: store.operation == .creating,
+        canConfirm: store.canConfirmCreate,
+        errorMessage: store.createValidationMessage ?? store.failureMessage,
         onCancel: { store.send(.view(.createCancelled)) },
         onConfirm: { store.send(.view(.createConfirmed)) },
       )
+      .interactiveDismissDisabled(store.operation == .creating)
     }
   }
 }
@@ -37,6 +42,8 @@ struct ProjectSidebarScreen: View {
 private struct ProjectSidebarView: View {
   let projects: [Project]
   let selectedProjectID: ProjectID?
+  let failureMessage: String?
+  let isBusy: Bool
   let onCreate: () -> Void
   let onSelect: (ProjectID) -> Void
 
@@ -51,6 +58,7 @@ private struct ProjectSidebarView: View {
               .frame(maxWidth: .infinity, alignment: .leading)
           }
           .buttonStyle(.plain)
+          .disabled(isBusy)
           .listRowBackground(
             selectedProjectID == project.id ? Color.accentColor.opacity(0.18) : Color.clear,
           )
@@ -59,13 +67,21 @@ private struct ProjectSidebarView: View {
       }
     }
     .safeAreaInset(edge: .bottom) {
-      Button(action: onCreate) {
-        Label("새 프로젝트", systemImage: "plus")
-          .frame(maxWidth: .infinity, alignment: .leading)
+      VStack(alignment: .leading, spacing: 8) {
+        if let failureMessage {
+          Text(failureMessage)
+            .font(.caption)
+            .foregroundStyle(.red)
+        }
+        Button(action: onCreate) {
+          Label("새 프로젝트", systemImage: "plus")
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(.plain)
+        .disabled(isBusy)
+        .accessibilityIdentifier(AccessibilityID.ProjectSidebar.createButton)
       }
-      .buttonStyle(.plain)
       .padding()
-      .accessibilityIdentifier(AccessibilityID.ProjectSidebar.createButton)
     }
   }
 }
@@ -73,6 +89,8 @@ private struct ProjectSidebarView: View {
 private struct ProjectCreateView: View {
   @Binding var name: String
   let isCreating: Bool
+  let canConfirm: Bool
+  let errorMessage: String?
   let onCancel: () -> Void
   let onConfirm: () -> Void
 
@@ -83,12 +101,19 @@ private struct ProjectCreateView: View {
       TextField("프로젝트 이름", text: $name)
         .textFieldStyle(.roundedBorder)
         .accessibilityIdentifier(AccessibilityID.ProjectSidebar.createNameField)
+      if let errorMessage {
+        Text(errorMessage)
+          .font(.caption)
+          .foregroundStyle(.red)
+          .accessibilityIdentifier(AccessibilityID.ProjectSidebar.createError)
+      }
       HStack {
         Spacer()
         Button("취소", action: onCancel)
+          .disabled(isCreating)
         Button("만들기", action: onConfirm)
           .keyboardShortcut(.defaultAction)
-          .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isCreating)
+          .disabled(!canConfirm)
           .accessibilityIdentifier(AccessibilityID.ProjectSidebar.createConfirmButton)
       }
     }
