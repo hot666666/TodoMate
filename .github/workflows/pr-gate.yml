@@ -1,0 +1,130 @@
+name: PR Gate
+
+'on':
+  pull_request:
+    branches:
+      - dev
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  certificate-free:
+    name: TodoMate certificate-free gate
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      CI: 'true'
+      DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
+      PRE_COMMIT_BASE: ${{ github.event.pull_request.base.sha }}
+
+    steps:
+      - name: Checkout exact pull request head
+        # actions/checkout v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install pinned validation tools
+        run: |
+          set -euo pipefail
+
+          tools_root="${RUNNER_TEMP}/todomate-validation-tools"
+          downloads="${tools_root}/downloads"
+          bin_root="${tools_root}/bin"
+          mkdir -p "${downloads}" "${bin_root}"
+
+          download() {
+            local url="$1"
+            local sha256="$2"
+            local destination="$3"
+
+            curl \
+              --fail \
+              --location \
+              --silent \
+              --show-error \
+              --retry 3 \
+              --retry-all-errors \
+              --proto '=https' \
+              --tlsv1.2 \
+              "${url}" \
+              --output "${destination}"
+            printf '%s  %s\n' "${sha256}" "${destination}" \
+              | shasum -a 256 --check -
+          }
+
+          download \
+            'https://github.com/casey/just/releases/download/1.46.0/just-1.46.0-aarch64-apple-darwin.tar.gz' \
+            '438eaf6468a115aa7db93e501cc7e3272f453f6b7083be3863adfab546b23358' \
+            "${downloads}/just.tar.gz"
+          download \
+            'https://github.com/cpisciotta/xcbeautify/releases/download/3.1.4/xcbeautify-3.1.4-arm64-apple-macosx.zip' \
+            '7e1442b90cb474c968b26acc8aaac8839ed0387de0bf05368f13c148b4922082' \
+            "${downloads}/xcbeautify.zip"
+          download \
+            'https://github.com/nicklockwood/SwiftFormat/releases/download/0.59.0/swiftformat.zip' \
+            'a5847d5f9e38bb7acffe0ea565319a5210e65d720ecf629effe66828e772a387' \
+            "${downloads}/swiftformat.zip"
+          download \
+            'https://github.com/realm/SwiftLint/releases/download/0.63.2/portable_swiftlint.zip' \
+            'c59a405c85f95b92ced677a500804e081596a4cae4a6a485af76065557d6ed29' \
+            "${downloads}/swiftlint.zip"
+
+          tar -xzf "${downloads}/just.tar.gz" -C "${bin_root}" just
+          ditto -x -k "${downloads}/xcbeautify.zip" "${bin_root}"
+          ditto -x -k "${downloads}/swiftformat.zip" "${bin_root}"
+          ditto -x -k "${downloads}/swiftlint.zip" "${bin_root}"
+          chmod 0755 \
+            "${bin_root}/just" \
+            "${bin_root}/xcbeautify" \
+            "${bin_root}/swiftformat" \
+            "${bin_root}/swiftlint"
+          printf '%s\n' "${bin_root}" >> "${GITHUB_PATH}"
+
+      - name: Verify exact source and toolchain
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          test "$(uname -m)" = 'arm64'
+          test "$(git rev-parse HEAD)" = "${PR_HEAD_SHA}"
+          git cat-file -e "${PRE_COMMIT_BASE}^{commit}"
+          test "$(xcodebuild -version | sed -n '1p')" = 'Xcode 26.5'
+          test "$(xcodebuild -version | sed -n '2p')" = 'Build version 17F42'
+          swift --version | grep -F 'Apple Swift version 6.3.2'
+          test "$(just --version)" = 'just 1.46.0'
+          test "$(xcbeautify --version)" = '3.1.4'
+          test "$(swiftformat --version)" = '0.59.0'
+          test "$(swiftlint version)" = '0.63.2'
+          script/check_env.bash
+
+      - name: Run canonical certificate-free gate
+        id: gate
+        env:
+          TODOMATE_DERIVED_DATA_DIR: ${{ runner.temp }}/TodoMateDerivedData
+        run: |
+          set -euo pipefail
+          just test-pr 2>&1 | tee "${RUNNER_TEMP}/test-pr.log"
+
+      - name: Upload failure log
+        if: failure() && steps.gate.outcome == 'failure'
+        # actions/upload-artifact v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: pr-gate-${{ github.event.pull_request.number }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/test-pr.log
+          if-no-files-found: error
+          retention-days: 7
