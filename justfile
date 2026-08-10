@@ -1,6 +1,6 @@
 set shell := ["bash", "-euc"]
 
-# Certificate/provisioning-free compile gate for the app and embedded Widget.
+# Certificate/provisioning-free compile gate for the app.
 build:
     derived_data_root="${TODOMATE_DERIVED_DATA_DIR-.build/DerivedData}"; \
     derived_data_path="${derived_data_root}/build-certificate-free"; \

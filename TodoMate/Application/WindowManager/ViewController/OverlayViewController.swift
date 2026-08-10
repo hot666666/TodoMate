@@ -9,7 +9,6 @@ import AppKit
 import SimpleOverlaySystem
 import SwiftUI
 import TodoMateDomain
-import WidgetKit
 
 // MARK: - OverlayViewController
 
@@ -68,7 +67,6 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
   /// 오버레이 닫기
   func close() {
     window.orderOut(nil)
-    WidgetCenter.shared.reloadAllTimelines()
   }
 
   /// 오버레이 열기

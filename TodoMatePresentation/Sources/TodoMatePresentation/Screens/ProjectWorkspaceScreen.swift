@@ -10,8 +10,9 @@ struct ProjectWorkspaceScreen: View {
       projectName: store.project.name.value,
       lifecycleLabel: store.project.lifecycle == .local ? "Local" : "",
       selectedSection: store.selectedSection,
-      onSectionSelected: { store.send(.view(.sectionSelected($0))) }
+      onSectionSelected: { store.send(.view(.sectionSelected($0))) },
     )
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier(AccessibilityID.ProjectWorkspace.root)
   }
 }
@@ -36,7 +37,7 @@ private struct ProjectWorkspaceView: View {
         Spacer()
         Picker("Section", selection: Binding(
           get: { selectedSection },
-          set: { section in onSectionSelected(section) }
+          set: { section in onSectionSelected(section) },
         )) {
           Text("Todo").tag(ProjectWorkspaceFeature.State.Section.todo)
             .accessibilityIdentifier(AccessibilityID.ProjectWorkspace.todoSectionButton)
@@ -57,7 +58,7 @@ private struct ProjectWorkspaceView: View {
         ContentUnavailableView(
           "Todo",
           systemImage: "checklist",
-          description: Text("이 Project의 Todo section입니다.")
+          description: Text("이 Project의 Todo section입니다."),
         )
         .accessibilityIdentifier(AccessibilityID.ProjectTodo.root)
       case .memo:

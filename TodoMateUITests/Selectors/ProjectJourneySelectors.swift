@@ -15,44 +15,44 @@ struct ProjectJourneySelectors: ProjectJourneySelectorsSet {
   let appShell = Selector(
     strategy: .anyByID,
     identifier: AccessibilityID.AppShell.root,
-    description: "Project app shell"
+    description: "Project app shell",
   )
   let createProjectButton = Selector(
     strategy: .buttonByID,
     identifier: AccessibilityID.ProjectSidebar.createButton,
-    description: "Create Project button"
+    description: "Create Project button",
   )
   let projectNameField = Selector(
     strategy: .textFieldByID,
     identifier: AccessibilityID.ProjectSidebar.createNameField,
-    description: "Project name field"
+    description: "Project name field",
   )
   let createConfirmButton = Selector(
     strategy: .buttonByID,
     identifier: AccessibilityID.ProjectSidebar.createConfirmButton,
-    description: "Create Project confirmation"
+    description: "Create Project confirmation",
   )
   let workspace = Selector(
     strategy: .anyByID,
     identifier: AccessibilityID.ProjectWorkspace.root,
-    description: "Project Workspace"
+    description: "Project Workspace",
   )
   let workspaceTitle = Selector(
     strategy: .staticTextByID,
     identifier: AccessibilityID.ProjectWorkspace.title,
-    description: "Project Workspace title"
+    description: "Project Workspace title",
   )
   let todoSection = Selector(
     strategy: .anyByID,
     identifier: AccessibilityID.ProjectTodo.root,
-    description: "Project Todo section"
+    description: "Project Todo section",
   )
 
   func projectRow(id: String) -> Selector {
     Selector(
       strategy: .buttonByID,
       identifier: AccessibilityID.ProjectSidebar.row(id),
-      description: "Project row"
+      description: "Project row",
     )
   }
 }

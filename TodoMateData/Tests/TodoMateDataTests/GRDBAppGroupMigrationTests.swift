@@ -2,14 +2,13 @@ import Common
 import Foundation
 import GRDB
 import Testing
-import TodoMateDomain
-
 @testable import TodoMateData
+import TodoMateDomain
 
 @Suite("GRDB App Group Migration Tests", .serialized)
 struct GRDBAppGroupMigrationTests {
   @Test("Debug container resolution requests only the registered shared App Group")
-  func debugContainerResolutionUsesRegisteredAppGroupOnly() throws {
+  func debugContainerResolutionUsesRegisteredAppGroupOnly() {
     #if DEBUG
       var requestedIdentifiers: [String] = []
       let debugGroupURL = URL(fileURLWithPath: "/tmp/debug-group", isDirectory: true)
@@ -26,6 +25,29 @@ struct GRDBAppGroupMigrationTests {
       #expect(requestedIdentifiers == [AppEnvironment.Container.storageAppGroupIdentifier])
       #expect(resolution.groupURL == debugGroupURL)
       #expect(resolution.legacyGroupURL == debugGroupURL)
+    #endif
+  }
+
+  @Test("Release defaults preserve the legacy App Group migration source")
+  func releaseContainerResolutionUsesBothAppGroups() {
+    #if !DEBUG
+      var requestedIdentifiers: [String] = []
+      let resolution = GRDBAppGroupStorage.containerResolution { identifier in
+        requestedIdentifiers.append(identifier)
+        return URL(fileURLWithPath: "/tmp/\(identifier)", isDirectory: true)
+      }
+
+      #expect(
+        AppEnvironment.Container.migrationSourceAppGroupIdentifier
+          == AppEnvironment.Container.legacyAppGroupIdentifier,
+      )
+      #expect(
+        requestedIdentifiers == [
+          AppEnvironment.Container.storageAppGroupIdentifier,
+          AppEnvironment.Container.legacyAppGroupIdentifier,
+        ],
+      )
+      #expect(resolution.groupURL != resolution.legacyGroupURL)
     #endif
   }
 
@@ -61,7 +83,7 @@ struct GRDBAppGroupMigrationTests {
   }
 
   @Test("Shared locations include legacy SwiftData candidates from both groups")
-  func includesLegacySwiftDataCandidates() throws {
+  func includesLegacySwiftDataCandidates() {
     let registeredGroupURL = URL(fileURLWithPath: "/tmp/registered-group", isDirectory: true)
     let legacyGroupURL = URL(fileURLWithPath: "/tmp/legacy-group", isDirectory: true)
     let locations = GRDBAppGroupStorage.locations(
@@ -100,7 +122,7 @@ struct GRDBAppGroupMigrationTests {
       _ = try GRDBAppGroupStorage.locations(resolution: resolution)
       Issue.record("Expected the missing legacy App Group to fail closed")
     } catch let error as LocalDatabaseError {
-      guard case .appGroupContainerUnavailable(let identifier) = error else {
+      guard case let .appGroupContainerUnavailable(identifier) = error else {
         Issue.record("Expected appGroupContainerUnavailable, got \(error)")
         return
       }
@@ -146,9 +168,11 @@ struct GRDBAppGroupMigrationTests {
     await assertReadOnly(database: migratedDatabase, todoID: fixture.todo.id)
 
     let legacyTodo = try await GRDBTodoRepository(database: legacyDatabase).read(
-      id: fixture.todo.id)
+      id: fixture.todo.id,
+    )
     let legacyMemo = try await GRDBMemoRepository(database: legacyDatabase).read(
-      id: fixture.memo.id)
+      id: fixture.memo.id,
+    )
     #expect(legacyTodo == fixture.todo)
     #expect(legacyMemo == fixture.memo)
     let legacyHasMarker = try await legacyDatabase.writer.read { databaseConnection in
@@ -202,7 +226,7 @@ struct GRDBAppGroupMigrationTests {
       of: GRDBAppGroupMigrationOutcome.self,
       returning: [GRDBAppGroupMigrationOutcome].self,
     ) { group in
-      for _ in 0..<participantCount {
+      for _ in 0 ..< participantCount {
         group.addTask {
           await startGate.wait()
           return try GRDBAppGroupMigration.migrateIfNeeded(
@@ -312,7 +336,7 @@ struct GRDBAppGroupMigrationTests {
     let directoryURL = layout.databaseURL.deletingLastPathComponent()
     let ownedBaseName =
       ".TodoMate.sqlite.app-group-migration-"
-      + "11111111-2222-3333-4444-555555555555.tmp"
+        + "11111111-2222-3333-4444-555555555555.tmp"
     let ownedURLs = ["", "-wal", "-shm", "-journal"].map {
       directoryURL.appendingPathComponent(ownedBaseName + $0)
     }
@@ -329,7 +353,8 @@ struct GRDBAppGroupMigrationTests {
       isDirectory: true,
     )
     try FileManager.default.createDirectory(
-      at: ownedNameDirectoryURL, withIntermediateDirectories: true)
+      at: ownedNameDirectoryURL, withIntermediateDirectories: true,
+    )
 
     #expect(
       try GRDBAppGroupMigration.migrateIfNeeded(
@@ -384,8 +409,8 @@ struct GRDBAppGroupMigrationTests {
     )
   }
 
-  @Test("Widget selection falls back without writing and prefers a marked new database")
-  func selectsReadOnlyDatabaseForWidget() async throws {
+  @Test("Read-only selection falls back without writing and prefers a marked new database")
+  func selectsReadOnlyDatabase() async throws {
     let layout = try TestLayout()
     defer { layout.remove() }
 
@@ -435,7 +460,7 @@ struct GRDBAppGroupMigrationTests {
     await assertReadOnly(database: database, todoID: fixture.todo.id)
   }
 
-  @Test("Canonical-only Widget selection accepts normal writes after migration")
+  @Test("Canonical-only read selection accepts normal writes after migration")
   func selectsCanonicalOnlyDatabaseAfterNormalWrite() async throws {
     let layout = try TestLayout()
     defer { layout.remove() }
@@ -550,12 +575,12 @@ private struct TestLayout {
       .appendingPathComponent("app-group-migration-\(UUID().uuidString)", isDirectory: true)
     legacyDatabaseURL =
       rootURL
-      .appendingPathComponent("legacy", isDirectory: true)
-      .appendingPathComponent("TodoMate.sqlite")
+        .appendingPathComponent("legacy", isDirectory: true)
+        .appendingPathComponent("TodoMate.sqlite")
     databaseURL =
       rootURL
-      .appendingPathComponent("registered", isDirectory: true)
-      .appendingPathComponent("TodoMate.sqlite")
+        .appendingPathComponent("registered", isDirectory: true)
+        .appendingPathComponent("TodoMate.sqlite")
     try FileManager.default.createDirectory(
       at: legacyDatabaseURL.deletingLastPathComponent(),
       withIntermediateDirectories: true,
@@ -568,7 +593,7 @@ private struct TestLayout {
 
   func removeDatabase(at url: URL) {
     for path in [url.path, url.path + "-wal", url.path + "-shm", url.path + "-journal"]
-    where FileManager.default.fileExists(atPath: path) {
+      where FileManager.default.fileExists(atPath: path) {
       try? FileManager.default.removeItem(atPath: path)
     }
   }

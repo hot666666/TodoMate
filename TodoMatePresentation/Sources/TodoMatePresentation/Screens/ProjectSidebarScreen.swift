@@ -11,23 +11,24 @@ struct ProjectSidebarScreen: View {
       projects: store.projects,
       selectedProjectID: store.selectedProjectID,
       onCreate: { store.send(.view(.createButtonTapped)) },
-      onSelect: { store.send(.view(.projectSelected($0))) }
+      onSelect: { store.send(.view(.projectSelected($0))) },
     )
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier(AccessibilityID.ProjectSidebar.root)
     .sheet(isPresented: Binding(
       get: { store.isCreatePresented },
       set: { isPresented in
         if !isPresented { store.send(.view(.createCancelled)) }
-      }
+      },
     )) {
       ProjectCreateView(
         name: Binding(
           get: { store.newProjectName },
-          set: { store.send(.view(.createNameChanged($0))) }
+          set: { store.send(.view(.createNameChanged($0))) },
         ),
         isCreating: store.operation == .creating,
         onCancel: { store.send(.view(.createCancelled)) },
-        onConfirm: { store.send(.view(.createConfirmed)) }
+        onConfirm: { store.send(.view(.createConfirmed)) },
       )
     }
   }
@@ -51,7 +52,7 @@ private struct ProjectSidebarView: View {
           }
           .buttonStyle(.plain)
           .listRowBackground(
-            selectedProjectID == project.id ? Color.accentColor.opacity(0.18) : Color.clear
+            selectedProjectID == project.id ? Color.accentColor.opacity(0.18) : Color.clear,
           )
           .accessibilityIdentifier(AccessibilityID.ProjectSidebar.row(project.id.rawValue))
         }

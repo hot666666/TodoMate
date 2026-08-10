@@ -78,6 +78,7 @@ struct TodoMateApp: App {
     }
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)
+    .defaultLaunchBehavior(.presented)
     .commands {
       // File 메뉴: 새 윈도우 (⇧⌘N)
       CommandGroup(replacing: .newItem) {
@@ -148,7 +149,7 @@ private extension TodoMateApp {
   }
 
   nonisolated static func projectDatabaseStorage(
-    arguments: [String] = ProcessInfo.processInfo.arguments
+    arguments: [String] = ProcessInfo.processInfo.arguments,
   ) -> GRDBDatabase.Storage {
     guard
       let flagIndex = arguments.firstIndex(of: "--ui-testing-project-database-id"),
@@ -172,7 +173,7 @@ private extension TodoMateApp {
   }
 
   nonisolated static func projectIDGenerator(
-    arguments: [String] = ProcessInfo.processInfo.arguments
+    arguments: [String] = ProcessInfo.processInfo.arguments,
   ) -> @Sendable () -> ProjectID {
     guard
       let flagIndex = arguments.firstIndex(of: "--ui-testing-project-id"),

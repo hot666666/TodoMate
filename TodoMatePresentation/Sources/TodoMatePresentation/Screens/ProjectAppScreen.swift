@@ -22,7 +22,7 @@ public struct ProjectAppScreen: View {
   public var body: some View {
     NavigationSplitView {
       ProjectSidebarScreen(
-        store: store.scope(state: \.sidebar, action: \.sidebar)
+        store: store.scope(state: \.sidebar, action: \.sidebar),
       )
     } detail: {
       if let workspaceStore = store.scope(state: \.workspace, action: \.workspace) {
@@ -33,11 +33,12 @@ public struct ProjectAppScreen: View {
         ContentUnavailableView(
           "프로젝트를 만드세요",
           systemImage: "folder.badge.plus",
-          description: Text("사이드바에서 첫 Local Project를 만들 수 있습니다.")
+          description: Text("사이드바에서 첫 Local Project를 만들 수 있습니다."),
         )
       }
     }
     .navigationSplitViewStyle(.prominentDetail)
+    .accessibilityElement(children: .contain)
     .accessibilityIdentifier(AccessibilityID.AppShell.root)
     .task { await store.send(.view(.task)).finish() }
   }

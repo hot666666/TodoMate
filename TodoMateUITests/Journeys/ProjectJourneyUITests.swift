@@ -35,6 +35,7 @@ final class ProjectJourneyUITests: XCTestCase {
   private func makeApplication(resetDatabase: Bool) -> XCUIApplication {
     let application = XCUIApplication()
     application.launchArguments += [
+      "-ApplePersistenceIgnoreState", "YES",
       "--ui-testing-project-database-id", databaseID,
       "--ui-testing-project-id", projectID,
     ]

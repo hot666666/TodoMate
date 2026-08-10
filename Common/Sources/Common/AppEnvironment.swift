@@ -25,12 +25,4 @@ public enum AppEnvironment {
       public static let migrationSourceAppGroupIdentifier: String? = legacyAppGroupIdentifier
     #endif
   }
-
-  public enum Widget {
-    #if DEBUG
-      public static let kind = "TodoMateWidgetDev"
-    #else
-      public static let kind = "TodoMateWidget"
-    #endif
-  }
 }

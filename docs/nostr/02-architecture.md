@@ -23,8 +23,8 @@
 - `localRevision`은 한 기기 DB 안의 행 버전이다. Nostr `created_at`, 이벤트 `id`,
   addressable event의 교체 순서와 동일시하지 않는다.
 - GRDB observation과 Darwin notification은 앱이나 활성 extension이 DB를 다시 읽게 만드는
-  비내구성 신호다. WidgetKit timeline 갱신은 별도 `WidgetCenter` 요청으로 처리한다. 어느
-  쪽도 재시작, 오프라인, 릴레이 ACK 재시도를 보장하지 않으므로 Nostr 발행 큐로 사용하지 않는다.
+  비내구성 신호다. 현재 Widget extension은 제거되어 앱이 `WidgetCenter` 요청을 보내지 않는다.
+  어느 쪽도 재시작, 오프라인, 릴레이 ACK 재시도를 보장하지 않으므로 Nostr 발행 큐로 사용하지 않는다.
 - 향후 outbox는 로컬 mutation과 같은 GRDB transaction에 기록하고 `origin`을 구분한다.
   로컬 origin만 발행하며, 원격 이벤트를 materialized cache에 적용한 변경은 재발행하지 않는다.
 

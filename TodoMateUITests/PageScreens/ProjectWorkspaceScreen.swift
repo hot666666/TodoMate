@@ -14,11 +14,12 @@ struct ProjectWorkspaceScreen {
     projectName: String,
     expectedProjectID: String,
     file: StaticString = #filePath,
-    line: UInt = #line
+    line: UInt = #line,
   ) {
     selectors.workspace.element(in: app).assertExists(file: file, line: line)
     let title = selectors.workspaceTitle.element(in: app).assertExists(file: file, line: line)
-    XCTAssertEqual(title.label, projectName, file: file, line: line)
+    let displayedTitle = title.label.isEmpty ? title.value as? String : title.label
+    XCTAssertEqual(displayedTitle, projectName, file: file, line: line)
     selectors.projectRow(id: expectedProjectID).element(in: app).assertExists(file: file, line: line)
     selectors.todoSection.element(in: app).assertExists(file: file, line: line)
   }

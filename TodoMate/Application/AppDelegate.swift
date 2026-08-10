@@ -8,7 +8,6 @@
 import Common
 import Sparkle
 import SwiftUI
-import WidgetKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUUpdaterDelegate {
   var updater: SPUUpdater?
@@ -29,13 +28,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, SPUU
         userDriverDelegate: nil,
       )
       updater = updaterController.updater
-      /// 업데이트를 자동으로 확인
+      // 업데이트를 자동으로 확인
       updater?.checkForUpdatesInBackground()
     #endif
-  }
-
-  func applicationDidResignActive(_: Notification) {
-    WidgetCenter.shared.reloadAllTimelines()
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
