@@ -106,6 +106,7 @@ def main():
     # Cleanup: Delete all files not in final_files
     print('[*] Cleaning up unused files...')
     deleted_count = 0
+    cleanup_errors = []
     valid_names = set(final_files.keys())
     valid_names.add(managed_output_marker)
 
@@ -121,6 +122,11 @@ def main():
                     deleted_count += 1
             except Exception as e:
                 print(f'  [Error] Failed to delete {file_path}: {e}')
+                cleanup_errors.append(file_path)
+
+    if cleanup_errors:
+        print(f'[!] Failed to delete {len(cleanup_errors)} garbage files')
+        return 1
 
     print(f'[OK] Deleted {deleted_count} garbage files')
 

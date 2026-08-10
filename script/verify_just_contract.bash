@@ -534,6 +534,29 @@ if [[ ! -f "${unowned_rename_output}/manifest.json" || \
   exit 1
 fi
 
+cleanup_failure_output="${TEMPORARY_ROOT}/Cleanup Failure Output"
+readonly cleanup_failure_output
+mkdir -p -- "${cleanup_failure_output}"
+touch -- "${cleanup_failure_output}/.todomate-managed-output"
+printf '%s\n' '[]' > "${cleanup_failure_output}/manifest.json"
+printf '%s\n' 'must remain after failed cleanup' > "${cleanup_failure_output}/stale.png"
+chmod 500 "${cleanup_failure_output}"
+set +e
+"${REAL_PYTHON3}" script/rename_screenshots.py "${cleanup_failure_output}" \
+  >/dev/null 2>&1
+cleanup_failure_status=$?
+set -e
+chmod 700 "${cleanup_failure_output}"
+if [[ "${cleanup_failure_status}" -eq 0 ]]; then
+  echo "error: screenshot cleanup swallowed a garbage-file deletion failure" >&2
+  exit 1
+fi
+if [[ ! -f "${cleanup_failure_output}/manifest.json" || \
+  ! -f "${cleanup_failure_output}/stale.png" ]]; then
+  echo "error: screenshot cleanup failure fixture did not preserve undeleted files" >&2
+  exit 1
+fi
+
 traversal_root="${TEMPORARY_ROOT}/Traversal Output"
 readonly traversal_root
 traversal_output="${traversal_root}/screens"
