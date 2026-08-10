@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   certificate-free:
-    name: certificate-free
+    name: TodoMate certificate-free gate
     runs-on: macos-26
     timeout-minutes: 60
     env:
