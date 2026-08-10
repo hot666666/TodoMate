@@ -188,3 +188,16 @@ Button("사이드바 토글") { toggleSidebar?() }
 | 뷰 내부에서 ⌘+키              | Hidden Button     |
 | 뷰 내부에서 ESC/Enter         | onKeyPress        |
 | 특정 뷰에서만 메뉴 활성화     | focusedSceneValue |
+
+---
+
+## TodoMate Command Palette 이관 경계
+
+기존 `Shift-Command-Space` global Todo overlay와 `PalettePoC`의 `Option-Space`
+nonactivating panel은 같은 동작이 아닙니다. production Command Palette의 AppKit/TCA
+소유권, keyboard/focus/window lifecycle, 기존 TodoEditor와의 분리, 확정 전 shortcut
+선택지는 [Command Palette Migration Contract](./command-palette-migration-contract.md)를
+따릅니다.
+
+이 문서의 Carbon 예시는 현재 구현을 설명합니다. 최종 global shortcut과 search/quick
+capture 진입 매핑은 migration contract의 review checkpoint 전까지 확정값이 아닙니다.
