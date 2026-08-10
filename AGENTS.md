@@ -160,8 +160,9 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 
 ## 명령어와 검증
 
-모든 표준 검증은 `justfile`의 명령을 우선 사용합니다. 로그는 `.test-logs/`에
-생성되며 커밋하지 않습니다.
+모든 표준 검증은 `justfile`의 명령을 우선 사용합니다. raw build/test log는 저장소에
+남기지 않습니다. signed App/UI test의 `.xcresult`는 ignored `.build/TestResults/`에
+생성합니다. 이 bundle은 `HOT6-22`에서 구성할 CI artifact upload의 입력입니다.
 
 | 변경 범위                               | 실행할 검증                                                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------- |
@@ -171,11 +172,25 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 | 앱 Store·서비스                         | `just test-app`                                                              |
 | 런타임/UI 동작                          | `just test-app-runtime`                                                      |
 | 포맷·린트                               | `just pre-commit`                                                            |
+| certificate/provisioning-free PR gate   | `just test-pr`                                                               |
+| recipe·artifact·failure contract        | `just verify-just-contract`                                                  |
 | 스크린샷                                | `just ui-screenshots` 또는 `SCREENS=personal_board,memo just ui-screenshots` |
 
-`just pre-commit`은 포맷과 린트를 자동 수정할 수 있습니다. 실행 뒤에는 수정된 파일을
-검토하고 필요한 파일만 명시적으로 스테이징합니다. 문서 또는 GitHub 템플릿만 바꿨다면
-해당 파일의 문법 검사와 `git diff --check`로 충분하며 앱 빌드는 요구하지 않습니다.
+`just pre-commit`은 staged·working tree의 변경 Swift 파일을 lint-only로 검사하며 자동
+수정하지 않습니다. partially staged Swift 파일은 index와 working tree 중 어느 내용을
+검사했는지 모호하므로 거부합니다. clean commit 범위를 검사할 때는
+`PRE_COMMIT_BASE=<commit>`을 함께 지정합니다. CI는 base history를 fetch하고 이 값을
+반드시 설정해야 합니다. 문서 또는 GitHub 템플릿만 바꿨다면 해당 파일의 문법 검사와
+`git diff --check`로 충분하며 앱 빌드는 요구하지 않습니다.
+
+`just test-pr`은 certificate/provisioning-free build와 SPM test를 묶습니다. 이 build의
+산출물은 linker가 ad-hoc signature를 넣을 수 있으며 배포 서명·provisioning·App Group
+runtime 증거가 아닙니다. `just test-app`과 `just test-app-runtime`은 각각 development
+signing과 runnable local test host 또는 UI automation permission이 필요한 별도 lane이며
+certificate/provisioning-free 성공 증거로 대체하지 않습니다. `TODOMATE_DERIVED_DATA_DIR`,
+`TODOMATE_RESULT_BUNDLE_DIR`, `TODOMATE_SCREENSHOT_OUTPUT_DIR`로 ignored artifact root를
+바꿀 수 있습니다. Screenshot override는 비어 있거나 이 recipe가 만든 managed output
+directory만 지정하며, 기존 자료가 있는 일반 directory를 재사용하지 않습니다.
 
 Linear 이슈의 `검증 명령`에는 위 명령 중 해당 범위를 정확히 적습니다. 새 package나
 검증 계층 때문에 기존 recipe로 증명할 수 없다면 구현과 함께 canonical `just` recipe를

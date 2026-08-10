@@ -10,9 +10,34 @@ import shutil
 import sys
 
 
+def direct_child_path(root_dir, filename):
+    if not filename or filename in {'.', '..'} or os.path.basename(filename) != filename:
+        return None
+
+    candidate = os.path.join(root_dir, filename)
+    resolved_root = os.path.realpath(root_dir)
+    resolved_candidate = os.path.realpath(candidate)
+    if os.path.dirname(resolved_candidate) != resolved_root:
+        return None
+
+    return candidate
+
+
 def main():
     screenshots_dir = sys.argv[1] if len(sys.argv) > 1 else './screenshots'
+    screenshots_dir = os.path.normpath(screenshots_dir)
     manifest_path = os.path.join(screenshots_dir, 'manifest.json')
+    managed_output_marker = '.todomate-managed-output'
+    managed_output_marker_path = os.path.join(screenshots_dir, managed_output_marker)
+
+    if (
+        os.path.islink(screenshots_dir)
+        or not os.path.isdir(screenshots_dir)
+        or os.path.islink(managed_output_marker_path)
+        or not os.path.isfile(managed_output_marker_path)
+    ):
+        print(f"[!] Refusing unowned screenshot output directory: {screenshots_dir}")
+        return 2
 
     if not os.path.exists(manifest_path):
         print(f"[!] manifest.json not found at {manifest_path}")
@@ -33,6 +58,11 @@ def main():
             if not old_name or not suggested:
                 continue
 
+            old_path = direct_child_path(screenshots_dir, old_name)
+            if old_path is None or direct_child_path(screenshots_dir, suggested) is None:
+                print('[!] Refusing screenshot manifest path outside the managed output directory')
+                return 2
+
             # Clean up suggested name to get base name
             # Example: "personal_board_0_3A190F0B-643B-4465-8D49-B8AE2B24F451.png"
             # We want: "personal_board.png"
@@ -48,15 +78,22 @@ def main():
                 base = base[:-2]
 
             clean_name = base + '.png'
-            old_path = os.path.join(screenshots_dir, old_name)
+            new_path = direct_child_path(screenshots_dir, clean_name)
+            if new_path is None:
+                print('[!] Refusing derived screenshot path outside the managed output directory')
+                return 2
 
             if os.path.exists(old_path):
                 # Store mapping, last one wins for each clean_name
-                final_files[clean_name] = old_path
+                final_files[clean_name] = old_name
 
     # Apply renames
-    for clean_name, old_path in final_files.items():
-        new_path = os.path.join(screenshots_dir, clean_name)
+    for clean_name, old_name in final_files.items():
+        old_path = direct_child_path(screenshots_dir, old_name)
+        new_path = direct_child_path(screenshots_dir, clean_name)
+        if old_path is None or new_path is None:
+            print('[!] Refusing screenshot path that left the managed output directory')
+            return 2
         if old_path != new_path:
             if os.path.exists(new_path):
                 os.unlink(new_path)
@@ -70,6 +107,7 @@ def main():
     print('[*] Cleaning up unused files...')
     deleted_count = 0
     valid_names = set(final_files.keys())
+    valid_names.add(managed_output_marker)
 
     for filename in os.listdir(screenshots_dir):
         if filename not in valid_names:
