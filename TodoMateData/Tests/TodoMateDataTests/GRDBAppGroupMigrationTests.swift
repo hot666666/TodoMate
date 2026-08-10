@@ -1,3 +1,4 @@
+import Common
 import Foundation
 import GRDB
 import Testing
@@ -7,6 +8,58 @@ import TodoMateDomain
 
 @Suite("GRDB App Group Migration Tests", .serialized)
 struct GRDBAppGroupMigrationTests {
+  @Test("Debug container resolution requests only the registered shared App Group")
+  func debugContainerResolutionUsesRegisteredAppGroupOnly() throws {
+    #if DEBUG
+      var requestedIdentifiers: [String] = []
+      let debugGroupURL = URL(fileURLWithPath: "/tmp/debug-group", isDirectory: true)
+
+      let resolution = GRDBAppGroupStorage.containerResolution { identifier in
+        requestedIdentifiers.append(identifier)
+        return debugGroupURL
+      }
+
+      #expect(
+        AppEnvironment.Container.storageAppGroupIdentifier
+          == AppEnvironment.Container.appGroupIdentifier,
+      )
+      #expect(requestedIdentifiers == [AppEnvironment.Container.storageAppGroupIdentifier])
+      #expect(resolution.groupURL == debugGroupURL)
+      #expect(resolution.legacyGroupURL == debugGroupURL)
+    #endif
+  }
+
+  @Test("Legacy-enabled container resolution requests both App Groups")
+  func legacyEnabledContainerResolutionRequestsBothAppGroups() {
+    var requestedIdentifiers: [String] = []
+    let canonicalURL = URL(fileURLWithPath: "/tmp/canonical-group", isDirectory: true)
+    let legacyURL = URL(fileURLWithPath: "/tmp/legacy-group", isDirectory: true)
+
+    let resolution = GRDBAppGroupStorage.containerResolution(
+      primaryAppGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
+      migrationSourceAppGroupIdentifier: AppEnvironment.Container.legacyAppGroupIdentifier,
+    ) { identifier in
+      requestedIdentifiers.append(identifier)
+      switch identifier {
+      case AppEnvironment.Container.appGroupIdentifier:
+        return canonicalURL
+      case AppEnvironment.Container.legacyAppGroupIdentifier:
+        return legacyURL
+      default:
+        return nil
+      }
+    }
+
+    #expect(
+      requestedIdentifiers == [
+        AppEnvironment.Container.appGroupIdentifier,
+        AppEnvironment.Container.legacyAppGroupIdentifier,
+      ],
+    )
+    #expect(resolution.groupURL == canonicalURL)
+    #expect(resolution.legacyGroupURL == legacyURL)
+  }
+
   @Test("Shared locations include legacy SwiftData candidates from both groups")
   func includesLegacySwiftDataCandidates() throws {
     let registeredGroupURL = URL(fileURLWithPath: "/tmp/registered-group", isDirectory: true)
@@ -380,6 +433,40 @@ struct GRDBAppGroupMigrationTests {
       return
     }
     await assertReadOnly(database: database, todoID: fixture.todo.id)
+  }
+
+  @Test("Canonical-only Widget selection accepts normal writes after migration")
+  func selectsCanonicalOnlyDatabaseAfterNormalWrite() async throws {
+    let layout = try TestLayout()
+    defer { layout.remove() }
+
+    let fixture = Fixture()
+    let legacyDatabase = try GRDBDatabase(storage: .file(layout.legacyDatabaseURL))
+    try await fixture.insert(into: legacyDatabase)
+    #expect(
+      try GRDBAppGroupMigration.migrateIfNeeded(
+        from: layout.legacyDatabaseURL,
+        to: layout.databaseURL,
+      ) == .migrated,
+    )
+
+    let canonicalDatabase = try GRDBDatabase(storage: .file(layout.databaseURL))
+    let canonicalTodo = Todo(
+      id: "canonical-only-write",
+      content: "Normal app mutation after migration",
+      date: fixture.timestamp,
+      createdAt: fixture.timestamp,
+      updatedAt: fixture.timestamp,
+      owner: fixture.ownerID,
+    )
+    try await GRDBTodoRepository(database: canonicalDatabase).create(canonicalTodo)
+
+    #expect(
+      GRDBAppGroupMigration.preferredReadOnlyDatabaseURL(
+        databaseURL: layout.databaseURL,
+        legacyDatabaseURL: layout.databaseURL,
+      ) == layout.databaseURL,
+    )
   }
 
   private func assertReadOnly(database: GRDBReadOnlyDatabase, todoID: String) async {
