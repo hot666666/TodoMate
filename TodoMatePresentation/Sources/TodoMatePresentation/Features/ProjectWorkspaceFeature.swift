@@ -8,6 +8,7 @@ public struct ProjectWorkspaceFeature: Sendable {
     public var project: Project
     public var selectedSection: Section
 
+    // swiftlint:disable:next nesting
     public enum Section: String, CaseIterable, Equatable, Sendable {
       case todo
       case memo
@@ -23,6 +24,7 @@ public struct ProjectWorkspaceFeature: Sendable {
   public enum Action: Equatable, Sendable {
     case view(ViewAction)
 
+    // swiftlint:disable:next nesting
     public enum ViewAction: Equatable, Sendable {
       case sectionSelected(State.Section)
     }

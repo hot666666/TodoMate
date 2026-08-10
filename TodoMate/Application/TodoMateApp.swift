@@ -204,7 +204,7 @@ private extension TodoMateApp {
 // MARK: - App Update Handling
 
 private extension TodoMateApp {
-  // TODO: - 정리
+  /// Legacy app-update cleanup remains outside the Project workspace slice.
   static func checkAndHandleAppUpdate(container: AppDIContainer) {
     let userDefaults = container.core.userDefaults
 

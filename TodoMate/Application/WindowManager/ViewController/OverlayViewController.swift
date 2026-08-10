@@ -128,9 +128,9 @@ final class OverlayViewController: NSObject, NSWindowDelegate {
 
   /// 화면 상단 쪽에 프레임을 배치 (캘린더 팝업 공간 확보)
   private func calculateCenteredFrame(size: CGSize, in screen: NSScreen) -> NSRect {
-    let x = screen.visibleFrame.midX - size.width / 2
-    let y = screen.visibleFrame.minY + screen.visibleFrame.height * 0.75 - size.height / 2
-    return NSRect(origin: CGPoint(x: x, y: y), size: size)
+    let originX = screen.visibleFrame.midX - size.width / 2
+    let originY = screen.visibleFrame.minY + screen.visibleFrame.height * 0.75 - size.height / 2
+    return NSRect(origin: CGPoint(x: originX, y: originY), size: size)
   }
 }
 

@@ -1,3 +1,5 @@
+// This migration remains intentionally centralized while its legacy compatibility window is active.
+// swiftlint:disable file_length
 import Common
 import Darwin
 import Foundation
@@ -141,12 +143,14 @@ enum GRDBAppGroupStorage {
   }
 }
 
+// swiftlint:disable:next type_body_length
 enum GRDBAppGroupMigration {
   private static let markerKey = "appGroupContainerMigration.v1"
   private static let markerVersion = 1
   private static let stagingNamePrefix = ".TodoMate.sqlite.app-group-migration-"
   private static let inProcessMigrationLock = Mutex(())
 
+  // swiftlint:disable:next function_body_length cyclomatic_complexity
   static func migrateIfNeeded(
     from legacyDatabaseURL: URL,
     to databaseURL: URL,
@@ -355,6 +359,7 @@ enum GRDBAppGroupMigration {
     }
   }
 
+  // swiftlint:disable:next function_body_length
   private static func projection(in reader: any DatabaseReader) throws -> ProjectionSnapshot {
     try reader.read { databaseConnection in
       let todoColumns = try Set(
@@ -432,6 +437,8 @@ enum GRDBAppGroupMigration {
   private static func write(marker: MigrationMarker, to writer: any DatabaseWriter) throws {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
+    // JSONEncoder emits UTF-8 data, so a lossless decoding initializer is intentional here.
+    // swiftlint:disable:next optional_data_string_conversion
     let value = try String(decoding: encoder.encode(marker), as: UTF8.self)
     try writer.write { databaseConnection in
       try databaseConnection.execute(

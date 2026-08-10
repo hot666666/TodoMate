@@ -44,9 +44,9 @@ struct AppFeatureTests {
   }
 
   @Test("Project switch resets Workspace to Todo section")
-  func projectSwitch() async {
-    let first = makeProject(id: "first", name: "First")
-    let second = makeProject(id: "second", name: "Second")
+  func projectSwitch() async throws {
+    let first = try makeProject(id: "first", name: "First")
+    let second = try makeProject(id: "second", name: "Second")
     var state = AppFeature.State()
     state.launchPhase = .ready
     state.sidebar = .init(projects: [first, second], selectedProjectID: first.id)
@@ -62,10 +62,10 @@ struct AppFeatureTests {
     }
   }
 
-  private func makeProject(id: String, name: String) -> Project {
-    Project(
+  private func makeProject(id: String, name: String) throws -> Project {
+    try Project(
       id: .init(rawValue: id),
-      name: try! ProjectName(name),
+      name: ProjectName(name),
       lifecycle: .local,
       createdAt: Date(timeIntervalSince1970: 1),
       updatedAt: Date(timeIntervalSince1970: 1),

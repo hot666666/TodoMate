@@ -12,6 +12,7 @@ public struct ProjectSidebarFeature: Sendable {
     public var newProjectName = ""
     public var operation: Operation = .idle
 
+    // swiftlint:disable:next nesting
     public enum Operation: Equatable, Sendable {
       case idle
       case creating
@@ -29,6 +30,7 @@ public struct ProjectSidebarFeature: Sendable {
     case view(ViewAction)
     case `internal`(InternalAction)
 
+    // swiftlint:disable:next nesting
     public enum ViewAction: Equatable, Sendable {
       case createButtonTapped
       case createNameChanged(String)
@@ -37,11 +39,13 @@ public struct ProjectSidebarFeature: Sendable {
       case projectSelected(ProjectID)
     }
 
+    // swiftlint:disable:next nesting
     public enum InternalAction: Equatable, Sendable {
       case createFinished(ProjectID?)
       case selectionFinished(ProjectID, SelectionResult)
     }
 
+    // swiftlint:disable:next nesting
     public enum SelectionResult: Equatable, Sendable {
       case success
       case failure

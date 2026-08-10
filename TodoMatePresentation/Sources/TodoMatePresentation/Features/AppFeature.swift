@@ -10,6 +10,7 @@ public struct AppFeature: Sendable {
     public var sidebar = ProjectSidebarFeature.State()
     public var workspace: ProjectWorkspaceFeature.State?
 
+    // swiftlint:disable:next nesting
     public enum LaunchPhase: Equatable, Sendable {
       case loading
       case ready
@@ -24,10 +25,12 @@ public struct AppFeature: Sendable {
     case sidebar(ProjectSidebarFeature.Action)
     case workspace(ProjectWorkspaceFeature.Action)
 
+    // swiftlint:disable:next nesting
     public enum ViewAction: Equatable, Sendable {
       case task
     }
 
+    // swiftlint:disable:next nesting
     public enum InternalAction: Equatable, Sendable {
       case snapshotUpdated(ProjectWorkspaceSnapshot)
     }

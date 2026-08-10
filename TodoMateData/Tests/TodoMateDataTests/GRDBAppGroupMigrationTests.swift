@@ -1,3 +1,5 @@
+// The serialized migration scenarios share one fixture and intentionally remain in one suite.
+// swiftlint:disable file_length
 import Common
 import Foundation
 import GRDB
@@ -6,6 +8,7 @@ import Testing
 import TodoMateDomain
 
 @Suite("GRDB App Group Migration Tests", .serialized)
+// swiftlint:disable:next type_body_length
 struct GRDBAppGroupMigrationTests {
   @Test("Debug container resolution requests only the registered shared App Group")
   func debugContainerResolutionUsesRegisteredAppGroupOnly() {
@@ -260,6 +263,7 @@ struct GRDBAppGroupMigrationTests {
   }
 
   @Test("Destination writes remain valid but legacy drift fails closed")
+  // swiftlint:disable:next function_body_length
   func detectsLegacySourceDriftAfterMigration() async throws {
     let layout = try TestLayout()
     defer { layout.remove() }
