@@ -47,10 +47,17 @@
   종료됐다. 제품 테스트 실패나 앱 assertion 실패는 관찰되지 않았다. 더 하위의 환경 원인은
   아직 확인되지 않았다.
 - 해결 또는 우회: 한 번만 재시도해 일시적 실패인지 확인한다. 같은 초기화 오류가 반복되면
-  제품 코드를 임의로 수정하지 않고 환경 검증 blocker로 기록하며 해당 `.xcresult`를 보존한다.
+  제품 코드를 임의로 수정하지 않고 환경 검증 blocker로 기록하며
+  `.build/TestResults/app-runtime.xcresult`를 보존한다. 경로를 바꿨다면
+  `${TODOMATE_RESULT_BUNDLE_DIR}/app-runtime.xcresult`를 확인한다. 재시도 전 완료 표시가 있는
+  기존 bundle은 `app-runtime.previous.xcresult`로 이동한다. 초기화가 새 bundle 생성 전에
+  끝나면 이전 bundle만 보존하고 그 한계를 함께 기록한다. clean DerivedData 재시도는
+  `todomate_retry_root="$(mktemp -d)"`로 전용 root를 만든 뒤
+  `TODOMATE_DERIVED_DATA_DIR="${todomate_retry_root}/DerivedData" just test-app-runtime`으로 한 번만
+  실행한다.
 - 검증: automation mode가 정상화된 환경에서 `just test-app-runtime`을 다시 실행해 실제 Test
   Suite와 Test Case가 시작되고 명령이 종료 코드 0으로 끝나는지 확인한다.
-- 관련: `HOT6-6`; `just test-app-runtime`
+- 관련: `HOT6-6`, `HOT6-19`; `just test-app-runtime`
 - 제거 조건: 저장소의 test recipe 또는 CI runner가 automation mode를 결정론적으로 준비하고
   같은 오류가 더 이상 재현되지 않을 때 제거한다.
 
@@ -65,9 +72,14 @@
 - 확인된 원인: XCTest가 local macOS test host를 materialize하고 LaunchServices로 실행하는 단계가
   완료되지 않았다. 더 하위의 환경 원인은 아직 확인되지 않았다.
 - 해결 또는 우회: 한 번만 clean DerivedData로 재시도한다. 같은 worker 초기화 오류가 반복되면
-  실행을 중단하고 `.xcresult`를 보존하며 제품 테스트 실패로 기록하지 않는다.
+  실행을 중단하고 `.build/TestResults/app.xcresult`를 보존하며 제품 테스트 실패로 기록하지
+  않는다. 경로를 바꿨다면 `${TODOMATE_RESULT_BUNDLE_DIR}/app.xcresult`를 확인한다. 재시도 전
+  완료 표시가 있는 기존 bundle은 `app.previous.xcresult`로 이동한다. 초기화가 새 bundle 생성
+  전에 끝나면 이전 bundle만 보존하고 그 한계를 함께 기록한다. clean DerivedData 재시도는
+  `todomate_retry_root="$(mktemp -d)"`로 전용 root를 만든 뒤
+  `TODOMATE_DERIVED_DATA_DIR="${todomate_retry_root}/DerivedData" just test-app`으로 한 번만 실행한다.
 - 검증: test host가 정상화된 환경에서 `just test-app`을 다시 실행해 실제 Test Suite와 13개 Test
   Case가 시작되고 명령이 종료 코드 0으로 끝나는지 확인한다.
-- 관련: `HOT6-6`; `just test-app`
+- 관련: `HOT6-6`, `HOT6-19`; `just test-app`
 - 제거 조건: canonical test runner가 local worker와 test host를 결정론적으로 준비하고 같은 오류가
   더 이상 재현되지 않을 때 제거한다.
