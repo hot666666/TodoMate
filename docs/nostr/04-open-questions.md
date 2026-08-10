@@ -1,5 +1,9 @@
 # 04. 결정 사항 및 남은 질문
 
+> [!WARNING]
+> 2026-08-02의 과거 결정 기록이다. 현재 제품 결정이 아니며 [`README.md`](README.md)와
+> canonical Project-first architecture를 따른다.
+
 **결정 완료: 2026-08-02.** 아래 4가지가 확정되어 [02-architecture.md](02-architecture.md)와 [03-implementation-plan.md](03-implementation-plan.md)에 반영되었다.
 
 ---
@@ -77,4 +81,3 @@ Nostr 전환을 계기로 정리할지 결정할 것들:
 
 D1~D4가 확정되었으므로 **[03-implementation-plan.md](03-implementation-plan.md)의 Phase 0(검증 Spike)** 착수가 가능하다.
 Q5~Q8은 각각 Phase 6 / Phase 2 / Phase 3~5 / Phase 7 착수 직전까지만 정하면 된다.
-</content>

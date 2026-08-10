@@ -1,5 +1,9 @@
 # 01. Nostr — 시작 전에 알아야 할 것
 
+> [!WARNING]
+> 과거 protocol 연구 참고 자료다. 이 문서의 실행 계획과 제품 가정은 폐기됐으며 현재 기준은
+> [`README.md`](README.md)와 Project-first Full Mock MVP 계약이다.
+
 > 목표: "Firestore를 쓰던 사람이 Nostr로 그룹 기능을 만들 때 반드시 알아야 하는 것"만 정리.
 > Nostr 전반의 소개가 아니라 **TodoMate 구현에 필요한 지식**에 한정.
 
@@ -291,4 +295,3 @@ nak decode npub1...                                # bech32 디코드
 ## 다음
 
 → [02-architecture.md](02-architecture.md): 이 지식을 TodoMate 구조에 어떻게 적용할 것인가
-</content>
