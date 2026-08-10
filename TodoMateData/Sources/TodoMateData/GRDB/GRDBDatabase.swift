@@ -24,7 +24,7 @@ public final class GRDBDatabase: Sendable {
       try Self.migrator.migrate(queue)
       openedWriter = queue
       notificationBaseName = nil
-    case let .file(url):
+    case .file(let url):
       openedWriter = try Self.openCoordinatedDatabase(at: url, legacyStoreURLs: [])
       notificationBaseName = Self.changeNotificationBaseName(for: url)
     case .shared:
@@ -42,40 +42,20 @@ public final class GRDBDatabase: Sendable {
     changeObservers = Self.startChangeObservers(in: openedWriter, changeCenter: changeCenter)
   }
 
-  static func sharedDatabaseURL() throws -> URL {
-    let groupURL = try sharedGroupURL()
-    return groupURL
-      .appendingPathComponent("Library/Application Support", isDirectory: true)
-      .appendingPathComponent(AppEnvironment.Container.name, isDirectory: true)
-      .appendingPathComponent("TodoMate.sqlite")
-  }
-
   private static func prepareSharedLocations() throws -> (
     databaseURL: URL,
     legacyStoreURLs: [URL],
   ) {
     let fileManager = FileManager.default
-    let groupURL = try sharedGroupURL()
-    let supportURL = groupURL.appendingPathComponent("Library/Application Support", isDirectory: true)
-    let directoryURL = supportURL.appendingPathComponent(AppEnvironment.Container.name, isDirectory: true)
+    let locations = try GRDBAppGroupStorage.locations(fileManager: fileManager)
+    _ = try GRDBAppGroupMigration.migrateIfNeeded(
+      from: locations.legacyDatabaseURL,
+      to: locations.databaseURL,
+      fileManager: fileManager,
+    )
+    let directoryURL = locations.databaseURL.deletingLastPathComponent()
     try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-    let legacyStoreURLs = [
-      supportURL.appendingPathComponent("\(AppEnvironment.Container.name).store"),
-      supportURL.appendingPathComponent("default.store"),
-      groupURL.appendingPathComponent("default.store"),
-    ]
-    return (directoryURL.appendingPathComponent("TodoMate.sqlite"), legacyStoreURLs)
-  }
-
-  private static func sharedGroupURL() throws -> URL {
-    guard let groupURL = FileManager.default.containerURL(
-      forSecurityApplicationGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
-    ) else {
-      throw LocalDatabaseError.appGroupContainerUnavailable(
-        AppEnvironment.Container.appGroupIdentifier,
-      )
-    }
-    return groupURL
+    return (locations.databaseURL, locations.legacyStoreURLs)
   }
 
   private static func openCoordinatedDatabase(

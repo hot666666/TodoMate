@@ -6,6 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
+		<string>group.io.hotcs6.TodoMateDebug</string>
 		<string>$(TeamIdentifierPrefix)io.hotcs6.TodoMateDebug</string>
 	</array>
 	<key>com.apple.security.network.client</key>

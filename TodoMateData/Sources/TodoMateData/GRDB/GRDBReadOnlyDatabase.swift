@@ -12,11 +12,20 @@ public final class GRDBReadOnlyDatabase: Sendable {
 
   /// Returns `nil` when the database does not exist yet or its schema does not match this build.
   public init?(storage: Storage = .shared) throws {
-    let databaseURL = switch storage {
+    let databaseURL: URL
+    switch storage {
     case .shared:
-      try GRDBDatabase.sharedDatabaseURL()
-    case let .file(url):
-      url
+      guard let locations = GRDBAppGroupStorage.readOnlyLocations(),
+        let selectedURL = GRDBAppGroupMigration.preferredReadOnlyDatabaseURL(
+          databaseURL: locations.databaseURL,
+          legacyDatabaseURL: locations.legacyDatabaseURL,
+        )
+      else {
+        return nil
+      }
+      databaseURL = selectedURL
+    case .file(let url):
+      databaseURL = url
     }
 
     guard let reader = try Self.openCoordinatedDatabase(at: databaseURL) else { return nil }

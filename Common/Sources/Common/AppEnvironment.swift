@@ -13,10 +13,12 @@ public enum AppEnvironment {
   public enum Container {
     #if DEBUG
       public static let name = "TodoMateDebug"
-      public static let appGroupIdentifier = "8PRWAG4355.io.hotcs6.TodoMateDebug"
+      public static let appGroupIdentifier = "group.io.hotcs6.TodoMateDebug"
+      public static let legacyAppGroupIdentifier = "8PRWAG4355.io.hotcs6.TodoMateDebug"
     #else
       public static let name = "TodoMate"
-      public static let appGroupIdentifier = "8PRWAG4355.io.hotcs6.TodoMate"
+      public static let appGroupIdentifier = "group.io.hotcs6.TodoMate"
+      public static let legacyAppGroupIdentifier = "8PRWAG4355.io.hotcs6.TodoMate"
     #endif
   }
 

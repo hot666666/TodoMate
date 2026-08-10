@@ -16,7 +16,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>io.hotcs6.TodoMate</string>
+			<string>io.hotcs6.TodoMateDebug</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>todomatedebug</string>
