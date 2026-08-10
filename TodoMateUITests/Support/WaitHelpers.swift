@@ -37,4 +37,37 @@ extension XCUIElement {
     guard result == .completed else { return }
     click()
   }
+
+  @MainActor
+  func replaceText(
+    with expectedValue: String,
+    timeout: TimeInterval = UITestWait.normal,
+    file: StaticString = #filePath,
+    line: UInt = #line,
+  ) {
+    click()
+    typeText(expectedValue)
+
+    let initialExpectation = XCTNSPredicateExpectation(
+      predicate: NSPredicate(format: "value == %@", expectedValue),
+      object: self,
+    )
+    if XCTWaiter.wait(for: [initialExpectation], timeout: 1) != .completed {
+      let currentValue = value as? String ?? ""
+      if expectedValue.hasPrefix(currentValue) {
+        typeText(String(expectedValue.dropFirst(currentValue.count)))
+      } else {
+        typeKey("a", modifierFlags: .command)
+        typeKey(.delete, modifierFlags: [])
+        typeText(expectedValue)
+      }
+    }
+
+    let finalExpectation = XCTNSPredicateExpectation(
+      predicate: NSPredicate(format: "value == %@", expectedValue),
+      object: self,
+    )
+    let result = XCTWaiter.wait(for: [finalExpectation], timeout: timeout)
+    XCTAssertEqual(result, .completed, "Expected element value to become \(expectedValue)", file: file, line: line)
+  }
 }

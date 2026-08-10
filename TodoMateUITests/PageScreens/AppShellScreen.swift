@@ -27,8 +27,7 @@ struct AppShellScreen {
   ) -> ProjectWorkspaceScreen {
     selectors.createProjectButton.element(in: app).waitAndClick(file: file, line: line)
     let nameField = selectors.projectNameField.element(in: app).assertExists(file: file, line: line)
-    nameField.click()
-    nameField.typeText(name)
+    nameField.replaceText(with: name, file: file, line: line)
     selectors.createConfirmButton.element(in: app).waitAndClick(file: file, line: line)
 
     let workspace = ProjectWorkspaceScreen(app: app, selectors: selectors)
