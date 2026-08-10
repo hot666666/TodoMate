@@ -110,7 +110,6 @@ ui-screenshots:
     screenshot_args_text="$(python3 script/generate_screenshot_test_args.py "${screens}")"; \
     IFS=' ' read -r -a screenshot_args <<< "${screenshot_args_text}"; \
     script/prepare_build_artifacts.bash prepare-directory "${derived_data_path}"; \
-    script/prepare_build_artifacts.bash prepare-managed-directory "${screenshot_output}"; \
     script/prepare_build_artifacts.bash prepare-result "${result_bundle_path}"; \
     status=0; set -o pipefail; xcodebuild test \
         -project TodoMate.xcodeproj \
@@ -127,6 +126,7 @@ ui-screenshots:
     exit "${finalize_status}"
     @result_bundle_root="${TODOMATE_RESULT_BUNDLE_DIR-.build/TestResults}"; \
     screenshot_output="${TODOMATE_SCREENSHOT_OUTPUT_DIR-screenshots}"; \
+    script/prepare_build_artifacts.bash prepare-managed-directory "${screenshot_output}"; \
     xcrun xcresulttool export attachments \
         --path "${result_bundle_root}/screenshots.xcresult" \
         --manifest "${screenshot_output}/manifest.json" \

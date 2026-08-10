@@ -30,6 +30,19 @@ trap cleanup EXIT
 
 cd "${REPOSITORY_ROOT}"
 
+nul_list_contains() {
+  local needle="$1"
+  local list_path="$2"
+  local candidate
+
+  while IFS= read -r -d '' candidate; do
+    if [[ "${candidate}" == "${needle}" ]]; then
+      return 0
+    fi
+  done < "${list_path}"
+  return 1
+}
+
 for tool in git just python3; do
   if ! command -v "${tool}" >/dev/null 2>&1; then
     echo "error: required contract tool is unavailable: ${tool}" >&2
@@ -40,6 +53,17 @@ done
 INITIAL_UNTRACKED_LIST="${TEMPORARY_ROOT}/initial-untracked-paths"
 readonly INITIAL_UNTRACKED_LIST
 git ls-files -z --others --exclude-standard > "${INITIAL_UNTRACKED_LIST}"
+
+INITIAL_RAW_LOG_LIST="${TEMPORARY_ROOT}/initial-raw-log-paths"
+readonly INITIAL_RAW_LOG_LIST
+find . -type d \( -name .git -o -name .build \) -prune -o \
+  -type f -name '*.log' -print0 > "${INITIAL_RAW_LOG_LIST}"
+
+INITIAL_TEST_LOGS_PRESENT=false
+if [[ -d .test-logs ]]; then
+  INITIAL_TEST_LOGS_PRESENT=true
+fi
+readonly INITIAL_TEST_LOGS_PRESENT
 
 REAL_PYTHON3="$(command -v python3)"
 if [[ -z "${REAL_PYTHON3}" || ! -x "${REAL_PYTHON3}" ]]; then
@@ -256,6 +280,7 @@ printf '%s\n' \
   'done' \
   'if [[ -n "${TODOMATE_EXPECT_SCREENSHOT_MANIFEST:-}" && "${manifest_path}" != "${TODOMATE_EXPECT_SCREENSHOT_MANIFEST}" ]]; then exit 49; fi' \
   'if [[ -n "${TODOMATE_EXPECT_SCREENSHOT_OUTPUT_PATH:-}" && "${output_path}" != "${TODOMATE_EXPECT_SCREENSHOT_OUTPUT_PATH}" ]]; then exit 50; fi' \
+  'if [[ -n "${manifest_path}" && -e "${manifest_path}" ]]; then exit 52; fi' \
   'if [[ -n "${manifest_path}" ]]; then printf "%s\n" "[]" > "${manifest_path}"; fi' \
   'exit 0' \
   > "${TEMPORARY_ROOT}/bin/xcrun"
@@ -655,36 +680,33 @@ if (
   exit 1
 fi
 
-if [[ -d .test-logs ]]; then
+if [[ -d .test-logs && "${INITIAL_TEST_LOGS_PRESENT}" != true ]]; then
   echo "error: a canonical recipe created .test-logs" >&2
   exit 1
 fi
 
-RAW_LOGS="$(find . -type d \( -name .git -o -name .build \) -prune -o \
-  -type f -name '*.log' -print)"
-readonly RAW_LOGS
-if [[ -n "${RAW_LOGS}" ]]; then
-  echo "error: canonical recipes left repo-local raw logs:" >&2
-  echo "${RAW_LOGS}" >&2
-  exit 1
-fi
+FINAL_RAW_LOG_LIST="${TEMPORARY_ROOT}/final-raw-log-paths"
+readonly FINAL_RAW_LOG_LIST
+find . -type d \( -name .git -o -name .build \) -prune -o \
+  -type f -name '*.log' -print0 > "${FINAL_RAW_LOG_LIST}"
+
+while IFS= read -r -d '' path; do
+  if ! nul_list_contains "${path}" "${INITIAL_RAW_LOG_LIST}"; then
+    echo "error: canonical recipes created a repo-local raw log: ${path}" >&2
+    exit 1
+  fi
+done < "${FINAL_RAW_LOG_LIST}"
+
+while IFS= read -r -d '' path; do
+  if [[ ! -f "${path}" ]]; then
+    echo "error: canonical recipes removed a pre-existing repo-local raw log: ${path}" >&2
+    exit 1
+  fi
+done < "${INITIAL_RAW_LOG_LIST}"
 
 FINAL_UNTRACKED_LIST="${TEMPORARY_ROOT}/final-untracked-paths"
 readonly FINAL_UNTRACKED_LIST
 git ls-files -z --others --exclude-standard > "${FINAL_UNTRACKED_LIST}"
-
-nul_list_contains() {
-  local needle="$1"
-  local list_path="$2"
-  local candidate
-
-  while IFS= read -r -d '' candidate; do
-    if [[ "${candidate}" == "${needle}" ]]; then
-      return 0
-    fi
-  done < "${list_path}"
-  return 1
-}
 
 while IFS= read -r -d '' path; do
   if ! nul_list_contains "${path}" "${INITIAL_UNTRACKED_LIST}"; then

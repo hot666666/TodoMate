@@ -98,6 +98,16 @@ case "${COMMAND}" in
 
     mkdir -p -- "${ARTIFACT_PATH}"
     touch -- "${managed_marker}"
+
+    while IFS= read -r -d '' managed_entry; do
+      rm -rf -- "${managed_entry}"
+    done < <(
+      find "${ARTIFACT_PATH}" \
+        -mindepth 1 \
+        -maxdepth 1 \
+        ! -name '.todomate-managed-output' \
+        -print0
+    )
     ;;
 
   prepare-result)
