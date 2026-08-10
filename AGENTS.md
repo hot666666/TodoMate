@@ -33,8 +33,22 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
   확인합니다. 사용자의 기존 변경이 있으면 별도 worktree를 사용하거나 중단하고
   충돌 범위를 알립니다.
 - `dev`와 `main`에는 직접 커밋하지 않습니다. 승인된 Linear 작업 범위에서는 브랜치
-  생성, 필요한 파일만 커밋, push, Draft PR 생성까지 자율적으로 수행할 수 있습니다.
-- PR 병합, 태그, 공증, 배포는 별도 승인 없이는 수행하지 않습니다.
+  생성, 필요한 파일만 커밋, push, Draft PR 생성과 검증된 PR 병합까지 자율적으로
+  수행할 수 있습니다.
+- 승인된 Goal 범위의 PR은 exact remote HEAD 독립 리뷰, 지적 수정 후 재리뷰, 설정된
+  required check의 성공, unresolved review thread 0건과 mergeability 확인을 모두 통과한
+  뒤 병합합니다. required check가 0건이면 그 사실을 evidence에 명시합니다.
+- `독립 리뷰`는 변경 구현자와 다른 agent task/context가 exact remote HEAD를 read-only로
+  검토하는 것을 뜻합니다. 구현자의 자체 재검토는 독립 리뷰로 계산하지 않습니다.
+  reviewer가 해당 HEAD를 직접 수정했다면 변경에 관여하지 않은 다른 reviewer가 새 HEAD를
+  다시 검토해야 합니다.
+- stacked PR은 선행 PR부터 병합하고 후속 브랜치를 최신 `dev`에 재정렬한 뒤 같은 검증과
+  리뷰 gate를 다시 통과시킵니다. 충돌이 제품 결정·호환성·데이터 정책을 요구할 때만
+  사용자에게 판단을 요청합니다.
+- 릴리스, 태그, 공증과 배포는 별도 승인 없이는 수행하지 않습니다.
+- PR 제목·본문·진행 comment·review 요약은 한글로 작성합니다. PR 본문은 실제 diff와
+  검증 결과만 사용해 `목적 / 주요 변경사항 / 검증 / 제한사항·후속` 순서로 간결하게
+  유지합니다.
 
 ## Linear 실행 계약
 
@@ -64,7 +78,8 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 - `Todo`: 요구사항과 검증 방법이 명확하고 모든 blocker가 해결된 Ready 이슈
 - `In Progress`: 현재 구현 중인 이슈. 같은 코드 경계의 신규 구현은 하나만 둡니다.
 - `In Review`: 구현, 검증, 독립 리뷰, 수정과 Draft PR 생성까지 완료된 이슈
-- `Done`: PR이 `dev`에 반영되고 최종 완료 조건을 다시 확인한 이슈
+- `Done`: review/check/thread/mergeability gate를 통과한 PR이 `dev`에 반영되고, merge된
+  exact SHA에서 최종 완료 조건을 다시 확인한 이슈
 
 승인된 Project 또는 Milestone 목표가 실행 중이면 다음 순서로 계속 진행합니다.
 
@@ -74,10 +89,16 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 3. 진행 중 이슈가 없으면 unblocked `Todo` 중 후속 작업을 가장 많이 해제하는 이슈를
    선택합니다.
 4. 선택한 이슈를 `In Progress`로 옮기고 구현 범위와 검증 계획을 기록합니다.
-5. 구현 → 관련 `just` 검증 → 독립 리뷰 → 수정 → 재검증을 수행합니다.
+5. 구현 → 관련 `just` 검증 → 구현자와 다른 agent task/context의 독립 리뷰 → 구현자의
+   수정 → 같은 독립 reviewer 또는 변경에 관여하지 않은 새 reviewer의 재리뷰 → 재검증을
+   수행합니다.
 6. Linear에 브랜치, 커밋, 검증 명령과 결과, 제한사항, PR을 기록합니다.
-7. `In Review`로 옮긴 뒤 다음 unblocked 이슈를 계속 진행합니다.
-8. 한 이슈가 막히면 blocker와 선택지를 기록하고 다른 Ready 이슈를 진행합니다.
+7. `In Review`에서 exact remote HEAD 기준 독립 리뷰, 지적 수정과 재리뷰, required check,
+   unresolved review thread 0건, mergeability를 확인하고 GitHub 또는 Linear에 최종 PASS
+   evidence를 남깁니다.
+8. gate가 통과하면 PR을 병합하고 merge된 exact SHA에서 필수 검증을 다시 실행한 뒤
+   `Done`으로 옮깁니다. stacked 후속 브랜치는 최신 `dev`에 재정렬해 다시 검증합니다.
+9. 한 이슈가 막히면 blocker와 선택지를 기록하고 다른 Ready 이슈를 진행합니다.
 
 승인된 실행 목표 안에서는 다음 작업을 추가 승인 없이 수행할 수 있습니다.
 
@@ -85,6 +106,7 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 - 코드·테스트·문서 수정과 관련 `just` 검증
 - 작업 브랜치 생성, 명시적 파일 커밋, push와 Draft PR 생성
 - 리뷰 지적 수정, 재검증과 결과 기록
+- review/check/thread/mergeability gate를 통과한 PR 병합과 stacked 후속 브랜치 재정렬
 
 다음 경우에는 임의로 결정하지 않고 중단해 사용자 판단을 요청합니다.
 
@@ -92,7 +114,8 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 - 파괴적 데이터 마이그레이션 또는 호환성 손실
 - 새 외부 의존성·서비스 도입
 - 인증서, 비밀정보, 운영 계정 권한 사용
-- PR 병합, 릴리스, 공증, 배포
+- 릴리스, 태그, 공증, 배포
+- merge conflict 해결이 제품 동작·호환성·데이터 정책을 새로 결정해야 하는 경우
 - 사용자 변경과의 충돌 또는 완료를 판정할 수 없는 검증 환경
 
 ## 현재 모듈 경계
@@ -190,7 +213,7 @@ Linear 이슈의 `검증 명령`에는 위 명령 중 해당 범위를 정확히
 | XCTest(UI)                 | `docs/xctest-ui-test.md`           |
 | SwiftUI Toolbar API(macOS) | `docs/macos-26-toolbar-guide.md`   |
 | 키보드 단축키              | `docs/macos-keyboard-shortcuts.md` |
-| Nostr 마이그레이션 계획    | `docs/nostr/README.md`             |
+| Deferred RelayLive 연구    | `docs/nostr/README.md`             |
 | Slopad 에디터 계획         | `docs/slopad-editor/README.md`     |
 | 반복 실패 런북             | `docs/agent-known-failures.md`     |
 

@@ -1,5 +1,9 @@
 # 05. 릴레이 운영 (GCP e2-micro)
 
+> [!WARNING]
+> Deferred RelayLive operation 연구다. Live Relay 배포·운영은 Full Mock client MVP 밖의
+> 범위이며 dependency frontier를 막지 않는다.
+
 > 결정 D2: **자체 릴레이 = 그룹 데이터의 권위 있는 저장소, 공개 릴레이 = 공개 메타데이터 배포용.**
 > 기존에 간단한 서버가 도는 GCP e2-micro(Always Free) VM을 재활용한다.
 
@@ -170,4 +174,3 @@ stop-relay:
 - [khatru](https://github.com/fiatjaf/khatru) / [relay29](https://github.com/fiatjaf/relay29)
 - [strfry 호스팅 가이드](https://usenostr.org/relay.html)
 - [NIP-42 AUTH](https://github.com/nostr-protocol/nips/blob/master/42.md)
-</content>

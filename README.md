@@ -3,7 +3,14 @@
 ![Platform](https://img.shields.io/badge/Platform-macOS%2026.0%2B-lightgrey)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**TodoMate**는 개인의 할 일과 메모를 체계적으로 관리할 수 있는 올인원 플래너입니다.
+**TodoMate**는 현재 개인 할 일·메모 플래너에서 Todo·Memo·다중 Chat을 한 Project에 모으는
+local-first macOS workspace로 재구성 중입니다.
+
+> [!NOTE]
+> 아래 화면과 구조는 현재 legacy 구현을 설명합니다. 목표 제품은 개인/공유를 하나의
+> Project lifecycle로 통합하고 선택 Project 안에서 Todo·Memo·다중 Chat Channel을 사용하는
+> [Project-first Full Mock Client MVP](https://linear.app/hot6/document/todomate-project-first-full-mock-client-mvp-f46148c475f5)입니다.
+> 현재 구현과 목표 경계는 [`docs/app-architecture.md`](docs/app-architecture.md)를 참고하세요.
 
 ![App](images/application.png)
 
@@ -83,7 +90,7 @@ graph LR
 - **CoreDIContainer**: 앱의 근간이 되는 로컬 기능들이 존재합니다.
 - **PublicDIContainer**: 외부와의 연결이 필요한 온라인 기능들이 존재합니다.
 
-### 프레젠테이션 계층
+### 현재 프레젠테이션 계층 (legacy)
 
 ```mermaid
 ---

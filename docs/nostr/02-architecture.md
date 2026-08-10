@@ -1,5 +1,9 @@
 # 02. TodoMate × Nostr 설계
 
+> [!WARNING]
+> 폐기된 Live Relay 설계 연구다. 현재 제품 architecture나 MVP 계획이 아니며 기준은
+> [`README.md`](README.md)와 [`../app-architecture.md`](../app-architecture.md)다.
+
 > [01-nostr-primer.md](01-nostr-primer.md)를 먼저 읽은 것을 전제로 한다.
 
 ---
@@ -434,4 +438,3 @@ sequenceDiagram
 ## 다음
 
 → [03-implementation-plan.md](03-implementation-plan.md): 이 설계를 어떤 순서로 구현할 것인가
-</content>
