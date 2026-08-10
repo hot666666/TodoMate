@@ -89,6 +89,11 @@ Widget은 각각 별도 `DatabasePool`을 열지만 같은 파일 URL과 migrati
   read-only로 조회하고, 새 DB가 검증된 뒤 canonical group으로 전환한다.
 - 테이블과 컬럼은 영문 단수형 lower camel case를 사용한다.
 - Swift record의 `ownerID`는 DB의 `ownerId`에 명시적으로 매핑한다.
+
+현재 ProjectID가 없는 Todo·Memo와 legacy User/Group/Message를 목표 Project aggregate로
+옮기는 before/after 규칙은 [Project-first legacy entity migration map](project-migration-map.md)에
+정리한다. 이 문서는 mapping 계약이며 실제 Project schema와 실행 migration은 후속 이슈가
+소유한다.
 - 공통 변경 메타데이터는 `createdAt`, `updatedAt`, `deletedAt`, `localRevision`이다.
 - `deletedAt`은 soft-delete tombstone이며 `localRevision`은 로컬 행 변경 순서다. 둘 다
   Nostr 이벤트 ID나 릴레이 버전을 의미하지 않는다.
