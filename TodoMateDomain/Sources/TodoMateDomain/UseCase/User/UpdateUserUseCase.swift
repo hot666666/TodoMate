@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol UpdateUserUseCase {
+public protocol UpdateUserUseCase: Sendable {
   func execute(_ user: User) async throws
 }
 

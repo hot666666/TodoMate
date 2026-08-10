@@ -5,7 +5,7 @@
 //  Created by hs on 7/12/25.
 //
 
-public protocol MessageRepository {
+public protocol MessageRepository: Sendable {
   func create(_ message: GroupMessage) throws
   func update(_ message: GroupMessage) throws
   func delete(_ messageId: String) async throws

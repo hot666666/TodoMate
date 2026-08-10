@@ -8,6 +8,7 @@
 import XCTest
 
 /// UI 테스트에서 특정 화면으로 네비게이션하는 헬퍼
+@MainActor
 struct ScreenNavigator {
   let app: XCUIApplication
 

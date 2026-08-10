@@ -63,12 +63,18 @@ struct TodoMateTimelineProvider: TimelineProvider {
     )
   }
 
-  func getSnapshot(in context: Context, completion: @escaping (TodoWidgetEntry) -> Void) {
+  func getSnapshot(
+    in context: Context,
+    completion: @escaping @Sendable (TodoWidgetEntry) -> Void,
+  ) {
     let entry = placeholder(in: context)
     completion(entry)
   }
 
-  func getTimeline(in _: Context, completion: @escaping (Timeline<TodoWidgetEntry>) -> Void) {
+  func getTimeline(
+    in _: Context,
+    completion: @escaping @Sendable (Timeline<TodoWidgetEntry>) -> Void,
+  ) {
     Task {
       let todayTodos = await fetchTodayTodos()
       let todos = todayTodos

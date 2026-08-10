@@ -11,11 +11,11 @@ import TodoMateDomain
 
 struct AddMemoIntent: AppIntent {
   #if DEBUG
-    static var title: LocalizedStringResource = "Add Memo DEBUG"
+    static let title: LocalizedStringResource = "Add Memo DEBUG"
   #else
-    static var title: LocalizedStringResource = "Add Memo"
+    static let title: LocalizedStringResource = "Add Memo"
   #endif
-  static var description: IntentDescription? = "Creates a new Memo in TodoMate."
+  static let description: IntentDescription? = "Creates a new Memo in TodoMate."
 
   @Parameter(title: "Content")
   var content: String

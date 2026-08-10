@@ -5,7 +5,7 @@
 //  Created by hs on 7/2/25.
 //
 
-public protocol DeleteMessageUseCase {
+public protocol DeleteMessageUseCase: Sendable {
   func run(for userId: String, _ message: GroupMessage) async throws
 }
 

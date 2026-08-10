@@ -5,7 +5,7 @@
 //  Created by agent on 1/9/26.
 //
 
-public protocol LeaveGroupUseCase {
+public protocol LeaveGroupUseCase: Sendable {
   func execute(groupId: String, userId: String) async throws
 }
 

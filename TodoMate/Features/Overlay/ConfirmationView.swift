@@ -64,9 +64,7 @@ struct ConfirmationView: View {
     .confirmationCard()
     .onAppear {
       escToken = coreContainer.hotKeyManager.register(key: .escape, modifiers: []) {
-        Task { @MainActor in
-          onDismiss()
-        }
+        onDismiss()
       }
     }
     .onDisappear {

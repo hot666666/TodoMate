@@ -13,11 +13,11 @@ import WidgetKit
 
 struct AddTodoIntent: AppIntent {
   #if DEBUG
-    static var title: LocalizedStringResource = "Add Todo DEBUG"
+    static let title: LocalizedStringResource = "Add Todo DEBUG"
   #else
-    static var title: LocalizedStringResource = "Add Todo"
+    static let title: LocalizedStringResource = "Add Todo"
   #endif
-  static var description: IntentDescription? = "Creates a new Todo in TodoMate."
+  static let description: IntentDescription? = "Creates a new Todo in TodoMate."
 
   @Parameter(title: "Content")
   var content: String

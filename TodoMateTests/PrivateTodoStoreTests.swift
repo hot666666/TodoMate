@@ -18,8 +18,15 @@ struct PrivateTodoStoreTests {
   // MARK: - Mock UseCases
 
   final class MockCreateUseCase: CreateLocalTodoUseCase {
-    var runHandler: ((Todo) -> Void)?
-    func run(_ todo: Todo) async throws { runHandler?(todo) }
+    private let invocation = AwaitableInvocation<Todo>()
+
+    func nextInvocation() async throws -> Todo {
+      try await invocation.next()
+    }
+
+    func run(_ todo: Todo) async throws {
+      invocation.record(todo)
+    }
   }
 
   final class MockReadUseCase: ReadLocalTodoUseCase {
@@ -29,13 +36,27 @@ struct PrivateTodoStoreTests {
   }
 
   final class MockUpdateUseCase: UpdateLocalTodoUseCase {
-    var runHandler: ((Todo) -> Void)?
-    func run(_ todo: Todo) async throws { runHandler?(todo) }
+    private let invocation = AwaitableInvocation<Todo>()
+
+    func nextInvocation() async throws -> Todo {
+      try await invocation.next()
+    }
+
+    func run(_ todo: Todo) async throws {
+      invocation.record(todo)
+    }
   }
 
   final class MockDeleteUseCase: DeleteLocalTodoUseCase {
-    var runHandler: ((String) -> Void)?
-    func run(_ todoId: String) async throws { runHandler?(todoId) }
+    private let invocation = AwaitableInvocation<String>()
+
+    func nextInvocation() async throws -> String {
+      try await invocation.next()
+    }
+
+    func run(_ todoId: String) async throws {
+      invocation.record(todoId)
+    }
   }
 
   final class MockObserveUseCase: ObserveTodosUseCase {
@@ -65,15 +86,12 @@ struct PrivateTodoStoreTests {
     )
 
     let todo = Todo(owner: "me", content: "New Todo", in: Date())
-    var capturedTodo: Todo?
-    createUC.runHandler = { capturedTodo = $0 }
-
     // When
     store.addTodo(todo)
-    try await Task.sleep(for: .milliseconds(50))
+    let receivedTodo = try await createUC.nextInvocation()
 
     // Then
-    #expect(capturedTodo?.id == todo.id)
+    #expect(receivedTodo.id == todo.id)
   }
 
   @Test("Update Todo calls UpdateUseCase")
@@ -95,16 +113,13 @@ struct PrivateTodoStoreTests {
     )
 
     let todo = Todo(owner: "me", content: "Updated Todo", in: Date())
-    var capturedTodo: Todo?
-    updateUC.runHandler = { capturedTodo = $0 }
-
     // When
     store.updateTodo(todo)
-    try await Task.sleep(for: .milliseconds(50))
+    let receivedTodo = try await updateUC.nextInvocation()
 
     // Then
-    #expect(capturedTodo?.id == todo.id)
-    #expect(capturedTodo?.content == "Updated Todo")
+    #expect(receivedTodo.id == todo.id)
+    #expect(receivedTodo.content == "Updated Todo")
   }
 
   @Test("Delete Todo calls DeleteUseCase")
@@ -126,14 +141,11 @@ struct PrivateTodoStoreTests {
     )
 
     let todoId = "some-id"
-    var capturedId: String?
-    deleteUC.runHandler = { capturedId = $0 }
-
     // When
     store.deleteTodo(todoId)
-    try await Task.sleep(for: .milliseconds(50))
+    let receivedTodoID = try await deleteUC.nextInvocation()
 
     // Then
-    #expect(capturedId == todoId)
+    #expect(receivedTodoID == todoId)
   }
 }

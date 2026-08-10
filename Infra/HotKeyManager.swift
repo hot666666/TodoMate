@@ -7,8 +7,59 @@ import AppKit
 import Carbon
 
 /// 글로벌 단축키 관리자 (Carbon API 기반, 스택 방식)
+@MainActor
 final class HotKeyManager {
   // MARK: - Types
+
+  struct CarbonBackend {
+    struct RegistrationResult {
+      let status: OSStatus
+      let reference: EventHotKeyRef?
+    }
+
+    let installEventHandler: (UnsafeMutableRawPointer) -> EventHandlerRef?
+    let removeEventHandler: (EventHandlerRef) -> Void
+    let registerHotKey: (UInt32, UInt32, UInt32) -> RegistrationResult
+    let unregisterHotKey: (EventHotKeyRef) -> Void
+
+    @MainActor static let live = CarbonBackend(
+      installEventHandler: { userData in
+        var eventType = EventTypeSpec(
+          eventClass: OSType(kEventClassKeyboard),
+          eventKind: UInt32(kEventHotKeyPressed),
+        )
+        var eventHandler: EventHandlerRef?
+        let status = InstallEventHandler(
+          GetEventDispatcherTarget(),
+          hotKeyHandler,
+          1,
+          &eventType,
+          userData,
+          &eventHandler,
+        )
+        return status == noErr ? eventHandler : nil
+      },
+      removeEventHandler: { eventHandler in
+        RemoveEventHandler(eventHandler)
+      },
+      registerHotKey: { keyCode, modifiers, entryID in
+        let hotKeyID = EventHotKeyID(signature: hotKeySignature, id: entryID)
+        var hotKeyRef: EventHotKeyRef?
+        let status = RegisterEventHotKey(
+          keyCode,
+          modifiers,
+          hotKeyID,
+          GetEventDispatcherTarget(),
+          0,
+          &hotKeyRef,
+        )
+        return RegistrationResult(status: status, reference: hotKeyRef)
+      },
+      unregisterHotKey: { hotKeyRef in
+        UnregisterEventHotKey(hotKeyRef)
+      },
+    )
+  }
 
   /// 단축키 등록 토큰 (해제 시 사용)
   struct RegistrationToken: Hashable {
@@ -45,7 +96,7 @@ final class HotKeyManager {
   /// 스택에 저장될 핸들러 엔트리
   private struct HotKeyEntry {
     let id: UInt32
-    let handler: () -> Void
+    let handler: @MainActor () -> Void
   }
 
   /// Carbon 등록 정보
@@ -56,6 +107,7 @@ final class HotKeyManager {
 
   // MARK: - Properties
 
+  private let carbonBackend: CarbonBackend
   private var eventHandler: EventHandlerRef?
 
   /// 키 조합별 핸들러 스택 (마지막이 top)
@@ -71,11 +123,12 @@ final class HotKeyManager {
 
   // MARK: - Initialization
 
-  init() {
+  init(carbonBackend: CarbonBackend = .live) {
+    self.carbonBackend = carbonBackend
     installEventHandler()
   }
 
-  deinit {
+  isolated deinit {
     cleanup()
   }
 
@@ -88,8 +141,11 @@ final class HotKeyManager {
   ///   - handler: 단축키가 눌렸을 때 실행될 클로저
   /// - Returns: 등록 해제에 사용할 토큰
   @discardableResult
-  func register(key: Key, modifiers: NSEvent.ModifierFlags, handler: @escaping () -> Void)
-    -> RegistrationToken {
+  func register(
+    key: Key,
+    modifiers: NSEvent.ModifierFlags,
+    handler: @escaping @MainActor () -> Void,
+  ) -> RegistrationToken {
     let combination = KeyCombination(
       keyCode: key.carbonKeyCode,
       modifiers: carbonFlags(from: modifiers),
@@ -102,7 +158,7 @@ final class HotKeyManager {
 
     // 1. 기존 Carbon 등록 해제 (새로운 핸들러로 교체하기 위해)
     if let existing = carbonRegistrations[combination] {
-      UnregisterEventHotKey(existing.ref)
+      carbonBackend.unregisterHotKey(existing.ref)
       carbonRegistrations.removeValue(forKey: combination)
     }
 
@@ -135,7 +191,7 @@ final class HotKeyManager {
     if stack.isEmpty {
       handlerStacks.removeValue(forKey: combination)
       if let registration = carbonRegistrations[combination] {
-        UnregisterEventHotKey(registration.ref)
+        carbonBackend.unregisterHotKey(registration.ref)
         carbonRegistrations.removeValue(forKey: combination)
       }
       return
@@ -148,7 +204,7 @@ final class HotKeyManager {
     if wasTop {
       // 기존 Carbon 등록 해제
       if let registration = carbonRegistrations[combination] {
-        UnregisterEventHotKey(registration.ref)
+        carbonBackend.unregisterHotKey(registration.ref)
         carbonRegistrations.removeValue(forKey: combination)
       }
 
@@ -162,67 +218,75 @@ final class HotKeyManager {
   // MARK: - Private Methods
 
   private func installEventHandler() {
-    var eventType = EventTypeSpec(
-      eventClass: OSType(kEventClassKeyboard),
-      eventKind: UInt32(kEventHotKeyPressed),
-    )
-
-    InstallEventHandler(
-      GetEventDispatcherTarget(),
-      hotKeyHandler,
-      1,
-      &eventType,
+    eventHandler = carbonBackend.installEventHandler(
       UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()),
-      &eventHandler,
     )
   }
 
   private func cleanup() {
     for registration in carbonRegistrations.values {
-      UnregisterEventHotKey(registration.ref)
+      carbonBackend.unregisterHotKey(registration.ref)
     }
     carbonRegistrations.removeAll()
     handlerStacks.removeAll()
     tokenToCombination.removeAll()
 
     if let eventHandler {
-      RemoveEventHandler(eventHandler)
+      carbonBackend.removeEventHandler(eventHandler)
       self.eventHandler = nil
     }
   }
 
   /// Carbon API로 단축키 등록
   private func registerWithCarbon(combination: KeyCombination, entryID: UInt32) {
-    let hotKeyID = EventHotKeyID(signature: hotKeySignature, id: entryID)
-    var hotKeyRef: EventHotKeyRef?
-
-    let status = RegisterEventHotKey(
+    let result = carbonBackend.registerHotKey(
       UInt32(combination.keyCode),
       combination.modifiers,
-      hotKeyID,
-      GetEventDispatcherTarget(),
-      0,
-      &hotKeyRef,
+      entryID,
     )
 
-    if status == noErr, let hotKeyRef {
+    if result.status == noErr, let hotKeyRef = result.reference {
       carbonRegistrations[combination] = CarbonRegistration(
         ref: hotKeyRef,
         topEntryID: entryID,
       )
     } else {
-      print("Failed to register hotkey with Carbon: \(status)")
+      print("Failed to register hotkey with Carbon: \(result.status)")
     }
   }
 
   /// 단축키 이벤트 처리
-  fileprivate func handleHotKey(id: UInt32) {
+  private func handleHotKey(id: UInt32) -> Bool {
     // ID로 조합 찾기
-    guard let combination = tokenToCombination[id] else { return }
+    guard let combination = tokenToCombination[id] else { return false }
 
     // 스택의 top 찾아서 실행
     if let top = handlerStacks[combination]?.last, top.id == id {
       top.handler()
+      return true
+    }
+    return false
+  }
+
+  /// Carbon의 main event dispatcher callback에서만 unretained manager를 동기 접근한다.
+  /// 예상과 달리 다른 thread/event loop에서 호출되면 pointer를 역참조하지 않고 fail-closed한다.
+  nonisolated static func dispatchCarbonHotKey(
+    id: UInt32,
+    userData: UnsafeMutableRawPointer?,
+    isMainEventDispatcher: Bool,
+  ) -> OSStatus {
+    guard isMainEventDispatcher, let userData else {
+      return OSStatus(eventNotHandledErr)
+    }
+    let userDataAddress = UInt(bitPattern: userData)
+
+    return MainActor.assumeIsolated {
+      guard let actorIsolatedUserData = UnsafeMutableRawPointer(bitPattern: userDataAddress) else {
+        return OSStatus(eventNotHandledErr)
+      }
+      let manager = Unmanaged<HotKeyManager>.fromOpaque(actorIsolatedUserData)
+        .takeUnretainedValue()
+      return manager.handleHotKey(id: id) ? noErr : OSStatus(eventNotHandledErr)
     }
   }
 
@@ -246,7 +310,11 @@ private let hotKeySignature: FourCharCode = {
 }()
 
 private let hotKeyHandler: EventHandlerUPP = { _, event, userData in
-  guard let event, let userData else { return noErr }
+  let isMainEventDispatcher =
+    Thread.isMainThread && GetCurrentEventLoop() == GetMainEventLoop()
+  guard isMainEventDispatcher, let event, let userData else {
+    return OSStatus(eventNotHandledErr)
+  }
 
   var hotKeyID = EventHotKeyID()
   let status = GetEventParameter(
@@ -259,10 +327,13 @@ private let hotKeyHandler: EventHandlerUPP = { _, event, userData in
     &hotKeyID,
   )
 
-  if status == noErr, hotKeyID.signature == hotKeySignature {
-    let manager = Unmanaged<HotKeyManager>.fromOpaque(userData).takeUnretainedValue()
-    manager.handleHotKey(id: hotKeyID.id)
+  guard status == noErr, hotKeyID.signature == hotKeySignature else {
+    return OSStatus(eventNotHandledErr)
   }
 
-  return noErr
+  return HotKeyManager.dispatchCarbonHotKey(
+    id: hotKeyID.id,
+    userData: userData,
+    isMainEventDispatcher: isMainEventDispatcher,
+  )
 }

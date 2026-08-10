@@ -5,7 +5,7 @@
 //  Created by hs on 6/30/25.
 //
 
-public protocol CreateTodoUseCase {
+public protocol CreateTodoUseCase: Sendable {
   func run(for userId: String, _ todo: Todo) async throws
 }
 

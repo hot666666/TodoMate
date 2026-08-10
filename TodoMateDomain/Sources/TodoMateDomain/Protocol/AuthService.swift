@@ -5,7 +5,7 @@
 //  Created by hs on 7/12/25.
 //
 
-public protocol AuthService {
+public protocol AuthService: Sendable {
   var signedInUserId: String? { get }
   func signIn() async throws
   func signOut() throws

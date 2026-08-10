@@ -13,11 +13,11 @@ import WidgetKit
 
 struct UpdateTodoIntent: AppIntent {
   #if DEBUG
-    static var title: LocalizedStringResource = "Update Todo DEBUG"
+    static let title: LocalizedStringResource = "Update Todo DEBUG"
   #else
-    static var title: LocalizedStringResource = "Update Todo"
+    static let title: LocalizedStringResource = "Update Todo"
   #endif
-  static var description: IntentDescription? = "Updates a Todo's status or content."
+  static let description: IntentDescription? = "Updates a Todo's status or content."
 
   @Parameter(title: "Todo")
   var todo: TodoEntity

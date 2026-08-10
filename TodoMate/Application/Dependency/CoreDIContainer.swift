@@ -108,13 +108,3 @@ extension CoreDIContainer {
     )
   }()
 }
-
-// MARK: - AppIntent Support
-
-extension CoreDIContainer {
-  @available(
-    *, deprecated,
-    message: "Use @Dependency private var container: CoreDIContainer in AppIntents instead"
-  )
-  nonisolated(unsafe) static var shared: CoreDIContainer?
-}

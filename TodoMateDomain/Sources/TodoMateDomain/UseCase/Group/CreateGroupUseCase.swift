@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol CreateGroupUseCase {
+public protocol CreateGroupUseCase: Sendable {
   func execute(name: String, userId: String) async throws -> UserGroup
 }
 

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol TogglePublicConnectivityUseCase {
+public protocol TogglePublicConnectivityUseCase: Sendable {
   func execute(isOnline: Bool) async
 }
 

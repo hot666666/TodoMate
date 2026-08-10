@@ -15,8 +15,8 @@ enum TodoStatusParam: String, AppEnum {
   case inProgress = "진행 중"
   case complete = "완료"
 
-  static var typeDisplayRepresentation: TypeDisplayRepresentation = "Todo Status"
-  static var caseDisplayRepresentations: [TodoStatusParam: DisplayRepresentation] = [
+  static let typeDisplayRepresentation: TypeDisplayRepresentation = "Todo Status"
+  static let caseDisplayRepresentations: [TodoStatusParam: DisplayRepresentation] = [
     .inComplete: "Incomplete",
     .todo: "To Do",
     .inProgress: "In Progress",

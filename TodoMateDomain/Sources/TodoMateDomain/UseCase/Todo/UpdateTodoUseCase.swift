@@ -9,7 +9,7 @@
 import Common
 import Foundation
 
-public protocol UpdateTodoUseCase {
+public protocol UpdateTodoUseCase: Sendable {
   func run(for userId: String, _ todo: Todo) async throws
 }
 

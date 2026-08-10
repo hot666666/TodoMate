@@ -10,8 +10,8 @@ import Foundation
 import TodoMateDomain
 
 struct MemoEntity: AppEntity {
-  static var defaultQuery = MemoEntityQuery()
-  static var typeDisplayRepresentation: TypeDisplayRepresentation = "Memo"
+  static let defaultQuery = MemoEntityQuery()
+  static let typeDisplayRepresentation: TypeDisplayRepresentation = "Memo"
 
   var id: String
   var content: String
