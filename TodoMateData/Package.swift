@@ -25,6 +25,10 @@ let package = Package(
         .product(name: "GRDB", package: "GRDB.swift"),
       ],
     ),
+    .executableTarget(
+      name: "GRDBReadOnlyProjectionProbe",
+      dependencies: ["TodoMateData", "TodoMateDomain"],
+    ),
     .testTarget(
       name: "TodoMateDataTests",
       dependencies: [

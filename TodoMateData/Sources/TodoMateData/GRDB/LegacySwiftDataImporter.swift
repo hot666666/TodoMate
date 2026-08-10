@@ -11,20 +11,25 @@ enum LegacySwiftDataImporter {
     let todos: [TodoRecord]
     let memos: [MemoRecord]
     let rejectedRecordCount: Int
+    let hasRecognizedEntityTable: Bool
   }
 
   struct ImportPreparation {
     var todosByID: [String: TodoRecord] = [:]
     var memosByID: [String: MemoRecord] = [:]
     var rejectedRecordCount = 0
+    var unrecognizedStoreCount = 0
     var sourceReadFailed = false
 
     var canMarkComplete: Bool {
-      !sourceReadFailed && rejectedRecordCount == 0
+      !sourceReadFailed && rejectedRecordCount == 0 && unrecognizedStoreCount == 0
     }
 
     mutating func merge(_ records: LegacyRecords) {
       rejectedRecordCount += records.rejectedRecordCount
+      if !records.hasRecognizedEntityTable {
+        unrecognizedStoreCount += 1
+      }
       for todo in records.todos
         where todo.updatedAt > (todosByID[todo.id]?.updatedAt ?? .distantPast) {
         todosByID[todo.id] = todo
@@ -92,6 +97,15 @@ enum LegacySwiftDataImporter {
         category: .data,
       )
     }
+    if preparation.unrecognizedStoreCount > 0 {
+      let message = "Legacy SwiftData import found "
+        + "\(preparation.unrecognizedStoreCount) store(s) without a recognized entity table; "
+        + "retry remains enabled"
+      Log.warning(
+        message,
+        category: .data,
+      )
+    }
   }
 
   static func persist(
@@ -149,14 +163,17 @@ enum LegacySwiftDataImporter {
     let database = try DatabaseQueue(path: url.path, configuration: configuration)
 
     return try database.read { databaseConnection in
-      let todoResult = try databaseConnection.tableExists("ZSDTODO")
-        ? readTodos(from: databaseConnection) : (records: [], rejectedRecordCount: 0)
-      let memoResult = try databaseConnection.tableExists("ZSDMEMO")
-        ? readMemos(from: databaseConnection) : (records: [], rejectedRecordCount: 0)
+      let hasTodoTable = try databaseConnection.tableExists("ZSDTODO")
+      let hasMemoTable = try databaseConnection.tableExists("ZSDMEMO")
+      let todoResult = hasTodoTable
+        ? try readTodos(from: databaseConnection) : (records: [], rejectedRecordCount: 0)
+      let memoResult = hasMemoTable
+        ? try readMemos(from: databaseConnection) : (records: [], rejectedRecordCount: 0)
       return LegacyRecords(
         todos: todoResult.records,
         memos: memoResult.records,
         rejectedRecordCount: todoResult.rejectedRecordCount + memoResult.rejectedRecordCount,
+        hasRecognizedEntityTable: hasTodoTable || hasMemoTable,
       )
     }
   }

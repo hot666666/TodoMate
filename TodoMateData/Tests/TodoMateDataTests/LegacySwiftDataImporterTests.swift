@@ -129,6 +129,46 @@ struct LegacySwiftDataImporterTests {
     #expect(owners.memo == "firebase-user")
   }
 
+  @Test("Keeps retry enabled for an unrecognized legacy schema")
+  func retriesUnrecognizedLegacySchema() async throws {
+    let legacyURL = FileManager.default.temporaryDirectory
+      .appendingPathComponent("legacy-unrecognized-\(UUID().uuidString).store")
+    defer { Self.removeDatabaseFiles(at: legacyURL) }
+
+    let unrecognizedDatabase = try DatabaseQueue(path: legacyURL.path)
+    try await unrecognizedDatabase.write { databaseConnection in
+      try databaseConnection.create(table: "ZUNRELATED") { table in
+        table.column("ZVALUE", .text)
+      }
+    }
+
+    let database = try GRDBDatabase(storage: .inMemory)
+    try LegacySwiftDataImporter.importIfNeeded(from: [legacyURL], into: database.writer)
+
+    let prematureCompletion = try await database.writer.read { databaseConnection in
+      try String.fetchOne(
+        databaseConnection,
+        sql: "SELECT value FROM localMetadata WHERE key = ?",
+        arguments: ["legacySwiftDataImportCompleted"],
+      )
+    }
+    #expect(prematureCompletion == nil)
+
+    try await Self.createLegacyStore(at: legacyURL, timestamp: Date())
+    try LegacySwiftDataImporter.importIfNeeded(from: [legacyURL], into: database.writer)
+
+    let importedTodo = try await GRDBTodoRepository(database: database).read(id: "todo-id")
+    #expect(importedTodo?.content == "Legacy Todo")
+    let finalCompletion = try await database.writer.read { databaseConnection in
+      try String.fetchOne(
+        databaseConnection,
+        sql: "SELECT value FROM localMetadata WHERE key = ?",
+        arguments: ["legacySwiftDataImportCompleted"],
+      )
+    }
+    #expect(finalCompletion == "true")
+  }
+
   private static func createLegacyStore(
     at url: URL,
     timestamp: Date,
