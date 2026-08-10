@@ -4,6 +4,7 @@ import Foundation
 enum GRDBDatabaseRegion: String, CaseIterable, Sendable {
   case todo
   case memo
+  case project
 }
 
 /// Bridges committed GRDB changes between processes that share the same database file.

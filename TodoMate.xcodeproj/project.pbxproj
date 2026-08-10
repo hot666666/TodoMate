@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A12800042F30000400000001 /* TodoMatePresentation in Frameworks */ = {isa = PBXBuildFile; productRef = A12800022F30000200000001 /* TodoMatePresentation */; };
+		A12800062F30000600000001 /* TodoMateUITestContracts in Frameworks */ = {isa = PBXBuildFile; productRef = A12800052F30000500000001 /* TodoMateUITestContracts */; };
+		A12800082F30000800000001 /* TodoMateApplication in Frameworks */ = {isa = PBXBuildFile; productRef = A12800072F30000700000001 /* TodoMateApplication */; };
 		4541F18C2F16622300CD59F3 /* SimpleOverlaySystem in Frameworks */ = {isa = PBXBuildFile; productRef = 4541F18B2F16622300CD59F3 /* SimpleOverlaySystem */; };
 		456ECA9E2F17B40100DB8E88 /* TodoMateData in Frameworks */ = {isa = PBXBuildFile; productRef = 456ECA9D2F17B40100DB8E88 /* TodoMateData */; };
 		456ECAA12F17B44400DB8E88 /* TodoMateDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 456ECAA02F17B44400DB8E88 /* TodoMateDomain */; };
@@ -158,6 +161,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A12800042F30000400000001 /* TodoMatePresentation in Frameworks */,
+				A12800082F30000800000001 /* TodoMateApplication in Frameworks */,
 				456ECB692F17B7E100DB8E88 /* Common in Frameworks */,
 				45B526A92F0F82480095C87F /* SwiftUIIntrospect in Frameworks */,
 				45962D2C2D4B128300089A48 /* Sparkle in Frameworks */,
@@ -171,6 +176,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A12800062F30000600000001 /* TodoMateUITestContracts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +283,8 @@
 			);
 			name = TodoMate;
 			packageProductDependencies = (
+				A12800022F30000200000001 /* TodoMatePresentation */,
+				A12800072F30000700000001 /* TodoMateApplication */,
 				45962D2B2D4B128300089A48 /* Sparkle */,
 				45B526A82F0F82480095C87F /* SwiftUIIntrospect */,
 				4541F18B2F16622300CD59F3 /* SimpleOverlaySystem */,
@@ -305,6 +313,9 @@
 				45E45A042F0CE76000BFEF01 /* TodoMateUITests */,
 			);
 			name = TodoMateUITests;
+			packageProductDependencies = (
+				A12800052F30000500000001 /* TodoMateUITestContracts */,
+			);
 			productName = TodoMateUITests;
 			productReference = 45E45A032F0CE76000BFEF01 /* TodoMateUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -344,6 +355,7 @@
 			);
 			mainGroup = 45E10B862C69B77300FC31CD;
 			packageReferences = (
+				A12800012F30000100000001 /* XCLocalSwiftPackageReference "TodoMatePresentation" */,
 				45962D2A2D4B128300089A48 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				45B526A72F0F82480095C87F /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				4541F18A2F16622300CD59F3 /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */,
@@ -870,6 +882,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		A12800012F30000100000001 /* XCLocalSwiftPackageReference "TodoMatePresentation" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = TodoMatePresentation;
+		};
 		456ECA9C2F17B40100DB8E88 /* XCLocalSwiftPackageReference "TodoMateData" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = TodoMateData;
@@ -912,6 +928,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		A12800022F30000200000001 /* TodoMatePresentation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A12800012F30000100000001 /* XCLocalSwiftPackageReference "TodoMatePresentation" */;
+			productName = TodoMatePresentation;
+		};
+		A12800052F30000500000001 /* TodoMateUITestContracts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A12800012F30000100000001 /* XCLocalSwiftPackageReference "TodoMatePresentation" */;
+			productName = TodoMateUITestContracts;
+		};
+		A12800072F30000700000001 /* TodoMateApplication */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 456ECA9F2F17B44400DB8E88 /* XCLocalSwiftPackageReference "TodoMateDomain" */;
+			productName = TodoMateApplication;
+		};
 		4541F18B2F16622300CD59F3 /* SimpleOverlaySystem */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4541F18A2F16622300CD59F3 /* XCRemoteSwiftPackageReference "SimpleOverlaySystem" */;

@@ -21,6 +21,7 @@ let package = Package(
       name: "TodoMateData",
       dependencies: [
         "TodoMateDomain",
+        .product(name: "TodoMateApplication", package: "TodoMateDomain"),
         "Common",
         .product(name: "GRDB", package: "GRDB.swift"),
       ],
@@ -33,6 +34,7 @@ let package = Package(
       name: "TodoMateDataTests",
       dependencies: [
         "TodoMateData",
+        .product(name: "TodoMateApplication", package: "TodoMateDomain"),
         .product(name: "GRDB", package: "GRDB.swift"),
       ],
     ),

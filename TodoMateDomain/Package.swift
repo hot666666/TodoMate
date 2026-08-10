@@ -14,6 +14,10 @@ let package = Package(
       name: "TodoMateDomain",
       targets: ["TodoMateDomain"],
     ),
+    .library(
+      name: "TodoMateApplication",
+      targets: ["TodoMateApplication"],
+    ),
   ],
   dependencies: [
     .package(path: "../Common"),
@@ -27,9 +31,17 @@ let package = Package(
         "Common",
       ],
     ),
+    .target(
+      name: "TodoMateApplication",
+      dependencies: ["TodoMateDomain"],
+    ),
     .testTarget(
       name: "TodoMateDomainTests",
       dependencies: ["TodoMateDomain"],
+    ),
+    .testTarget(
+      name: "TodoMateApplicationTests",
+      dependencies: ["TodoMateApplication"],
     ),
   ],
 )

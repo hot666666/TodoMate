@@ -113,6 +113,36 @@ extension GRDBDatabase {
         )
       }
     }
+    migrator.registerMigration("createProjectWorkspaceV1") { databaseConnection in
+      try databaseConnection.create(table: ProjectRecord.databaseTableName) { table in
+        table.column("id", .text).primaryKey()
+        table.column("name", .text).notNull()
+        table.column("lifecycle", .text).notNull()
+        table.column("createdAt", .datetime).notNull()
+        table.column("updatedAt", .datetime).notNull()
+      }
+      try databaseConnection.create(
+        index: "project_by_createdAt",
+        on: ProjectRecord.databaseTableName,
+        columns: ["createdAt"],
+      )
+      try databaseConnection.create(table: MembershipRecord.databaseTableName) { table in
+        table.column("id", .text).primaryKey()
+        table.column("projectId", .text)
+          .notNull()
+          .references(ProjectRecord.databaseTableName, onDelete: .cascade)
+        table.column("authorId", .text).notNull()
+        table.column("role", .text).notNull()
+        table.column("createdAt", .datetime).notNull()
+        table.uniqueKey(["projectId", "authorId"])
+      }
+      try databaseConnection.create(table: ProjectSelectionRecord.databaseTableName) { table in
+        table.column("key", .text).primaryKey()
+        table.column("projectId", .text)
+          .notNull()
+          .references(ProjectRecord.databaseTableName, onDelete: .cascade)
+      }
+    }
     return migrator
   }
 }

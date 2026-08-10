@@ -147,7 +147,25 @@ public final class GRDBDatabase: Sendable {
         changeCenter.notifyChange(in: .memo)
       },
     )
-    return [todoObserver, memoObserver]
+    let projectObserver = DatabaseRegionObservation(tracking: ProjectRecord.all()).start(
+      in: writer,
+      onError: { error in
+        Log.error("Project database region observation failed: \(error)", category: .data)
+      },
+      onChange: { _ in
+        changeCenter.notifyChange(in: .project)
+      },
+    )
+    let selectionObserver = DatabaseRegionObservation(tracking: ProjectSelectionRecord.all()).start(
+      in: writer,
+      onError: { error in
+        Log.error("Project selection observation failed: \(error)", category: .data)
+      },
+      onChange: { _ in
+        changeCenter.notifyChange(in: .project)
+      },
+    )
+    return [todoObserver, memoObserver, projectObserver, selectionObserver]
   }
 }
 

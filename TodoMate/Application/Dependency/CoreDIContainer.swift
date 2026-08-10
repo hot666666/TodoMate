@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import TodoMateApplication
 import TodoMateData
 import TodoMateDomain
 
@@ -21,6 +22,7 @@ final class CoreDIContainer {
   @ObservationIgnored let localMemoRepository: MemoRepository
   @ObservationIgnored let calendarDayService: CalendarDayService
   @ObservationIgnored let sidebarCacheUseCase: SidebarCacheUseCase
+  @ObservationIgnored let projectClient: ProjectClient
 
   @ObservationIgnored let createLocalTodoUseCase: CreateLocalTodoUseCase
   @ObservationIgnored let readLocalTodoUseCase: ReadLocalTodoUseCase
@@ -52,6 +54,9 @@ final class CoreDIContainer {
     userDefaults: UserDefaults = .standard,
     calendar: Calendar = .current,
     hotKeyManager: HotKeyManager,
+    projectIDGenerator: @escaping @Sendable () -> ProjectID = {
+      ProjectID(rawValue: UUID().uuidString)
+    },
   ) {
     self.database = database
     self.userDefaults = userDefaults
@@ -82,6 +87,7 @@ final class CoreDIContainer {
 
     sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)
+    projectClient = .grdb(database: database, generateID: projectIDGenerator)
 
     // Deleted Items
     deletedItemsRepository = GRDBDeletedItemsRepository(database: database)
