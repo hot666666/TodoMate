@@ -34,16 +34,7 @@ struct GRDBAppGroupContainerResolution: Equatable, Sendable {
 
 enum GRDBAppGroupStorage {
   static func locations(fileManager: FileManager = .default) throws -> GRDBSharedDatabaseLocations {
-    try locations(
-      resolution: GRDBAppGroupContainerResolution(
-        groupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
-        ),
-        legacyGroupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.legacyAppGroupIdentifier,
-        ),
-      ),
-    )
+    try locations(resolution: containerResolution(fileManager: fileManager))
   }
 
   static func locations(
@@ -51,7 +42,7 @@ enum GRDBAppGroupStorage {
   ) throws -> GRDBSharedDatabaseLocations {
     guard let groupURL = resolution.groupURL else {
       throw LocalDatabaseError.appGroupContainerUnavailable(
-        AppEnvironment.Container.appGroupIdentifier,
+        AppEnvironment.Container.storageAppGroupIdentifier,
       )
     }
     guard let legacyGroupURL = resolution.legacyGroupURL else {
@@ -65,16 +56,44 @@ enum GRDBAppGroupStorage {
   static func readOnlyLocations(
     fileManager: FileManager = .default,
   ) -> GRDBSharedDatabaseLocations? {
-    readOnlyLocations(
-      resolution: GRDBAppGroupContainerResolution(
-        groupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
-        ),
-        legacyGroupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.legacyAppGroupIdentifier,
-        ),
-      ),
+    readOnlyLocations(resolution: containerResolution(fileManager: fileManager))
+  }
+
+  static func containerResolution(
+    resolve: (String) -> URL?,
+  ) -> GRDBAppGroupContainerResolution {
+    containerResolution(
+      primaryAppGroupIdentifier: AppEnvironment.Container.storageAppGroupIdentifier,
+      migrationSourceAppGroupIdentifier:
+        AppEnvironment.Container.migrationSourceAppGroupIdentifier,
+      resolve: resolve,
     )
+  }
+
+  static func containerResolution(
+    primaryAppGroupIdentifier: String,
+    migrationSourceAppGroupIdentifier: String?,
+    resolve: (String) -> URL?,
+  ) -> GRDBAppGroupContainerResolution {
+    let groupURL = resolve(primaryAppGroupIdentifier)
+    guard let migrationSourceAppGroupIdentifier else {
+      return GRDBAppGroupContainerResolution(
+        groupURL: groupURL,
+        legacyGroupURL: groupURL,
+      )
+    }
+    return GRDBAppGroupContainerResolution(
+      groupURL: groupURL,
+      legacyGroupURL: resolve(migrationSourceAppGroupIdentifier),
+    )
+  }
+
+  private static func containerResolution(
+    fileManager: FileManager,
+  ) -> GRDBAppGroupContainerResolution {
+    containerResolution { identifier in
+      fileManager.containerURL(forSecurityApplicationGroupIdentifier: identifier)
+    }
   }
 
   static func readOnlyLocations(
@@ -90,9 +109,11 @@ enum GRDBAppGroupStorage {
     groupURL: URL,
     legacyGroupURL: URL,
   ) -> GRDBSharedDatabaseLocations {
+    let usesCanonicalGroupOnly =
+      groupURL.standardizedFileURL == legacyGroupURL.standardizedFileURL
     let storeURLs =
       legacyStoreURLs(in: groupURL)
-      + legacyStoreURLs(in: legacyGroupURL)
+      + (usesCanonicalGroupOnly ? [] : legacyStoreURLs(in: legacyGroupURL))
     return GRDBSharedDatabaseLocations(
       databaseURL: databaseURL(in: groupURL),
       legacyDatabaseURL: databaseURL(in: legacyGroupURL),
@@ -222,6 +243,10 @@ enum GRDBAppGroupMigration {
     legacyDatabaseURL: URL,
     fileManager: FileManager = .default,
   ) -> URL? {
+    if databaseURL.standardizedFileURL == legacyDatabaseURL.standardizedFileURL {
+      return databaseIsReady(at: databaseURL, fileManager: fileManager) ? databaseURL : nil
+    }
+
     let legacyExists = fileManager.fileExists(atPath: legacyDatabaseURL.path)
     if let marker = validMigrationMarker(at: databaseURL) {
       guard legacyExists,

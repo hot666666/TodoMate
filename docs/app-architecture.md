@@ -79,14 +79,19 @@ Widget은 각각 별도 `DatabasePool`을 열지만 같은 파일 URL과 migrati
 - Bundle ID는 Release `io.hotcs6.TodoMate`, Debug `io.hotcs6.TodoMateDebug`를 유지한다.
   App Group은 향후 iOS target과 같은 등록형 namespace를 사용할 수 있도록 각각
   `group.io.hotcs6.TodoMate`, `group.io.hotcs6.TodoMateDebug`를 canonical identifier로 쓴다.
-- 전환 build는 기존 Team-ID App Group도 entitlement에 함께 둔다. 앱은 legacy GRDB를
+  Debug 앱과 Widget target은 `REGISTER_APP_GROUPS = YES`를 명시해 signed Xcode build의
+  provisioning profile이 registered Debug App Group entitlement를 검증하게 한다.
+- Release 전환 build는 기존 Team-ID App Group도 entitlement에 함께 둔다. 앱은 legacy GRDB를
   WAL-consistent backup으로 새 group의 staging DB에 복제하고 schema·integrity·projection과
   marker를 확인한 뒤 같은 filesystem에서 원자적으로 승격한다. legacy DB는 삭제하지 않는다.
+  Debug 앱과 Widget은 legacy Team-ID group을 entitlement와 container lookup에서 제외하고
+  registered Debug group만 공유하므로 별도 container migration을 실행하지 않는다.
 - marker는 전환 시점의 legacy Todo·Memo projection signature를 보존한다. 이후 legacy DB가
   달라지면 앱은 자동 덮어쓰기나 재병합을 하지 않고 fail-closed하며, Widget도 어느 DB도
   선택하지 않는다.
-- Widget은 이 container migration을 실행하지 않는다. 새 DB가 준비되기 전에는 legacy DB를
-  read-only로 조회하고, 새 DB가 검증된 뒤 canonical group으로 전환한다.
+- Widget은 이 container migration을 실행하지 않는다. Release에서는 새 DB가 준비되기 전
+  legacy DB를 read-only로 조회하고 검증 뒤 canonical group으로 전환한다. Debug Widget은 앱과
+  같은 registered Debug DB만 read-only로 조회한다.
 - 테이블과 컬럼은 영문 단수형 lower camel case를 사용한다.
 - Swift record의 `ownerID`는 DB의 `ownerId`에 명시적으로 매핑한다.
 
