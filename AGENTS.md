@@ -38,6 +38,10 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 - 승인된 Goal 범위의 PR은 exact remote HEAD 독립 리뷰, 지적 수정 후 재리뷰, 설정된
   required check의 성공, unresolved review thread 0건과 mergeability 확인을 모두 통과한
   뒤 병합합니다. required check가 0건이면 그 사실을 evidence에 명시합니다.
+- `독립 리뷰`는 변경 구현자와 다른 agent task/context가 exact remote HEAD를 read-only로
+  검토하는 것을 뜻합니다. 구현자의 자체 재검토는 독립 리뷰로 계산하지 않습니다.
+  reviewer가 해당 HEAD를 직접 수정했다면 변경에 관여하지 않은 다른 reviewer가 새 HEAD를
+  다시 검토해야 합니다.
 - stacked PR은 선행 PR부터 병합하고 후속 브랜치를 최신 `dev`에 재정렬한 뒤 같은 검증과
   리뷰 gate를 다시 통과시킵니다. 충돌이 제품 결정·호환성·데이터 정책을 요구할 때만
   사용자에게 판단을 요청합니다.
@@ -85,7 +89,9 @@ GRDB에 저장하며, 그룹 피드·채팅 등 협업 인터페이스는 현재
 3. 진행 중 이슈가 없으면 unblocked `Todo` 중 후속 작업을 가장 많이 해제하는 이슈를
    선택합니다.
 4. 선택한 이슈를 `In Progress`로 옮기고 구현 범위와 검증 계획을 기록합니다.
-5. 구현 → 관련 `just` 검증 → 독립 리뷰 → 수정 → 재검증을 수행합니다.
+5. 구현 → 관련 `just` 검증 → 구현자와 다른 agent task/context의 독립 리뷰 → 구현자의
+   수정 → 같은 독립 reviewer 또는 변경에 관여하지 않은 새 reviewer의 재리뷰 → 재검증을
+   수행합니다.
 6. Linear에 브랜치, 커밋, 검증 명령과 결과, 제한사항, PR을 기록합니다.
 7. `In Review`에서 exact remote HEAD 기준 독립 리뷰, 지적 수정과 재리뷰, required check,
    unresolved review thread 0건, mergeability를 확인하고 GitHub 또는 Linear에 최종 PASS
