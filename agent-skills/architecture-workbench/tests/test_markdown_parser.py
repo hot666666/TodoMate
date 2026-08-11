@@ -175,6 +175,27 @@ class MarkdownContractTests(unittest.TestCase):
         with self.assertRaisesRegex(workbench.ContractError, "source evidence changed"):
             self.validate()
 
+    def test_untracked_source_absent_at_verified_commit_is_rejected(self) -> None:
+        (self.fixture.root / "Sources/Untracked.swift").write_text(
+            "struct Untracked {}\n", encoding="utf-8"
+        )
+        body = self.fixture.valid_body().replace(
+            "Sources/Root.swift#struct Root", "Sources/Untracked.swift#struct Untracked", 1
+        )
+        self.fixture.write(body=body)
+        with self.assertRaisesRegex(workbench.ContractError, "absent at verifiedGitCommit"):
+            self.validate()
+
+    def test_hierarchy_cycle_is_rejected(self) -> None:
+        body = self.fixture.valid_body().replace(
+            "| root | child | contains | always | Sources/Root.swift#struct Child |",
+            "| root | child | contains | always | Sources/Root.swift#struct Child |\n"
+            "| child | root | contains | always | Sources/Root.swift#struct Root |",
+        )
+        self.fixture.write(body=body)
+        with self.assertRaisesRegex(workbench.ContractError, "hierarchy cycle"):
+            self.validate()
+
 
 if __name__ == "__main__":
     unittest.main()
