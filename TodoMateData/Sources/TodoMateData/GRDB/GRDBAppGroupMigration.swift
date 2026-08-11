@@ -49,7 +49,8 @@ enum GRDBAppGroupStorage {
     }
     guard let legacyGroupURL = resolution.legacyGroupURL else {
       throw LocalDatabaseError.appGroupContainerUnavailable(
-        AppEnvironment.Container.legacyAppGroupIdentifier,
+        AppEnvironment.Container.migrationSourceAppGroupIdentifier
+          ?? AppEnvironment.Container.storageAppGroupIdentifier,
       )
     }
     return locations(groupURL: groupURL, legacyGroupURL: legacyGroupURL)

@@ -10,48 +10,24 @@ import TodoMateDomain
 @Suite("GRDB App Group Migration Tests", .serialized)
 // swiftlint:disable:next type_body_length
 struct GRDBAppGroupMigrationTests {
-  @Test("Debug container resolution requests only the registered shared App Group")
-  func debugContainerResolutionUsesRegisteredAppGroupOnly() {
-    #if DEBUG
-      var requestedIdentifiers: [String] = []
-      let debugGroupURL = URL(fileURLWithPath: "/tmp/debug-group", isDirectory: true)
+  @Test("App defaults request only the registered shared App Group")
+  func containerResolutionUsesRegisteredAppGroupOnly() {
+    var requestedIdentifiers: [String] = []
+    let registeredGroupURL = URL(fileURLWithPath: "/tmp/registered-group", isDirectory: true)
 
-      let resolution = GRDBAppGroupStorage.containerResolution { identifier in
-        requestedIdentifiers.append(identifier)
-        return debugGroupURL
-      }
+    let resolution = GRDBAppGroupStorage.containerResolution { identifier in
+      requestedIdentifiers.append(identifier)
+      return registeredGroupURL
+    }
 
-      #expect(
-        AppEnvironment.Container.storageAppGroupIdentifier
-          == AppEnvironment.Container.appGroupIdentifier,
-      )
-      #expect(requestedIdentifiers == [AppEnvironment.Container.storageAppGroupIdentifier])
-      #expect(resolution.groupURL == debugGroupURL)
-      #expect(resolution.legacyGroupURL == debugGroupURL)
-    #endif
-  }
-
-  @Test("Release defaults preserve the legacy App Group migration source")
-  func releaseContainerResolutionUsesBothAppGroups() {
-    #if !DEBUG
-      var requestedIdentifiers: [String] = []
-      let resolution = GRDBAppGroupStorage.containerResolution { identifier in
-        requestedIdentifiers.append(identifier)
-        return URL(fileURLWithPath: "/tmp/\(identifier)", isDirectory: true)
-      }
-
-      #expect(
-        AppEnvironment.Container.migrationSourceAppGroupIdentifier
-          == AppEnvironment.Container.legacyAppGroupIdentifier,
-      )
-      #expect(
-        requestedIdentifiers == [
-          AppEnvironment.Container.storageAppGroupIdentifier,
-          AppEnvironment.Container.legacyAppGroupIdentifier,
-        ],
-      )
-      #expect(resolution.groupURL != resolution.legacyGroupURL)
-    #endif
+    #expect(
+      AppEnvironment.Container.storageAppGroupIdentifier
+        == AppEnvironment.Container.appGroupIdentifier,
+    )
+    #expect(AppEnvironment.Container.migrationSourceAppGroupIdentifier == nil)
+    #expect(requestedIdentifiers == [AppEnvironment.Container.storageAppGroupIdentifier])
+    #expect(resolution.groupURL == registeredGroupURL)
+    #expect(resolution.legacyGroupURL == registeredGroupURL)
   }
 
   @Test("Legacy-enabled container resolution requests both App Groups")
@@ -59,16 +35,17 @@ struct GRDBAppGroupMigrationTests {
     var requestedIdentifiers: [String] = []
     let canonicalURL = URL(fileURLWithPath: "/tmp/canonical-group", isDirectory: true)
     let legacyURL = URL(fileURLWithPath: "/tmp/legacy-group", isDirectory: true)
+    let migrationFixtureIdentifier = "group.io.hotcs6.TodoMateMigrationFixture"
 
     let resolution = GRDBAppGroupStorage.containerResolution(
       primaryAppGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
-      migrationSourceAppGroupIdentifier: AppEnvironment.Container.legacyAppGroupIdentifier,
+      migrationSourceAppGroupIdentifier: migrationFixtureIdentifier,
     ) { identifier in
       requestedIdentifiers.append(identifier)
       switch identifier {
       case AppEnvironment.Container.appGroupIdentifier:
         return canonicalURL
-      case AppEnvironment.Container.legacyAppGroupIdentifier:
+      case migrationFixtureIdentifier:
         return legacyURL
       default:
         return nil
@@ -78,7 +55,7 @@ struct GRDBAppGroupMigrationTests {
     #expect(
       requestedIdentifiers == [
         AppEnvironment.Container.appGroupIdentifier,
-        AppEnvironment.Container.legacyAppGroupIdentifier,
+        migrationFixtureIdentifier,
       ],
     )
     #expect(resolution.groupURL == canonicalURL)
@@ -129,7 +106,7 @@ struct GRDBAppGroupMigrationTests {
         Issue.record("Expected appGroupContainerUnavailable, got \(error)")
         return
       }
-      #expect(identifier.hasPrefix("8PRWAG4355.io.hotcs6.TodoMate"))
+      #expect(identifier == AppEnvironment.Container.storageAppGroupIdentifier)
     } catch {
       Issue.record("Expected LocalDatabaseError, got \(error)")
     }

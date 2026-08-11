@@ -14,15 +14,11 @@ public enum AppEnvironment {
     #if DEBUG
       public static let name = "TodoMateDebug"
       public static let appGroupIdentifier = "group.io.hotcs6.TodoMateDebug"
-      public static let legacyAppGroupIdentifier = "8PRWAG4355.io.hotcs6.TodoMateDebug"
-      public static let storageAppGroupIdentifier = appGroupIdentifier
-      public static let migrationSourceAppGroupIdentifier: String? = nil
     #else
       public static let name = "TodoMate"
       public static let appGroupIdentifier = "group.io.hotcs6.TodoMate"
-      public static let legacyAppGroupIdentifier = "8PRWAG4355.io.hotcs6.TodoMate"
-      public static let storageAppGroupIdentifier = appGroupIdentifier
-      public static let migrationSourceAppGroupIdentifier: String? = legacyAppGroupIdentifier
     #endif
+    public static let storageAppGroupIdentifier = appGroupIdentifier
+    public static let migrationSourceAppGroupIdentifier: String? = nil
   }
 }
