@@ -145,6 +145,7 @@ private extension TodoMateApp {
       userDefaults: userDefaults,
       hotKeyManager: hotKeyManager,
       projectIDGenerator: projectIDGenerator(),
+      todoIDGenerator: todoIDGenerator(),
     )
   }
 
@@ -183,6 +184,19 @@ private extension TodoMateApp {
     }
     let projectID = ProjectID(rawValue: arguments[flagIndex + 1])
     return { projectID }
+  }
+
+  nonisolated static func todoIDGenerator(
+    arguments: [String] = ProcessInfo.processInfo.arguments,
+  ) -> @Sendable () -> TodoID {
+    guard
+      let flagIndex = arguments.firstIndex(of: "--ui-testing-todo-id"),
+      arguments.indices.contains(flagIndex + 1)
+    else {
+      return { TodoID(rawValue: UUID().uuidString) }
+    }
+    let todoID = TodoID(rawValue: arguments[flagIndex + 1])
+    return { todoID }
   }
 
   static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {

@@ -23,4 +23,28 @@ struct ProjectWorkspaceScreen {
     selectors.projectRow(id: expectedProjectID).element(in: app).assertExists(file: file, line: line)
     selectors.todoSection.element(in: app).assertExists(file: file, line: line)
   }
+
+  func createTodo(
+    titled title: String,
+    expectedID: String,
+    file: StaticString = #filePath,
+    line: UInt = #line,
+  ) {
+    let titleField = selectors.todoTitleField.element(in: app)
+      .assertExists(file: file, line: line)
+    titleField.replaceText(with: title, file: file, line: line)
+    selectors.createTodoButton.element(in: app).waitAndClick(file: file, line: line)
+    assertTodo(id: expectedID, title: title, file: file, line: line)
+  }
+
+  func assertTodo(
+    id: String,
+    title: String,
+    file: StaticString = #filePath,
+    line: UInt = #line,
+  ) {
+    let row = selectors.todoRow(id: id).element(in: app).assertExists(file: file, line: line)
+    let displayedTitle = row.label.isEmpty ? row.value as? String : row.label
+    XCTAssertEqual(displayedTitle, title, file: file, line: line)
+  }
 }

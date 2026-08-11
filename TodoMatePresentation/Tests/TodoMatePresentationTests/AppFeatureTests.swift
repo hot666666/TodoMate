@@ -58,6 +58,8 @@ struct AppFeatureTests {
       selectedProjectID: second.id,
     )))) {
       $0.sidebar.selectedProjectID = second.id
+    }
+    await store.receive(.workspace(.internal(.projectChanged(second)))) {
       $0.workspace = .init(project: second, selectedSection: .todo)
     }
   }

@@ -25,5 +25,12 @@ public enum AccessibilityID {
 
   public enum ProjectTodo {
     public static let root = "project.todo"
+    public static let titleField = "project.todo.create.title"
+    public static let createButton = "project.todo.create.confirm"
+    public static let createError = "project.todo.create.error"
+
+    public static func row(_ todoID: String) -> String {
+      "project.todo.row.\(todoID)"
+    }
   }
 }

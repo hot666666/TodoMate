@@ -8,7 +8,10 @@ protocol ProjectJourneySelectorsSet {
   var workspace: Selector { get }
   var workspaceTitle: Selector { get }
   var todoSection: Selector { get }
+  var todoTitleField: Selector { get }
+  var createTodoButton: Selector { get }
   func projectRow(id: String) -> Selector
+  func todoRow(id: String) -> Selector
 }
 
 struct ProjectJourneySelectors: ProjectJourneySelectorsSet {
@@ -47,12 +50,30 @@ struct ProjectJourneySelectors: ProjectJourneySelectorsSet {
     identifier: AccessibilityID.ProjectTodo.root,
     description: "Project Todo section",
   )
+  let todoTitleField = Selector(
+    strategy: .textFieldByID,
+    identifier: AccessibilityID.ProjectTodo.titleField,
+    description: "Project Todo title field",
+  )
+  let createTodoButton = Selector(
+    strategy: .buttonByID,
+    identifier: AccessibilityID.ProjectTodo.createButton,
+    description: "Create Todo button",
+  )
 
   func projectRow(id: String) -> Selector {
     Selector(
       strategy: .buttonByID,
       identifier: AccessibilityID.ProjectSidebar.row(id),
       description: "Project row",
+    )
+  }
+
+  func todoRow(id: String) -> Selector {
+    Selector(
+      strategy: .staticTextByID,
+      identifier: AccessibilityID.ProjectTodo.row(id),
+      description: "Project Todo row",
     )
   }
 }

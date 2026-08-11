@@ -20,7 +20,11 @@ public final class GRDBTodoRepository: TodoRepository, Sendable {
   public func update(_ todo: Todo) async throws {
     try await database.writer.write { databaseConnection in
       guard var record = try TodoRecord
-        .filter(TodoRecord.Columns.id == todo.id && TodoRecord.Columns.deletedAt == nil)
+        .filter(
+          TodoRecord.Columns.id == todo.id
+            && TodoRecord.Columns.projectID == nil
+            && TodoRecord.Columns.deletedAt == nil,
+        )
         .fetchOne(databaseConnection)
       else {
         throw TodoRecord.recordNotFound(databaseConnection, key: todo.id)
@@ -32,7 +36,10 @@ public final class GRDBTodoRepository: TodoRepository, Sendable {
 
   public func delete(_ todoId: String) async throws {
     try await database.writer.write { databaseConnection in
-      guard var record = try TodoRecord.fetchOne(databaseConnection, key: todoId) else { return }
+      guard var record = try TodoRecord
+        .filter(TodoRecord.Columns.id == todoId && TodoRecord.Columns.projectID == nil)
+        .fetchOne(databaseConnection)
+      else { return }
       guard try record.markDeleted(at: databaseConnection.transactionDate) else { return }
       try record.update(databaseConnection)
     }
@@ -41,7 +48,11 @@ public final class GRDBTodoRepository: TodoRepository, Sendable {
   public func read(id: String) async throws -> Todo? {
     try await database.writer.read { databaseConnection in
       try TodoRecord
-        .filter(TodoRecord.Columns.id == id && TodoRecord.Columns.deletedAt == nil)
+        .filter(
+          TodoRecord.Columns.id == id
+            && TodoRecord.Columns.projectID == nil
+            && TodoRecord.Columns.deletedAt == nil,
+        )
         .fetchOne(databaseConnection)?
         .domainValue()
     }

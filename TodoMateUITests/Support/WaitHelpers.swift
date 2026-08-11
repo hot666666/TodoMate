@@ -48,21 +48,6 @@ extension XCUIElement {
     click()
     typeText(expectedValue)
 
-    let initialExpectation = XCTNSPredicateExpectation(
-      predicate: NSPredicate(format: "value == %@", expectedValue),
-      object: self,
-    )
-    if XCTWaiter.wait(for: [initialExpectation], timeout: 1) != .completed {
-      let currentValue = value as? String ?? ""
-      if expectedValue.hasPrefix(currentValue) {
-        typeText(String(expectedValue.dropFirst(currentValue.count)))
-      } else {
-        typeKey("a", modifierFlags: .command)
-        typeKey(.delete, modifierFlags: [])
-        typeText(expectedValue)
-      }
-    }
-
     let finalExpectation = XCTNSPredicateExpectation(
       predicate: NSPredicate(format: "value == %@", expectedValue),
       object: self,

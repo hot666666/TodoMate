@@ -23,6 +23,7 @@ final class CoreDIContainer {
   @ObservationIgnored let calendarDayService: CalendarDayService
   @ObservationIgnored let sidebarCacheUseCase: SidebarCacheUseCase
   @ObservationIgnored let projectClient: ProjectClient
+  @ObservationIgnored let todoClient: TodoClient
 
   @ObservationIgnored let createLocalTodoUseCase: CreateLocalTodoUseCase
   @ObservationIgnored let readLocalTodoUseCase: ReadLocalTodoUseCase
@@ -57,6 +58,9 @@ final class CoreDIContainer {
     projectIDGenerator: @escaping @Sendable () -> ProjectID = {
       ProjectID(rawValue: UUID().uuidString)
     },
+    todoIDGenerator: @escaping @Sendable () -> TodoID = {
+      TodoID(rawValue: UUID().uuidString)
+    },
   ) {
     self.database = database
     self.userDefaults = userDefaults
@@ -88,6 +92,7 @@ final class CoreDIContainer {
     sidebarCacheRepository = SidebarCacheRepositoryImpl(userDefaults: userDefaults)
     sidebarCacheUseCase = SidebarCacheUseCaseImpl(repository: sidebarCacheRepository)
     projectClient = .grdb(database: database, generateID: projectIDGenerator)
+    todoClient = .grdb(database: database, generateID: todoIDGenerator)
 
     // Deleted Items
     deletedItemsRepository = GRDBDeletedItemsRepository(database: database)

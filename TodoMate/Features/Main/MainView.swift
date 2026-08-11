@@ -9,7 +9,10 @@ struct MainView: View {
   }
 
   var body: some View {
-    ProjectAppScreen(projectClient: container.core.projectClient)
+    ProjectAppScreen(
+      projectClient: container.core.projectClient,
+      todoClient: container.core.todoClient,
+    )
   }
 }
 

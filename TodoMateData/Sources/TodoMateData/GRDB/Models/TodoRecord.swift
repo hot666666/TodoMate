@@ -9,6 +9,7 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
 
   enum CodingKeys: String, CodingKey {
     case id
+    case projectID = "projectId"
     case content
     case status
     case detail
@@ -22,6 +23,7 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
 
   enum Columns {
     static let id = Column(CodingKeys.id)
+    static let projectID = Column(CodingKeys.projectID)
     static let content = Column(CodingKeys.content)
     static let status = Column(CodingKeys.status)
     static let detail = Column(CodingKeys.detail)
@@ -34,6 +36,7 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
   }
 
   var id: String
+  var projectID: String?
   var content: String
   var status: TodoStatus
   var detail: String
@@ -47,6 +50,7 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
 
   init(
     id: String,
+    projectID: String? = nil,
     content: String,
     status: TodoStatus,
     detail: String,
@@ -58,6 +62,7 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
     localRevision: Int64 = 1,
   ) {
     self.id = id
+    self.projectID = projectID
     self.content = content
     self.status = status
     self.detail = detail
@@ -71,6 +76,7 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
 
   init(_ todo: Todo) {
     id = todo.id
+    projectID = nil
     content = todo.content
     status = todo.status
     detail = todo.detail
@@ -79,6 +85,20 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
     updatedAt = todo.updatedAt
     ownerID = todo.owner
     deletedAt = todo.isDeleted ? todo.updatedAt : nil
+    localRevision = 1
+  }
+
+  init(_ todo: ProjectTodo) {
+    id = todo.id.rawValue
+    projectID = todo.projectID.rawValue
+    content = todo.title.value
+    status = todo.status
+    detail = ""
+    date = todo.createdAt
+    createdAt = todo.createdAt
+    updatedAt = todo.updatedAt
+    ownerID = todo.authorID.rawValue
+    deletedAt = nil
     localRevision = 1
   }
 
@@ -121,11 +141,28 @@ struct TodoRecord: Codable, Equatable, FetchableRecord, PersistableRecord, Ident
       isDeleted: deletedAt != nil,
     )
   }
+
+  func projectTodoValue() throws -> ProjectTodo {
+    guard let projectID else { throw ProjectTodoMappingError.missingProjectID(id) }
+    return try ProjectTodo(
+      id: TodoID(rawValue: id),
+      projectID: ProjectID(rawValue: projectID),
+      authorID: ContentAuthorID(rawValue: ownerID),
+      title: ProjectTodoTitle(content),
+      status: status,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    )
+  }
+}
+
+enum ProjectTodoMappingError: Error {
+  case missingProjectID(String)
 }
 
 extension TodoRecord {
   static func activeRequest(for query: TodoQuery) -> QueryInterfaceRequest<TodoRecord> {
-    var request = filter(Columns.deletedAt == nil)
+    var request = filter(Columns.projectID == nil && Columns.deletedAt == nil)
       .order(Columns.date, Columns.createdAt)
 
     for filter in query.filters {

@@ -143,6 +143,17 @@ extension GRDBDatabase {
           .references(ProjectRecord.databaseTableName, onDelete: .cascade)
       }
     }
+    migrator.registerMigration("addProjectScopeToTodoV1") { databaseConnection in
+      try databaseConnection.alter(table: TodoRecord.databaseTableName) { table in
+        table.add(column: "projectId", .text)
+          .references(ProjectRecord.databaseTableName, onDelete: .cascade)
+      }
+      try databaseConnection.create(
+        index: "todo_by_projectId_createdAt",
+        on: TodoRecord.databaseTableName,
+        columns: ["projectId", "createdAt"],
+      )
+    }
     return migrator
   }
 }

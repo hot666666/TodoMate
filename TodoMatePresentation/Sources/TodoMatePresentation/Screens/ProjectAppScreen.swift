@@ -11,11 +11,12 @@ public struct ProjectAppScreen: View {
   }
 
   @MainActor
-  public init(projectClient: ProjectClient) {
+  public init(projectClient: ProjectClient, todoClient: TodoClient) {
     store = Store(initialState: AppFeature.State()) {
       AppFeature()
     } withDependencies: {
       $0.projectClient = projectClient
+      $0.todoClient = todoClient
     }
   }
 

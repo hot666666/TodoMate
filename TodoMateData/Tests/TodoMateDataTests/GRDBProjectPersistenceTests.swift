@@ -53,6 +53,33 @@ struct GRDBProjectPersistenceTests {
     #expect(try await firstSnapshot(from: client).selectedProjectID == knownID)
   }
 
+  @Test("Membership failure rolls back Project and selection atomically")
+  func rollbackFailedMembership() async throws {
+    let database = try GRDBDatabase(storage: .inMemory)
+    let firstID = ProjectID(rawValue: "first")
+    let secondID = ProjectID(rawValue: "second")
+    let duplicateMembershipID = MembershipID(rawValue: "duplicate")
+    let firstClient = ProjectClient.grdb(
+      database: database,
+      generateID: { firstID },
+      generateMembershipID: { duplicateMembershipID },
+    )
+    _ = try await firstClient.createLocal(.init(name: "First"))
+
+    let secondClient = ProjectClient.grdb(
+      database: database,
+      generateID: { secondID },
+      generateMembershipID: { duplicateMembershipID },
+    )
+    await #expect(throws: (any Error).self) {
+      try await secondClient.createLocal(.init(name: "Second"))
+    }
+
+    let snapshot = try await firstSnapshot(from: firstClient)
+    #expect(snapshot.projects.map(\.id) == [firstID])
+    #expect(snapshot.selectedProjectID == firstID)
+  }
+
   private func firstSnapshot(from client: ProjectClient) async throws -> ProjectWorkspaceSnapshot {
     for await snapshot in client.snapshots() {
       return snapshot

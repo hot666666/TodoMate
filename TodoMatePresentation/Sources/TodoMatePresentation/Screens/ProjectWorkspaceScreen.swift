@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
+import TodoMateDomain
 import TodoMateUITestContracts
 
 struct ProjectWorkspaceScreen: View {
@@ -10,10 +11,19 @@ struct ProjectWorkspaceScreen: View {
       projectName: store.project.name.value,
       lifecycleLabel: store.project.lifecycle == .local ? "Local" : "",
       selectedSection: store.selectedSection,
+      todos: store.todos,
+      todoDraft: store.todoDraft,
+      canCreateTodo: store.canCreateTodo,
+      todoError: store.todoError,
       onSectionSelected: { store.send(.view(.sectionSelected($0))) },
+      onTodoDraftChanged: { store.send(.view(.todoDraftChanged($0))) },
+      onCreateTodo: { store.send(.view(.createTodoTapped)) },
     )
     .accessibilityElement(children: .contain)
     .accessibilityIdentifier(AccessibilityID.ProjectWorkspace.root)
+    .task(id: store.project.id) {
+      await store.send(.view(.task)).finish()
+    }
   }
 }
 
@@ -21,7 +31,13 @@ private struct ProjectWorkspaceView: View {
   let projectName: String
   let lifecycleLabel: String
   let selectedSection: ProjectWorkspaceFeature.State.Section
+  let todos: [ProjectTodo]
+  let todoDraft: String
+  let canCreateTodo: Bool
+  let todoError: String?
   let onSectionSelected: (ProjectWorkspaceFeature.State.Section) -> Void
+  let onTodoDraftChanged: (String) -> Void
+  let onCreateTodo: () -> Void
 
   var body: some View {
     VStack(spacing: 0) {
@@ -55,17 +71,66 @@ private struct ProjectWorkspaceView: View {
 
       switch selectedSection {
       case .todo:
-        ContentUnavailableView(
-          "Todo",
-          systemImage: "checklist",
-          description: Text("이 Project의 Todo section입니다."),
+        ProjectTodoView(
+          todos: todos,
+          draft: todoDraft,
+          canCreate: canCreateTodo,
+          error: todoError,
+          onDraftChanged: onTodoDraftChanged,
+          onCreate: onCreateTodo,
         )
-        .accessibilityIdentifier(AccessibilityID.ProjectTodo.root)
       case .memo:
         ContentUnavailableView("Memo", systemImage: "note.text")
       case .chat:
         ContentUnavailableView("Chat", systemImage: "bubble.left.and.bubble.right")
       }
     }
+  }
+}
+
+private struct ProjectTodoView: View {
+  let todos: [ProjectTodo]
+  let draft: String
+  let canCreate: Bool
+  let error: String?
+  let onDraftChanged: (String) -> Void
+  let onCreate: () -> Void
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      HStack {
+        TextField(
+          "첫 Todo를 입력하세요",
+          text: Binding(
+            get: { draft },
+            set: { value in onDraftChanged(value) },
+          ),
+        )
+        .accessibilityIdentifier(AccessibilityID.ProjectTodo.titleField)
+
+        Button("추가", action: onCreate)
+          .disabled(!canCreate)
+          .accessibilityIdentifier(AccessibilityID.ProjectTodo.createButton)
+      }
+
+      if let error {
+        Text(error)
+          .foregroundStyle(.red)
+          .accessibilityIdentifier(AccessibilityID.ProjectTodo.createError)
+      }
+
+      if todos.isEmpty {
+        ContentUnavailableView("Todo가 없습니다", systemImage: "checklist")
+      } else {
+        List(todos) { todo in
+          Text(todo.title.value)
+            .accessibilityIdentifier(AccessibilityID.ProjectTodo.row(todo.id.rawValue))
+        }
+      }
+      Spacer(minLength: 0)
+    }
+    .padding()
+    .accessibilityElement(children: .contain)
+    .accessibilityIdentifier(AccessibilityID.ProjectTodo.root)
   }
 }

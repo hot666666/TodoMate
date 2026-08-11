@@ -73,6 +73,8 @@ public struct AppFeature: Sendable {
 
         if state.workspace?.project.id == project.id {
           state.workspace?.project = project
+        } else if state.workspace != nil {
+          return .send(.workspace(.internal(.projectChanged(project))))
         } else {
           state.workspace = ProjectWorkspaceFeature.State(project: project, selectedSection: .todo)
         }
