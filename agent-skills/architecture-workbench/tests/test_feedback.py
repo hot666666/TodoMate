@@ -140,6 +140,16 @@ class FeedbackTests(unittest.TestCase):
                 ),
             )
 
+        cross_kind = self.fixture.valid_body().replace("## trace.fixture", "## root")
+        self.fixture.write(body=cross_kind)
+        with self.assertRaisesRegex(workbench.ContractError, "shared by node and trace"):
+            workbench.validate_documents(
+                self.fixture.root,
+                workbench.load_documents(
+                    self.fixture.root, Path("docs/architecture-workbench/current")
+                ),
+            )
+
     def test_storage_generates_only_named_markdown_inside_repository_and_is_exclusive(self) -> None:
         path, normalized = server.feedback_file(
             self.fixture.root,

@@ -429,6 +429,8 @@ def validate_documents(root: Path, documents: list[Document]) -> dict[str, Any]:
                 errors.append(f"{path}: invalid stable trace ID {trace_id!r}")
             if trace_id in trace_ids:
                 errors.append(f"{path}: duplicate stable trace ID {trace_id}")
+            if trace_id in nodes:
+                errors.append(f"{path}: stable ID is shared by node and trace: {trace_id}")
             trace_ids.add(trace_id)
         require_columns(
             document.hierarchy,
@@ -458,6 +460,8 @@ def validate_documents(root: Path, documents: list[Document]) -> dict[str, Any]:
                 errors.append(f"{path}: invalid stable node ID {node_id!r}")
             if node_id in nodes:
                 errors.append(f"{path}: duplicate stable node ID {node_id}")
+            if node_id in trace_ids:
+                errors.append(f"{path}: stable ID is shared by node and trace: {node_id}")
             nodes[node_id] = node
             missing = sorted(NODE_FIELDS - node.keys())
             if missing:
