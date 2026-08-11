@@ -22,6 +22,7 @@ Treat `docs/architecture-workbench/current/*.md` as the architecture source of t
    ```
 
 7. Inspect the generated offline HTML: switch model layers, search/filter, select a node, inspect source evidence, follow upstream/downstream relationships, expand hierarchy, open a trace, and confirm the browser console has no errors.
+8. For questions or corrections, read [references/feedback-contract.md](references/feedback-contract.md). Static HTML exports a JSON request; the optional loopback server stores only validated feedback Markdown. Review source and current Markdown before writing an Agent response.
 
 ## Authoring rules
 
@@ -31,6 +32,7 @@ Treat `docs/architecture-workbench/current/*.md` as the architecture source of t
 - Separate framework-specific concepts. For example, use State/Action/Effect only where that framework is actually present; describe Observation stores with their real ownership model.
 - Cite repository-relative source paths and exact symbol text as `path#symbol`. Separate multiple references with semicolons.
 - Do not edit `resolved.generated.json` or `site/index.html` by hand.
+- Feedback never authorizes production changes. Correct factual architecture errors in `current/*.md`; route code-change requests through the proposed/approval workflow.
 
 ## Adapters
 
