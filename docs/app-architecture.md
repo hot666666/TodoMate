@@ -78,15 +78,11 @@ target에서 임시 제거했다. 앱만 read-write migration과 legacy import�
 - Bundle ID는 Release `io.hotcs6.TodoMate`, Debug `io.hotcs6.TodoMateDebug`를 유지한다.
   App Group은 향후 iOS target과 같은 등록형 namespace를 사용할 수 있도록 각각
   `group.io.hotcs6.TodoMate`, `group.io.hotcs6.TodoMateDebug`를 canonical identifier로 쓴다.
-  Debug 앱은 `REGISTER_APP_GROUPS = YES`를 명시해 signed Xcode build의 provisioning
-  profile이 registered Debug App Group entitlement를 검증하게 한다.
-- Release 전환 build는 기존 Team-ID App Group도 entitlement에 함께 둔다. 앱은 legacy GRDB를
-  WAL-consistent backup으로 새 group의 staging DB에 복제하고 schema·integrity·projection과
-  marker를 확인한 뒤 같은 filesystem에서 원자적으로 승격한다. legacy DB는 삭제하지 않는다.
-  Debug 앱은 legacy Team-ID group을 entitlement와 container lookup에서 제외하고 registered
-  Debug group만 사용하므로 별도 container migration을 실행하지 않는다.
-- marker는 전환 시점의 legacy Todo·Memo projection signature를 보존한다. 이후 legacy DB가
-  달라지면 앱은 자동 덮어쓰기나 재병합을 하지 않고 fail-closed한다.
+  앱은 `REGISTER_APP_GROUPS = YES`를 명시해 signed Xcode build의 provisioning profile이
+  registered App Group entitlement를 검증하게 한다. Debug와 Release 모두 구형 Team-ID
+  App Group을 entitlement나 container lookup에 포함하지 않는다.
+- App Group storage는 canonical registered group 하나만 연다. 이전 Team-ID container를
+  자동 조회하거나 migration source로 사용하지 않는다.
 - Widget 재도입 시에는 `TodoMateWidgetReadModel`의 narrow read-only API, canonical App Group
   provisioning, 실제 WidgetKit host 검증을 별도 이슈에서 다시 연결한다. 현재 Data package의
   read-only reader는 그 후속 구현을 위한 기반일 뿐 제품에 포함된 Widget 증거가 아니다.
