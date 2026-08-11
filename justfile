@@ -13,6 +13,8 @@ build:
         -configuration Debug \
         -destination 'generic/platform=macOS' \
         -derivedDataPath "${derived_data_path}" \
+        -disableAutomaticPackageResolution \
+        -skipMacroValidation \
         CODE_SIGNING_ALLOWED=NO \
         CODE_SIGNING_REQUIRED=NO \
         -quiet >"${build_log_path}" 2>&1 || build_status=$?; \
