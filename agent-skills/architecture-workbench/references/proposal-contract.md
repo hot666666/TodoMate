@@ -35,17 +35,19 @@ the current Agent turn, record a separate JSON approval with exactly these field
   "baseGitCommit": "<exact proposal base SHA>",
   "approvedInCurrentTurn": true,
   "approvedAt": "2026-08-11T00:00:00Z",
-  "approvalNote": "Exact user approval from the current turn."
+  "approvalNote": "Exact user approval from the current turn.",
+  "turnNonceHash": "<sha256 of a fresh non-committed 32+ character turn nonce>"
 }
 ```
 
-`apply` rejects a missing approval, mismatched digest/base/identity, drifted target, or incomplete
+`apply` rejects a missing or older-than-30-minutes approval, a missing/mismatched transient turn nonce,
+mismatched digest/base/identity, drifted target, or incomplete
 code/current set. It stages every replacement before switching targets and restores already-written
 targets if a filesystem write fails. Approval files are execution evidence, not canonical architecture,
 and should not be committed unless repository policy explicitly requires it.
 
 ```bash
-python3 agent-skills/architecture-workbench/scripts/proposal_workbench.py apply --root . --proposal <proposal.md> --approval <approval.json>
+python3 agent-skills/architecture-workbench/scripts/proposal_workbench.py apply --root . --proposal <proposal.md> --approval <approval.json> --turn-nonce-file <uncommitted-nonce-file>
 python3 agent-skills/architecture-workbench/scripts/proposal_workbench.py reconcile --root . --proposal <proposal.md>
 ```
 

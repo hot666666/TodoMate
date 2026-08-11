@@ -118,6 +118,21 @@ class ProposedPreviewTests(unittest.TestCase):
         for text in ("Proposed Changes", "As-Is", "To-Be", "Diff"):
             self.assertIn(text, page)
 
+    def test_current_replacement_must_equal_preview_snapshot(self):
+        replacement = self.path.parent / "files/architecture.md"
+        replacement.write_text(
+            replacement.read_text().replace("Proposed child node.", "Unpreviewed child node."),
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(proposal.base.ContractError, "does not match preview snapshot"):
+            proposal.parse_proposal(self.path, self.fixture.root)
+
+    def test_linked_feedback_contract_is_validated(self):
+        feedback = self.fixture.root / "docs/architecture-workbench/feedback/open/feedback.fixture.md"
+        feedback.write_text(feedback.read_text().replace("targetId: child", "targetId: missing"), encoding="utf-8")
+        with self.assertRaisesRegex(proposal.base.ContractError, "feedback target"):
+            proposal.parse_proposal(self.path, self.fixture.root)
+
 
 if __name__ == "__main__":
     unittest.main()

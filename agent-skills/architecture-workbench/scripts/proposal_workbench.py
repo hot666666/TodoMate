@@ -12,7 +12,7 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -28,7 +28,7 @@ SCHEMA_VERSION = "1"
 PROPOSAL_FIELDS = {"schemaVersion", "proposalId", "feedbackId", "baseGitCommit", "status"}
 APPROVAL_FIELDS = {
     "schemaVersion", "proposalId", "proposalDigest", "baseGitCommit",
-    "approvedInCurrentTurn", "approvedAt", "approvalNote",
+    "approvedInCurrentTurn", "approvedAt", "approvalNote", "turnNonceHash",
 }
 FILE_COLUMNS = {"targetPath", "proposedPath", "expectedSHA256", "role"}
 ROLES = {"code", "current-markdown", "test"}
@@ -55,6 +55,31 @@ def safe_relative(value: str, owner: str) -> Path:
     return path
 
 
+def safe_target(root: Path, relative: Path, owner: str) -> Path:
+    target = root / relative
+    root_resolved = root.resolve()
+    resolved = target.resolve()
+    if not resolved.is_relative_to(root_resolved):
+        raise base.ContractError(f"{owner}: target escapes repository through a symlink: {relative}")
+    cursor = target
+    while cursor != root:
+        if cursor.is_symlink():
+            raise base.ContractError(f"{owner}: symlink targets are unsupported: {relative}")
+        cursor = cursor.parent
+    return target
+
+
+def document_signature(document: Any) -> dict[str, Any]:
+    return {
+        "frontmatter": {**document.frontmatter, "status": "current"},
+        "nodes": document.nodes,
+        "relationships": document.relationships,
+        "hierarchy": document.hierarchy,
+        "traces": document.traces,
+        "unresolved": document.unresolved,
+    }
+
+
 def parse_proposal(path: Path, root: Path) -> Proposal:
     frontmatter, lines = base.parse_frontmatter(path.read_text(encoding="utf-8"), path)
     errors: list[str] = []
@@ -72,6 +97,8 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
         if not base.STABLE_ID.fullmatch(frontmatter.get(field, "")):
             errors.append(f"invalid {field} {frontmatter.get(field, '')!r}")
     feedback_items = base.load_feedback(root, Path("docs/architecture-workbench/feedback"))
+    current_documents = base.load_documents(root, Path("docs/architecture-workbench/current"))
+    base.validate_feedback(root, current_documents, feedback_items)
     feedback_ids = {item.frontmatter.get("feedbackId", "") for item in feedback_items}
     if frontmatter.get("feedbackId") not in feedback_ids:
         errors.append("feedbackId does not resolve to feedback Markdown")
@@ -119,11 +146,11 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
         if not candidate.is_file() or not candidate.resolve().is_relative_to(path.parent.resolve()):
             errors.append(f"missing proposed file {proposed}")
         expected = row.get("expectedSHA256", "")
-        current = root / target
+        current = safe_target(root, target, str(path))
         if not re.fullmatch(r"[0-9a-f]{64}", expected):
             errors.append(f"invalid expectedSHA256 for {target}")
-        elif not current.is_file() or sha256(current.read_bytes()) != expected:
-            errors.append(f"target drifted from expectedSHA256: {target}")
+        elif not current.is_file():
+            errors.append(f"proposal target does not exist: {target}")
     if "code" in roles and "current-markdown" not in roles:
         errors.append("a code proposal must update current Markdown in the same apply set")
 
@@ -142,6 +169,17 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
         finally:
             for document in snapshot:
                 document.frontmatter["status"] = "proposed"
+        snapshot_by_id = {document.frontmatter.get("documentId", ""): document for document in snapshot}
+        for row in files:
+            if row.get("role") != "current-markdown":
+                continue
+            replacement = base.parse_document(path.parent / row["proposedPath"])
+            if replacement.frontmatter.get("status") != "current":
+                errors.append(f"{row['proposedPath']}: current-markdown replacement status must be current")
+                continue
+            matching = snapshot_by_id.get(replacement.frontmatter.get("documentId", ""))
+            if matching is None or document_signature(replacement) != document_signature(matching):
+                errors.append(f"{row['proposedPath']}: current-markdown replacement does not match preview snapshot")
     if errors:
         raise base.ContractError(f"{path.relative_to(root)}: " + "\n".join(errors))
     return Proposal(path.parent, path, frontmatter, summary, files, snapshot)
@@ -207,7 +245,7 @@ def diff_proposal(current: list[Any], proposal: Proposal) -> dict[str, Any]:
     }
 
 
-def validate_approval(proposal: Proposal, approval_path: Path) -> dict[str, Any]:
+def validate_approval(proposal: Proposal, approval_path: Path, turn_nonce: str) -> dict[str, Any]:
     payload = json.loads(approval_path.read_text(encoding="utf-8"))
     if set(payload) != APPROVAL_FIELDS:
         raise base.ContractError("approval fields do not match the approval contract")
@@ -221,14 +259,20 @@ def validate_approval(proposal: Proposal, approval_path: Path) -> dict[str, Any]
         raise base.ContractError("approval must record explicit current-turn approval and a note")
     if not base.valid_iso8601(payload["approvedAt"]):
         raise base.ContractError("approval approvedAt must be ISO-8601")
+    approved_at = datetime.fromisoformat(payload["approvedAt"].replace("Z", "+00:00"))
+    now = datetime.now(timezone.utc)
+    if approved_at < now - timedelta(minutes=30) or approved_at > now + timedelta(minutes=5):
+        raise base.ContractError("approval is not fresh enough to prove current-turn authorization")
+    if len(turn_nonce) < 32 or payload["turnNonceHash"] != sha256(turn_nonce.encode("utf-8")):
+        raise base.ContractError("approval does not match the transient current-turn nonce")
     return payload
 
 
-def apply_proposal(root: Path, proposal: Proposal, approval_path: Path) -> dict[str, Any]:
-    validate_approval(proposal, approval_path)
+def apply_proposal(root: Path, proposal: Proposal, approval_path: Path, turn_nonce: str) -> dict[str, Any]:
+    validate_approval(proposal, approval_path, turn_nonce)
     prepared: list[tuple[Path, bytes, bytes]] = []
     for row in proposal.files:
-        target = root / safe_relative(row["targetPath"], str(proposal.path))
+        target = safe_target(root, safe_relative(row["targetPath"], str(proposal.path)), str(proposal.path))
         before = target.read_bytes()
         if sha256(before) != row["expectedSHA256"]:
             raise base.ContractError(f"target drifted before apply: {target.relative_to(root)}")
@@ -258,7 +302,7 @@ def apply_proposal(root: Path, proposal: Proposal, approval_path: Path) -> dict[
 def reconcile_proposal(root: Path, proposal: Proposal) -> dict[str, Any]:
     mismatches = []
     for row in proposal.files:
-        target = root / row["targetPath"]
+        target = safe_target(root, Path(row["targetPath"]), str(proposal.path))
         proposed = proposal.directory / row["proposedPath"]
         if not target.is_file() or target.read_bytes() != proposed.read_bytes():
             mismatches.append(row["targetPath"])
@@ -275,6 +319,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--root", type=Path, default=Path.cwd())
     result.add_argument("--proposal", type=Path, required=True)
     result.add_argument("--approval", type=Path)
+    result.add_argument("--turn-nonce-file", type=Path)
     return result
 
 
@@ -285,9 +330,10 @@ def main(arguments: Iterable[str] | None = None) -> int:
         proposal = parse_proposal((root / options.proposal).resolve(), root)
         current = base.load_documents(root, Path("docs/architecture-workbench/current"))
         if options.command == "apply":
-            if options.approval is None:
-                raise base.ContractError("apply requires --approval from explicit current-turn approval")
-            result = apply_proposal(root, proposal, root / options.approval)
+            if options.approval is None or options.turn_nonce_file is None:
+                raise base.ContractError("apply requires --approval and --turn-nonce-file from explicit current-turn approval")
+            nonce_path = root / options.turn_nonce_file
+            result = apply_proposal(root, proposal, root / options.approval, nonce_path.read_text().strip())
         elif options.command == "reconcile":
             result = reconcile_proposal(root, proposal)
         else:
