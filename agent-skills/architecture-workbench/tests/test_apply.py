@@ -93,17 +93,18 @@ class ApplyTests(unittest.TestCase):
         proposal.base.command_validate(self.fixture.root, Path("docs/architecture-workbench/current"))
 
     def test_parent_symlink_cannot_escape_repository(self):
-        outside = Path(self.fixture.temp.name).parent / "workbench-outside.swift"
-        outside.write_text("outside\n", encoding="utf-8")
-        link = self.fixture.root / "Linked"
-        link.symlink_to(outside.parent, target_is_directory=True)
-        row = self.item.files[0]
-        row["targetPath"] = f"Linked/{outside.name}"
-        row["expectedSHA256"] = proposal.sha256(outside.read_bytes())
-        self.write_approval()
-        with self.assertRaisesRegex(proposal.base.ContractError, "escapes repository"):
-            proposal.apply_proposal(self.fixture.root, self.item, self.approval, self.nonce)
-        self.assertEqual(b"outside\n", outside.read_bytes())
+        with tempfile.TemporaryDirectory() as outside_directory:
+            outside = Path(outside_directory) / "workbench-outside.swift"
+            outside.write_text("outside\n", encoding="utf-8")
+            link = self.fixture.root / "Linked"
+            link.symlink_to(outside.parent, target_is_directory=True)
+            row = self.item.files[0]
+            row["targetPath"] = f"Linked/{outside.name}"
+            row["expectedSHA256"] = proposal.sha256(outside.read_bytes())
+            self.write_approval()
+            with self.assertRaisesRegex(proposal.base.ContractError, "escapes repository"):
+                proposal.apply_proposal(self.fixture.root, self.item, self.approval, self.nonce)
+            self.assertEqual(b"outside\n", outside.read_bytes())
 
 
 if __name__ == "__main__":
