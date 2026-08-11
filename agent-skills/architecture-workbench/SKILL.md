@@ -23,6 +23,7 @@ Treat `docs/architecture-workbench/current/*.md` as the architecture source of t
 
 7. Inspect the generated offline HTML: switch model layers, search/filter, select a node, inspect source evidence, follow upstream/downstream relationships, expand hierarchy, open a trace, and confirm the browser console has no errors.
 8. For questions or corrections, read [references/feedback-contract.md](references/feedback-contract.md). Static HTML exports a JSON request; the optional loopback server stores only validated feedback Markdown. Review source and current Markdown before writing an Agent response.
+9. For a code-change request, read [references/proposal-contract.md](references/proposal-contract.md). Keep the To-Be snapshot under `proposed/`; preview As-Is/To-Be/Diff. Apply code and current Markdown together only after an exact current-turn approval matches the proposal digest and base commit, then reconcile.
 
 ## Authoring rules
 

@@ -769,7 +769,7 @@ def render_html(model: dict[str, Any]) -> str:
 </head>
 <body>
 <header class="top"><h1>Architecture Workbench</h1><input id="search" aria-label="Search" placeholder="Search IDs, summaries, modules"><select id="layer" aria-label="Model layer"></select><select id="kind" aria-label="Node kind"></select><select id="confidence" aria-label="Confidence"><option value="">All confidence</option><option>high</option><option>medium</option><option>low</option></select></header>
-<div class="layout"><main><nav class="tabs" aria-label="Views"><button data-view="graph" aria-selected="true">Graph</button><button data-view="hierarchy">Hierarchy</button><button data-view="traces">Traces</button><span class="count" id="count"></span></nav><section id="graph" class="view active"><div class="graph-wrap"><svg class="edges" id="edges"></svg><div class="graph" id="nodes"></div></div></section><section id="hierarchy" class="view"><div class="panel tree" id="tree"></div></section><section id="traces" class="view"><div class="panel"><label>Trace <select id="traceSelect"></select></label></div><div class="panel" id="traceSteps"></div></section></main><aside><h2>Inspector</h2><div id="inspector" class="count">Select an element to inspect its source evidence and relationships.</div></aside></div>
+<div class="layout"><main><nav class="tabs" aria-label="Views"><button data-view="graph" aria-selected="true">Graph</button><button data-view="hierarchy">Hierarchy</button><button data-view="traces">Traces</button><button data-view="proposals">Proposed Changes</button><span class="count" id="count"></span></nav><section id="graph" class="view active"><div class="graph-wrap"><svg class="edges" id="edges"></svg><div class="graph" id="nodes"></div></div></section><section id="hierarchy" class="view"><div class="panel tree" id="tree"></div></section><section id="traces" class="view"><div class="panel"><label>Trace <select id="traceSelect"></select></label></div><div class="panel" id="traceSteps"></div></section><section id="proposals" class="view"><div id="proposalDiffs"></div></section></main><aside><h2>Inspector</h2><div id="inspector" class="count">Select an element to inspect its source evidence and relationships.</div></aside></div>
 <script id="architecture-model" type="application/json">__MODEL_JSON__</script>
 <script>
 (()=>{'use strict';const model=JSON.parse(document.getElementById('architecture-model').textContent);const byId=new Map(model.nodes.map(n=>[n.id,n]));const $=id=>document.getElementById(id);let selected=null;let neighborhood=new Set();const state={query:'',layer:'',kind:'',confidence:''};
@@ -783,6 +783,7 @@ function highlight(ids){state.query='';state.layer='';state.kind='';state.confid
 function renderTree(){const children=new Map();for(const h of model.hierarchy){if(!children.has(h.parentId))children.set(h.parentId,[]);children.get(h.parentId).push(h.childId)}const childIds=new Set(model.hierarchy.map(h=>h.childId));const roots=model.nodes.filter(n=>!childIds.has(n.id)&&children.has(n.id));const branch=(id,seen=new Set())=>{if(seen.has(id))return'';const next=new Set(seen).add(id),kids=(children.get(id)||[]).sort(),toggle=kids.length?`<button class="toggle" data-tree-toggle="${escapeHTML(id)}" aria-expanded="true" aria-label="Collapse ${escapeHTML(id)}">−</button>`:'';return `<li>${toggle}<button data-tree-id="${escapeHTML(id)}">${escapeHTML(id)}</button>${kids.length?`<ul data-tree-children="${escapeHTML(id)}">${kids.map(k=>branch(k,next)).join('')}</ul>`:''}</li>`};$('tree').innerHTML=`<h2>Composition and ownership hierarchy</h2><ul>${roots.map(r=>branch(r.id)).join('')}</ul>`;document.querySelectorAll('[data-tree-id]').forEach(b=>b.onclick=()=>selectNode(b.dataset.treeId));document.querySelectorAll('[data-tree-toggle]').forEach(b=>b.onclick=()=>{const expanded=b.getAttribute('aria-expanded')==='true',children=document.querySelector(`[data-tree-children="${CSS.escape(b.dataset.treeToggle)}"]`);b.setAttribute('aria-expanded',String(!expanded));b.setAttribute('aria-label',`${expanded?'Expand':'Collapse'} ${b.dataset.treeToggle}`);b.textContent=expanded?'+':'−';children?.classList.toggle('collapsed',expanded)})}
 function renderTrace(){const id=$('traceSelect').value,steps=model.traces.filter(s=>s.traceId===id).sort((a,b)=>Number(a.order)-Number(b.order));$('traceSteps').innerHTML=(steps.length?`<div class="actions"><button type="button" data-trace-feedback="${escapeHTML(id)}">Discuss trace ${escapeHTML(id)}</button></div>`:'')+steps.map(s=>`<div class="trace-step"><span class="order">${escapeHTML(s.order)}</span><button data-trace-node="${escapeHTML(s.elementId)}">${escapeHTML(s.elementId)}</button><div><b>${escapeHTML(s.input)} → ${escapeHTML(s.output)}</b><div>${escapeHTML(s['state change'])}</div><div class="count">${escapeHTML(s['effect/dependency'])}</div><div class="source">${escapeHTML(s.evidence)}</div></div></div>`).join('')||'<div class="empty">No trace steps</div>';document.querySelectorAll('[data-trace-node]').forEach(b=>b.onclick=()=>selectNode(b.dataset.traceNode));document.querySelectorAll('[data-trace-feedback]').forEach(b=>b.onclick=()=>inspectFeedbackTarget(traceTarget(b.dataset.traceFeedback)))}
 const traceIds=unique(model.traces.map(s=>s.traceId));$('traceSelect').innerHTML=traceIds.map(id=>`<option>${escapeHTML(id)}</option>`).join('');$('traceSelect').onchange=renderTrace;renderTrace();renderTree();renderGraph();
+function renderProposals(){const proposals=model.proposals||[];$('proposalDiffs').innerHTML=proposals.map(p=>`<article class="panel"><h2>${escapeHTML(p.proposalId)} · linked ${escapeHTML(p.feedbackId)}</h2><p>${escapeHTML(p.summary)}</p><div class="count">Base ${escapeHTML(p.baseGitCommit)} · digest ${escapeHTML(p.digest)}</div>${p.changes.map(c=>`<section class="feedback-card"><b>${escapeHTML(c.change)} · ${escapeHTML(c.section)} · ${escapeHTML(c.id)}</b><div class="relations"><div><h3>As-Is</h3><pre>${escapeHTML(JSON.stringify(c.asIs,null,2))}</pre></div><div><h3>To-Be</h3><pre>${escapeHTML(JSON.stringify(c.toBe,null,2))}</pre></div></div><h3>Diff</h3><pre>${escapeHTML(c.change)}</pre></section>`).join('')||'<div class="empty">No architecture differences.</div>'}</article>`).join('')||'<div class="empty">No proposed changes. Current architecture remains the only active model.</div>'}renderProposals();
 const graphControls=['search','layer','kind','confidence'];for(const id of graphControls)$(id).addEventListener(id==='search'?'input':'change',e=>{state[id==='search'?'query':id]=e.target.value;renderGraph()});document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',String(x===b)));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));for(const id of graphControls)$(id).disabled=b.dataset.view!=='graph'});addEventListener('resize',drawEdges);const initial=new URLSearchParams(location.hash.slice(1)).get('node');if(initial&&byId.has(initial))selectNode(initial,false)})();
 </script>
 </body></html>
@@ -814,10 +815,18 @@ def command_validate(
 ) -> dict[str, Any]:
     documents = load_documents(root, docs_directory)
     feedback_items = load_feedback(root, feedback_directory)
-    return {
+    summary = {
         **validate_documents(root, documents),
         **validate_feedback(root, documents, feedback_items),
     }
+    proposals_directory = Path("docs/architecture-workbench/proposed")
+    if (root / proposals_directory).exists():
+        proposal_module = load_proposal_module()
+        proposals = proposal_module.load_proposals(root, proposals_directory)
+        summary["proposals"] = len(proposals)
+    else:
+        summary["proposals"] = 0
+    return summary
 
 
 def command_build(
@@ -833,6 +842,15 @@ def command_build(
         **validate_feedback(root, documents, feedback_items),
     }
     model = resolved_model(documents, feedback_items, root)
+    proposals_directory = Path("docs/architecture-workbench/proposed")
+    proposals = []
+    if (root / proposals_directory).exists():
+        proposal_module = load_proposal_module()
+        proposals = proposal_module.load_proposals(root, proposals_directory)
+        model["proposals"] = [proposal_module.diff_proposal(documents, item) for item in proposals]
+    else:
+        model["proposals"] = []
+    summary["proposals"] = len(proposals)
     destination = root / output_directory
     site = destination / "site"
     site.mkdir(parents=True, exist_ok=True)
@@ -841,6 +859,18 @@ def command_build(
     )
     (site / "index.html").write_text(render_html(model), encoding="utf-8")
     return {**summary, "outputs": [str(output_directory / "resolved.generated.json"), str(output_directory / "site/index.html")]}
+
+
+def load_proposal_module() -> Any:
+    import importlib.util
+
+    path = Path(__file__).with_name("proposal_workbench.py")
+    spec = importlib.util.spec_from_file_location("architecture_workbench_proposals", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 def parser() -> argparse.ArgumentParser:
