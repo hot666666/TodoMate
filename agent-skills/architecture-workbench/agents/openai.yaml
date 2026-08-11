@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture Workbench"
+  short_description: "Explore repository architecture from canonical Markdown"
+  default_prompt: "Use $architecture-workbench to validate and render this repository architecture from canonical Markdown."
