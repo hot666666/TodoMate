@@ -52,6 +52,11 @@ class ApplyTests(unittest.TestCase):
         with self.assertRaisesRegex(proposal.base.ContractError, "not fresh"):
             proposal.apply_proposal(self.fixture.root, self.item, self.approval, self.nonce)
 
+    def test_timezone_less_approval_is_a_contract_error(self):
+        self.write_approval(approvedAt="2026-08-11T00:00:00")
+        with self.assertRaisesRegex(proposal.base.ContractError, "include a timezone"):
+            proposal.apply_proposal(self.fixture.root, self.item, self.approval, self.nonce)
+
     def test_approval_cannot_be_replayed_without_transient_turn_nonce(self):
         self.write_approval()
         with self.assertRaisesRegex(proposal.base.ContractError, "transient current-turn nonce"):

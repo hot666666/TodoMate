@@ -133,6 +133,48 @@ class ProposedPreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(proposal.base.ContractError, "feedback target"):
             proposal.parse_proposal(self.path, self.fixture.root)
 
+    def test_snapshot_must_cover_the_complete_current_document_set(self):
+        extra = self.fixture.root / "docs/architecture-workbench/current/extra.md"
+        extra.write_text(f"""---
+schemaVersion: 1
+documentId: current.extra
+modelLayer: architecture
+verifiedGitCommit: {self.fixture.commit}
+status: current
+---
+
+# Nodes
+
+## extra
+
+- kind: module
+- summary: Extra current node.
+- parent: -
+- module: Fixture
+- status: observed
+- confidence: high
+- source: Sources/Root.swift#struct Root
+
+# Relationships
+
+| sourceId | kind | targetId | status | confidence | evidence |
+| --- | --- | --- | --- | --- | --- |
+
+# Hierarchy
+
+| parentId | childId | relationship | condition | evidence |
+| --- | --- | --- | --- | --- |
+
+# Traces
+
+# Unresolved
+
+| elementId | reason | verificationSuggestion | evidence |
+| --- | --- | --- | --- |
+""", encoding="utf-8")
+        with self.assertRaisesRegex(proposal.base.ContractError, "complete current document set"):
+            proposal.parse_proposal(self.path, self.fixture.root)
+
 
 if __name__ == "__main__":
     unittest.main()

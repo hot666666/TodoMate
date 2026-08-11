@@ -98,6 +98,7 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
             errors.append(f"invalid {field} {frontmatter.get(field, '')!r}")
     feedback_items = base.load_feedback(root, Path("docs/architecture-workbench/feedback"))
     current_documents = base.load_documents(root, Path("docs/architecture-workbench/current"))
+    base.validate_documents(root, current_documents)
     base.validate_feedback(root, current_documents, feedback_items)
     feedback_ids = {item.frontmatter.get("feedbackId", "") for item in feedback_items}
     if frontmatter.get("feedbackId") not in feedback_ids:
@@ -130,6 +131,7 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
     base.require_columns(files, FILE_COLUMNS, path, "Files", errors)
     roles: set[str] = set()
     targets: set[Path] = set()
+    applied_targets: set[Path] = set()
     for row in files:
         target = safe_relative(row.get("targetPath", ""), str(path))
         proposed = safe_relative(row.get("proposedPath", ""), str(path))
@@ -151,6 +153,13 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
             errors.append(f"invalid expectedSHA256 for {target}")
         elif not current.is_file():
             errors.append(f"proposal target does not exist: {target}")
+        else:
+            current_digest = sha256(current.read_bytes())
+            proposed_digest = sha256(candidate.read_bytes()) if candidate.is_file() else ""
+            if current_digest not in {expected, proposed_digest}:
+                errors.append(f"target matches neither approved preimage nor proposed result: {target}")
+            if current_digest == proposed_digest:
+                applied_targets.add(target)
     if "code" in roles and "current-markdown" not in roles:
         errors.append("a code proposal must update current Markdown in the same apply set")
 
@@ -170,16 +179,32 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
             for document in snapshot:
                 document.frontmatter["status"] = "proposed"
         snapshot_by_id = {document.frontmatter.get("documentId", ""): document for document in snapshot}
+        current_by_id = {document.frontmatter.get("documentId", ""): document for document in current_documents}
+        if set(snapshot_by_id) != set(current_by_id):
+            errors.append("proposal snapshot document IDs must exactly match the complete current document set")
+        replacement_ids: set[str] = set()
+        applied_replacement_ids: set[str] = set()
         for row in files:
             if row.get("role") != "current-markdown":
                 continue
             replacement = base.parse_document(path.parent / row["proposedPath"])
+            replacement_id = replacement.frontmatter.get("documentId", "")
+            replacement_ids.add(replacement_id)
+            if Path(row["targetPath"]) in applied_targets:
+                applied_replacement_ids.add(replacement_id)
             if replacement.frontmatter.get("status") != "current":
                 errors.append(f"{row['proposedPath']}: current-markdown replacement status must be current")
                 continue
             matching = snapshot_by_id.get(replacement.frontmatter.get("documentId", ""))
             if matching is None or document_signature(replacement) != document_signature(matching):
                 errors.append(f"{row['proposedPath']}: current-markdown replacement does not match preview snapshot")
+        changed_ids = {
+            document_id
+            for document_id in set(snapshot_by_id) & set(current_by_id)
+            if document_signature(snapshot_by_id[document_id]) != document_signature(current_by_id[document_id])
+        }
+        if replacement_ids != changed_ids | applied_replacement_ids:
+            errors.append("current-markdown replacements must exactly match the changed snapshot document IDs")
     if errors:
         raise base.ContractError(f"{path.relative_to(root)}: " + "\n".join(errors))
     return Proposal(path.parent, path, frontmatter, summary, files, snapshot)
@@ -260,6 +285,8 @@ def validate_approval(proposal: Proposal, approval_path: Path, turn_nonce: str) 
     if not base.valid_iso8601(payload["approvedAt"]):
         raise base.ContractError("approval approvedAt must be ISO-8601")
     approved_at = datetime.fromisoformat(payload["approvedAt"].replace("Z", "+00:00"))
+    if approved_at.tzinfo is None or approved_at.utcoffset() is None:
+        raise base.ContractError("approval approvedAt must include a timezone")
     now = datetime.now(timezone.utc)
     if approved_at < now - timedelta(minutes=30) or approved_at > now + timedelta(minutes=5):
         raise base.ContractError("approval is not fresh enough to prove current-turn authorization")

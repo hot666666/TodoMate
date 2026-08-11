@@ -4,7 +4,9 @@ Architecture proposals live under `docs/architecture-workbench/proposed/<proposa
 change `current/` merely by existing or by being rendered. Each bundle contains:
 
 - `proposal.md`: stable proposal/feedback identity, exact base commit, summary, and typed file set.
-- `snapshot/*.md`: the complete To-Be architecture documents, with `status: proposed`.
+- `snapshot/*.md`: the complete To-Be architecture document set, with `status: proposed`. Its
+  document IDs must exactly match `current/`; declared current replacements must exactly match the
+  subset whose semantic content differs.
 - `files/*`: reviewable replacement files referenced by `proposal.md`.
 
 The `# Files` table has `targetPath`, bundle-relative `proposedPath`, the target's exact
