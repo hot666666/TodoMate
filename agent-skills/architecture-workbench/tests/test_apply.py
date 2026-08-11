@@ -62,6 +62,17 @@ class ApplyTests(unittest.TestCase):
         with self.assertRaisesRegex(proposal.base.ContractError, "not implemented"):
             proposal.reconcile_proposal(self.fixture.root, self.item)
 
+    def test_reconcile_failure_rolls_back_every_applied_target(self):
+        self.write_approval()
+        targets = [self.fixture.root / row["targetPath"] for row in self.item.files]
+        before = [path.read_bytes() for path in targets]
+        proposed_current = self.item.directory / "files/architecture.md"
+        proposed_current.write_text("not valid architecture markdown\n", encoding="utf-8")
+        self.write_approval()
+        with self.assertRaises(proposal.base.ContractError):
+            proposal.apply_proposal(self.fixture.root, self.item, self.approval)
+        self.assertEqual(before, [path.read_bytes() for path in targets])
+
 
 if __name__ == "__main__":
     unittest.main()

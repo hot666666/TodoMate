@@ -75,11 +75,19 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
     feedback_ids = {item.frontmatter.get("feedbackId", "") for item in feedback_items}
     if frontmatter.get("feedbackId") not in feedback_ids:
         errors.append("feedbackId does not resolve to feedback Markdown")
+    linked_feedback = next(
+        (item for item in feedback_items if item.frontmatter.get("feedbackId") == frontmatter.get("feedbackId")),
+        None,
+    )
+    if linked_feedback is not None and linked_feedback.frontmatter.get("category") != "code-change-request":
+        errors.append("proposal feedback must have category code-change-request")
     commit = frontmatter.get("baseGitCommit", "")
     if not base.COMMIT.fullmatch(commit):
         errors.append("baseGitCommit must be a 40-character lowercase SHA")
     elif base.run_git(root, ["cat-file", "-e", f"{commit}^{{commit}}"], check=False).returncode != 0:
         errors.append(f"baseGitCommit does not exist: {commit}")
+    elif base.run_git(root, ["merge-base", "--is-ancestor", commit, "HEAD"], check=False).returncode != 0:
+        errors.append("baseGitCommit must be an ancestor of HEAD")
 
     sections: dict[str, list[str]] = {"Summary": [], "Files": []}
     section = ""
@@ -121,7 +129,9 @@ def parse_proposal(path: Path, root: Path) -> Proposal:
 
     snapshot_dir = path.parent / "snapshot"
     snapshot = []
-    if snapshot_dir.is_dir():
+    if not snapshot_dir.is_dir() or not list(snapshot_dir.glob("*.md")):
+        errors.append("proposal must include a non-empty snapshot directory")
+    else:
         snapshot = base.load_documents(root, snapshot_dir.relative_to(root))
         for document in snapshot:
             if document.frontmatter.get("status") != "proposed":
@@ -224,18 +234,25 @@ def apply_proposal(root: Path, proposal: Proposal, approval_path: Path) -> dict[
             raise base.ContractError(f"target drifted before apply: {target.relative_to(root)}")
         after = (proposal.directory / row["proposedPath"]).read_bytes()
         prepared.append((target, before, after))
+    staged: list[tuple[Path, Path, bytes]] = []
     written: list[tuple[Path, bytes]] = []
     try:
         for target, before, after in prepared:
             temporary = target.with_name(f".{target.name}.workbench-{os.getpid()}")
             temporary.write_bytes(after)
+            temporary.chmod(target.stat().st_mode)
+            staged.append((target, temporary, before))
+        for target, temporary, before in staged:
             os.replace(temporary, target)
             written.append((target, before))
-    except OSError:
+        return reconcile_proposal(root, proposal)
+    except Exception:
         for target, before in reversed(written):
             target.write_bytes(before)
         raise
-    return reconcile_proposal(root, proposal)
+    finally:
+        for _, temporary, _ in staged:
+            temporary.unlink(missing_ok=True)
 
 
 def reconcile_proposal(root: Path, proposal: Proposal) -> dict[str, Any]:
