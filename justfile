@@ -4,8 +4,9 @@ set shell := ["bash", "-euc"]
 build:
     derived_data_root="${TODOMATE_DERIVED_DATA_DIR-.build/DerivedData}"; \
     derived_data_path="${derived_data_root}/build-certificate-free"; \
+    build_log_path="${derived_data_root}/build-certificate-free.log"; \
     script/prepare_build_artifacts.bash prepare-directory "${derived_data_path}"; \
-    set -o pipefail; \
+    build_status=0; \
     xcodebuild \
         -project TodoMate.xcodeproj \
         -scheme TodoMate \
@@ -14,8 +15,14 @@ build:
         -derivedDataPath "${derived_data_path}" \
         CODE_SIGNING_ALLOWED=NO \
         CODE_SIGNING_REQUIRED=NO \
-        -quiet 2>&1 \
-        | xcbeautify --quieter
+        -quiet >"${build_log_path}" 2>&1 || build_status=$?; \
+    beautify_status=0; \
+    xcbeautify --quieter <"${build_log_path}" || beautify_status=$?; \
+    if [[ "${build_status}" -ne 0 ]]; then \
+        cat "${build_log_path}" >&2; \
+        exit "${build_status}"; \
+    fi; \
+    exit "${beautify_status}"
 
 # Lint changed Swift files without mutating them. In CI, set PRE_COMMIT_BASE.
 pre-commit:
