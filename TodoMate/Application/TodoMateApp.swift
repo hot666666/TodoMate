@@ -78,6 +78,7 @@ struct TodoMateApp: App {
     }
     #if os(macOS)
     .windowStyle(.hiddenTitleBar)
+    .defaultLaunchBehavior(.presented)
     .commands {
       // File 메뉴: 새 윈도우 (⇧⌘N)
       CommandGroup(replacing: .newItem) {
@@ -133,7 +134,7 @@ private extension TodoMateApp {
   ) -> CoreDIContainer {
     let database: GRDBDatabase
     do {
-      database = try GRDBDatabase()
+      database = try GRDBDatabase(storage: projectDatabaseStorage())
     } catch {
       Log.error("Failed to create GRDB database: \(error)")
       fatalError("Failed to create GRDB database: \(error)")
@@ -143,7 +144,45 @@ private extension TodoMateApp {
       database: database,
       userDefaults: userDefaults,
       hotKeyManager: hotKeyManager,
+      projectIDGenerator: projectIDGenerator(),
     )
+  }
+
+  nonisolated static func projectDatabaseStorage(
+    arguments: [String] = ProcessInfo.processInfo.arguments,
+  ) -> GRDBDatabase.Storage {
+    guard
+      let flagIndex = arguments.firstIndex(of: "--ui-testing-project-database-id"),
+      arguments.indices.contains(flagIndex + 1)
+    else {
+      return .shared
+    }
+
+    let databaseID = arguments[flagIndex + 1]
+      .filter { $0.isLetter || $0.isNumber || $0 == "-" }
+    precondition(!databaseID.isEmpty, "UI testing Project database ID must not be empty")
+    let databaseURL = FileManager.default.temporaryDirectory
+      .appendingPathComponent("TodoMateProjectJourney-\(databaseID).sqlite")
+
+    if arguments.contains("--ui-testing-reset-project-database") {
+      for suffix in ["", "-shm", "-wal"] {
+        try? FileManager.default.removeItem(atPath: databaseURL.path + suffix)
+      }
+    }
+    return .file(databaseURL)
+  }
+
+  nonisolated static func projectIDGenerator(
+    arguments: [String] = ProcessInfo.processInfo.arguments,
+  ) -> @Sendable () -> ProjectID {
+    guard
+      let flagIndex = arguments.firstIndex(of: "--ui-testing-project-id"),
+      arguments.indices.contains(flagIndex + 1)
+    else {
+      return { ProjectID(rawValue: UUID().uuidString) }
+    }
+    let projectID = ProjectID(rawValue: arguments[flagIndex + 1])
+    return { projectID }
   }
 
   static func createPublicDIContainer(userDefaults: UserDefaults) -> PublicDIContainer {
@@ -165,7 +204,7 @@ private extension TodoMateApp {
 // MARK: - App Update Handling
 
 private extension TodoMateApp {
-  // TODO: - 정리
+  /// Legacy app-update cleanup remains outside the Project workspace slice.
   static func checkAndHandleAppUpdate(container: AppDIContainer) {
     let userDefaults = container.core.userDefaults
 

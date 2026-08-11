@@ -1,3 +1,5 @@
+// This migration remains intentionally centralized while its legacy compatibility window is active.
+// swiftlint:disable file_length
 import Common
 import Darwin
 import Foundation
@@ -34,16 +36,7 @@ struct GRDBAppGroupContainerResolution: Equatable, Sendable {
 
 enum GRDBAppGroupStorage {
   static func locations(fileManager: FileManager = .default) throws -> GRDBSharedDatabaseLocations {
-    try locations(
-      resolution: GRDBAppGroupContainerResolution(
-        groupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
-        ),
-        legacyGroupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.legacyAppGroupIdentifier,
-        ),
-      ),
-    )
+    try locations(resolution: containerResolution(fileManager: fileManager))
   }
 
   static func locations(
@@ -51,7 +44,7 @@ enum GRDBAppGroupStorage {
   ) throws -> GRDBSharedDatabaseLocations {
     guard let groupURL = resolution.groupURL else {
       throw LocalDatabaseError.appGroupContainerUnavailable(
-        AppEnvironment.Container.appGroupIdentifier,
+        AppEnvironment.Container.storageAppGroupIdentifier,
       )
     }
     guard let legacyGroupURL = resolution.legacyGroupURL else {
@@ -65,23 +58,51 @@ enum GRDBAppGroupStorage {
   static func readOnlyLocations(
     fileManager: FileManager = .default,
   ) -> GRDBSharedDatabaseLocations? {
-    readOnlyLocations(
-      resolution: GRDBAppGroupContainerResolution(
-        groupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
-        ),
-        legacyGroupURL: fileManager.containerURL(
-          forSecurityApplicationGroupIdentifier: AppEnvironment.Container.legacyAppGroupIdentifier,
-        ),
-      ),
+    readOnlyLocations(resolution: containerResolution(fileManager: fileManager))
+  }
+
+  static func containerResolution(
+    resolve: (String) -> URL?,
+  ) -> GRDBAppGroupContainerResolution {
+    containerResolution(
+      primaryAppGroupIdentifier: AppEnvironment.Container.storageAppGroupIdentifier,
+      migrationSourceAppGroupIdentifier:
+      AppEnvironment.Container.migrationSourceAppGroupIdentifier,
+      resolve: resolve,
     )
+  }
+
+  static func containerResolution(
+    primaryAppGroupIdentifier: String,
+    migrationSourceAppGroupIdentifier: String?,
+    resolve: (String) -> URL?,
+  ) -> GRDBAppGroupContainerResolution {
+    let groupURL = resolve(primaryAppGroupIdentifier)
+    guard let migrationSourceAppGroupIdentifier else {
+      return GRDBAppGroupContainerResolution(
+        groupURL: groupURL,
+        legacyGroupURL: groupURL,
+      )
+    }
+    return GRDBAppGroupContainerResolution(
+      groupURL: groupURL,
+      legacyGroupURL: resolve(migrationSourceAppGroupIdentifier),
+    )
+  }
+
+  private static func containerResolution(
+    fileManager: FileManager,
+  ) -> GRDBAppGroupContainerResolution {
+    containerResolution { identifier in
+      fileManager.containerURL(forSecurityApplicationGroupIdentifier: identifier)
+    }
   }
 
   static func readOnlyLocations(
     resolution: GRDBAppGroupContainerResolution,
   ) -> GRDBSharedDatabaseLocations? {
     guard let groupURL = resolution.groupURL,
-      let legacyGroupURL = resolution.legacyGroupURL
+          let legacyGroupURL = resolution.legacyGroupURL
     else { return nil }
     return locations(groupURL: groupURL, legacyGroupURL: legacyGroupURL)
   }
@@ -90,9 +111,11 @@ enum GRDBAppGroupStorage {
     groupURL: URL,
     legacyGroupURL: URL,
   ) -> GRDBSharedDatabaseLocations {
+    let usesCanonicalGroupOnly =
+      groupURL.standardizedFileURL == legacyGroupURL.standardizedFileURL
     let storeURLs =
       legacyStoreURLs(in: groupURL)
-      + legacyStoreURLs(in: legacyGroupURL)
+        + (usesCanonicalGroupOnly ? [] : legacyStoreURLs(in: legacyGroupURL))
     return GRDBSharedDatabaseLocations(
       databaseURL: databaseURL(in: groupURL),
       legacyDatabaseURL: databaseURL(in: legacyGroupURL),
@@ -120,12 +143,14 @@ enum GRDBAppGroupStorage {
   }
 }
 
+// swiftlint:disable:next type_body_length
 enum GRDBAppGroupMigration {
   private static let markerKey = "appGroupContainerMigration.v1"
   private static let markerVersion = 1
   private static let stagingNamePrefix = ".TodoMate.sqlite.app-group-migration-"
   private static let inProcessMigrationLock = Mutex(())
 
+  // swiftlint:disable:next function_body_length cyclomatic_complexity
   static func migrateIfNeeded(
     from legacyDatabaseURL: URL,
     to databaseURL: URL,
@@ -154,8 +179,7 @@ enum GRDBAppGroupMigration {
         try removeOrphanedStagingFiles(in: directoryURL, fileManager: fileManager)
         guard fileManager.fileExists(atPath: legacyDatabaseURL.path) else {
           if fileManager.fileExists(atPath: databaseURL.path),
-            validMigrationMarker(at: databaseURL) != nil
-          {
+             validMigrationMarker(at: databaseURL) != nil {
             throw GRDBAppGroupMigrationError.legacySourceChangedAfterMigration(
               legacyDatabaseURL,
             )
@@ -195,9 +219,9 @@ enum GRDBAppGroupMigration {
             throw GRDBAppGroupMigrationError.projectionMismatch
           }
 
-          let marker = MigrationMarker(
+          let marker = try MigrationMarker(
             version: markerVersion,
-            sourceProjection: try migratedSnapshot.signature(),
+            sourceProjection: migratedSnapshot.signature(),
           )
           try write(marker: marker, to: staging)
           guard try readMarker(from: staging) == marker else {
@@ -222,13 +246,17 @@ enum GRDBAppGroupMigration {
     legacyDatabaseURL: URL,
     fileManager: FileManager = .default,
   ) -> URL? {
+    if databaseURL.standardizedFileURL == legacyDatabaseURL.standardizedFileURL {
+      return databaseIsReady(at: databaseURL, fileManager: fileManager) ? databaseURL : nil
+    }
+
     let legacyExists = fileManager.fileExists(atPath: legacyDatabaseURL.path)
     if let marker = validMigrationMarker(at: databaseURL) {
       guard legacyExists,
-        legacySourceMatches(
-          marker: marker,
-          legacyDatabaseURL: legacyDatabaseURL,
-        )
+            legacySourceMatches(
+              marker: marker,
+              legacyDatabaseURL: legacyDatabaseURL,
+            )
       else { return nil }
 
       if databaseIsReady(at: databaseURL, fileManager: fileManager) {
@@ -251,8 +279,8 @@ enum GRDBAppGroupMigration {
     do {
       let reader = try makeReadOnlyPool(at: databaseURL)
       guard try databaseQuickCheckPasses(in: reader),
-        let marker = try readMarker(from: reader),
-        marker.version == markerVersion
+            let marker = try readMarker(from: reader),
+            marker.version == markerVersion
       else { return nil }
       return marker
     } catch {
@@ -331,6 +359,7 @@ enum GRDBAppGroupMigration {
     }
   }
 
+  // swiftlint:disable:next function_body_length
   private static func projection(in reader: any DatabaseReader) throws -> ProjectionSnapshot {
     try reader.read { databaseConnection in
       let todoColumns = try Set(
@@ -340,18 +369,18 @@ enum GRDBAppGroupMigration {
         databaseConnection.columns(in: MemoRecord.databaseTableName).map(\.name),
       )
       guard todoColumns.contains("id"),
-        todoColumns.contains("content"),
-        todoColumns.contains("status"),
-        todoColumns.contains("detail"),
-        todoColumns.contains("date"),
-        todoColumns.contains("createdAt"),
-        todoColumns.contains("updatedAt"),
-        todoColumns.contains("ownerId") || todoColumns.contains("owner"),
-        memoColumns.contains("id"),
-        memoColumns.contains("content"),
-        memoColumns.contains("createdAt"),
-        memoColumns.contains("updatedAt"),
-        memoColumns.contains("ownerId") || memoColumns.contains("owner")
+            todoColumns.contains("content"),
+            todoColumns.contains("status"),
+            todoColumns.contains("detail"),
+            todoColumns.contains("date"),
+            todoColumns.contains("createdAt"),
+            todoColumns.contains("updatedAt"),
+            todoColumns.contains("ownerId") || todoColumns.contains("owner"),
+            memoColumns.contains("id"),
+            memoColumns.contains("content"),
+            memoColumns.contains("createdAt"),
+            memoColumns.contains("updatedAt"),
+            memoColumns.contains("ownerId") || memoColumns.contains("owner")
       else {
         throw GRDBAppGroupMigrationError.projectionMismatch
       }
@@ -359,43 +388,43 @@ enum GRDBAppGroupMigration {
       let todoOwnerColumn = todoColumns.contains("ownerId") ? "ownerId" : "owner"
       let todoDeletedExpression =
         todoColumns.contains("deletedAt")
-        ? "deletedAt"
-        : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
+          ? "deletedAt"
+          : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
       let todoRevisionExpression =
         todoColumns.contains("localRevision")
-        ? "localRevision"
-        : "1"
+          ? "localRevision"
+          : "1"
       let memoOwnerColumn = memoColumns.contains("ownerId") ? "ownerId" : "owner"
       let memoDeletedExpression =
         memoColumns.contains("deletedAt")
-        ? "deletedAt"
-        : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
+          ? "deletedAt"
+          : "CASE WHEN isDeleted = 1 THEN updatedAt ELSE NULL END"
       let memoRevisionExpression =
         memoColumns.contains("localRevision")
-        ? "localRevision"
-        : "1"
+          ? "localRevision"
+          : "1"
 
       let todoRows = try Row.fetchAll(
         databaseConnection,
         sql: """
-          SELECT id, content, status, detail, date, createdAt, updatedAt,
-                 \(todoOwnerColumn) AS ownerId,
-                 \(todoDeletedExpression) AS deletedAt,
-                 \(todoRevisionExpression) AS localRevision
-          FROM todo
-          ORDER BY id
-          """,
+        SELECT id, content, status, detail, date, createdAt, updatedAt,
+               \(todoOwnerColumn) AS ownerId,
+               \(todoDeletedExpression) AS deletedAt,
+               \(todoRevisionExpression) AS localRevision
+        FROM todo
+        ORDER BY id
+        """,
       )
       let memoRows = try Row.fetchAll(
         databaseConnection,
         sql: """
-          SELECT id, content, createdAt, updatedAt,
-                 \(memoOwnerColumn) AS ownerId,
-                 \(memoDeletedExpression) AS deletedAt,
-                 \(memoRevisionExpression) AS localRevision
-          FROM memo
-          ORDER BY id
-          """,
+        SELECT id, content, createdAt, updatedAt,
+               \(memoOwnerColumn) AS ownerId,
+               \(memoDeletedExpression) AS deletedAt,
+               \(memoRevisionExpression) AS localRevision
+        FROM memo
+        ORDER BY id
+        """,
       )
 
       return ProjectionSnapshot(
@@ -408,13 +437,15 @@ enum GRDBAppGroupMigration {
   private static func write(marker: MigrationMarker, to writer: any DatabaseWriter) throws {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.sortedKeys]
-    let value = String(decoding: try encoder.encode(marker), as: UTF8.self)
+    // JSONEncoder emits UTF-8 data, so a lossless decoding initializer is intentional here.
+    // swiftlint:disable:next optional_data_string_conversion
+    let value = try String(decoding: encoder.encode(marker), as: UTF8.self)
     try writer.write { databaseConnection in
       try databaseConnection.execute(
         sql: """
-          INSERT INTO localMetadata (key, value) VALUES (?, ?)
-          ON CONFLICT(key) DO UPDATE SET value = excluded.value
-          """,
+        INSERT INTO localMetadata (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        """,
         arguments: [markerKey, value],
       )
     }
@@ -436,12 +467,12 @@ enum GRDBAppGroupMigration {
   private static func readMarker(from reader: any DatabaseReader) throws -> MigrationMarker? {
     try reader.read { databaseConnection in
       guard try databaseConnection.tableExists("localMetadata"),
-        let value = try String.fetchOne(
-          databaseConnection,
-          sql: "SELECT value FROM localMetadata WHERE key = ?",
-          arguments: [markerKey],
-        ),
-        let data = value.data(using: .utf8)
+            let value = try String.fetchOne(
+              databaseConnection,
+              sql: "SELECT value FROM localMetadata WHERE key = ?",
+              arguments: [markerKey],
+            ),
+            let data = value.data(using: .utf8)
       else {
         return nil
       }
@@ -513,7 +544,7 @@ enum GRDBAppGroupMigration {
     let uuidStart = fileName.index(fileName.startIndex, offsetBy: stagingNamePrefix.count)
     let uuidEnd = fileName.index(fileName.endIndex, offsetBy: -suffix.count)
     guard uuidStart < uuidEnd else { return false }
-    return UUID(uuidString: String(fileName[uuidStart..<uuidEnd])) != nil
+    return UUID(uuidString: String(fileName[uuidStart ..< uuidEnd])) != nil
   }
 
   private static func removeSealedWALSidecars(
@@ -540,7 +571,7 @@ enum GRDBAppGroupMigration {
       databaseURL.path, databaseURL.path + "-wal", databaseURL.path + "-shm",
       databaseURL.path + "-journal",
     ]
-    where fileManager.fileExists(atPath: path) {
+      where fileManager.fileExists(atPath: path) {
       try? fileManager.removeItem(atPath: path)
     }
   }

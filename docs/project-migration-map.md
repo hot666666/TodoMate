@@ -43,7 +43,8 @@
   최신 source와 importer provenance를 현재 GRDB projection에 reconcile한다.
 - `TodoMateData/Sources/TodoMateData/GRDB/GRDBAppGroupMigration.swift`는 이전 App Group DB를 WAL-consistent
   backup, 검증, atomic promotion으로 등록형 App Group에 옮기며 legacy DB를 보존한다.
-- `TodoMateWidget/TodoMateWidget.swift`는 현재 Project 구분 없이 날짜 범위 Todo를 읽는다.
+- Widget extension은 현재 제품과 Xcode target에서 제거되어 Project projection을 소비하지
+  않는다. Data의 read-only reader는 후속 Widget 재도입 기반으로만 남아 있다.
 - `TodoMate/AppIntent/**`는 현재 global local repository와 `User.local.id`를 사용한다.
 - `User`, `UserGroup`, `GroupMessage`, `SessionStore`와 `MessageStore`는 legacy Group UI의
   의미를 보여 주지만 Release 구성은 현재 stub이므로 durable group source가 아니다.

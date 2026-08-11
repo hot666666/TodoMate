@@ -45,7 +45,8 @@ private struct MenuBarContent: View {
       .keyboardShortcut(" ", modifiers: [.command, .shift])
 
       Button("TodoMate 열기") {
-        WindowManager.shared.openMainWindow()
+        openWindow(id: AppSceneID.mainApp.rawValue)
+        NSApp.activate(ignoringOtherApps: true)
       }
       .keyboardShortcut("O", modifiers: [.command])
 

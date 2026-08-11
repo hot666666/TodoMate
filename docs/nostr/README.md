@@ -15,11 +15,12 @@
 ## 현재 persistence 구현 경계
 
 HOT6-5/6 migration은 legacy 개인 Todo·Memo·휴지통을 App Group 단일 GRDB로 옮긴다. 앱은
-read-write migration/import를 소유하고 Widget은 schema-validated read-only query만 사용한다.
-Bundle ID는 기존 `io.hotcs6.TodoMate[Debug]`를 유지하고 canonical App Group만
-`group.io.hotcs6.TodoMate[Debug]` 등록형으로 전환한다. 전환 build는 legacy Team-ID group을
-함께 허용하며, 앱의 검증된 backup migration이 끝날 때까지 Widget은 legacy DB를 read-only로
-fallback한다.
+read-write migration/import를 소유한다. Widget extension은 현재 제품과 Xcode target에서
+임시 제거되어 있으며 Data의 read-only query는 후속 재도입 기반으로만 남아 있다.
+Bundle ID는 기존 `io.hotcs6.TodoMate[Debug]`를 유지하고 canonical App Group은
+`group.io.hotcs6.TodoMate[Debug]` 등록형으로 사용한다. Release 전환 build는 legacy Team-ID
+group을 함께 허용한다. Debug 앱은 legacy Team-ID group을 조회하지 않고 registered Debug
+group만 사용하며 signed build에서 App Group 등록을 요청한다.
 `localRevision`과 `deletedAt`은 로컬 메타데이터이며 DB change notification은 UI invalidation
 신호일 뿐 durable sync outbox가 아니다. 이는 Project schema, `SyncEngine` 또는 `RelayLive`
 구현 완료를 뜻하지 않는다.

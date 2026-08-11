@@ -323,13 +323,11 @@ Common                 -> Foundation + OSLog
 TodoMateDomain         -> Common
 TodoMateData           -> TodoMateDomain + Common + GRDB
 TodoMate.app           -> Common + TodoMateDomain + TodoMateData
-TodoMateWidget source  -> Common + TodoMateDomain + TodoMateData
 ```
 
-Widget native target은 `TodoMateDomain`과 `TodoMateData` product만 직접 선언하면서 source에서
-`Common`을 import한다. transitive import에 기대는 현재 상태도 목표 graph에서는 제거한다.
-`TodoMateDomain`의 `Common` dependency와 app/Widget의 full writer product dependency를 그대로
-새 package에 복제하지 않는다.
+Widget native target은 현재 제거되어 있다. 후속 재도입 시에는 과거처럼 transitive import나
+full writer product dependency에 기대지 않고 아래 목표 graph의 read-only facade만 소비한다.
+`TodoMateDomain`의 `Common` dependency를 새 package에 그대로 복제하지 않는다.
 
 ## 목표 compile-time graph
 
@@ -481,7 +479,7 @@ allowlist 없이 실행해 0건을 증명한다.
 
 | 현재 producer | 현재 주요 consumer | 목표 owner와 migration |
 | --- | --- | --- |
-| `TodoMateDomain/Sources/TodoMateDomain/Entity/Todo.swift`, `Memo.swift`, `DeletedItem.swift`, `TodoQuery.swift` | GRDB record/repository, app Store/ViewModel, AppIntent, Widget | `TodoMateDomain`; HOT6-24 mapping 뒤 HOT6-26이 ProjectID/authorID를 가진 model로 전환 |
+| `TodoMateDomain/Sources/TodoMateDomain/Entity/Todo.swift`, `Memo.swift`, `DeletedItem.swift`, `TodoQuery.swift` | GRDB record/repository, app Store/ViewModel, AppIntent | `TodoMateDomain`; HOT6-24 mapping 뒤 HOT6-26이 ProjectID/authorID를 가진 model로 전환 |
 | `TodoMateData/Sources/TodoMateData/GRDB/LocalAuthorID.swift`, `Models/TodoRecord.swift`/`MemoRecord.swift`의 `ownerID`, `LegacySwiftDataImporter.swift`, `GRDBAppGroupMigration.swift` | legacy Todo/Memo import와 기존 DB migration, author filter | HOT6-24가 alias→`ContentAuthorID` 보존표를 고정하고 HOT6-26이 Domain typed ID와 GRDB migration에 같은 규칙 적용 |
 | `TodoMateDomain/Sources/TodoMateDomain/Entity/User.swift`, `Group.swift`, `GroupMessage.swift`, session entity | Session/Group/Message Store와 legacy UI | `Project`, `Membership`, `ChatChannel`, `Message`의 legacy input; HOT6-24/26/36이 보존·대체 경계를 소유 |
 | `TodoMateDomain/Sources/TodoMateDomain/Protocol/TodoRepository.swift`, `MemoRepository.swift`, `DeletedItemsRepository.swift` | GRDB 구현과 local use case | persistence capability는 SyncContracts/Application port, 구현은 `TodoMateGRDB`; Domain에는 pure policy만 유지 |
@@ -490,7 +488,7 @@ allowlist 없이 실행해 0건을 증명한다.
 | `TodoMateDomain/Sources/TodoMateDomain/UseCase/Todo/SyncTodayTodosUseCase.swift` | `AppDIContainer`, GroupFeed refresh | 제거 대상 local/remote repository LWW bridge; 목표 sync는 `SyncEngine` + `RelayClient` |
 | `TodoMateData/Sources/TodoMateData/GRDB/GRDBDatabase.swift`, migrations, records, repositories, change center | CoreDIContainer와 local Store | package-internal `TodoMateGRDBStorage` + app writer facade `TodoMateGRDB`; native app에는 facade만 노출 |
 | `TodoMateData/Sources/TodoMateData/GRDB/GRDBAppGroupMigration.swift`, `LegacySwiftDataImporter.swift` | app의 shared DB open path | storage core를 쓰는 `TodoMateGRDB` app-only writer/migration facade에서만 실행 |
-| `TodoMateData/Sources/TodoMateData/GRDB/GRDBReadOnlyDatabase.swift`, `Repositories/GRDBTodoReader.swift` | Widget, cross-process probe | `TodoMateWidgetReadModel`의 narrow snapshot facade; package-internal storage만 공유하고 writer/migration API는 module 수준에서 비노출 |
+| `TodoMateData/Sources/TodoMateData/GRDB/GRDBReadOnlyDatabase.swift`, `Repositories/GRDBTodoReader.swift` | 현재 cross-process probe; 후속 Widget 재도입 | `TodoMateWidgetReadModel`의 narrow snapshot facade; package-internal storage만 공유하고 writer/migration API는 module 수준에서 비노출 |
 | `TodoMateData/Sources/TodoMateData/`의 CalendarDay/UserDefaults sidebar/message/legacy import adapter | app DI와 legacy Store | calendar pure policy는 Domain/Application, UI preference는 Presentation/app adapter, migration state는 migration-only adapter |
 | `TodoMate/Models/TodoBoardStore.swift`, `MemoStore.swift`, calendar/trash ViewModel | Home/Memo/Overlay/MenuBar | HOT6-9 이후 `TodoMatePresentation` TCA Feature로 점진 교체; CoreDIContainer init 제거 |
 | Session/Todo/Message Store와 GroupFeedViewModel | Login/GroupFeed/Chat | Project/Membership/Chat Feature로 교체; remote repository를 알지 않음 |
@@ -498,7 +496,7 @@ allowlist 없이 실행해 0건을 증명한다.
 | `CoreDIContainer`, `PublicDIContainer`, `AppDIContainer`, `TodoMateApp.swift` | 전체 app composition | concrete 조립은 Host, consumer API는 typed Application client로 축소 |
 | `AppDelegate.swift`, `WindowManager/**` | Scene, overlay, Sparkle, hotkey | `TodoMate.app`; TCA intent와 AppKit callback 사이 bridge |
 | `TodoMate/AppIntent/**` | Shortcuts/AppIntent | `TodoMate.app`; repository 대신 Project-aware Application client 소비 |
-| `TodoMateWidget/**` | WidgetKit | Widget host + `TodoMateWidgetReadModel` narrow read-only projection; writer product 직접 dependency 제거 |
+| 제거된 `TodoMateWidget/**` | 후속 WidgetKit 재도입 | Widget host + `TodoMateWidgetReadModel` narrow read-only projection; writer product 직접 dependency 금지 |
 | `AppDIContainer+Mocks.swift`, `TodoMateApp+Debug.swift`, Domain `Stub*`, `TodoMateApp.composeContainer()`의 Release `Stub*Repository`/`StubAuthService` 생성 | Preview/screenshot/debug와 현재 Release legacy group wiring | HOT6-26이 reusable fixture를 `TodoMateCoreTestSupport`로 옮기고 Release가 그 product를 링크하지 않게 함. 필요한 app-local compatibility symbol은 제거 issue allowlist로 한정하고 HOT6-28/29/31/36/37이 각 consumer를 typed client로 교체, HOT6-32가 Release source/dependency zero gate를 검증 |
 
 ### Legacy author ID 보존 정책
@@ -525,7 +523,7 @@ placeholder alias 집합이다.
 | 현재 Common source | 목표 owner |
 | --- | --- |
 | `AppEnvironment.Container` | Host가 만든 persistence configuration; `TodoMateGRDB`에 value로 주입 |
-| `AppEnvironment.Widget`, `AppSceneID` | native app/Widget host |
+| 제거된 `AppEnvironment.Widget`, `AppSceneID` | Widget kind는 재도입 시 host가 소유; AppSceneID는 native app host |
 | `Log` (`OSLog`) | host/platform logging adapter; Domain/SyncContracts에는 metadata port만 필요한 경우 별도 정의 |
 | `UserDefaults+`, `UserDefaultsKey` | Presentation preference 또는 host/migration adapter별 분리 |
 | `Date+` formatting | DesignSystem/Presentation; pure calendar 계산은 주입된 `Calendar`를 쓰는 Domain policy |

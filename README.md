@@ -48,12 +48,6 @@ local-first macOS workspace로 재구성 중입니다.
 <img src="images/menubar.png" width="200" alt="MenuBar">
 </br>
 
-### 위젯
-데스크탑 위젯을 통해 홈 화면에서 나의 할 일 목록을 한눈에 파악할 수 있습니다.
-
-<img src="images/widget.png" width="250" alt="Widget">
-</br>
-
 ### 앱인텐트 & 단축어
 Siri와 단축어 앱을 연동하여 나만의 자동화된 생산성 워크플로우를 구성할 수 있습니다.
 

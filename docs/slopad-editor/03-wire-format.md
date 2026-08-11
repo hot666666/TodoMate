@@ -43,7 +43,7 @@ flowchart LR
 | `MemoGridItem` | `components(separatedBy: .newlines)`로 8줄 미리보기 | ✅ 사람이 읽는 텍스트 | ❌ `{"blocks":[{"i...` |
 | `MemoGridItem` | `pasteboard.setString(memo.content)` — 클립보드 복사 | ✅ 붙여넣으면 정상 텍스트 | ❌ JSON 덩어리 |
 | `MemoEntity` (App Intents) | Spotlight/단축어에 노출 | ✅ | ❌ |
-| `TodoMateWidget` | 위젯 본문 표시 | ✅ | ❌ |
+| 제거된 `TodoMateWidget` | 후속 위젯 재도입 시 본문 표시 | ✅ | ❌ |
 | `MemoRecord` (GRDB) | 로컬 영속화 | ✅ | ✅ |
 | `MemoRepositoryImpl` (Firebase) | 원격 동기화 | ✅ | ✅ |
 | `Memo.wordCount` / `isEmpty` | 단어 수, 빈 메모 판정 | ✅ 대체로 맞음 | ❌ 항상 non-empty |

@@ -9,7 +9,6 @@ import AppIntents
 import Common
 import Foundation
 import TodoMateDomain
-import WidgetKit
 
 struct AddTodoIntent: AppIntent {
   #if DEBUG
@@ -55,7 +54,6 @@ struct AddTodoIntent: AppIntent {
     )
 
     try await container.createLocalTodoUseCase.run(todo)
-    WidgetCenter.shared.reloadTimelines(ofKind: AppEnvironment.Widget.kind)
 
     let entity = TodoEntity(from: todo)
     return .result(value: entity)

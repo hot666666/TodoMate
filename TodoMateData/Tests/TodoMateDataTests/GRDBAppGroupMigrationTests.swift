@@ -1,14 +1,92 @@
+// The serialized migration scenarios share one fixture and intentionally remain in one suite.
+// swiftlint:disable file_length
+import Common
 import Foundation
 import GRDB
 import Testing
+@testable import TodoMateData
 import TodoMateDomain
 
-@testable import TodoMateData
-
 @Suite("GRDB App Group Migration Tests", .serialized)
+// swiftlint:disable:next type_body_length
 struct GRDBAppGroupMigrationTests {
+  @Test("Debug container resolution requests only the registered shared App Group")
+  func debugContainerResolutionUsesRegisteredAppGroupOnly() {
+    #if DEBUG
+      var requestedIdentifiers: [String] = []
+      let debugGroupURL = URL(fileURLWithPath: "/tmp/debug-group", isDirectory: true)
+
+      let resolution = GRDBAppGroupStorage.containerResolution { identifier in
+        requestedIdentifiers.append(identifier)
+        return debugGroupURL
+      }
+
+      #expect(
+        AppEnvironment.Container.storageAppGroupIdentifier
+          == AppEnvironment.Container.appGroupIdentifier,
+      )
+      #expect(requestedIdentifiers == [AppEnvironment.Container.storageAppGroupIdentifier])
+      #expect(resolution.groupURL == debugGroupURL)
+      #expect(resolution.legacyGroupURL == debugGroupURL)
+    #endif
+  }
+
+  @Test("Release defaults preserve the legacy App Group migration source")
+  func releaseContainerResolutionUsesBothAppGroups() {
+    #if !DEBUG
+      var requestedIdentifiers: [String] = []
+      let resolution = GRDBAppGroupStorage.containerResolution { identifier in
+        requestedIdentifiers.append(identifier)
+        return URL(fileURLWithPath: "/tmp/\(identifier)", isDirectory: true)
+      }
+
+      #expect(
+        AppEnvironment.Container.migrationSourceAppGroupIdentifier
+          == AppEnvironment.Container.legacyAppGroupIdentifier,
+      )
+      #expect(
+        requestedIdentifiers == [
+          AppEnvironment.Container.storageAppGroupIdentifier,
+          AppEnvironment.Container.legacyAppGroupIdentifier,
+        ],
+      )
+      #expect(resolution.groupURL != resolution.legacyGroupURL)
+    #endif
+  }
+
+  @Test("Legacy-enabled container resolution requests both App Groups")
+  func legacyEnabledContainerResolutionRequestsBothAppGroups() {
+    var requestedIdentifiers: [String] = []
+    let canonicalURL = URL(fileURLWithPath: "/tmp/canonical-group", isDirectory: true)
+    let legacyURL = URL(fileURLWithPath: "/tmp/legacy-group", isDirectory: true)
+
+    let resolution = GRDBAppGroupStorage.containerResolution(
+      primaryAppGroupIdentifier: AppEnvironment.Container.appGroupIdentifier,
+      migrationSourceAppGroupIdentifier: AppEnvironment.Container.legacyAppGroupIdentifier,
+    ) { identifier in
+      requestedIdentifiers.append(identifier)
+      switch identifier {
+      case AppEnvironment.Container.appGroupIdentifier:
+        return canonicalURL
+      case AppEnvironment.Container.legacyAppGroupIdentifier:
+        return legacyURL
+      default:
+        return nil
+      }
+    }
+
+    #expect(
+      requestedIdentifiers == [
+        AppEnvironment.Container.appGroupIdentifier,
+        AppEnvironment.Container.legacyAppGroupIdentifier,
+      ],
+    )
+    #expect(resolution.groupURL == canonicalURL)
+    #expect(resolution.legacyGroupURL == legacyURL)
+  }
+
   @Test("Shared locations include legacy SwiftData candidates from both groups")
-  func includesLegacySwiftDataCandidates() throws {
+  func includesLegacySwiftDataCandidates() {
     let registeredGroupURL = URL(fileURLWithPath: "/tmp/registered-group", isDirectory: true)
     let legacyGroupURL = URL(fileURLWithPath: "/tmp/legacy-group", isDirectory: true)
     let locations = GRDBAppGroupStorage.locations(
@@ -47,7 +125,7 @@ struct GRDBAppGroupMigrationTests {
       _ = try GRDBAppGroupStorage.locations(resolution: resolution)
       Issue.record("Expected the missing legacy App Group to fail closed")
     } catch let error as LocalDatabaseError {
-      guard case .appGroupContainerUnavailable(let identifier) = error else {
+      guard case let .appGroupContainerUnavailable(identifier) = error else {
         Issue.record("Expected appGroupContainerUnavailable, got \(error)")
         return
       }
@@ -93,9 +171,11 @@ struct GRDBAppGroupMigrationTests {
     await assertReadOnly(database: migratedDatabase, todoID: fixture.todo.id)
 
     let legacyTodo = try await GRDBTodoRepository(database: legacyDatabase).read(
-      id: fixture.todo.id)
+      id: fixture.todo.id,
+    )
     let legacyMemo = try await GRDBMemoRepository(database: legacyDatabase).read(
-      id: fixture.memo.id)
+      id: fixture.memo.id,
+    )
     #expect(legacyTodo == fixture.todo)
     #expect(legacyMemo == fixture.memo)
     let legacyHasMarker = try await legacyDatabase.writer.read { databaseConnection in
@@ -149,7 +229,7 @@ struct GRDBAppGroupMigrationTests {
       of: GRDBAppGroupMigrationOutcome.self,
       returning: [GRDBAppGroupMigrationOutcome].self,
     ) { group in
-      for _ in 0..<participantCount {
+      for _ in 0 ..< participantCount {
         group.addTask {
           await startGate.wait()
           return try GRDBAppGroupMigration.migrateIfNeeded(
@@ -183,6 +263,7 @@ struct GRDBAppGroupMigrationTests {
   }
 
   @Test("Destination writes remain valid but legacy drift fails closed")
+  // swiftlint:disable:next function_body_length
   func detectsLegacySourceDriftAfterMigration() async throws {
     let layout = try TestLayout()
     defer { layout.remove() }
@@ -259,7 +340,7 @@ struct GRDBAppGroupMigrationTests {
     let directoryURL = layout.databaseURL.deletingLastPathComponent()
     let ownedBaseName =
       ".TodoMate.sqlite.app-group-migration-"
-      + "11111111-2222-3333-4444-555555555555.tmp"
+        + "11111111-2222-3333-4444-555555555555.tmp"
     let ownedURLs = ["", "-wal", "-shm", "-journal"].map {
       directoryURL.appendingPathComponent(ownedBaseName + $0)
     }
@@ -276,7 +357,8 @@ struct GRDBAppGroupMigrationTests {
       isDirectory: true,
     )
     try FileManager.default.createDirectory(
-      at: ownedNameDirectoryURL, withIntermediateDirectories: true)
+      at: ownedNameDirectoryURL, withIntermediateDirectories: true,
+    )
 
     #expect(
       try GRDBAppGroupMigration.migrateIfNeeded(
@@ -331,8 +413,8 @@ struct GRDBAppGroupMigrationTests {
     )
   }
 
-  @Test("Widget selection falls back without writing and prefers a marked new database")
-  func selectsReadOnlyDatabaseForWidget() async throws {
+  @Test("Read-only selection falls back without writing and prefers a marked new database")
+  func selectsReadOnlyDatabase() async throws {
     let layout = try TestLayout()
     defer { layout.remove() }
 
@@ -380,6 +462,40 @@ struct GRDBAppGroupMigrationTests {
       return
     }
     await assertReadOnly(database: database, todoID: fixture.todo.id)
+  }
+
+  @Test("Canonical-only read selection accepts normal writes after migration")
+  func selectsCanonicalOnlyDatabaseAfterNormalWrite() async throws {
+    let layout = try TestLayout()
+    defer { layout.remove() }
+
+    let fixture = Fixture()
+    let legacyDatabase = try GRDBDatabase(storage: .file(layout.legacyDatabaseURL))
+    try await fixture.insert(into: legacyDatabase)
+    #expect(
+      try GRDBAppGroupMigration.migrateIfNeeded(
+        from: layout.legacyDatabaseURL,
+        to: layout.databaseURL,
+      ) == .migrated,
+    )
+
+    let canonicalDatabase = try GRDBDatabase(storage: .file(layout.databaseURL))
+    let canonicalTodo = Todo(
+      id: "canonical-only-write",
+      content: "Normal app mutation after migration",
+      date: fixture.timestamp,
+      createdAt: fixture.timestamp,
+      updatedAt: fixture.timestamp,
+      owner: fixture.ownerID,
+    )
+    try await GRDBTodoRepository(database: canonicalDatabase).create(canonicalTodo)
+
+    #expect(
+      GRDBAppGroupMigration.preferredReadOnlyDatabaseURL(
+        databaseURL: layout.databaseURL,
+        legacyDatabaseURL: layout.databaseURL,
+      ) == layout.databaseURL,
+    )
   }
 
   private func assertReadOnly(database: GRDBReadOnlyDatabase, todoID: String) async {
@@ -463,12 +579,12 @@ private struct TestLayout {
       .appendingPathComponent("app-group-migration-\(UUID().uuidString)", isDirectory: true)
     legacyDatabaseURL =
       rootURL
-      .appendingPathComponent("legacy", isDirectory: true)
-      .appendingPathComponent("TodoMate.sqlite")
+        .appendingPathComponent("legacy", isDirectory: true)
+        .appendingPathComponent("TodoMate.sqlite")
     databaseURL =
       rootURL
-      .appendingPathComponent("registered", isDirectory: true)
-      .appendingPathComponent("TodoMate.sqlite")
+        .appendingPathComponent("registered", isDirectory: true)
+        .appendingPathComponent("TodoMate.sqlite")
     try FileManager.default.createDirectory(
       at: legacyDatabaseURL.deletingLastPathComponent(),
       withIntermediateDirectories: true,
@@ -481,7 +597,7 @@ private struct TestLayout {
 
   func removeDatabase(at url: URL) {
     for path in [url.path, url.path + "-wal", url.path + "-shm", url.path + "-journal"]
-    where FileManager.default.fileExists(atPath: path) {
+      where FileManager.default.fileExists(atPath: path) {
       try? FileManager.default.removeItem(atPath: path)
     }
   }
