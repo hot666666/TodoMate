@@ -921,6 +921,7 @@
       "summary": "Source-retained Group feed wrapper using legacy Session/Todo/Message stores; not composed by current MainView."
     }
   ],
+  "proposals": [],
   "relationships": [
     {
       "confidence": "high",
