@@ -42,13 +42,13 @@ def request_is_local(client_ip: str, host_header: str, origin: str | None, port:
         host_port = parsed_host.port
     except ValueError:
         return False
-    if host not in LOOPBACK_HOSTS or host_port not in {None, port}:
+    if host not in LOOPBACK_HOSTS or (host_port or 80) != port:
         return False
     if origin:
         parsed = urlparse(origin)
         if parsed.scheme != "http" or parsed.hostname not in LOOPBACK_HOSTS:
             return False
-        if parsed.port not in {None, port}:
+        if (parsed.port or 80) != port:
             return False
     return True
 
@@ -85,6 +85,10 @@ class FeedbackHandler(BaseHTTPRequestHandler):
     site = Path("docs/architecture-workbench/site/index.html")
     feedback_directory = Path("docs/architecture-workbench/feedback/open")
     server_version = "ArchitectureWorkbenchFeedback/1"
+
+    def setup(self) -> None:
+        super().setup()
+        self.connection.settimeout(5)
 
     def log_message(self, format: str, *args: object) -> None:
         print(f"feedback-server: {format % args}", file=sys.stderr)
