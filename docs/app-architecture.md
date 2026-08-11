@@ -38,6 +38,9 @@ legacy Home/Memo/Group 분리는 migration input이며 목표 제품 모델이 �
 [SPM 경계와 점진적 migration 계획](spm-migration-plan.md)을 따른다. 이 계획은 목표 구조의
 상세 handoff이며 package가 이미 생성되었다는 의미가 아니다.
 
+Project-first 화면 tree, typed route, Screen–View ownership과 POM 명칭 handoff는
+[Screen–View와 route catalog](screen-view-route-catalog.md)를 따른다.
+
 ## Clean Architecture와 의존성 주입
 
 의존성은 Presentation → Application → Domain/SyncContracts 방향으로 안쪽을 향한다.
